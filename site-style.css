@@ -1,0 +1,70 @@
+body {
+	width: 700px;
+	margin: 5px auto 0 auto;
+	background: #444 url(images/bg.png) repeat-x;
+	color: #fff;
+	font-family: arial, helvetica, sans-serif;
+	font-size: 11px;
+}
+a:link, a:visited, a:active {
+	color: #fff;
+}
+h1 {
+	font-size: 22px;
+	font-weight: normal;
+	font-variant: small-caps;
+	color: #aaa;
+	float: left;
+	margin: 5px 0 5px 0;
+	padding: 0;
+}
+h2 {
+	font-size: 18px;
+	margin: 20px 0 10px 0;
+	padding: 0;
+}
+p {
+	margin: 10px 0 10px 0;
+	padding: 0;
+	font-size: 13px;
+}
+ol {
+	font-size: 13px;
+}
+pre, code {
+	font-weight: normal;
+	font-style: normal;
+	background: #333;
+	padding: 5px;
+	margin: 0;
+}
+#player-container {
+	clear: both;
+	zoom: 1;
+	width: 700px;
+	min-height: 300px;
+	position: relative;
+	background: #444;
+	padding: 10px 10px 20px 10px;
+	border-top: 1px solid #666;
+}
+#links {
+	float: right;
+	display: inline;
+	color: #777;
+	padding: 10px 0 0 0;
+	margin: 0;
+}
+#links li {
+	display: inline;
+}
+#links li a {
+	color: #aaa;
+	text-decoration: none;
+	padding: 3px;
+	font-size: 11px;
+}
+#links li a:hover {
+	background: #181818;
+	color: #fff;
+}

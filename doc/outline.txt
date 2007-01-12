@@ -1,0 +1,23 @@
+game tree:
+- stored (SGF, JSON)
+- live (rich family information)
+- navigable (cursor)
+
+board
+- stones
+- markers
+- captures
+- cache
+- renderer
+
+rules
+- captures
+- ko
+
+replayer
+- game state
+  - current tree location (cursor)
+  - meta information (captures, move number, turn)
+  - board contents (stones, markers)
+- variations
+- controls

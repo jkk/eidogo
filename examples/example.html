@@ -1,0 +1,74 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<title>EidoGo Example</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style type="text/css">
+body {
+	font-family: verdana, arial, helvetica;
+	font-size: 11px;
+}
+#player-container {
+	width: 700px;
+	padding: 10px;
+	background: #ccc;
+}
+</style>
+<link rel="stylesheet" href="player/player.css" />
+<script type="text/javascript" src="player/player.compressed.js"></script>
+<script type="text/javascript">
+//<![CDATA[
+var player;
+YAHOO.util.Event.on(window, "load", function() {
+	var cfg = {
+		
+		// HTML id indicating where to put the player
+		domId: "player-container",
+		
+		// Only "replay" is supported right now.
+		mode: "replay",
+		
+		// URL to the SGF file to load, relative to here.
+		// NOTE: this does not work when viewing this page on your
+		// local filesystem.
+		sgfUrl: "test.sgf",
+		
+		// This is only used in conjunction with things like the KJD joseki
+		// tutor. You can safely ignore it.
+		progressiveLoad: false,
+		
+		// Mark the current move
+		markCurrent: true,
+		
+		// Show clickable variations on the board
+		markVariations: true,
+		
+		// Show the next move as variation 1
+		markNext: false,
+		
+		// Hiding the game info keeps the player at a fixed width and height
+		// (700px by 375px by default)
+		showGameInfo: false,
+		showPlayerInfo: false,
+		
+		// The location within the game tree to start at
+		loadPath: location.hash.replace(/^#/, "").split(/,/)
+		
+	};
+	player = new eidogo.Player(cfg);
+});
+//]]>
+</script>
+</head>
+<body>
+	
+<h1>EidoGo Example</h1>
+
+<p>This is a simple example. <a href="javascript:player.goTo(4)">Click here to go to move 4 on the main line</a>.
+<a href="javascript:player.goTo([0,0,1,2])">Or click here to go to a cool move</a></p>
+
+<div id="player-container"></div>
+
+</body>
+</html>
