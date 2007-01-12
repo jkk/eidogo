@@ -66,7 +66,6 @@ YAHOO.util.Event.on(window, "load", function() {
 <ul id="links">
 	<li><a href="http://senseis.xmp.net/?EidoGo">Info</a> | </li>
 	<li><a href="source.html">Download / Source Code</a> | </li>
-	<li><a href="http://sourceforge.net/projects/eidogo/">SourceForge</a> | </li>
 	<li><a href="http://tin.nu/">Justin Kramer</a></li>
 </ul>
 
