@@ -414,17 +414,17 @@ eidogo.Player.prototype = {
 		}
 	},
 	
-	back: function() {
+	back: function(e, obj, noRender) {
 		if (this.cursor.previous()) {
 			this.board.revert(1);
 			this.moveNumber -= 1;
 			if (this.moveNumber < 0) this.moveNumber = 0;
-			this.refresh();
+			this.refresh(noRender);
 		}
 	},
 	
-	forward: function() {
-		this.variation();
+	forward: function(e, obj, noRender) {
+		this.variation(null, noRender);
 	},
 	
 	first: function() {
@@ -500,25 +500,22 @@ eidogo.Player.prototype = {
 				break;
 			case 39: // right
 				if (e.shiftKey) {
-					this.forward(); this.forward();
-					this.forward(); this.forward();
-					this.forward(); this.forward();
-					this.forward(); this.forward();
-					this.forward(); this.forward();
-				} else {
-					this.forward();
+				    var movesLeft = this.totalMoves - this.moveNumber;
+				    var steps = (movesLeft > 9 ? 9 : movesLeft-1);
+				    for (var i = 0; i < steps; i++) {
+				        this.forward(null, null, true);
+				    }
 				}
+                this.forward();
 				break;
 			case 37: // left
 				if (e.shiftKey) {
-					this.back(); this.back();
-					this.back(); this.back();
-					this.back(); this.back();
-					this.back(); this.back();
-					this.back(); this.back();
-				} else {
-					this.back();
+				    var steps = (this.moveNumber > 9 ? 9 : this.moveNumber-1);
+					for (var i = 0; i < steps; i++) {
+					    this.back(null, null, true);
+					}
 				}
+                this.back();
 				break;
 			case 40: // down
 				this.last();
