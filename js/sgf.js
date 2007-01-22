@@ -11,10 +11,10 @@
  * @class Returns a JSON object of the form:
  * 		{ nodes: [], trees: [{nodes: [], trees:[]}, ...] }
  */
-eidogo.SGF = function(sgf) {
+eidogo.SgfParser = function(sgf) {
 	this.init(sgf);
 }
-eidogo.SGF.prototype = {
+eidogo.SgfParser.prototype = {
 	/**
 	 * @constructor
 	 * @param {String} sgf Raw SGF data to parse

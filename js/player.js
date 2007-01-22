@@ -64,8 +64,8 @@ eidogo.Player.prototype = {
 		
 		cfg = cfg || {};
 		
-		// setting this to "edit" currently does nothing
-		this.mode = cfg.mode ? cfg.mode : "replay";
+		// play, edit
+		this.mode = cfg.mode ? cfg.mode : "play";
 		
 		// for references to all our DOM objects -- see constructDom()
 		this.dom = {};
@@ -79,9 +79,15 @@ eidogo.Player.prototype = {
 		// so we can have more than one player on a page
 		this.uniq = Math.round(10000 * Math.random());
 
+        // gameTree here is actually more like a Collection as described in the
+        // EBNF definition in the SGF spec, http://www.red-bean.com/sgf/sgf4.html.
+        // Each element of gameTree.trees is actually a GameTree as defined in the
+        // spec. Right now we only really support a single game at a time -- i.e.,
+        // gameTree.trees[0]. I might change this in the future.
 		this.gameTree = new eidogo.GameTree();
 		this.cursor = new eidogo.GameCursor();
 		
+		// used for Ajaxy dynamic tree loading
 		this.progressiveLoad = cfg.progressiveLoad ? true : false;
 		this.progressiveLoads = null;
 		this.progressiveUrl = null
@@ -106,10 +112,12 @@ eidogo.Player.prototype = {
 			cfg.showGameInfo : true;
 		this.prefs.showPlayerInfo = typeof cfg.showPlayerInfo != "undefined" ?
 			cfg.showPlayerInfo : true;
-			
+		
+		// handlers for the various types of GameNode properties
 		this.propertyHandlers = {
 			W:	this.playMove,
 			B:	this.playMove,
+			KO: this.playMove,
 			AW:	this.addStone,
 			AB:	this.addStone,
 			AE: this.addStone,
@@ -120,9 +128,11 @@ eidogo.Player.prototype = {
 			SQ: this.addMarker, // square
 			TW: this.addMarker,
 			TB: this.addMarker,
+			PL: this.setColor,
 			C:	this.showComments
 		};
 		
+		// a YUI Slider widget
 		this.slider = null;
 		
 		this.constructDom();
@@ -134,7 +144,7 @@ eidogo.Player.prototype = {
 
 		if (typeof cfg.sgf == "string") {
 			// raw SGF data
-			var sgf = new eidogo.SGF(cfg.sgf);
+			var sgf = new eidogo.SgfParser(cfg.sgf);
 			this.load(sgf.tree);
 		} else if (typeof cfg.sgf == "object") {
 			// already-parsed JSON game tree
@@ -148,8 +158,8 @@ eidogo.Player.prototype = {
 					|| cfg.sgfUrl.replace(/\?.+$/, "");
 			}
 		} else {
-			// can't start from scratch yet
-			this.croak("No game data provided.");
+			// start from scratch
+			this.load({nodes: [], trees: [{nodes: [{SZ: '19'}], trees: []}]});
 			return;
 		}	
 	},
@@ -230,7 +240,7 @@ eidogo.Player.prototype = {
 					// infer which kind of file we got
 					if (o.responseText.charAt(0) == '(') {
 						// SGF
-						var sgf = new eidogo.SGF(o.responseText);
+						var sgf = new eidogo.SgfParser(o.responseText);
 						this.load(sgf.tree, target);
 					} else if (o.responseText.charAt(0) == '{') {
 						// JSON
@@ -356,6 +366,10 @@ eidogo.Player.prototype = {
 			this.board.clearMarkers();
 		}
 		
+		if (this.moveNumber < 1) {
+		    this.currentColor = "B";
+		}
+		
 		// execute handlers for the appropriate properties
 		var props = this.cursor.node.getProperties();
 		for (var propName in props) {
@@ -446,14 +460,33 @@ eidogo.Player.prototype = {
 				return;
 			}
 		}
+		this.createMove('tt');
 	},
 	
 	handleBoardClick: function(e) {
-		var boardXY = YAHOO.util.Dom.getXY(this.board.renderer.domNode);
-		var x = Math.round((e.clientX - boardXY[0] - this.board.renderer.margin -
+	    if (/Apple/.test(navigator.vendor)) {
+	        // Safari/YUI give the wrong board position
+	        var node = this.board.renderer.domNode;
+	        var boardX = 0;
+	        var boardY = 0;
+	        while (node) {
+	            boardX += node.offsetLeft;
+	            boardY += node.offsetTop;
+	            node = node.offsetParent ? node.offsetParent : null;
+            }
+	    } else {
+	        var boardX = YAHOO.util.Dom.getX(this.board.renderer.domNode);
+	        var boardY = YAHOO.util.Dom.getY(this.board.renderer.domNode);
+        }
+		var pageX = YAHOO.util.Event.getPageX(e);
+		var pageY = YAHOO.util.Event.getPageY(e);
+		var clickX = pageX - boardX;
+		var clickY = pageY - boardY;
+		var x = Math.round((clickX - this.board.renderer.margin -
 			(this.board.renderer.pointWidth / 2)) / this.board.renderer.pointWidth);
-		var y = Math.round((e.clientY - boardXY[1] - this.board.renderer.margin -
+		var y = Math.round((clickY - this.board.renderer.margin -
 			(this.board.renderer.pointHeight / 2)) / this.board.renderer.pointHeight);
+        
 		// click on a variation?
 		for (var i = 0; i < this.variations.length; i++) {
 			var varPt = this.sgfCoordToPoint(this.variations[i].move);
@@ -463,6 +496,63 @@ eidogo.Player.prototype = {
 				return;
 			}
 		}
+		
+		if (!this.rules.check({x: x, y: y}, this.currentColor)) {
+		    return;
+		}
+		var coord = this.pointToSgfCoord({x: x, y: y});
+	    if (coord) {
+	        this.createMove(coord);
+		}
+	},
+	
+	/**
+	 * Create an as-yet unplayed move and go to it.
+	 */
+	createMove: function(coord) {
+	    var props = {};
+	    props[this.currentColor] = coord;
+	    var varNode = new eidogo.GameNode(props);
+	    this.totalMoves++;
+        if (this.cursor.hasNext()) {
+	        // new variation tree
+	        if (this.cursor.node.nextSibling) {
+	            // no variation trees at this point; create a new one
+	            var stopNode = this.cursor.node;
+	            var preNodes = [];
+	            var len = this.cursor.node.parent.nodes.length;
+	            var i;
+	            for (i = 0; i < len; i++) {
+	                var n = this.cursor.node.parent.nodes[i];
+	                preNodes.push(n);
+	                if (n.id == stopNode.id) {
+	                    n.nextSibling = null;
+	                    break;
+	                }
+	            }
+	            var mainlineTree = new eidogo.GameTree();
+	            i++;
+	            this.cursor.node.parent.nodes[i].previousSibling = null;
+	            var postNodes = [];
+	            for (; i < len; i++) {
+	                var n = this.cursor.node.parent.nodes[i];
+	                n.parent = mainlineTree;
+	                postNodes.push(n);
+	            }		            
+	            mainlineTree.nodes = postNodes;
+	            mainlineTree.trees = this.cursor.node.parent.trees;
+	            this.cursor.node.parent.nodes = preNodes;
+	            this.cursor.node.parent.trees = [];
+	            this.cursor.node.parent.appendTree(mainlineTree);
+            }
+	        this.cursor.node.parent.appendTree(new eidogo.GameTree(
+	            {nodes: [varNode], trees: []}));
+	        this.variation(this.cursor.node.parent.trees.length-1);
+	    } else {
+	        // at the end of the main line
+	        this.cursor.node.parent.appendNode(varNode);
+		    this.variation();
+	    }
 	},
 	
 	handleKeypress: function(e) {
@@ -639,16 +729,17 @@ eidogo.Player.prototype = {
 		this.sliderIgnore = false;
 	},
 	
-	toggleCurrentColor: function() {
-		this.currentColor == "B" ? "W": "B";
+	setColor: function(color) {
+		this.currentColor = color;
 	},
 	
 	playMove: function(coord, color, noRender) {
-		this.toggleCurrentColor();
+	    color = color || this.currentColor;
+	    this.currentColor = (color == "B" ? "W" : "B");
+	    color = color == "W" ? this.board.WHITE : this.board.BLACK;
+	    var pt = this.sgfCoordToPoint(coord);
 		this.moveNumber++;
 		if (coord && coord != "tt") {
-			var pt = this.sgfCoordToPoint(coord);
-			color = color == "W" ? this.board.WHITE : this.board.BLACK;
 			this.board.addStone(pt, color);
 			this.rules.apply(pt, color);
 			if (this.prefs.markCurrent) {
@@ -830,6 +921,18 @@ eidogo.Player.prototype = {
 			x: sgfCoords[coord.charAt(0)],
 			y: sgfCoords[coord.charAt(1)]
 		};
+	},
+	
+	pointToSgfCoord: function(pt) {
+		if (!pt || pt.x < 0 || pt.x > this.board.boardSize || pt.y < 0 || pt.y > this.board.boardSize) {
+		    return null;
+	    }
+		var pts = {
+		    0: 'a', 1: 'b', 2: 'c', 3: 'd', 4: 'e', 5: 'f', 6: 'g', 7: 'h',
+		    8: 'i', 9: 'j', 10: 'k', 11: 'l', 12: 'm', 13: 'n', 14: 'o',
+		    15: 'p', 16: 'q', 17: 'r', 18: 's'
+		};
+		return pts[pt.x] + pts[pt.y];
 	},
 	
 	setPermalink: function() {

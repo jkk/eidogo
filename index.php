@@ -25,7 +25,7 @@ $in = $_SERVER['QUERY_STRING'];
 if (!$in || $in == "kjd") {
 	$cfg = array(
 		"domId"				=> "player-container",
-		"mode"				=> "replay",
+		"mode"				=> "play",
 		"sgfUrl"			=> "php/kjd_progressive.php",
 		"progressiveLoad"	=> true,
 		"markCurrent"		=> true,
@@ -37,8 +37,7 @@ if (!$in || $in == "kjd") {
 } else {
 	$cfg = array(
 		"domId"				=> "player-container",
-		"mode"				=> "replay",
-		"sgfUrl"			=> "sgf/$in.sgf",
+		"mode"				=> "play",
 		"progressiveLoad"	=> false,
 		"markCurrent"		=> true,
 		"markVariations"	=> true,
@@ -46,6 +45,9 @@ if (!$in || $in == "kjd") {
 		"showGameInfo"		=> true,
 		"showPlayerInfo"	=> true,
 	);
+	if ($in != "blank") {
+	    $cfg['sgfUrl'] = "sgf/$in.sgf";
+	}
 }
 ?>
 <script type="text/javascript">

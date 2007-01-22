@@ -9,10 +9,11 @@
 
 /**
  * For uniquely identifying trees and nodes. Should work even if we have
- * multiple Player instantiations.
+ * multiple Player instantiations. Setting this to 15000 is kind of a hack
+ * to avoid overlap with ids of as-yet-unloaded trees.
  */
-eidogo.gameTreeIdCounter = 1;
-eidogo.gameNodeIdCounter = 1;
+eidogo.gameTreeIdCounter = 15000;
+eidogo.gameNodeIdCounter = 15000;
 
 /**
  * @class GameNode holds the information for a specific node in the game tree,
@@ -120,6 +121,8 @@ eidogo.GameTree.prototype = {
 		if (jsonTree.id) {
 			// overwrite default id
 			this.id = jsonTree.id;
+			// so we never have overlap, even for nodes created later
+			eidogo.gameTreeIdCounter = Math.max(this.id, eidogo.gameTreeIdCounter);
 		}
 	},
 	getPosition: function() {
@@ -130,6 +133,36 @@ eidogo.GameTree.prototype = {
 			}
 		}
 		return null;
+	},
+	toSgf: function() {
+	    function treeToSgf(tree) {
+	        var sgf = "(";
+	        for (var i = 0; i < tree.nodes.length; i++) {
+	            sgf += nodeToSgf(tree.nodes[i]);
+	        }
+	        for (var i = 0; i < tree.trees.length; i++) {
+	            sgf += treeToSgf(tree.trees[i]);
+	        }
+	        return sgf + ")";
+	    }
+	    function nodeToSgf(node) {
+	        var sgf = ";";
+	        var props = node.getProperties();
+	        for (var key in props) {
+	            var val;
+	            if (props[key] instanceof Array) {
+	                val = props[key].map(function (val) {
+	                    return val.replace(/\]/, "\\]");
+	                }).join("][");
+	            } else {
+	                val = props[key].replace(/\]/, "\\]");
+	            }
+	            
+	            sgf += key + "[" + val  + "]";
+	        }
+	        return sgf;
+	    }
+	    return treeToSgf(this);
 	}
 };
 

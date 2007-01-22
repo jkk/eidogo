@@ -165,6 +165,9 @@
 	height: 371px;
 	background: #555;
 	border-bottom: 4px solid #222;
+	user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
 }
 .eidogo-player .board.size9 {
 	position: absolute;

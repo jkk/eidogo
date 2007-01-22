@@ -20,8 +20,22 @@ eidogo.Rules.prototype = {
 		this.board = board;
 		this.pendingCaptures = [];
 	},
+	check: function(pt, color) {
+	    // already occupied?
+	    if (this.board.getStone(pt) != this.board.EMPTY) {
+	        return false;
+	    }
+	    // TODO: check for suicide? (allowed in certain rulesets)    
+	    // TODO: ko
+	    return true;
+	},
 	apply: function(pt, color) {
 		var captures = this.doCaptures(pt, color);
+		if (captures < 0) {
+		    // make sure suicides give proper points (some rulesets allow it)
+		    color = -color;
+		    captures = -captures;
+		}
 		color = color == this.board.WHITE ? "W" : "B";
 		this.board.captures[color] += captures;
 	},
@@ -35,7 +49,7 @@ eidogo.Rules.prototype = {
 		captures += this.doCapture({x: pt.x, y: pt.y-1}, color);
 		captures += this.doCapture({x: pt.x, y: pt.y+1}, color);
 		// check for suicide
-		captures += this.doCapture(pt, -color);
+		captures -= this.doCapture(pt, -color);
 		return captures;
 	},
 	doCapture: function(pt, color) {
@@ -63,7 +77,7 @@ eidogo.Rules.prototype = {
 			return 0;
 
 		// found opposite color
-		if (this.board.getStone(pt)== color)
+		if (this.board.getStone(pt) == color)
 			return 0;
 
 		// found a liberty
