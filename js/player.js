@@ -15,45 +15,45 @@ eidogo.Player = function(cfg) {
 }
 eidogo.Player.prototype = {
 	infoLabels: {
-		GN: "Game",
-		PW: "White",
-		WR: "White rank",
-		WT: "White team",
-		PB: "Black",
-		BR: "Black rank",
-		BT: "Black team",
-		HA: "Handicap",
-		KM: "Komi",
-		RE: "Result",
-		DT: "Date",
-		GC: "Info",
-		PC: "Place",
-		EV: "Event",
-		RO: "Round",
-		OT: "Overtime",
-		ON: "Opening",
-		RU: "Ruleset",
-		AN: "Annotator",
-		CP: "Copyright",
-		SO: "Source",
-		TM: "Time limit",
-		US: "Transcriber",
-		AP: "Created with"
+		GN: eidogo.i18n['game'],
+		PW: eidogo.i18n['white'],
+		WR: eidogo.i18n['white rank'],
+		WT: eidogo.i18n['white team'],
+		PB: eidogo.i18n['black'],
+		BR: eidogo.i18n['black rank'],
+		BT: eidogo.i18n['black team'],
+		HA: eidogo.i18n['handicap'],
+		KM: eidogo.i18n['komi'],
+		RE: eidogo.i18n['result'],
+		DT: eidogo.i18n['date'],
+		GC: eidogo.i18n['info'],
+		PC: eidogo.i18n['place'],
+		EV: eidogo.i18n['event'],
+		RO: eidogo.i18n['round'],
+		OT: eidogo.i18n['overtime'],
+		ON: eidogo.i18n['opening'],
+		RU: eidogo.i18n['ruleset'],
+		AN: eidogo.i18n['annotator'],
+		CP: eidogo.i18n['copyright'],
+		SO: eidogo.i18n['source'],
+		TM: eidogo.i18n['time limit'],
+		US: eidogo.i18n['transcriber'],
+		AP: eidogo.i18n['created with']
 		// FF, GM, TM
 	},
 	months: [
-		"January",
-		"February",
-		"March",
-		"April",
-		"May",
-		"June",
-		"July",
-		"August",
-		"September",
-		"October",
-		"November",
-		"December"
+		eidogo.i18n['january'],
+		eidogo.i18n['february'],
+		eidogo.i18n['march'],
+		eidogo.i18n['april'],
+		eidogo.i18n['may'],
+		eidogo.i18n['june'],
+		eidogo.i18n['july'],
+		eidogo.i18n['august'],
+		eidogo.i18n['september'],
+		eidogo.i18n['october'],
+		eidogo.i18n['november'],
+		eidogo.i18n['december']
 	],
 
 	/**
@@ -72,7 +72,7 @@ eidogo.Player.prototype = {
 		this.dom.container = document.getElementById(cfg.domId);
 		
 		if (!this.dom.container) {
-			alert("Error finding DOM container.");
+			alert(eidogo.i18n['dom error']);
 			return;
 		}
 		
@@ -175,7 +175,7 @@ eidogo.Player.prototype = {
 			);
 		} catch (e) {
 			if (e == "No DOM container") {
-				this.croak("Error loading board container.");
+				this.croak(eidogo.i18n['error board']);
 				return;
 			}
 		} 
@@ -247,12 +247,12 @@ eidogo.Player.prototype = {
 						eval("var data = " + o.responseText);
 						this.load(data, target);
 					} else {
-						this.croak("Received invalid game data.");
+						this.croak(eidogo.i18n['invalid data']);
 					}
 				},
 				failure: function(o) {
 					this.croak(
-						"There was a problem retrieving the game data:\n\n"
+						eidogo.i18n['error retrieving']
 						+ o.statusText
 					);
 				},
@@ -662,13 +662,13 @@ eidogo.Player.prototype = {
 	
 	updateControls: function() {
 		if (this.moveNumber) {
-			this.dom.moveNumber.innerHTML = "move " + this.moveNumber;
+			this.dom.moveNumber.innerHTML = eidogo.i18n['move'] + " " + this.moveNumber;
 		} else {
 			this.dom.moveNumber.innerHTML = "";
 		}
 		
-		this.dom.playerW.captures.innerHTML = "Captures: <span>" + this.board.captures.W + "</span>";
-		this.dom.playerB.captures.innerHTML = "Captures: <span>" + this.board.captures.B + "</span>";
+		this.dom.playerW.captures.innerHTML = eidogo.i18n['captures'] + ": <span>" + this.board.captures.W + "</span>";
+		this.dom.playerB.captures.innerHTML = eidogo.i18n['captures'] + ": <span>" + this.board.captures.B + "</span>";
 		
 		YAHOO.util.Dom.removeClass(this.dom.controls.pass, "pass-on");
 		
@@ -704,7 +704,7 @@ eidogo.Player.prototype = {
 			this.dom.variations.appendChild(varNav);
 		}
 		if (!this.variations.length) {
-			this.dom.variations.innerHTML = "<div class='variation-nav none'>none</div>";
+			this.dom.variations.innerHTML = "<div class='variation-nav none'>" + eidogo.i18n['no variations'] + "</div>";
 		}
 		
 		if (this.cursor.hasNext()) {
@@ -747,7 +747,7 @@ eidogo.Player.prototype = {
 			}
 		} else if (!noRender) {
 			this.dom.comments.innerHTML = "<div class='comment-pass'>" +
-				(color == "W" ? "White" : "Black") + " passed</div>" +
+				(color == "W" ? eidogo.i18n['white'] : eidogo.i18n['black']) + " passed</div>" +
 				this.dom.comments.innerHTML;
 		}
 	},
@@ -811,7 +811,7 @@ eidogo.Player.prototype = {
 						{tag: 'div', id: 'nav-slider-thumb-' + this.uniq, cls: 'nav-slider-thumb'}
 					]},
 					{tag: 'div', id: 'variations-container-' + this.uniq, cls: 'variations-container', children: [
-						{tag: 'div', id: 'variations-label' + this.uniq, cls: 'variations-label', html: "Variations: "},
+						{tag: 'div', id: 'variations-label' + this.uniq, cls: 'variations-label', html: eidogo.i18n['variations'] + ':'},
 						{tag: 'div', id: 'variations-' + this.uniq, cls: 'variations'}
 					]}
 				]},
@@ -947,7 +947,7 @@ eidogo.Player.prototype = {
 		this.domLoading = document.createElement('div');
 		this.domLoading.id = "eidogo-loading-" + this.uniq;
 		this.domLoading.className = "eidogo-loading";
-		this.domLoading.innerHTML = "Loading...";
+		this.domLoading.innerHTML = eidogo.i18n['loading'] + "...";
 		this.dom.player.appendChild(this.domLoading);
 	},
 	

@@ -6,18 +6,30 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <link rel="stylesheet" href="site-style.css" />
 <link rel="stylesheet" href="player/player.css" />
+<!--
+    For international support, uncomment the following line and put in the
+    appropriate language code (see the 'player/i18n' folder).
+-->
+<!-- <script type="text/javascript" src="player/i18n/pt_br.js"></script> -->
+
 <script type="text/javascript" src="player/player.compressed.js"></script>
-<!-- Uncomment the following to work with the original source -->
-<!-- <script type="text/javascript" src="js/yui-util.js"></script>
+
+<!--
+    Uncomment the following to work with the original source.
+-->
+<!--
+<script type="text/javascript" src="js/yui-util.js"></script>
 <script type="text/javascript" src="js/yui-slider.js"></script>
 <script type="text/javascript" src="js/yui-ext-domhelper.js"></script>
 <script type="text/javascript" src="js/util.js"></script>
 <script type="text/javascript" src="js/eidogo.js"></script>
+<script type="text/javascript" src="js/i18n.js"></script>
 <script type="text/javascript" src="js/gametree.js"></script>
 <script type="text/javascript" src="js/sgf.js"></script>
 <script type="text/javascript" src="js/board.js"></script>
 <script type="text/javascript" src="js/rules.js"></script>
-<script type="text/javascript" src="js/player.js"></script> -->
+<script type="text/javascript" src="js/player.js"></script>
+-->
 <?php
 include("php/json.php");
 $json = new Services_JSON();

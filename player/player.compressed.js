@@ -3797,7 +3797,11 @@ _a[i]=this[i];
 return _a;
 };
 
-var eidogo={};
+var eidogo=eidogo||{};
+
+if(typeof eidogo.i18n=="undefined"){
+eidogo.i18n={"move":"Move","loading":"Loading","variations":"Variations","no variations":"none","captures":"captures","game":"Game","white":"White","white rank":"White rank","white team":"White team","black":"Black","black rank":"Black rank","black team":"Black team","handicap":"Handicap","komi":"Komi","result":"Result","date":"Date","info":"Info","place":"Place","event":"Event","round":"Round","overtime":"Overtime","opening":"Openning","ruleset":"Ruleset","annotator":"Annotator","copyright":"Copyright","source":"Source","time limit":"Time limit","transcriber":"Transcriber","created with":"Created with","january":"January","february":"February","march":"March","april":"April","may":"May","june":"June","july":"July","august":"August","september":"September","october":"October","november":"November","december":"December","dom error":"Error finding DOM container","error retrieving":"There was a problem retrieving the game data.","invalid data":"Received invalid game data","error board":"Error loading board container"};
+}
 
 eidogo.gameTreeIdCounter=15000;
 eidogo.gameNodeIdCounter=15000;
@@ -4309,13 +4313,13 @@ return 0;
 eidogo.Player=function(_1){
 this.init(_1);
 };
-eidogo.Player.prototype={infoLabels:{GN:"Game",PW:"White",WR:"White rank",WT:"White team",PB:"Black",BR:"Black rank",BT:"Black team",HA:"Handicap",KM:"Komi",RE:"Result",DT:"Date",GC:"Info",PC:"Place",EV:"Event",RO:"Round",OT:"Overtime",ON:"Opening",RU:"Ruleset",AN:"Annotator",CP:"Copyright",SO:"Source",TM:"Time limit",US:"Transcriber",AP:"Created with"},months:["January","February","March","April","May","June","July","August","September","October","November","December"],init:function(_2){
+eidogo.Player.prototype={infoLabels:{GN:eidogo.i18n["game"],PW:eidogo.i18n["white"],WR:eidogo.i18n["white rank"],WT:eidogo.i18n["white team"],PB:eidogo.i18n["black"],BR:eidogo.i18n["black rank"],BT:eidogo.i18n["black team"],HA:eidogo.i18n["handicap"],KM:eidogo.i18n["komi"],RE:eidogo.i18n["result"],DT:eidogo.i18n["date"],GC:eidogo.i18n["info"],PC:eidogo.i18n["place"],EV:eidogo.i18n["event"],RO:eidogo.i18n["round"],OT:eidogo.i18n["overtime"],ON:eidogo.i18n["opening"],RU:eidogo.i18n["ruleset"],AN:eidogo.i18n["annotator"],CP:eidogo.i18n["copyright"],SO:eidogo.i18n["source"],TM:eidogo.i18n["time limit"],US:eidogo.i18n["transcriber"],AP:eidogo.i18n["created with"]},months:[eidogo.i18n["january"],eidogo.i18n["february"],eidogo.i18n["march"],eidogo.i18n["april"],eidogo.i18n["may"],eidogo.i18n["june"],eidogo.i18n["july"],eidogo.i18n["august"],eidogo.i18n["september"],eidogo.i18n["october"],eidogo.i18n["november"],eidogo.i18n["december"]],init:function(_2){
 _2=_2||{};
 this.mode=_2.mode?_2.mode:"play";
 this.dom={};
 this.dom.container=document.getElementById(_2.domId);
 if(!this.dom.container){
-alert("Error finding DOM container.");
+alert(eidogo.i18n["dom error"]);
 return;
 }
 this.uniq=Math.round(10000*Math.random());
@@ -4367,7 +4371,7 @@ this.board=new eidogo.Board(new eidogo.BoardRendererHtml(document.getElementById
 }
 catch(e){
 if(e=="No DOM container"){
-this.croak("Error loading board container.");
+this.croak(eidogo.i18n["error board"]);
 return;
 }
 }
@@ -4414,11 +4418,11 @@ if(o.responseText.charAt(0)=="{"){
 eval("var data = "+o.responseText);
 this.load(data,_b);
 }else{
-this.croak("Received invalid game data.");
+this.croak(eidogo.i18n["invalid data"]);
 }
 }
 },failure:function(o){
-this.croak("There was a problem retrieving the game data:\n\n"+o.statusText);
+this.croak(eidogo.i18n["error retrieving"]+o.statusText);
 },scope:this,timeout:10000},null);
 },goTo:function(_f,_10){
 _10=typeof _10!="undefined"?_10:true;
@@ -4752,12 +4756,12 @@ this.dom.infoGame.appendChild(dl);
 }
 },updateControls:function(){
 if(this.moveNumber){
-this.dom.moveNumber.innerHTML="move "+this.moveNumber;
+this.dom.moveNumber.innerHTML=eidogo.i18n["move"]+" "+this.moveNumber;
 }else{
 this.dom.moveNumber.innerHTML="";
 }
-this.dom.playerW.captures.innerHTML="Captures: <span>"+this.board.captures.W+"</span>";
-this.dom.playerB.captures.innerHTML="Captures: <span>"+this.board.captures.B+"</span>";
+this.dom.playerW.captures.innerHTML=eidogo.i18n["captures"]+": <span>"+this.board.captures.W+"</span>";
+this.dom.playerB.captures.innerHTML=eidogo.i18n["captures"]+": <span>"+this.board.captures.B+"</span>";
 YAHOO.util.Dom.removeClass(this.dom.controls.pass,"pass-on");
 this.dom.variations.innerHTML="";
 for(var i=0;i<this.variations.length;i++){
@@ -4782,7 +4786,7 @@ arg.me.variation(arg.treeNum);
 this.dom.variations.appendChild(_50);
 }
 if(!this.variations.length){
-this.dom.variations.innerHTML="<div class='variation-nav none'>none</div>";
+this.dom.variations.innerHTML="<div class='variation-nav none'>"+eidogo.i18n["no variations"]+"</div>";
 }
 if(this.cursor.hasNext()){
 YAHOO.util.Dom.addClass(this.dom.controls.forward,"forward-on");
@@ -4818,7 +4822,7 @@ this.addMarker(_55,"current");
 }
 }else{
 if(!_57){
-this.dom.comments.innerHTML="<div class='comment-pass'>"+(_56=="W"?"White":"Black")+" passed</div>"+this.dom.comments.innerHTML;
+this.dom.comments.innerHTML="<div class='comment-pass'>"+(_56=="W"?eidogo.i18n["white"]:eidogo.i18n["black"])+" passed</div>"+this.dom.comments.innerHTML;
 }
 }
 },addStone:function(_59,_5a){
@@ -4869,7 +4873,7 @@ return;
 }
 this.dom.comments.innerHTML+=_60.replace(/\n/g,"<br />");
 },constructDom:function(){
-YAHOO.ext.DomHelper.append(this.dom.container,{tag:"div",id:"player-"+this.uniq,cls:"eidogo-player",children:[{tag:"div",id:"controls-container-"+this.uniq,cls:"controls-container",children:[{tag:"ul",id:"controls-"+this.uniq,cls:"controls",children:[{tag:"li",id:"control-first-"+this.uniq,cls:"control first",html:"First"},{tag:"li",id:"control-back-"+this.uniq,cls:"control back",html:"Back"},{tag:"li",id:"control-forward-"+this.uniq,cls:"control forward",html:"Forward"},{tag:"li",id:"control-last-"+this.uniq,cls:"control last",html:"Last"},{tag:"li",id:"control-pass-"+this.uniq,cls:"control pass",html:"Pass"}]},{tag:"div",id:"move-number-"+this.uniq,cls:"move-number"},{tag:"div",id:"nav-slider-"+this.uniq,cls:"nav-slider",children:[{tag:"div",id:"nav-slider-thumb-"+this.uniq,cls:"nav-slider-thumb"}]},{tag:"div",id:"variations-container-"+this.uniq,cls:"variations-container",children:[{tag:"div",id:"variations-label"+this.uniq,cls:"variations-label",html:"Variations: "},{tag:"div",id:"variations-"+this.uniq,cls:"variations"}]}]},{tag:"div",id:"comments-"+this.uniq,cls:"comments"},{tag:"div",id:"board-container-"+this.uniq,cls:"board-container"},{tag:"div",id:"info-"+this.uniq,cls:"info",children:[{tag:"div",id:"info-players-"+this.uniq,cls:"players",children:[{tag:"div",id:"white-"+this.uniq,cls:"player white",children:[{tag:"div",id:"white-name-"+this.uniq,cls:"name"},{tag:"div",id:"white-captures-"+this.uniq,cls:"captures"},{tag:"div",id:"white-time-"+this.uniq,cls:"time"}]},{tag:"div",id:"white-"+this.uniq,cls:"player black",children:[{tag:"div",id:"black-name-"+this.uniq,cls:"name"},{tag:"div",id:"black-captures-"+this.uniq,cls:"captures"},{tag:"div",id:"black-time-"+this.uniq,cls:"time"}]}]},{tag:"div",id:"info-game-"+this.uniq,cls:"game"}]}]});
+YAHOO.ext.DomHelper.append(this.dom.container,{tag:"div",id:"player-"+this.uniq,cls:"eidogo-player",children:[{tag:"div",id:"controls-container-"+this.uniq,cls:"controls-container",children:[{tag:"ul",id:"controls-"+this.uniq,cls:"controls",children:[{tag:"li",id:"control-first-"+this.uniq,cls:"control first",html:"First"},{tag:"li",id:"control-back-"+this.uniq,cls:"control back",html:"Back"},{tag:"li",id:"control-forward-"+this.uniq,cls:"control forward",html:"Forward"},{tag:"li",id:"control-last-"+this.uniq,cls:"control last",html:"Last"},{tag:"li",id:"control-pass-"+this.uniq,cls:"control pass",html:"Pass"}]},{tag:"div",id:"move-number-"+this.uniq,cls:"move-number"},{tag:"div",id:"nav-slider-"+this.uniq,cls:"nav-slider",children:[{tag:"div",id:"nav-slider-thumb-"+this.uniq,cls:"nav-slider-thumb"}]},{tag:"div",id:"variations-container-"+this.uniq,cls:"variations-container",children:[{tag:"div",id:"variations-label"+this.uniq,cls:"variations-label",html:eidogo.i18n["variations"]+":"},{tag:"div",id:"variations-"+this.uniq,cls:"variations"}]}]},{tag:"div",id:"comments-"+this.uniq,cls:"comments"},{tag:"div",id:"board-container-"+this.uniq,cls:"board-container"},{tag:"div",id:"info-"+this.uniq,cls:"info",children:[{tag:"div",id:"info-players-"+this.uniq,cls:"players",children:[{tag:"div",id:"white-"+this.uniq,cls:"player white",children:[{tag:"div",id:"white-name-"+this.uniq,cls:"name"},{tag:"div",id:"white-captures-"+this.uniq,cls:"captures"},{tag:"div",id:"white-time-"+this.uniq,cls:"time"}]},{tag:"div",id:"white-"+this.uniq,cls:"player black",children:[{tag:"div",id:"black-name-"+this.uniq,cls:"name"},{tag:"div",id:"black-captures-"+this.uniq,cls:"captures"},{tag:"div",id:"black-time-"+this.uniq,cls:"time"}]}]},{tag:"div",id:"info-game-"+this.uniq,cls:"game"}]}]});
 this.dom.player=document.getElementById("player-"+this.uniq);
 this.dom.comments=document.getElementById("comments-"+this.uniq);
 this.dom.info=document.getElementById("info-"+this.uniq);
@@ -4963,7 +4967,7 @@ return;
 this.domLoading=document.createElement("div");
 this.domLoading.id="eidogo-loading-"+this.uniq;
 this.domLoading.className="eidogo-loading";
-this.domLoading.innerHTML="Loading...";
+this.domLoading.innerHTML=eidogo.i18n["loading"]+"...";
 this.dom.player.appendChild(this.domLoading);
 },doneLoading:function(){
 if(this.domLoading&&this.domLoading!=null&&this.domLoading.parentNode){

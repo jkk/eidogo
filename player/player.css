@@ -252,6 +252,22 @@
 .eidogo-player .board .point.marker.territory-black {
 	background: url(images/territory-black.gif);
 }
+.eidogo-player .board-hover-move {
+    position: absolute;
+    width: 19px;
+    height: 19px;
+    z-index: 1;
+    margin: -8px 0 0 -8px;
+    opacity: 0.4;
+    filter: alpha(opacity=40);
+    display: none;
+}
+.eidogo-player .board-hover-move-b {
+    background-image: url(images/b.gif);
+}
+.eidogo-player .board-hover-move-w {
+    background-image: url(images/w.gif);
+}
 .eidogo-player .info {
 	padding-top: 375px;
 	width: 371px;

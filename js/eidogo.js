@@ -10,5 +10,5 @@
 /**
  * Our namespace.
  */
-var eidogo = {};
+var eidogo = eidogo || {};
 
