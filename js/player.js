@@ -137,7 +137,7 @@ eidogo.Player.prototype = {
 		
 		this.constructDom();
 		this.nowLoading();
-
+		
 		// Load the first tree and first node by default.
 		this.loadPath = cfg.loadPath && cfg.loadPath.length > 1 ?
 			cfg.loadPath : [0, 0];
@@ -159,9 +159,21 @@ eidogo.Player.prototype = {
 			}
 		} else {
 			// start from scratch
-			this.load({nodes: [], trees: [{nodes: [{SZ: '19'}], trees: []}]});
-			return;
-		}	
+			var boardSize = cfg.boardSize || "19";
+			var blankGame = {nodes: [], trees: [{nodes: [{SZ: boardSize}], trees: []}]};
+			
+			// AI opponent (e.g. GNU Go)
+    		if (cfg.opponentUrl) {
+    		    this.opponentUrl = cfg.opponentUrl;
+        		this.opponentColor = cfg.opponentColor == "B" ? cfg.opponentColor : "W";
+        		var root = blankGame.trees.first().nodes.first();
+        		root.PW = "You";
+        		root.PB = "GNU Go"
+    		}
+    		
+    		
+			this.load(blankGame);
+		}
 	},
 	
 	createBoard: function(size) {
@@ -171,7 +183,8 @@ eidogo.Player.prototype = {
 				new eidogo.BoardRendererHtml( // change Html to Ascii for kicks
 					document.getElementById('board-container-' + this.uniq),
 					size
-				)
+				),
+				size
 			);
 		} catch (e) {
 			if (e == "No DOM container") {
@@ -260,6 +273,31 @@ eidogo.Player.prototype = {
 				timeout: 10000
 			},
 			null
+		);
+	},
+	
+	fetchOpponentMove: function() {
+	    this.nowLoading();
+	    YAHOO.util.Connect.asyncRequest(
+			'POST',
+			this.opponentUrl,
+			{
+				success: function(o) {
+				    this.doneLoading();
+					this.createMove(o.responseText);
+				},
+				failure: function(o) {
+					this.croak(
+						eidogo.i18n['error retrieving']
+						+ o.statusText
+					);
+				},
+				scope: this,
+				timeout: 45000
+			},
+			"sgf=" + encodeURIComponent(this.gameTree.trees[0].toSgf())
+			    + "&move=" + this.currentColor
+			    + "&size=" + this.gameTree.trees.first().nodes.first().SZ
 		);
 	},
 	
@@ -384,6 +422,11 @@ eidogo.Player.prototype = {
 		if (noRender) {
 			this.board.commit();
 		} else {
+		    // let the opponent move
+		    if (this.opponentUrl && this.opponentColor == this.currentColor
+		        && this.moveNumber == this.totalMoves) {
+		        this.fetchOpponentMove();
+		    }
 			this.findVariations();
 			this.updateControls();
 			this.board.commit();
@@ -464,6 +507,8 @@ eidogo.Player.prototype = {
 	},
 	
 	handleBoardClick: function(e) {
+	    if (this.domLoading) return;
+	    
 	    if (/Apple/.test(navigator.vendor)) {
 	        // Safari/YUI give the wrong board position
 	        var node = this.board.renderer.domNode;

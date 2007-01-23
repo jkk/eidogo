@@ -57,7 +57,14 @@ if (!$in || $in == "kjd") {
 		"showGameInfo"		=> true,
 		"showPlayerInfo"	=> true,
 	);
-	if ($in != "blank") {
+	if (strpos($in, "gnugo") === 0) {
+	    $cfg['opponentUrl'] = "php/gnugo.php";
+	    $cfg['opponentColor'] = "B";
+	    list(, $size) = split(";", $in);
+	    if ($size) {
+	        $cfg['boardSize'] = (string)(int)$size;
+	    }
+	} elseif ($in != "blank") {
 	    $cfg['sgfUrl'] = "sgf/$in.sgf";
 	}
 }
@@ -79,8 +86,12 @@ YAHOO.util.Event.on(window, "load", function() {
 
 <ul id="links">
 	<li><a href="http://senseis.xmp.net/?EidoGo">Info</a> | </li>
-	<li><a href="source.html">Download / Source Code</a> | </li>
-	<li><a href="http://tin.nu/">Justin Kramer</a></li>
+	<li><a href="kjd">Joseki Tutor</a> | </li>
+	<!-- <li><a href="archive">Game Archive</a> | </li> -->
+	<li><a href="gnugo">GNU Go</a> (<a href="gnugo;9">9&times;9</a>, <a href="gnugo;13">13&times;13</a>)</a> | </li>
+	<li><a href="blank">Blank Board</a> | </li>
+	<!-- <li><a href="upload">Upload</a> | </li> -->
+	<li><a href="source.html">Download / Source Code</a>
 </ul>
 
 <div id="player-container"></div>
