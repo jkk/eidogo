@@ -91,8 +91,10 @@ YAHOO.util.Event.on(window, "load", function() {
 	<li><a href="gnugo">GNU Go</a> (<a href="gnugo;9">9&times;9</a>, <a href="gnugo;13">13&times;13</a>)</a> | </li>
 	<li><a href="blank">Blank Board</a> | </li>
 	<!-- <li><a href="upload">Upload</a> | </li> -->
-	<li><a href="source.html">Download / Source Code</a>
+	<!-- <li><a href="player.downloadSgf()">Download SGF</a> | </li> -->
+	<li><a href="source.html">Source Code</a>
 </ul>
+
 
 <div id="player-container"></div>
 

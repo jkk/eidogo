@@ -3800,7 +3800,7 @@ return _a;
 var eidogo=eidogo||{};
 
 if(typeof eidogo.i18n=="undefined"){
-eidogo.i18n={"move":"Move","loading":"Loading","variations":"Variations","no variations":"none","captures":"captures","game":"Game","white":"White","white rank":"White rank","white team":"White team","black":"Black","black rank":"Black rank","black team":"Black team","handicap":"Handicap","komi":"Komi","result":"Result","date":"Date","info":"Info","place":"Place","event":"Event","round":"Round","overtime":"Overtime","opening":"Openning","ruleset":"Ruleset","annotator":"Annotator","copyright":"Copyright","source":"Source","time limit":"Time limit","transcriber":"Transcriber","created with":"Created with","january":"January","february":"February","march":"March","april":"April","may":"May","june":"June","july":"July","august":"August","september":"September","october":"October","november":"November","december":"December","dom error":"Error finding DOM container","error retrieving":"There was a problem retrieving the game data.","invalid data":"Received invalid game data","error board":"Error loading board container"};
+eidogo.i18n={"move":"Move","loading":"Loading","variations":"Variations","no variations":"none","captures":"captures","game":"Game","white":"White","white rank":"White rank","white team":"White team","black":"Black","black rank":"Black rank","black team":"Black team","handicap":"Handicap","komi":"Komi","result":"Result","date":"Date","info":"Info","place":"Place","event":"Event","round":"Round","overtime":"Overtime","opening":"Openning","ruleset":"Ruleset","annotator":"Annotator","copyright":"Copyright","source":"Source","time limit":"Time limit","transcriber":"Transcriber","created with":"Created with","january":"January","february":"February","march":"March","april":"April","may":"May","june":"June","july":"July","august":"August","september":"September","october":"October","november":"November","december":"December","dom error":"Error finding DOM container","error retrieving":"There was a problem retrieving the game data.","invalid data":"Received invalid game data","error board":"Error loading board container","gnugo thinking":"GNU Go is thinking..."};
 }
 
 eidogo.gameTreeIdCounter=15000;
@@ -4433,7 +4433,7 @@ this.croak(eidogo.i18n["invalid data"]);
 this.croak(eidogo.i18n["error retrieving"]+o.statusText);
 },scope:this,timeout:10000},null);
 },fetchOpponentMove:function(){
-this.nowLoading();
+this.nowLoading(eidogo.i18n["gnugo thinking"]);
 YAHOO.util.Connect.asyncRequest("POST",this.opponentUrl,{success:function(o){
 this.doneLoading();
 this.createMove(o.responseText);
@@ -4979,17 +4979,18 @@ return pts[pt.x]+pts[pt.y];
 },setPermalink:function(){
 var _70=/Apple/.test(navigator.vendor)?"":"#";
 location.hash=_70+this.cursor.getPath().join(",");
-},nowLoading:function(){
+},nowLoading:function(msg){
 if(this.croaked){
 return;
 }
+msg=msg||eidogo.i18n["loading"]+"...";
 if(document.getElementById("eidogo-loading-"+this.uniq)){
 return;
 }
 this.domLoading=document.createElement("div");
 this.domLoading.id="eidogo-loading-"+this.uniq;
 this.domLoading.className="eidogo-loading";
-this.domLoading.innerHTML=eidogo.i18n["loading"]+"...";
+this.domLoading.innerHTML=msg;
 this.dom.player.appendChild(this.domLoading);
 },doneLoading:function(){
 if(this.domLoading&&this.domLoading!=null&&this.domLoading.parentNode){

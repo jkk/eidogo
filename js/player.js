@@ -277,7 +277,7 @@ eidogo.Player.prototype = {
 	},
 	
 	fetchOpponentMove: function() {
-	    this.nowLoading();
+	    this.nowLoading(eidogo.i18n['gnugo thinking']);
 	    YAHOO.util.Connect.asyncRequest(
 			'POST',
 			this.opponentUrl,
@@ -986,13 +986,14 @@ eidogo.Player.prototype = {
 		location.hash = prefix + this.cursor.getPath().join(",");
 	},
 	
-	nowLoading: function() {
+	nowLoading: function(msg) {
 		if (this.croaked) return;
+		msg = msg || eidogo.i18n['loading'] + "...";
 		if (document.getElementById('eidogo-loading-' + this.uniq)) return;
 		this.domLoading = document.createElement('div');
 		this.domLoading.id = "eidogo-loading-" + this.uniq;
 		this.domLoading.className = "eidogo-loading";
-		this.domLoading.innerHTML = eidogo.i18n['loading'] + "...";
+		this.domLoading.innerHTML = msg;
 		this.dom.player.appendChild(this.domLoading);
 	},
 	

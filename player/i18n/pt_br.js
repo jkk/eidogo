@@ -50,5 +50,7 @@ eidogo.i18n = {
     'dom error':        'Error finding DOM container',
     'error retrieving': 'Houve um problema na recuperação dos dados do jogo',
     'invalid data':     'Foi recebido dados inválidos.',
-    'error board':      'Erro de carregamento do tabuleiro.'
+    'error board':      'Erro de carregamento do tabuleiro.',
+    
+    'gnugo thinking':   'GNU Go is thinking...'
 }
