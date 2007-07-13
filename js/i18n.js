@@ -13,8 +13,23 @@ if (typeof eidogo.i18n == "undefined") {
     eidogo.i18n = {
         'move':             'Move',
         'loading':          'Loading',
+        
         'variations':       'Variations',
         'no variations':    'none',
+        
+        'tool':             'Tool',
+        'play':             'Play',
+        'region':           'Select Region',
+        'add_b':            'Black Stone',
+        'add_w':            'White Stone',
+        'triangle':         'Triangle',
+        'square':           'Square',
+        'circle':           'Circle',
+        'x':                'X',
+        'letter':           'Letter',
+        'number':           'Number',
+        'search':           'Search for Pattern',
+        
         'captures':         'captures',
     
         'game':             'Game',

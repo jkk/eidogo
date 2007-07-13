@@ -64,7 +64,7 @@ eidogo.Player.prototype = {
 		
 		cfg = cfg || {};
 		
-		// play, edit
+		// play, add_b, add_w, region, tr, sq, cr, label, number, score(?)
 		this.mode = cfg.mode ? cfg.mode : "play";
 		
 		// for references to all our DOM objects -- see constructDom()
@@ -77,7 +77,7 @@ eidogo.Player.prototype = {
 		}
 		
 		// so we can have more than one player on a page
-		this.uniq = Math.round(10000 * Math.random());
+		this.uniq = (new Date()).getTime();
 
         // gameTree here is actually more like a Collection as described in the
         // EBNF definition in the SGF spec, http://www.red-bean.com/sgf/sgf4.html.
@@ -181,7 +181,7 @@ eidogo.Player.prototype = {
 		try {
 			this.board = new eidogo.Board(
 				new eidogo.BoardRendererHtml( // change Html to Ascii for kicks
-					document.getElementById('board-container-' + this.uniq),
+					this.dom.boardContainer,
 					size
 				),
 				size
@@ -191,12 +191,24 @@ eidogo.Player.prototype = {
 				this.croak(eidogo.i18n['error board']);
 				return;
 			}
-		} 
+		}
+		if (size != 19) {
+		    YAHOO.util.Dom.removeClass(this.dom.boardContainer, "with-coords");
+		}
+		this.board.renderer.domNode.appendChild(this.dom.searchRegion);
+		
 		this.rules = new eidogo.Rules(this.board);	
 		YAHOO.util.Event.on(
 			this.board.renderer.domNode,
 			"click",
 			this.handleBoardClick,
+			this,
+			true
+		);
+		YAHOO.util.Event.on(
+			this.board.renderer.domNode,
+			"mousemove",
+			this.handleBoardHover,
 			this,
 			true
 		);
@@ -313,7 +325,7 @@ eidogo.Player.prototype = {
 				var position = parseInt(path.shift());
 				if (path.length == 0) {
 					// node position
-					for (var i = 0; i < position; i++) {
+					for (var i = 0; i <= position; i++) {
 						this.variation(null, true);
 					}
 				} else if (path.length) {
@@ -363,10 +375,10 @@ eidogo.Player.prototype = {
 			setTimeout(function() { me.refresh.call(me); }, 10);
 			return;
 		}
-		this.board.revert(1);
-		this.moveNumber--;
-		if (this.moveNumber < 0) this.moveNumber = 0;
-		this.execNode(noRender);
+        this.board.revert(1);
+        this.moveNumber--;
+        if (this.moveNumber < 0) this.moveNumber = 0;
+        this.execNode(noRender);
 	},
 	
 	/**
@@ -506,9 +518,7 @@ eidogo.Player.prototype = {
 		this.createMove('tt');
 	},
 	
-	handleBoardClick: function(e) {
-	    if (this.domLoading) return;
-	    
+	getXY: function(e) {
 	    if (/Apple/.test(navigator.vendor)) {
 	        // Safari/YUI give the wrong board position
 	        var node = this.board.renderer.domNode;
@@ -527,28 +537,101 @@ eidogo.Player.prototype = {
 		var pageY = YAHOO.util.Event.getPageY(e);
 		var clickX = pageX - boardX;
 		var clickY = pageY - boardY;
+		
+		// board coordinates (0-18 for 19x19, etc)
 		var x = Math.round((clickX - this.board.renderer.margin -
 			(this.board.renderer.pointWidth / 2)) / this.board.renderer.pointWidth);
 		var y = Math.round((clickY - this.board.renderer.margin -
 			(this.board.renderer.pointHeight / 2)) / this.board.renderer.pointHeight);
-        
-		// click on a variation?
-		for (var i = 0; i < this.variations.length; i++) {
-			var varPt = this.sgfCoordToPoint(this.variations[i].move);
-			if (varPt.x == x && varPt.y == y) {
-				this.variation(this.variations[i].treeNum);
-				YAHOO.util.Event.stopEvent(e);
-				return;
-			}
-		}
 		
-		if (!this.rules.check({x: x, y: y}, this.currentColor)) {
-		    return;
-		}
-		var coord = this.pointToSgfCoord({x: x, y: y});
-	    if (coord) {
-	        this.createMove(coord);
-		}
+		return [x, y];
+	},
+	
+	handleBoardHover: function(e) {
+	    if (this.domLoading) return;
+	    if (this.regionBegun) {
+	        var xy = this.getXY(e);
+	        if (xy[0] > this.board.boardSize-1 || xy[1] > this.board.boardSize-1) return;
+    	    this.regionRight = xy[0] + 1;
+    	    this.regionBottom = xy[1] + 1;
+            this.showRegion();
+	    }
+	},
+	
+	handleBoardClick: function(e) {
+	    if (this.domLoading) return;
+	    
+	    var xy = this.getXY(e);
+	    var x = xy[0];
+	    var y = xy[1];
+        
+        var coord = this.pointToSgfCoord({x: x, y: y});
+        
+        if (this.mode == "play") {
+            // click on a variation?
+    		for (var i = 0; i < this.variations.length; i++) {
+    			var varPt = this.sgfCoordToPoint(this.variations[i].move);
+    			if (varPt.x == x && varPt.y == y) {
+    				this.variation(this.variations[i].treeNum);
+    				YAHOO.util.Event.stopEvent(e);
+    				return;
+    			}
+    		}
+            // can't click there?
+    		if (!this.rules.check({x: x, y: y}, this.currentColor)) {
+    		    return;
+    		}
+    		// play the move
+    	    if (coord) {
+    	        this.createMove(coord);
+    		}
+        } else if (this.mode == "region" && x >= 0 && y >= 0) {
+            if (this.regionBegun) {
+                this.regionBegun = false;
+                this.regionBottom = y + 1;
+                this.regionRight = x + 1;
+                this.showRegion();
+                this.dom.searchButton.style.display = "inline";
+            } else {
+                this.regionTop = y;
+                this.regionLeft = x;
+                this.regionBegun = true;
+            }
+        } else {
+            var prop;
+            switch (this.mode) {
+                case "add_b": prop = "AB"; break;
+                case "add_w": prop = "AW"; break;
+                case "tr": prop = "TR"; break;
+                case "sq": prop = "SQ"; break;
+                case "cr": prop = "CR"; break;
+                case "x": prop = "MA"; break;
+            }
+            this.cursor.node.pushProperty(prop, coord);
+            this.refresh();
+        }
+	},
+	
+	showRegion: function() {
+	    var w = this.regionRight - this.regionLeft;
+        var l = this.regionLeft;
+        if (w < 0) {
+            l = this.regionRight;
+            w = -w;
+        }
+        var h = this.regionBottom - this.regionTop;
+        var t = this.regionTop;
+        if (h < 0) {
+            t = this.regionBottom;
+            h = -h;
+        }
+        this.dom.searchRegion.style.top = (this.board.renderer.margin +
+            this.board.renderer.pointHeight * t) + "px";
+        this.dom.searchRegion.style.left = (this.board.renderer.margin +
+            this.board.renderer.pointWidth * l) + "px";
+        this.dom.searchRegion.style.width = this.board.renderer.pointWidth * w + "px";
+        this.dom.searchRegion.style.height = this.board.renderer.pointHeight * h + "px";
+        this.dom.searchRegion.style.display = "block";
 	},
 	
 	/**
@@ -562,39 +645,15 @@ eidogo.Player.prototype = {
         if (this.cursor.hasNext()) {
 	        // new variation tree
 	        if (this.cursor.node.nextSibling) {
-	            // no variation trees at this point; create a new one
-	            var stopNode = this.cursor.node;
-	            var preNodes = [];
-	            var len = this.cursor.node.parent.nodes.length;
-	            var i;
-	            for (i = 0; i < len; i++) {
-	                var n = this.cursor.node.parent.nodes[i];
-	                preNodes.push(n);
-	                if (n.id == stopNode.id) {
-	                    n.nextSibling = null;
-	                    break;
-	                }
-	            }
-	            var mainlineTree = new eidogo.GameTree();
-	            i++;
-	            this.cursor.node.parent.nodes[i].previousSibling = null;
-	            var postNodes = [];
-	            for (; i < len; i++) {
-	                var n = this.cursor.node.parent.nodes[i];
-	                n.parent = mainlineTree;
-	                postNodes.push(n);
-	            }		            
-	            mainlineTree.nodes = postNodes;
-	            mainlineTree.trees = this.cursor.node.parent.trees;
-	            this.cursor.node.parent.nodes = preNodes;
-	            this.cursor.node.parent.trees = [];
-	            this.cursor.node.parent.appendTree(mainlineTree);
+	            // No variation trees at this point; create a new one
+	            this.cursor.node.parent.createVariationTree(
+	                this.cursor.node.getPosition());
             }
 	        this.cursor.node.parent.appendTree(new eidogo.GameTree(
 	            {nodes: [varNode], trees: []}));
 	        this.variation(this.cursor.node.parent.trees.length-1);
 	    } else {
-	        // at the end of the main line
+	        // at the end of the main line -- easy peasy
 	        this.cursor.node.parent.appendNode(varNode);
 		    this.variation();
 	    }
@@ -705,15 +764,32 @@ eidogo.Player.prototype = {
 		}
 	},
 	
+	selectTool: function(evt) {
+        var sel = YAHOO.util.Event.getTarget(evt);
+        var cursor;
+        if (sel.value == "region") {
+            cursor = "crosshair";
+        } else {
+            cursor = "default";
+            this.dom.searchRegion.style.display = "none";
+            this.dom.searchButton.style.display = "none";
+        }
+        this.board.renderer.domNode.style.cursor = cursor;
+        this.mode = sel.value;
+	},
+	
 	updateControls: function() {
 		if (this.moveNumber) {
-			this.dom.moveNumber.innerHTML = eidogo.i18n['move'] + " " + this.moveNumber;
+			this.dom.moveNumber.innerHTML = eidogo.i18n['move'] + " "
+			    + this.moveNumber;
 		} else {
 			this.dom.moveNumber.innerHTML = "";
 		}
 		
-		this.dom.playerW.captures.innerHTML = eidogo.i18n['captures'] + ": <span>" + this.board.captures.W + "</span>";
-		this.dom.playerB.captures.innerHTML = eidogo.i18n['captures'] + ": <span>" + this.board.captures.B + "</span>";
+		this.dom.playerW.captures.innerHTML = eidogo.i18n['captures'] +
+		    ": <span>" + this.board.captures.W + "</span>";
+		this.dom.playerB.captures.innerHTML = eidogo.i18n['captures'] +
+		    ": <span>" + this.board.captures.B + "</span>";
 		
 		YAHOO.util.Dom.removeClass(this.dom.controls.pass, "pass-on");
 		
@@ -749,7 +825,8 @@ eidogo.Player.prototype = {
 			this.dom.variations.appendChild(varNav);
 		}
 		if (!this.variations.length) {
-			this.dom.variations.innerHTML = "<div class='variation-nav none'>" + eidogo.i18n['no variations'] + "</div>";
+			this.dom.variations.innerHTML = "<div class='variation-nav none'>" +
+			    eidogo.i18n['no variations'] + "</div>";
 		}
 		
 		if (this.cursor.hasNext()) {
@@ -767,11 +844,13 @@ eidogo.Player.prototype = {
 			YAHOO.util.Dom.removeClass(this.dom.controls.first, "first-on");
 		}
 		
-		var domWidth = this.dom.slider.offsetWidth -
-				this.dom.sliderThumb.offsetWidth;
-		this.sliderIgnore = true;
-		this.slider.setValue(this.moveNumber / this.totalMoves * domWidth);
-		this.sliderIgnore = false;
+		if (!this.progressiveLoad) {
+		    var domWidth = this.dom.slider.offsetWidth -
+    				this.dom.sliderThumb.offsetWidth;
+    		this.sliderIgnore = true;
+    		this.slider.setValue(this.moveNumber / this.totalMoves * domWidth);
+    		this.sliderIgnore = false;
+		}
 	},
 	
 	setColor: function(color) {
@@ -792,7 +871,8 @@ eidogo.Player.prototype = {
 			}
 		} else if (!noRender) {
 			this.dom.comments.innerHTML = "<div class='comment-pass'>" +
-				(color == "W" ? eidogo.i18n['white'] : eidogo.i18n['black']) + " passed</div>" +
+				(color == this.board.WHITE ? eidogo.i18n['white'] : eidogo.i18n['black']) +
+				" passed</div>" +
 				this.dom.comments.innerHTML;
 		}
 	},
@@ -839,48 +919,73 @@ eidogo.Player.prototype = {
 	},
 	
 	constructDom: function() {
+	    
+	    this.dom.player = document.createElement('div');
+	    this.dom.player.className = "eidogo-player";
+	    this.dom.player.id = "player-" + this.uniq;
+	    this.dom.container.appendChild(this.dom.player);
+	    
+	    var domHtml = "\
+	        <div id='controls-container' class='controls-container'>\
+	            <ul id='controls' class='controls'>\
+	                <li id='control-first' class='control first'>First</li>\
+	                <li id='control-back' class='control back'>Back</li>\
+	                <li id='control-forward' class='control forward'>Forward</li>\
+	                <li id='control-last' class='control last'>Last</li>\
+	                <li id='control-pass' class='control pass'>Pass</li>\
+	            </ul>\
+	            <div id='move-number' class='move-number'></div>\
+	            <div id='nav-slider' class='nav-slider'>\
+	                <div id='nav-slider-thumb' class='nav-slider-thumb'></div>\
+	            </div>\
+	            <div id='variations-container' class='variations-container'>\
+	                <div id='variations-label' class='variations-label'>" + eidogo.i18n['variations'] + ":</div>\
+	                <div id='variations' class='variations'></div>\
+	            </div>\
+	        </div>\
+	        <div id='tools-container' class='tools-container'>\
+                <div id='tools-label' class='tools-label'>" + eidogo.i18n['tool'] + ":</div>\
+                <select id='tools-select' class='tools-select'>\
+                    <option value='play'>" + eidogo.i18n['play'] + "</option>\
+                    <option value='add_b'>" + eidogo.i18n['add_b'] + "</option>\
+                    <option value='add_w'>" + eidogo.i18n['add_w'] + "</option>\
+                    <option value='region'>" + eidogo.i18n['region'] + "</option>\
+                    <option value='tr'>" + eidogo.i18n['triangle'] + "</option>\
+                    <option value='sq'>" + eidogo.i18n['square'] + "</option>\
+                    <option value='cr'>" + eidogo.i18n['circle'] + "</option>\
+                    <option value='x'>" + eidogo.i18n['x'] + "</option>\
+                    <option value='letter'>" + eidogo.i18n['letter'] + "</option>\
+                    <option value='number'>" + eidogo.i18n['number'] + "</option>\
+                </select>\
+                <input type='button' id='search-button' class='search-button' value='" + eidogo.i18n['search'] + "'>\
+            </div>\
+	        <div id='comments' class='comments'></div>\
+	        <div id='board-container' class='board-container with-coords'></div>\
+	        <div id='info' class='info'>\
+	            <div id='info-players' class='players'>\
+    	            <div id='white' class='player white'>\
+    	                <div id='white-name' class='name'></div>\
+    	                <div id='white-captures' class='captures'></div>\
+    	                <div id='white-time' class='time'></div>\
+    	            </div>\
+    	            <div id='black' class='player black'>\
+    	                <div id='black-name' class='name'></div>\
+    	                <div id='black-captures' class='captures'></div>\
+    	                <div id='black-time' class='time'></div>\
+    	            </div>\
+    	        </div>\
+	            <div id='info-game' class='game'></div>\
+	        </div>\
+	        <div id='preferences' class='preferences'></div>\
+	        <div id='footer' class='footer'></div>\
+	    ";
+	    domHtml = domHtml.replace(/ id='([^']+)'/g, " id='$1-" + this.uniq + "'");
+	    
+        this.dom.player.innerHTML = domHtml;
 
-		YAHOO.ext.DomHelper.append(
-			this.dom.container,
-			{tag: 'div', id: 'player-' + this.uniq, cls: 'eidogo-player', children: [
-				{tag: 'div', id: 'controls-container-' + this.uniq, cls: 'controls-container', children: [
-					{tag: 'ul', id: 'controls-' + this.uniq, cls: 'controls', children: [
-						{tag: 'li', id: 'control-first-' + this.uniq, cls: 'control first', html: 'First'},
-						{tag: 'li', id: 'control-back-' + this.uniq, cls: 'control back', html: 'Back'},
-						{tag: 'li', id: 'control-forward-' + this.uniq, cls: 'control forward', html: 'Forward'},
-						{tag: 'li', id: 'control-last-' + this.uniq, cls: 'control last', html: 'Last'},
-						{tag: 'li', id: 'control-pass-' + this.uniq, cls: 'control pass', html: 'Pass'}					
-					]},
-					{tag: 'div', id: 'move-number-' + this.uniq, cls: 'move-number'},
-					{tag: 'div', id: 'nav-slider-' + this.uniq, cls: 'nav-slider', children: [
-						{tag: 'div', id: 'nav-slider-thumb-' + this.uniq, cls: 'nav-slider-thumb'}
-					]},
-					{tag: 'div', id: 'variations-container-' + this.uniq, cls: 'variations-container', children: [
-						{tag: 'div', id: 'variations-label' + this.uniq, cls: 'variations-label', html: eidogo.i18n['variations'] + ':'},
-						{tag: 'div', id: 'variations-' + this.uniq, cls: 'variations'}
-					]}
-				]},
-				{tag: 'div', id: 'comments-' + this.uniq, cls: 'comments'},
-				{tag: 'div', id: 'board-container-' + this.uniq, cls: 'board-container'},
-				{tag: 'div', id: 'info-' + this.uniq, cls: 'info', children: [
-					{tag: 'div', id: 'info-players-' + this.uniq, cls: 'players', children: [
-						{tag: 'div', id: 'white-' + this.uniq, cls: 'player white', children: [
-							{tag: 'div', id: 'white-name-' + this.uniq, cls: 'name'},
-							{tag: 'div', id: 'white-captures-' + this.uniq, cls: 'captures'},
-							{tag: 'div', id: 'white-time-' + this.uniq, cls: 'time'}
-						]},
-						{tag: 'div', id: 'white-' + this.uniq, cls: 'player black', children: [
-							{tag: 'div', id: 'black-name-' + this.uniq, cls: 'name'},
-							{tag: 'div', id: 'black-captures-' + this.uniq, cls: 'captures'},
-							{tag: 'div', id: 'black-time-' + this.uniq, cls: 'time'}
-						]}
-					]},
-					{tag: 'div', id: 'info-game-' + this.uniq, cls: 'game'}
-				]}
-			]}
-		);
 		this.dom.player = document.getElementById('player-' + this.uniq);
 		this.dom.comments = document.getElementById('comments-' + this.uniq);
+		this.dom.boardContainer = document.getElementById('board-container-' + this.uniq);
 		this.dom.info = document.getElementById('info-' + this.uniq);
 		this.dom.infoGame = document.getElementById('info-game-' + this.uniq);
 		this.dom.infoPlayers = document.getElementById('info-players-' + this.uniq);
@@ -917,15 +1022,26 @@ eidogo.Player.prototype = {
 		this.dom.controls.pass = document.getElementById('control-pass-' + this.uniq);
 		YAHOO.util.Event.on(this.dom.controls.pass, 'click', this.pass, this, true);
 		
+		this.dom.toolSelector = document.getElementById('tools-select-' + this.uniq);
+		YAHOO.util.Event.on(this.dom.toolSelector, 'change', this.selectTool, this, true);
+		
+		this.dom.searchButton = document.getElementById('search-button-' + this.uniq);
+		this.dom.searchRegion = document.createElement('div');
+		this.dom.searchRegion.id = "search-region-" + this.uniq;
+		this.dom.searchRegion.className = "search-region";
+		
+		this.dom.footer = document.getElementById('footer-' + this.uniq);
+		
 		this.dom.slider = document.getElementById('nav-slider-' + this.uniq);
 		this.dom.sliderThumb = document.getElementById('nav-slider-thumb-' + this.uniq);
 	},
 	
 	enableNavSlider: function() {
 		if (!this.progressiveLoad) {
-			this.dom.slider.style.display = "block";
+			this.dom.sliderThumb.style.display = "block";
+			this.dom.slider.style.cursor = "pointer";
 		}
-		this.slider = YAHOO.widget.Slider.getHorizSlider(this.dom.slider.id, this.dom.sliderThumb.id, 0, 300);
+		this.slider = YAHOO.widget.Slider.getHorizSlider(this.dom.slider.id, this.dom.sliderThumb.id, 0, 305);
 		this.slider.animate = false;
 		this.slider.enableKeys = false;
 		
@@ -969,7 +1085,8 @@ eidogo.Player.prototype = {
 	},
 	
 	pointToSgfCoord: function(pt) {
-		if (!pt || pt.x < 0 || pt.x > this.board.boardSize || pt.y < 0 || pt.y > this.board.boardSize) {
+		if (!pt || pt.x < 0 || pt.x > this.board.boardSize
+		    || pt.y < 0 || pt.y > this.board.boardSize) {
 		    return null;
 	    }
 		var pts = {

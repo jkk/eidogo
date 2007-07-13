@@ -1,10 +1,11 @@
 planned
-- fix variations overflow css thing
+X fix variations overflow css thing
 - player time
 - uploading
-- coordinate labels
+X coordinate labels
 X slider navigation
-- edit mode
+X edit mode
+- add letter/number labels
 - complete FF[4] SGF support
 
 maybe

@@ -41,6 +41,17 @@ eidogo.GameNode.prototype = {
 			this[property] = value;
 		}
 	},
+	pushProperty: function(property, value) {
+	    if (this.reserved.contains(property)) return;
+	    if (this[property]) {
+            if (!(this[property] instanceof Array)) {
+                this[property] = [this[property]];
+            }
+            this[property].push(value);
+        } else {
+            this[property] = value;
+        }
+	},
 	loadJson: function(jsonNode) {
 		for (var propName in jsonNode) {
 			this.setProperty(propName, jsonNode[propName]);
@@ -110,6 +121,35 @@ eidogo.GameTree.prototype = {
 	appendTree: function(tree) {
 		tree.parent = this;
 		this.trees.push(tree);
+	},
+	// creates a variation tree at the given node position
+	createVariationTree: function(nodePos) {
+	    var posNode = this.nodes[nodePos];
+        var preNodes = [];
+        var len = posNode.parent.nodes.length;
+        var i;
+        for (i = 0; i < len; i++) {
+            var n = posNode.parent.nodes[i];
+            preNodes.push(n);
+            if (n.id == posNode.id) {
+                n.nextSibling = null;
+                break;
+            }
+        }
+        var mainlineTree = new eidogo.GameTree();
+        i++;
+        posNode.parent.nodes[i].previousSibling = null;
+        var postNodes = [];
+        for (; i < len; i++) {
+            var n = posNode.parent.nodes[i];
+            n.parent = mainlineTree;
+            postNodes.push(n);
+        }		            
+        mainlineTree.nodes = postNodes;
+        mainlineTree.trees = posNode.parent.trees;
+        posNode.parent.nodes = preNodes;
+        posNode.parent.trees = [];
+        posNode.parent.appendTree(mainlineTree);
 	},
 	loadJson: function(jsonTree) {
 		for (var i = 0; i < jsonTree.nodes.length; i++) {

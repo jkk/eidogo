@@ -1,8 +1,9 @@
 <?php
 
 require("json.php");
+require("db.php");
 
-mysql_connect("localhost", "", "");
+mysql_connect(DB_HOST, DB_USER, DB_PASS);
 mysql_select_db("eidogo");
 
 $id = (int)$_REQUEST['id'];

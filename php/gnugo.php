@@ -8,11 +8,13 @@ if ($_SERVER['HTTP_HOST'] == "localhost") {
 
 $sgf = $_REQUEST['sgf'];
 $color = $_REQUEST['color'] == "W" ? "W" : "B";
-$size = (int)$_REQUEST['size'];
+$size = (int)$_REQUEST['size']; // needed for coordinate conversion
 
+// give gnugo our current game state
 $sgf_file = tempnam("/tmp", "eidogo");
 file_put_contents($sgf_file, $sgf);
 
+// tell gnugo to generate a move
 $command_file = tempnam("/tmp", "eidogo");
 file_put_contents($command_file, "genmove $color\nquit\n");
 

@@ -1,22 +1,50 @@
+* {
+    zoom: 1.0; /* because IE makes no sense */
+}
 body {
-	width: 700px;
-	margin: 5px auto 0 auto;
-	background: #444 url(images/bg.png) repeat-x;
-	color: #fff;
+	margin: 0;
+/*  background: #444 url(images/bg.png) repeat-x;*/
+/*  color: #fff;*/
 	font-family: arial, helvetica, sans-serif;
 	font-size: 11px;
+	background: #999;
+}
+#container {
+    width: 760px;
+    margin: 0 auto;
+}
+#header {
+    background: #eee;
+    padding: 5px 0 0 0;
+}
+#content {
+    margin: 10px 0 30px 0;
+/*    background: #fff;*/
 }
 a:link, a:visited, a:active {
-	color: #fff;
+    color: #fff;
 }
 h1 {
-	font-size: 22px;
+	font-size: 20px;
 	font-weight: normal;
-	font-variant: small-caps;
-	color: #aaa;
-	float: left;
-	margin: 5px 0 5px 0;
+/*  font-variant: small-caps;*/
+    text-transform: uppercase;
+/*  color: #ccc;*/
+	margin: 5px 0 5px 10px;
 	padding: 0;
+	float: left;
+}
+h1 span {
+    font-weight: bold;
+}
+#ownership {
+    float: right;
+    font-size: 9px;
+    margin: 10px 10px 0 0;
+/*    color: #ddd;*/
+}
+#ownership a {
+    color: black;
 }
 h2 {
 	font-size: 18px;
@@ -34,37 +62,58 @@ ol {
 pre, code {
 	font-weight: normal;
 	font-style: normal;
-	background: #333;
-	padding: 5px;
-	margin: 0;
+/*  background: #333;*/
+/*    color: #800;*/
+    padding: 10px 5px;
+    margin: 0;
 }
 #player-container {
 	clear: both;
 	zoom: 1;
-	width: 700px;
+	width: 760px;
 	min-height: 300px;
 	position: relative;
-	background: #444;
-	padding: 10px 10px 20px 10px;
-	border-top: 1px solid #666;
+    background: #fff;
+/*  padding: 10px 10px 20px 10px;*/
+/*  border-top: 1px solid #666;*/
 }
 #links {
-	float: right;
-	display: inline;
-	color: #777;
-	padding: 10px 0 0 0;
+    clear: both;
+/*    zoom: 1;*/
+    width: 760px;
+    height: 33px;
+	display: block;
+/*  color: #777;*/
+  padding: 0;
 	margin: 0;
+    background-color: #ccc;
+	border-top: 1px solid #999;
+	border-bottom: 3px solid #777;
 }
 #links li {
-	display: inline;
+  list-style-type: none;
+/*  display: inline;*/
+  float: left;
 }
 #links li a {
-	color: #aaa;
-	text-decoration: none;
-	padding: 3px;
+    height: 13px;
+/*    background-color: #222;*/
+    display: block;
+    float: left;
+    color: #000;
+/*  color: #aaa;*/
+/*  text-decoration: none;*/
+/*    border-left: 1px solid #ddd;*/
+/*    border-bottom: 1px solid #ccc;*/
+  padding: 10px 15px 10px 15px;
+ 
 	font-size: 11px;
 }
 #links li a:hover {
-	background: #181818;
-	color: #fff;
+/*  background: #622;*/
+    background: #bbb;
+/*    border-left: 1px solid #ccc;*/
+/*    border-bottom: 1px solid #888;*/
+/*  color: #fff;*/
+/*    text-decoration: underline;*/
 }
