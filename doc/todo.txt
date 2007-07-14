@@ -1,18 +1,16 @@
-planned
-X fix variations overflow css thing
-- player time
-- uploading
-X coordinate labels
-X slider navigation
-X edit mode
-- add letter/number labels
-- complete FF[4] SGF support
+planned for 1.0
+- click and drag implicitly selects region
+- search results page or iframe to allow back nav or load in-page (this.load, this.loadPath)?
+- get rid of unnecessary .default files
+- reconcile moveNumber and cursor offset for slider
+- checkboxes for preferences
+- detect point width and height
+- game archive browsing/searching
 
 maybe
-- JSdocs
+- add letter/number labels
+- uploading
+- exhaustive FF[4] SGF support
 - more robust SGF parser
-- integrate fuller YAHOO.ext (EventManager, Date, Templates)
-- multi-character labels
-- checkboxes for marking options
 - navigable variation tree like CGoban
-- fix IE slow back/forward click?
+

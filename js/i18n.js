@@ -13,6 +13,7 @@ if (typeof eidogo.i18n == "undefined") {
     eidogo.i18n = {
         'move':             'Move',
         'loading':          'Loading',
+        'passed':           'passed',
         
         'variations':       'Variations',
         'no variations':    'none',
@@ -28,11 +29,12 @@ if (typeof eidogo.i18n == "undefined") {
         'x':                'X',
         'letter':           'Letter',
         'number':           'Number',
-        'search':           'Search for Pattern',
-        
-        'captures':         'captures',
-    
-        'game':             'Game',
+        'search':           'Search',
+        'search corner':    'Corner Search',
+        'search center':    'Center Search',
+        'region info':      'Click and drag to select a region. If your browser\
+            does not support dragging (e.g., iPhone), click once to begin the selection\
+            and click once to end it.',
     
         'white':            'White',
         'white rank':       'White rank',
@@ -41,7 +43,11 @@ if (typeof eidogo.i18n == "undefined") {
         'black':            'Black',
         'black rank':       'Black rank',
         'black team':       'Black team',
+
+        'captures':         'captures',
+        'time left':        'time left',
     
+        'game':             'Game',
         'handicap':         'Handicap',
         'komi':             'Komi',
         'result':           'Result',
@@ -72,6 +78,22 @@ if (typeof eidogo.i18n == "undefined") {
         'october':          'October',
         'november':         'November',
         'december':         'December',
+        
+        'gw':               'Good for White',
+        'vgw':              'Very good for White',
+        'gb':               'Good for Black',
+        'vgb':              'Very good for Black',
+        'dm':               'Even position',
+        'dmj':              'Even position (joseki)',
+        'uc':               'Unclear position',
+        'te':               'Tesuji',
+        'bm':               'Bad move',
+        'vbm':              'Very bad move',
+        'do':               'Doubtful move',
+        'it':               'Interesting move',
+        'black to play':    'Black to play',
+        'white to play':    'White to play',
+        'ho':               'Hotspot',
     
         'dom error':        'Error finding DOM container',
         'error retrieving': 'There was a problem retrieving the game data.',

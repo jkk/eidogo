@@ -173,12 +173,13 @@
     cursor: default;
 }
 .eidogo-player .search-button {
-    margin: 0 0 0 10px;
+    margin: 0 0 0 5px;
     color: #c00;
     font-size: 11px;
     background-color: #88a;
     border: 1px solid #88a;
     cursor: pointer;
+    font-weight: bold;
     display: none;
 }
 .eidogo-player .search-region {
@@ -187,18 +188,27 @@
     left: 0px;
     width: 133px;
     height: 133px;
-/*    border: 2px solid #0f0;*/
-    background-color: #00f;
+/*    border: 2px solid #ff0;*/
+    background-color: #80f;
     opacity: 0.3;
     filter: alpha(opacity=30);
     z-index: 9999;
     display: none;
 }
-.eidogo-player .tools-select {
+.eidogo-player .tools-select, .eidogo-player .search-algo {
     font-size: 11px;
+}
+.eidogo-player .search-algo {
+    margin: 0 0 0 10px;
+    display: none;
 }
 .eidogo-player .comment-pass {
 	color: #800;
+	font-weight: bold;
+	margin: 0 0 10px 0;
+}
+.eidogo-player .comment-status {
+	color: #000;
 	font-weight: bold;
 	margin: 0 0 10px 0;
 }
@@ -220,6 +230,63 @@
 }
 .eidogo-player .comments a {
     color: #008;
+}
+.eidogo-player .comment-info {
+/*    background: #aa9;*/
+    padding: 5px;
+/*    border: 1px solid #998;*/
+    background: #bbf;
+    border: 1px solid #88b;
+    margin: 0 0 10px 0;
+}
+.eidogo-player .comments .search-count {
+    font-size: 11px;
+    padding: 0 0 5px 0;
+    margin: 0 0 10px 0;
+    border-bottom: 1px solid #887;
+}
+.eidogo-player .comments .search-count span {
+    font-weight: bold;
+}
+.eidogo-player .comments .search-result {
+
+}
+.eidogo-player .comments .search-result.odd {
+
+}
+.eidogo-player .comments .search-result a {
+    display: block;
+    text-decoration: none;
+    color: #000;
+    cursor: pointer;
+}
+.eidogo-player .comments .search-result.odd a {
+    background: #aa9;
+}
+.eidogo-player .comments .search-result a:hover {
+    color: #008;
+    background-color: #ddc;
+}
+.eidogo-player .comments .search-result span {
+    display: inline;
+    float: left;
+    padding: 5px;
+}
+.eidogo-player .comments .search-result .pw {
+    width: 70px;
+}
+.eidogo-player .comments .search-result .pb {
+    width: 70px;
+}
+.eidogo-player .comments .search-result .re {
+    width: 30px;
+}
+.eidogo-player .comments .search-result .dt {
+    width: 60px;
+}
+.eidogo-player .comments .search-result .clear {
+    clear: both;
+    font-size: 1px;
 }
 .eidogo-player .board-container {
 /*  position: absolute;*/
@@ -372,6 +439,8 @@
 	background: #555 url(images/territory-black.gif) no-repeat;
 }
 .eidogo-player .info .players .player .captures {
+    float: left;
+    width: 40%;
 	padding: 3px 3px 5px 5px;
 	color: #777;
 	background: #222;
@@ -379,6 +448,17 @@
 	margin: 0 0 10px 0;
 }
 .eidogo-player .info .players .player .captures span {
+	color: #fff;
+	padding-left: 2px;
+}
+.eidogo-player .info .players .player .time {
+	padding: 3px 3px 5px 5px;
+	color: #777;
+	background: #222;
+	font-size: 9px;
+	margin: 0 0 10px 0;
+}
+.eidogo-player .info .players .player .time span {
 	color: #fff;
 	padding-left: 2px;
 }
@@ -393,7 +473,7 @@
 	padding: 0 0 3px 0;
 }
 .eidogo-player .info .game dd {
-	text-indent: -5px;
+/*  text-indent: -5px;*/
 	padding: 0 0 3px 0;
 	margin: 0 0 0 85px;
 }

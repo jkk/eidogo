@@ -91,6 +91,9 @@ eidogo.Player.prototype = {
 		this.progressiveLoad = cfg.progressiveLoad ? true : false;
 		this.progressiveLoads = null;
 		this.progressiveUrl = null
+		
+		// pattern and game info search
+		this.searchUrl = cfg.searchUrl;
 
 		// these are populated after load
 		this.board = null;
@@ -99,6 +102,8 @@ eidogo.Player.prototype = {
 		this.moveNumber = null;
 		this.totalMoves = null;
 		this.variations = null;
+		this.timeB = "";
+		this.timeW = "";
 		
 		// user-changeable preferences
 		this.prefs = {};
@@ -118,6 +123,7 @@ eidogo.Player.prototype = {
 			W:	this.playMove,
 			B:	this.playMove,
 			KO: this.playMove,
+			MN: this.setMoveNumber,
 			AW:	this.addStone,
 			AB:	this.addStone,
 			AE: this.addStone,
@@ -129,7 +135,22 @@ eidogo.Player.prototype = {
 			TW: this.addMarker,
 			TB: this.addMarker,
 			PL: this.setColor,
-			C:	this.showComments
+			C:	this.showComments,
+		    N:  this.showAnnotation,
+		    GB: this.showAnnotation,
+		    GW: this.showAnnotation,
+		    DM: this.showAnnotation,
+		    HO: this.showAnnotation,
+		    UC: this.showAnnotation,
+		    V:  this.showAnnotation,
+		    BM: this.showAnnotation,
+		    DO: this.showAnnotation,
+		    IT: this.showAnnotation,
+		    TE: this.showAnnotation,
+		    BL: this.showTime,
+		    OB: this.showTime,
+		    WL: this.showTime,
+		    OW: this.showTime
 		};
 		
 		// a YUI Slider widget
@@ -171,7 +192,6 @@ eidogo.Player.prototype = {
         		root.PB = "GNU Go"
     		}
     		
-    		
 			this.load(blankGame);
 		}
 	},
@@ -192,23 +212,33 @@ eidogo.Player.prototype = {
 				return;
 			}
 		}
+		
 		if (size != 19) {
 		    YAHOO.util.Dom.removeClass(this.dom.boardContainer, "with-coords");
 		}
+		
 		this.board.renderer.domNode.appendChild(this.dom.searchRegion);
 		
 		this.rules = new eidogo.Rules(this.board);	
+		
 		YAHOO.util.Event.on(
 			this.board.renderer.domNode,
-			"click",
-			this.handleBoardClick,
+			"mousemove",
+			this.handleBoardHover,
 			this,
 			true
 		);
 		YAHOO.util.Event.on(
 			this.board.renderer.domNode,
-			"mousemove",
-			this.handleBoardHover,
+			"mousedown",
+			this.handleBoardMouseDown,
+			this,
+			true
+		);
+		YAHOO.util.Event.on(
+			this.board.renderer.domNode,
+			"mouseup",
+			this.handleBoardMouseUp,
 			this,
 			true
 		);
@@ -375,9 +405,9 @@ eidogo.Player.prototype = {
 			setTimeout(function() { me.refresh.call(me); }, 10);
 			return;
 		}
-        this.board.revert(1);
         this.moveNumber--;
         if (this.moveNumber < 0) this.moveNumber = 0;
+        this.board.revert(1);
         this.execNode(noRender);
 	},
 	
@@ -410,9 +440,11 @@ eidogo.Player.prototype = {
 			setTimeout(function() { me.execNode.call(me, noRender); }, 10);
 			return;
 		}
-		
+        
 		if (!noRender) {
 			this.dom.comments.innerHTML = "";
+			this.timeB = "";
+    		this.timeW = "";
 			this.board.clearMarkers();
 		}
 		
@@ -485,9 +517,9 @@ eidogo.Player.prototype = {
 	
 	back: function(e, obj, noRender) {
 		if (this.cursor.previous()) {
+            this.moveNumber--;
+            if (this.moveNumber < 0) this.moveNumber = 0;
 			this.board.revert(1);
-			this.moveNumber -= 1;
-			if (this.moveNumber < 0) this.moveNumber = 0;
 			this.refresh(noRender);
 		}
 	},
@@ -518,6 +550,9 @@ eidogo.Player.prototype = {
 		this.createMove('tt');
 	},
 	
+	/**
+	 *  Gets the board coordinates (0-18) for a mouse event
+	**/
 	getXY: function(e) {
 	    if (/Apple/.test(navigator.vendor)) {
 	        // Safari/YUI give the wrong board position
@@ -538,7 +573,6 @@ eidogo.Player.prototype = {
 		var clickX = pageX - boardX;
 		var clickY = pageY - boardY;
 		
-		// board coordinates (0-18 for 19x19, etc)
 		var x = Math.round((clickX - this.board.renderer.margin -
 			(this.board.renderer.pointWidth / 2)) / this.board.renderer.pointWidth);
 		var y = Math.round((clickY - this.board.renderer.margin -
@@ -547,18 +581,31 @@ eidogo.Player.prototype = {
 		return [x, y];
 	},
 	
+	handleBoardMouseDown: function(e) {
+	    if (this.domLoading) return;
+	    var xy = this.getXY(e);
+	    var x = xy[0];
+	    var y = xy[1];
+	    // begin region selection
+	    if (this.mode == "region" && x >= 0 && y >= 0 && !this.regionBegun) {
+            this.regionTop = y;
+            this.regionLeft = x;
+            this.regionBegun = true;
+        }
+	},
+	
 	handleBoardHover: function(e) {
 	    if (this.domLoading) return;
 	    if (this.regionBegun) {
 	        var xy = this.getXY(e);
-	        if (xy[0] > this.board.boardSize-1 || xy[1] > this.board.boardSize-1) return;
-    	    this.regionRight = xy[0] + 1;
-    	    this.regionBottom = xy[1] + 1;
+	        if (xy[0] < 0 || xy[1] < 0 || xy[0] > this.board.boardSize-1 || xy[1] > this.board.boardSize-1) return;
+    	    this.regionRight = xy[0] + (xy[0] >= this.regionLeft ? 1 : 0);
+    	    this.regionBottom = xy[1] + (xy[1] >= this.regionTop ? 1 : 0);
             this.showRegion();
 	    }
 	},
 	
-	handleBoardClick: function(e) {
+	handleBoardMouseUp: function(e) {
 	    if (this.domLoading) return;
 	    
 	    var xy = this.getXY(e);
@@ -585,53 +632,161 @@ eidogo.Player.prototype = {
     	    if (coord) {
     	        this.createMove(coord);
     		}
-        } else if (this.mode == "region" && x >= 0 && y >= 0) {
-            if (this.regionBegun) {
-                this.regionBegun = false;
-                this.regionBottom = y + 1;
-                this.regionRight = x + 1;
-                this.showRegion();
-                this.dom.searchButton.style.display = "inline";
+        } else if (this.mode == "region" && x >= -1 && y >= -1 && this.regionBegun) {
+            if (this.regionTop == y && this.regionLeft == x && !this.regionClickSelect) {
+                // allow two-click selection in addition to click-and-drag (for iphone!)
+                this.regionClickSelect = true;
             } else {
-                this.regionTop = y;
-                this.regionLeft = x;
-                this.regionBegun = true;
+                // end of region selection
+                this.regionBegun = false;
+                this.regionClickSelect = false;
+                this.regionBottom = (y >= this.board.boardSize) ? y : y + (y > this.regionTop ? 1 : 0);
+                this.regionRight = (x >= this.board.boardSize) ? x : x + (x > this.regionLeft ? 1 : 0);
+                this.showRegion();
+                this.dom.searchAlgo.style.display = "inline";
+                this.dom.searchButton.style.display = "inline";
             }
         } else {
+            // black stone, white stone, labels
             var prop;
-            switch (this.mode) {
-                case "add_b": prop = "AB"; break;
-                case "add_w": prop = "AW"; break;
-                case "tr": prop = "TR"; break;
-                case "sq": prop = "SQ"; break;
-                case "cr": prop = "CR"; break;
-                case "x": prop = "MA"; break;
+            var stone = this.board.getStone({x:x,y:y});
+            if (this.mode == "add_b" || this.mode == "add_w") {
+                // if (stone != this.board.EMPTY) {
+                    this.cursor.node.emptyPoint(this.pointToSgfCoord({x:x,y:y}));
+                // }
+                if (stone != this.board.BLACK && this.mode == "add_b") {
+                    prop = "AB";
+                } else if (stone != this.board.WHITE && this.mode == "add_w") {
+                    prop = "AW";
+                } else {
+                    prop = "AE";
+                }
+            } else {
+                switch (this.mode) {
+                    case "tr": prop = "TR"; break;
+                    case "sq": prop = "SQ"; break;
+                    case "cr": prop = "CR"; break;
+                    case "x": prop = "MA"; break;
+                }    
             }
             this.cursor.node.pushProperty(prop, coord);
             this.refresh();
         }
 	},
 	
-	showRegion: function() {
+	getRegionBounds: function() {
+	    // top, left, width, height
+	    var l = this.regionLeft;
 	    var w = this.regionRight - this.regionLeft;
-        var l = this.regionLeft;
         if (w < 0) {
             l = this.regionRight;
-            w = -w;
+            w = -w + 1;
         }
-        var h = this.regionBottom - this.regionTop;
         var t = this.regionTop;
+        var h = this.regionBottom - this.regionTop;
         if (h < 0) {
             t = this.regionBottom;
-            h = -h;
+            h = -h + 1;
         }
+        return [t, l, w, h];
+	},
+	
+	showRegion: function() {
+	    var bounds = this.getRegionBounds();
         this.dom.searchRegion.style.top = (this.board.renderer.margin +
-            this.board.renderer.pointHeight * t) + "px";
+            this.board.renderer.pointHeight * bounds[0]) + "px";
         this.dom.searchRegion.style.left = (this.board.renderer.margin +
-            this.board.renderer.pointWidth * l) + "px";
-        this.dom.searchRegion.style.width = this.board.renderer.pointWidth * w + "px";
-        this.dom.searchRegion.style.height = this.board.renderer.pointHeight * h + "px";
+            this.board.renderer.pointWidth * bounds[1]) + "px";
+        this.dom.searchRegion.style.width = this.board.renderer.pointWidth *
+            bounds[2] + "px";
+        this.dom.searchRegion.style.height = this.board.renderer.pointHeight *
+            bounds[3] + "px";
         this.dom.searchRegion.style.display = "block";
+	},
+	
+	searchRegion: function() {
+	    var bounds = this.getRegionBounds();
+	    var region = this.board.getRegion(bounds[0], bounds[1], bounds[2], bounds[3]);
+	    var pattern = region.join("")
+	        .replace(new RegExp(this.board.EMPTY, "g"), ".")
+	        .replace(new RegExp(this.board.BLACK, "g"), "X")
+	        .replace(new RegExp(this.board.WHITE, "g"), "O");
+	    var quadrant = (bounds[0] < this.board.boardSize / 2) ? "n" : "s";
+	    quadrant += (bounds[1] < this.board.boardSize / 2) ? "w" : "e";
+	    var algo = this.dom.searchAlgo.value;
+	    
+	    this.showComments("");
+	    this.nowLoading();
+	    
+	    YAHOO.util.Connect.asyncRequest(
+	        'GET',
+	        this.searchUrl + "?q=" + quadrant + "&w=" + bounds[2] + "&h=" + bounds[3] +
+	            "&p=" + pattern + "&a=" + algo + "&t=" + (new Date().getTime()),
+	        {
+    	        success: function(req) {
+    	            this.doneLoading();
+    	            this.dom.comments.innerHTML = req.responseText;
+    	        },
+    	        failure: function(req) {
+    	            this.croak(
+    					eidogo.i18n['error retrieving']
+    					+ req.statusText
+    				);
+	        },
+	        scope: this,
+	        timeout: 45000
+	    });
+	},
+	
+	/**
+	 * Takes a pattern string like ...O...XX and converts it to .3O.3X2
+	 */
+	compressPattern: function(pattern) {
+	    var c = null;
+	    var pc = "";
+	    var n = 1;
+	    var ret = "";
+	    for (var i = 0; i < pattern.length; i++) {
+	        c = pattern.charAt(i);
+	        if (c == pc) {
+	           n++;
+	        } else {
+	            ret = ret + pc + (n > 1 ? n : "");
+	            n = 1;
+	            pc = c;
+	        }
+	    }
+	    ret = ret + pc + (n > 1 ? n : "");
+	    return ret;
+	},
+	
+	uncompressPattern: function(pattern) {
+	    var c = null;
+	    var s = null;
+	    var n = "";
+	    var ret = "";
+	    for (var i = 0; i < pattern.length; i++) {
+	        c = pattern.charAt(i);
+	        if (c == "." || c == "X" || c == "O") {
+	            if (s != null) {
+	                n = parseInt(n);
+	                n = isNaN(n) ? 1 : n;
+                    for (var j = 0; j < n; j++) {
+                        ret += s;
+                    }
+                    n = "";
+	            }
+	            s = c;
+	        } else {
+	            n += c;
+	        }
+	    }
+	    n = parseInt(n);
+        n = isNaN(n) ? 1 : n;
+        for (var j = 0; j < n; j++) {
+            ret += s;
+        }
+	    return ret;
 	},
 	
 	/**
@@ -640,6 +795,7 @@ eidogo.Player.prototype = {
 	createMove: function(coord) {
 	    var props = {};
 	    props[this.currentColor] = coord;
+	    props['MN'] = (++this.moveNumber).toString();
 	    var varNode = new eidogo.GameNode(props);
 	    this.totalMoves++;
         if (this.cursor.hasNext()) {
@@ -764,33 +920,41 @@ eidogo.Player.prototype = {
 		}
 	},
 	
-	selectTool: function(evt) {
-        var sel = YAHOO.util.Event.getTarget(evt);
+	selectTool: function(tool) {
         var cursor;
-        if (sel.value == "region") {
+        if (tool == "region") {
             cursor = "crosshair";
+            this.dom.comments.innerHTML = "<div id='comment-info-" + this.uniq + "'class='comment-info'>" +
+                eidogo.i18n['region info'] + "</div>" + this.dom.comments.innerHTML;
         } else {
             cursor = "default";
             this.dom.searchRegion.style.display = "none";
             this.dom.searchButton.style.display = "none";
+            this.dom.searchAlgo.style.display = "none";
+            var info = document.getElementById('comment-info-' + this.uniq);
+            if (info) {
+                info.parentNode.removeChild(info);
+            }
         }
         this.board.renderer.domNode.style.cursor = cursor;
-        this.mode = sel.value;
+        this.mode = tool;
 	},
 	
 	updateControls: function() {
-		if (this.moveNumber) {
-			this.dom.moveNumber.innerHTML = eidogo.i18n['move'] + " "
-			    + this.moveNumber;
-		} else {
-			this.dom.moveNumber.innerHTML = "";
-		}
+
+		this.dom.moveNumber.innerHTML = (this.moveNumber ?
+		    eidogo.i18n['move'] + " " + this.moveNumber : "permalink");
 		
 		this.dom.playerW.captures.innerHTML = eidogo.i18n['captures'] +
 		    ": <span>" + this.board.captures.W + "</span>";
 		this.dom.playerB.captures.innerHTML = eidogo.i18n['captures'] +
 		    ": <span>" + this.board.captures.B + "</span>";
 		
+		this.dom.playerB.time.innerHTML = eidogo.i18n['time left'] + ": <span>" +
+		    (this.timeB ? this.timeB : "--") + "</span>";
+		this.dom.playerW.time.innerHTML = eidogo.i18n['time left'] + ": <span>" +
+		    (this.timeW ? this.timeW : "--") + "</span>";
+
 		YAHOO.util.Dom.removeClass(this.dom.controls.pass, "pass-on");
 		
 		// variations?
@@ -854,7 +1018,13 @@ eidogo.Player.prototype = {
 	},
 	
 	setColor: function(color) {
+	    this.prependComment(color == "B" ? eidogo.i18n['black to play'] :
+	        eidogo.i18n['white to play']);
 		this.currentColor = color;
+	},
+	
+	setMoveNumber: function(num) {
+	    this.moveNumber = num;
 	},
 	
 	playMove: function(coord, color, noRender) {
@@ -862,7 +1032,9 @@ eidogo.Player.prototype = {
 	    this.currentColor = (color == "B" ? "W" : "B");
 	    color = color == "W" ? this.board.WHITE : this.board.BLACK;
 	    var pt = this.sgfCoordToPoint(coord);
-		this.moveNumber++;
+	    if (!this.cursor.node['MN']) {
+            this.moveNumber++;
+	    }
 		if (coord && coord != "tt") {
 			this.board.addStone(pt, color);
 			this.rules.apply(pt, color);
@@ -870,10 +1042,8 @@ eidogo.Player.prototype = {
 				this.addMarker(coord, "current");
 			}
 		} else if (!noRender) {
-			this.dom.comments.innerHTML = "<div class='comment-pass'>" +
-				(color == this.board.WHITE ? eidogo.i18n['white'] : eidogo.i18n['black']) +
-				" passed</div>" +
-				this.dom.comments.innerHTML;
+		    this.prependComment((color == this.board.WHITE ? eidogo.i18n['white'] : eidogo.i18n['black']) +
+			    " " + eidogo.i18n['passed'], "comment-pass");
 		}
 	},
 	
@@ -881,6 +1051,7 @@ eidogo.Player.prototype = {
 		if (!(coord instanceof Array)) {
 			coord = [coord];
 		}
+		coord = this.expandCompressedPoints(coord);
 		for (var i = 0; i < coord.length; i++) {
 			this.board.addStone(
 				this.sgfCoordToPoint(coord[i]),
@@ -894,6 +1065,7 @@ eidogo.Player.prototype = {
 		if (!(coord instanceof Array)) {
 			coord = [coord];
 		}
+		coord = this.expandCompressedPoints(coord);
 		var label;
 		for (var i = 0; i < coord.length; i++) {
 			switch (type) {
@@ -913,9 +1085,44 @@ eidogo.Player.prototype = {
 		}
 	},
 	
+	showTime: function(value, type) {
+	    var tp = (type == "BL" || type == "OB" ? "timeB" : "timeW");
+	    if (type == "BL" || type == "WL") {
+	        var mins = Math.floor(value / 60);
+	        var secs = (value % 60).toFixed(0);
+	        secs = (secs < 10 ? "0" : "") + secs;
+	        this[tp] = mins + ":" + secs + this[tp];
+	    } else {
+	        this[tp] += " (" + value + ")";
+	    }
+	},
+	
+	showAnnotation: function(value, type) {
+	    var msg;
+	    switch (type) {
+	        case 'N':  msg = value; break;
+	        case 'GB': msg = (value > 1 ? eidogo.i18n['vgb'] : eidogo.i18n['gb']); break;
+	        case 'GW': msg = (value > 1 ? eidogo.i18n['vgw'] : eidogo.i18n['gw']); break;
+	        case 'DM': msg = (value > 1 ? eidogo.i18n['dmj'] : eidogo.i18n['dm']); break;
+	        case 'UC': msg = eidogo.i18n['uc']; break;
+	        case 'TE': msg = eidogo.i18n['te']; break;
+	        case 'BM': msg = (value > 1 ? eidogo.i18n['vbm'] : eidogo.i18n['bm']); break;
+	        case 'DO': msg = eidogo.i18n['do']; break;
+	        case 'IT': msg = eidogo.i18n['it']; break;
+	        case 'HO': msg = eidogo.i18n['ho']; break;
+	    }
+	    this.prependComment(msg);
+	},
+	
 	showComments: function(comments, junk, noRender) {
 		if (!comments || noRender) return;
 		this.dom.comments.innerHTML += comments.replace(/\n/g, "<br />");
+	},
+	
+	prependComment: function(content, cls) {
+	    cls = cls || "comment-status";
+	    this.dom.comments.innerHTML = "<div class='" + cls + "'>" + content + "</div>" +
+	        this.dom.comments.innerHTML;
 	},
 	
 	constructDom: function() {
@@ -956,6 +1163,10 @@ eidogo.Player.prototype = {
                     <option value='x'>" + eidogo.i18n['x'] + "</option>\
                     <option value='letter'>" + eidogo.i18n['letter'] + "</option>\
                     <option value='number'>" + eidogo.i18n['number'] + "</option>\
+                </select>\
+                <select id='search-algo' class='search-algo'>\
+                    <option value='corner'>" + eidogo.i18n['search corner'] + "</option>\
+                    <option value='center'>" + eidogo.i18n['search center'] + "</option>\
                 </select>\
                 <input type='button' id='search-button' class='search-button' value='" + eidogo.i18n['search'] + "'>\
             </div>\
@@ -1023,9 +1234,13 @@ eidogo.Player.prototype = {
 		YAHOO.util.Event.on(this.dom.controls.pass, 'click', this.pass, this, true);
 		
 		this.dom.toolSelector = document.getElementById('tools-select-' + this.uniq);
-		YAHOO.util.Event.on(this.dom.toolSelector, 'change', this.selectTool, this, true);
+		YAHOO.util.Event.on(this.dom.toolSelector, 'change', function(evt) {
+		    this.selectTool.apply(this, [YAHOO.util.Event.getTarget(evt).value]);
+		}, this, true);
 		
 		this.dom.searchButton = document.getElementById('search-button-' + this.uniq);
+		YAHOO.util.Event.on(this.dom.searchButton, 'click', this.searchRegion, this, true);
+		this.dom.searchAlgo = document.getElementById('search-algo-' + this.uniq);
 		this.dom.searchRegion = document.createElement('div');
 		this.dom.searchRegion.id = "search-region-" + this.uniq;
 		this.dom.searchRegion.className = "search-region";
@@ -1060,11 +1275,11 @@ eidogo.Player.prototype = {
 						this.variation(null, true);
 					} else if (delta < 0) {
 						this.cursor.previous();
-						this.moveNumber--;
+                        this.moveNumber--;
 					}
 				}
 				if (delta < 0) {
-					if (this.moveNumber < 0) this.moveNumber = 0;
+                    if (this.moveNumber < 0) this.moveNumber = 0;
 					this.board.revert(Math.abs(delta));
 				}
 				this.refresh();
@@ -1095,6 +1310,29 @@ eidogo.Player.prototype = {
 		    15: 'p', 16: 'q', 17: 'r', 18: 's'
 		};
 		return pts[pt.x] + pts[pt.y];
+	},
+	
+	expandCompressedPoints: function(coords) {
+	    var bounds;
+	    var ul, lr;
+	    var x, y;
+	    var newCoords = [];
+	    var hits = [];
+	    for (var i = 0; i < coords.length; i++) {
+	        bounds = coords[i].split(/:/);
+	        if (bounds.length > 1) {
+	            ul = this.sgfCoordToPoint(bounds[0]);
+	            lr = this.sgfCoordToPoint(bounds[1]);
+	            for (x = ul.x; x <= lr.x; x++) {
+	               for (y = ul.y; y <= lr.y; y++) {
+	                   newCoords.push(this.pointToSgfCoord({x:x,y:y}));
+	               }
+	            }
+	            hits.push(i);
+	        }
+       }
+       coords = coords.concat(newCoords);
+       return coords;
 	},
 	
 	setPermalink: function() {

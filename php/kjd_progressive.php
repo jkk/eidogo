@@ -1,6 +1,6 @@
 <?php
 
-require("json.php");
+require("JSON.php");
 require("db.php");
 
 mysql_connect(DB_HOST, DB_USER, DB_PASS);

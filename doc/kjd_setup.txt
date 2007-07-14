@@ -6,11 +6,9 @@ To use Kogo's Joseki Dictionary with progressive loading:
 2) Save the .sgf file as 'sgf/kjd.sgf'
 3) Set up a MySQL database and make note of the login info.
 4) Import php/kjd_structure.sql into the MySQL database.
-5) Remove the .default extension from the files:
-     php/kjd_insert.php.default
-     php/kjd_progressive.php.default
-6) Update the files from step 5 with the MySQL login information
-   from step 3.
+5) Remove the .default extension from the files
+     php/db.php.default
+6) Update db.php with the MySQL login information from step 3.
 7) Run kjd_insert.php, preferably from a shell, since it may
    use a lot memory and take a while to process.
 8) Point the Player cfg setting sgfUrl at php/kjd_progressive.php

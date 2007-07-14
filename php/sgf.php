@@ -52,7 +52,7 @@ class SGF {
 						$this->index++;
 					}
 					$i++;
-					if ($this->sgf[$this->index] == ']')
+					while ($this->sgf[$this->index] == ']' || $this->sgf[$this->index] == '\r' || $this->sgf[$this->index] == 'n')
 						$this->index++;
 				}
 				$node[$key] = count($values) > 1 ? $values : $values[0];

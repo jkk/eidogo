@@ -10,11 +10,11 @@
 <style type="text/css">
 .eidogo-player .board .point.stone.black {
 	background: none;
-	filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src="player/images/b.png");
+	filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src="/eidogo/player/images/b.png");
 }
 .eidogo-player .board .point.stone.white {
 	background: none;
-	filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src="player/images/w.png");
+	filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src="/eidogo/player/images/w.png");
 }
 </style>
 <![endif]-->
@@ -50,6 +50,7 @@ if (!$in || $in == "kjd") {
 		"domId"				=> "player-container",
 		"mode"				=> "play",
 		"sgfUrl"			=> "/eidogo/php/kjd_progressive.php",
+		"searchUrl"         => "/eidogo/php/search.php",
 		"progressiveLoad"	=> true,
 		"markCurrent"		=> true,
 		"markVariations"	=> true,
@@ -62,6 +63,7 @@ if (!$in || $in == "kjd") {
 		"domId"				=> "player-container",
 		"mode"				=> "play",
 		"progressiveLoad"	=> false,
+		"searchUrl"         => "/eidogo/php/search.php",
 		"markCurrent"		=> true,
 		"markVariations"	=> true,
 		"markNext"			=> false,
@@ -108,11 +110,11 @@ YAHOO.util.Event.on(window, "load", function() {
 
         <ul id="links">
         	<li><a href="/eidogo/kjd">Joseki Tutor</a></li>
+        	<li><a href="/eidogo/games">Game Archive</a></li>
+        	<li><a href="/eidogo/search">Pattern Search</a></li>
         	<li><a href="/eidogo/gnugo">GNU Go</a>
         	<li><a href="/eidogo/blank">Blank Board</a></li>
         	<li><a href="/eidogo/upload">Upload</a></li>
-        	<li><a href="/eidogo/games">Game Archive</a></li>
-        	<li><a href="/eidogo/search">Pattern Search</a></li>
         	<li><a href="http://senseis.xmp.net/?EidoGo">Info</a></li>
         </ul>
 

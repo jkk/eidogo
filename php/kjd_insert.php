@@ -4,6 +4,7 @@ require("sgf.php");
 require("json.php");
 require("db.php");
 
+// Change these as appropriate:
 mysql_connect(DB_HOST, DB_USER, DB_PASS);
 mysql_select_db("eidogo");
 $sgf_file = "../sgf/kjd.sgf";

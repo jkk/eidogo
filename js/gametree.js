@@ -47,7 +47,9 @@ eidogo.GameNode.prototype = {
             if (!(this[property] instanceof Array)) {
                 this[property] = [this[property]];
             }
-            this[property].push(value);
+            if (!this[property].contains(value)) {
+                this[property].push(value);
+            }
         } else {
             this[property] = value;
         }
@@ -74,6 +76,22 @@ eidogo.GameNode.prototype = {
 			return this.B;
 		}
 		return null;
+	},
+	emptyPoint: function(coord) {
+	    var props = this.getProperties();
+	    for (var propName in props) {
+	        if (propName == "AW" || propName == "AB" || propName == "AE") {
+	            if (!(this[propName] instanceof Array)) {
+	                this[propName] = [this[propName]];
+	            }
+	            this[propName] = this[propName].filter(function(v) { return v != coord});
+	            if (!this[propName].length) {
+	                delete this[propName];
+	            }
+	        } else if ((propName == "B" || propName == "W") && this[propName] == coord) {
+	            delete this[propName];
+	        }
+	    }
 	},
 	getPosition: function() {
 		for (var i = 0; i < this.parent.nodes.length; i++) {

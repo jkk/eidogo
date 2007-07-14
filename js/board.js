@@ -107,6 +107,17 @@ eidogo.Board.prototype = {
 	getStone: function(pt) {
 	    return this.stones[pt.y * this.boardSize + pt.x];
 	},
+	getRegion: function(t, l, w, h) {
+	    var region = [].setLength(w * h, this.EMPTY);
+	    var offset;
+	    for (var y = t; y < t + h; y++) {
+	        for (var x = l; x < l + w; x++) {
+	            offset = (y - t) * w + (x - l);
+	            region[offset] = this.getStone({x:x, y:y});
+	        }
+	    }
+	    return region;
+	},
 	addMarker: function(pt, type) {
 		this.markers[pt.y * this.boardSize + pt.x] = type;
 	},

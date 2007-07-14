@@ -58,21 +58,28 @@ eidogo.SgfParser.prototype = {
 		var i = 0;
 		while (this.index < this.sgf.length) {
 			var c = this.getChar();
-			if (c == ';' || c == '(' || c == ')')
+			if (c == ';' || c == '(' || c == ')') {
 				break;
+			}
 			if (this.getChar() == '[') {
 				while (this.getChar() == '[') {
 					this.nextChar();
 					values[i] = "";
 					while (this.getChar() != ']' && this.index < this.sgf.length) {
-						if (this.getChar() == '\\')
+						if (this.getChar() == '\\') {
 							this.nextChar();
+							// not technically corret, but works in practice
+							while (this.getChar() == "\r" || this.getChar() == "\n") {
+							    this.nextChar();
+							}
+						}
 						values[i] += this.getChar();
 						this.nextChar();
 					}
 					i++;
-					if (this.getChar() == ']')
+					while (this.getChar() == ']' || this.getChar() == "\n" || this.getChar() == "\r") {
 						this.nextChar();
+					}
 				}
 				node[key] = values.length > 1 ? values : values[0];
 				key = "";
@@ -80,8 +87,9 @@ eidogo.SgfParser.prototype = {
 				i = 0;
 				continue;
 			}
-			if (c != " " && c != "\n" && c != "\r" && c != "\t")
+			if (c != " " && c != "\n" && c != "\r" && c != "\t") {
 				key += c;
+			}
 			this.nextChar();
 		}
 		return node;
