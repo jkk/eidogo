@@ -174,7 +174,7 @@
 }
 .eidogo-player .search-button {
     margin: 0 0 0 5px;
-    color: #c00;
+    color: #a00;
     font-size: 11px;
     background-color: #88a;
     border: 1px solid #88a;
@@ -239,52 +239,60 @@
     border: 1px solid #88b;
     margin: 0 0 10px 0;
 }
-.eidogo-player .comments .search-count {
+.eidogo-player .search-container {
+	clear: right;
+	float: right;
+	width: 302px;
+	height: 243px;
+	font-size: 11px;
+	margin: 5px 0 0 0;
+	padding: 15px 10px 40px 10px;
+	overflow: auto;
+    background: #bbe;
+    border-left: 3px solid #778;
+    border-top: 2px solid #778;
+    display: none;
+}
+.eidogo-player .search-container .search-count {
     font-size: 11px;
     padding: 0 0 5px 0;
     margin: 0 0 10px 0;
-    border-bottom: 1px solid #887;
+    border-bottom: 1px solid #778;
 }
-.eidogo-player .comments .search-count span {
+.eidogo-player .search-container .search-count span {
     font-weight: bold;
 }
-.eidogo-player .comments .search-result {
-
-}
-.eidogo-player .comments .search-result.odd {
-
-}
-.eidogo-player .comments .search-result a {
+.eidogo-player .search-container .search-result a {
     display: block;
     text-decoration: none;
-    color: #000;
+    color: #008;
     cursor: pointer;
 }
-.eidogo-player .comments .search-result.odd a {
-    background: #aa9;
+.eidogo-player .search-container .search-result.odd a {
+    background: #aad;
 }
-.eidogo-player .comments .search-result a:hover {
-    color: #008;
-    background-color: #ddc;
+.eidogo-player .search-container .search-result a:hover {
+    color: #fff;
+    background-color: #77c;
 }
-.eidogo-player .comments .search-result span {
+.eidogo-player .search-container .search-result span {
     display: inline;
     float: left;
     padding: 5px;
 }
-.eidogo-player .comments .search-result .pw {
+.eidogo-player .search-container .search-result .pw {
     width: 70px;
 }
-.eidogo-player .comments .search-result .pb {
+.eidogo-player .search-container .search-result .pb {
     width: 70px;
 }
-.eidogo-player .comments .search-result .re {
+.eidogo-player .search-container .search-result .re {
     width: 30px;
 }
-.eidogo-player .comments .search-result .dt {
+.eidogo-player .search-container .search-result .dt {
     width: 60px;
 }
-.eidogo-player .comments .search-result .clear {
+.eidogo-player .search-container .search-result .clear {
     clear: both;
     font-size: 1px;
 }
@@ -479,6 +487,17 @@
 }
 .eidogo-player .info a {
     color: #fff;
+}
+.eidogo-player .preferences {
+	clear: right;
+	float: right;
+	width: 302px;
+	font-size: 11px;
+	margin: 15px 0 0 20px;
+	overflow: auto;
+    background: #222;
+    color: #888;
+    display: none;
 }
 .eidogo-loading {
 	position: absolute;

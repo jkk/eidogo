@@ -1,16 +1,32 @@
 planned for 1.0
-- click and drag implicitly selects region
-- search results page or iframe to allow back nav or load in-page (this.load, this.loadPath)?
-- get rid of unnecessary .default files
-- reconcile moveNumber and cursor offset for slider
+- shortcuts for player.js (t = eidogo.i18n, etc)
+- showTools preference (disallow implicit selection too)
+- load search results via front page rather than Player to keep history
+  state separated from core functionality. consider the same for permalinks?
+  create gameloadhandler/permalinkhandler?
+- figure out why updateControls is slow when there are lots of search results
+  (guessing YUI/DOM related)
+- use hashes for permalinks!
+- search results back navigation or permalinks
+- gameUrl setting for permalinks of loaded games
+- hold down arrow keys to keep navigating
 - checkboxes for preferences
-- detect point width and height
 - game archive browsing/searching
+- brief help text (keyboard shortcuts, etc)
 
 maybe
-- add letter/number labels
 - uploading
 - exhaustive FF[4] SGF support
 - more robust SGF parser
 - navigable variation tree like CGoban
 
+done
+- search caching
+- implicit mouse-drag region select
+- detect point width and height
+- add letter/number labels
+- f1 or esc to select "play" tool
+
+suggestions for ulrich
+- move number, variation as individual field
+- search hit limit

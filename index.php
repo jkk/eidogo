@@ -50,7 +50,9 @@ if (!$in || $in == "kjd") {
 		"domId"				=> "player-container",
 		"mode"				=> "play",
 		"sgfUrl"			=> "/eidogo/php/kjd_progressive.php",
+		"gameName"          => "kjd",
 		"searchUrl"         => "/eidogo/php/search.php",
+		"sgfPath"           => "/eidogo/sgf/",
 		"progressiveLoad"	=> true,
 		"markCurrent"		=> true,
 		"markVariations"	=> true,
@@ -80,7 +82,9 @@ if (!$in || $in == "kjd") {
 	} elseif (strpos($in, "games/") === 0) {
 	    $cfg['sgfUrl'] = "/eidogo/games.php?id=" . str_replace("games/", "", $in);
 	} elseif ($in != "blank") {
-	    $cfg['sgfUrl'] = "/eidogo/sgf/$in.sgf";
+	    $cfg['sgfPath'] = "/eidogo/sgf/";
+	    $cfg['gameName'] = $in;
+	    //$cfg['sgfUrl'] = "/eidogo/sgf/$in.sgf";
 	}
 }
 ?>
@@ -91,6 +95,43 @@ var player;
 YAHOO.util.Event.on(window, "load", function() {
 	var cfg = <?php echo json_encode($cfg); ?>;
 	cfg.loadPath = location.hash.replace(/^#/, "").split(/,/);
+	/*var hashParts = location.hash ? location.hash.replace(/^#/, "").split(/:/) : [];
+	var loadPath = null;
+	if (hashParts[1]) {
+	    loadPath = hashParts[1].split(",");
+	}
+	if (hashParts.length && hashParts[0] != "kjd") {
+	    cfg = {
+	        domId:              "player-container",
+	        mode:               "play",
+	        sgfPath:            "/eidogo/sgf/",
+	        gameName:           hashParts[0],
+	        loadPath:           loadPath,
+	        progressiveLoad:    false,
+	        searchUrl:          "/eidogo/php/search.php",
+	        markCurrent:        true,
+	        markVariations:     true,
+	        markNext:           false,
+	        showGameInfo:       true,
+	        showPlayerInfo:     true
+	    }
+	} else {
+	    cfg = {
+	        domId:              "player-container",
+	        mode:               "play",
+	        sgfUrl:             "/eidogo/php/kjd_progressive.php",
+	        sgfPath:            "/eidogo/sgf/",
+	        gameName:           "kjd",
+	        loadPath:           loadPath,
+	        progressiveLoad:    true,
+	        searchUrl:          "/eidogo/php/search.php",
+	        markCurrent:        true,
+	        markVariations:     true,
+	        markNext:           true,
+	        showGameInfo:       true,
+	        showPlayerInfo:     false
+	    }
+	}*/
 	player = new eidogo.Player(cfg);
 });
 

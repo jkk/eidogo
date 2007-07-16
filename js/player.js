@@ -105,6 +105,24 @@ eidogo.Player.prototype = {
 		this.timeB = "";
 		this.timeW = "";
 		
+		// region selection state
+		this.regionTop = null;
+		this.regionLeft = null;
+		this.regionWidth = null;
+		this.regionHeight = null;
+		this.regionBegun = null;
+		this.regionClickSelect = null;
+		
+		// mouse clicking/dragging state
+		this.mouseDown = null;
+		this.mouseDownX = null;
+		this.mouseDownY = null;
+		
+		// for the letter and number tools
+		this.labelLastLetter = null;
+		this.labelLastNumber = null;
+		this.resetLastLabels();
+		
 		// user-changeable preferences
 		this.prefs = {};
 		this.prefs.markCurrent = typeof cfg.markCurrent != "undefined" ?
@@ -155,6 +173,7 @@ eidogo.Player.prototype = {
 		
 		// a YUI Slider widget
 		this.slider = null;
+		this.sliderIgnore = true;
 		
 		this.constructDom();
 		this.nowLoading();
@@ -162,23 +181,41 @@ eidogo.Player.prototype = {
 		// Load the first tree and first node by default.
 		this.loadPath = cfg.loadPath && cfg.loadPath.length > 1 ?
 			cfg.loadPath : [0, 0];
+			
+		// URL path to SGF files (for dynamic loading)
+		this.sgfPath = cfg.sgfPath;
+		
+		// game name (= file name) of load the currently-loaded game
+		this.gameName = cfg.gameName;
 
 		if (typeof cfg.sgf == "string") {
+		    
 			// raw SGF data
 			var sgf = new eidogo.SgfParser(cfg.sgf);
 			this.load(sgf.tree);
+		
 		} else if (typeof cfg.sgf == "object") {
+		
 			// already-parsed JSON game tree
 			this.load(cfg.sgf);
-		} else if (typeof cfg.sgfUrl == "string") {
-			// this is only allowed from within the same domain
-			this.remoteLoad(cfg.sgfUrl);
+			
+		} else if (typeof cfg.sgfUrl == "string" || this.gameName) {
+		    
+		    // the URL can be provided as a single sgfUrl or as sgfPath + gameName
+		    if (!cfg.sgfUrl) {
+		        cfg.sgfUrl = this.sgfPath + this.gameName + ".sgf";
+		    }
+		    
+		    // load data from a URL
+			this.remoteLoad(cfg.sgfUrl, null, false);
 			if (cfg.progressiveLoad) {
 				this.progressiveLoads = 0;
 				this.progressiveUrl = cfg.progressiveUrl
 					|| cfg.sgfUrl.replace(/\?.+$/, "");
 			}
+		
 		} else {
+		
 			// start from scratch
 			var boardSize = cfg.boardSize || "19";
 			var blankGame = {nodes: [], trees: [{nodes: [{SZ: boardSize}], trees: []}]};
@@ -196,16 +233,39 @@ eidogo.Player.prototype = {
 		}
 	},
 	
+	/**
+	 * Sets up a new game for playing. Can be called repeatedly (e.g., for
+	 * dynamically-loaded games).
+	**/
+	initGame: function(target) {
+		var size = target.trees.first().nodes.first().SZ;
+		if (!this.board) {
+		    this.createBoard(size || 19);
+	    }
+		this.reset(true);
+		this.totalMoves = 0;
+		var moveCursor = new eidogo.GameCursor(this.cursor.node);
+		while (moveCursor.next()) { this.totalMoves++; }
+		this.totalMoves--;
+		this.showInfo();
+		if (this.prefs.showPlayerInfo) {
+			this.dom.infoPlayers.style.display = "block";
+		}
+		if (!this.slider) {
+		    this.enableNavSlider();
+		}
+		this.selectTool("play");
+	},
+	
+	/**
+	 * Create our board, tie it to a Rules instance, and add appropriate event
+	 * handlers. This only gets called once.
+	**/
 	createBoard: function(size) {
 		size = size || 19;
 		try {
-			this.board = new eidogo.Board(
-				new eidogo.BoardRendererHtml( // change Html to Ascii for kicks
-					this.dom.boardContainer,
-					size
-				),
-				size
-			);
+		    var renderer = new eidogo.BoardRendererHtml(this.dom.boardContainer, size);
+			this.board = new eidogo.Board(renderer, size);
 		} catch (e) {
 			if (e == "No DOM container") {
 				this.croak(eidogo.i18n['error board']);
@@ -217,9 +277,14 @@ eidogo.Player.prototype = {
 		    YAHOO.util.Dom.removeClass(this.dom.boardContainer, "with-coords");
 		}
 		
+		// add the search region selection box for later use
 		this.board.renderer.domNode.appendChild(this.dom.searchRegion);
 		
 		this.rules = new eidogo.Rules(this.board);	
+		
+        // var domBoard = this.board.renderer.domNode;
+		
+        // addEvent(domBoard, "mousemove", this.handleBoardHover, this, true);
 		
 		YAHOO.util.Event.on(
 			this.board.renderer.domNode,
@@ -251,29 +316,20 @@ eidogo.Player.prototype = {
 		);
 	},
 	
-	initGame: function(target) {
-		var size = target.trees.first().nodes.first().SZ;
-		this.createBoard(size || 19);
-		this.reset(true);
-		this.totalMoves = 0;
-		var moveCursor = new eidogo.GameCursor(this.cursor.node);
-		while (moveCursor.next()) { this.totalMoves++; }
-		this.totalMoves--;
-		this.showInfo();
-		if (this.prefs.showPlayerInfo) {
-			this.dom.infoPlayers.style.display = "block";
-		}
-		this.enableNavSlider();
-	},
-	
+	/**
+	 * Loads game data into a given target. If no target is given, creates
+	 * a new gameTree and initializes the game.
+	**/
 	load: function(data, target) {
-		target = target || this.gameTree;
+        if (!target) {
+            // initial load
+            target = new eidogo.GameTree();
+            this.gameTree = target;
+        }
 		target.loadJson(data);
 		target.cached = true;
 		this.doneLoading();
-
 		if (!target.parent) {
-			// initial load
 			this.initGame(target);
 		} else {
 			this.progressiveLoads--;
@@ -281,68 +337,90 @@ eidogo.Player.prototype = {
 		
 		if (this.loadPath.length) {
 			this.goTo(this.loadPath, false);
+            if (!this.progressiveLoad) {
+                this.loadPath = [0,0];
+            }
 		} else {
 			this.refresh();
 		}
 	},
 	
-	remoteLoad: function(url, target) {
-		YAHOO.util.Connect.asyncRequest(
-			'GET',
-			url,
-			{
-				success: function(o) {
-					// infer which kind of file we got
-					if (o.responseText.charAt(0) == '(') {
-						// SGF
-						var sgf = new eidogo.SgfParser(o.responseText);
-						this.load(sgf.tree, target);
-					} else if (o.responseText.charAt(0) == '{') {
-						// JSON
-						eval("var data = " + o.responseText);
-						this.load(data, target);
-					} else {
-						this.croak(eidogo.i18n['invalid data']);
-					}
-				},
-				failure: function(o) {
-					this.croak(
-						eidogo.i18n['error retrieving']
-						+ o.statusText
-					);
-				},
-				scope: this,
-				timeout: 10000
-			},
-			null
-		);
+	/**
+	 * Load game data given as raw SGF or JSON from a URL within the same
+	 * domain.
+	 * @param {string} url URL to load game data from
+	 * @param {GameTree} target inserts data into this tree if given
+	 * @param {boolean} useSgfPath if true, prepends sgfPath to url
+	 * @param {Array} loadPath gameTree path to load
+	**/
+	remoteLoad: function(url, target, useSgfPath, loadPath) {
+	    useSgfPath = useSgfPath == "undefined" ? true : useSgfPath;
+	    
+	    if (useSgfPath) {
+	        // if we're using sgfPath, assume url does not include .sgf extension
+	        url = this.sgfPath + url + ".sgf";
+	    }
+	    
+	    var success = function(req) {
+		    var data = req.responseText;
+		    
+		    // trim leading space
+		    var first = data.charAt(0);
+		    var i = 1;
+		    while (i < data.length && (first == " " || first == "\r" || first == "\n")) {
+	            first = data.charAt(i++);
+		    }
+		    
+			// infer the kind of file we got
+			if (first == '(') {
+				// SGF
+				var sgf = new eidogo.SgfParser(data);
+				this.load(sgf.tree, target);
+			} else if (first == '{') {
+				// JSON
+				data = eval("(" + data + ")");
+				this.load(data, target);
+			} else {
+				this.croak(eidogo.i18n['invalid data']);
+			}	        
+	    }
+	    
+	    var failure = function(req) {
+	        this.croak(eidogo.i18n['error retrieving'] + req.statusText);
+	    }
+	    
+		YAHOO.util.Connect.asyncRequest('GET', url, {success: success, failure: failure,
+		    scope: this, timeout: 10000}, null);
 	},
 	
+	/**
+	 * Fetches a move from an external opponent -- e.g., GnuGo. Provides
+	 * serialized game data as SGF, the color to move as, and the size of
+	 * the board. Expects the response to be the SGF coordinate of the
+	 * move to play.
+	**/
 	fetchOpponentMove: function() {
 	    this.nowLoading(eidogo.i18n['gnugo thinking']);
-	    YAHOO.util.Connect.asyncRequest(
-			'POST',
-			this.opponentUrl,
-			{
-				success: function(o) {
-				    this.doneLoading();
-					this.createMove(o.responseText);
-				},
-				failure: function(o) {
-					this.croak(
-						eidogo.i18n['error retrieving']
-						+ o.statusText
-					);
-				},
-				scope: this,
-				timeout: 45000
-			},
-			"sgf=" + encodeURIComponent(this.gameTree.trees[0].toSgf())
-			    + "&move=" + this.currentColor
-			    + "&size=" + this.gameTree.trees.first().nodes.first().SZ
-		);
+	    var success = function(req) {
+	        this.doneLoading();
+			this.createMove(req.responseText);
+	    }
+	    var failure = function(req) {
+	        this.croak(eidogo.i18n['error retrieving'] + o.statusText);
+	    } 
+	    var params = "sgf=" + encodeURIComponent(this.gameTree.trees[0].toSgf())
+		    + "&move=" + this.currentColor
+		    + "&size=" + this.gameTree.trees.first().nodes.first().SZ;
+		    
+		//ajax('POST', this.opponentUrl, params, success, failure, this, 45000);  
+	    YAHOO.util.Connect.asyncRequest('POST', this.opponentUrl, {success: success,
+	        failure: failure, scope: this, timeout: 45000}, params);
 	},
 	
+	/**
+	 * Navigates to a location within the gameTree. Takes progressive loading
+	 * into account.
+	**/
 	goTo: function(path, fromStart) {
 		fromStart = typeof fromStart != "undefined" ? fromStart : true;
 		if (path instanceof Array) {
@@ -387,6 +465,9 @@ eidogo.Player.prototype = {
 		}
 	},
 
+    /**
+     * Resets the game to the first node
+    **/
 	reset: function(noRender, firstGame) {
 		this.board.reset();
 		this.currentColor = "B";
@@ -399,6 +480,10 @@ eidogo.Player.prototype = {
 		this.refresh(noRender);
 	},
 	
+	/**
+	 * Refresh the current node (and wait until progressive loading is
+	 * finished before doing so)
+	**/
 	refresh: function(noRender) {
 		if (this.progressiveLoads) {
 			var me = this;
@@ -420,6 +505,7 @@ eidogo.Player.prototype = {
 	variation: function(treeNum, noRender) {
 		if (this.cursor.next(treeNum)) {
 			this.execNode(noRender);
+			this.resetLastLabels();
 			// Should we continue after loading finishes or just stop
 			// like we do here?
 			if (this.progressiveLoads) return false;
@@ -430,7 +516,8 @@ eidogo.Player.prototype = {
 	
 	/**
 	 * Delegates the work of putting down stones etc to various handler
-	 * functions
+	 * functions. Also resets some settings and makes sure the interface
+	 * gets updated.
 	 * @param {Boolean} noRender If true, don't render the board
 	 */
 	execNode: function(noRender) {
@@ -521,6 +608,7 @@ eidogo.Player.prototype = {
             if (this.moveNumber < 0) this.moveNumber = 0;
 			this.board.revert(1);
 			this.refresh(noRender);
+			this.resetLastLabels();
 		}
 	},
 	
@@ -586,6 +674,9 @@ eidogo.Player.prototype = {
 	    var xy = this.getXY(e);
 	    var x = xy[0];
 	    var y = xy[1];
+	    this.mouseDown = true;
+	    this.mouseDownX = x;
+	    this.mouseDownY = y;
 	    // begin region selection
 	    if (this.mode == "region" && x >= 0 && y >= 0 && !this.regionBegun) {
             this.regionTop = y;
@@ -596,17 +687,28 @@ eidogo.Player.prototype = {
 	
 	handleBoardHover: function(e) {
 	    if (this.domLoading) return;
-	    if (this.regionBegun) {
+	    if (this.mouseDown || this.regionBegun) {
 	        var xy = this.getXY(e);
-	        if (xy[0] < 0 || xy[1] < 0 || xy[0] > this.board.boardSize-1 || xy[1] > this.board.boardSize-1) return;
-    	    this.regionRight = xy[0] + (xy[0] >= this.regionLeft ? 1 : 0);
-    	    this.regionBottom = xy[1] + (xy[1] >= this.regionTop ? 1 : 0);
-            this.showRegion();
+	        if (!this.regionBegun && (xy[0] != this.mouseDownX || xy[1] != this.mouseDownY)) {
+	            // implicit region select
+	            this.selectTool("region");
+	            this.regionBegun = true;
+	            this.regionTop = this.mouseDownY;
+	            this.regionLeft = this.mouseDownX;
+	        }
+	        if (this.regionBegun) {
+    	        if (xy[0] < 0 || xy[1] < 0 || xy[0] > this.board.boardSize-1 || xy[1] > this.board.boardSize-1) return;
+        	    this.regionRight = xy[0] + (xy[0] >= this.regionLeft ? 1 : 0);
+        	    this.regionBottom = xy[1] + (xy[1] >= this.regionTop ? 1 : 0);
+                this.showRegion();
+    	    }
 	    }
 	},
 	
 	handleBoardMouseUp: function(e) {
 	    if (this.domLoading) return;
+	    
+	    this.mouseDown = false;
 	    
 	    var xy = this.getXY(e);
 	    var x = xy[0];
@@ -647,13 +749,11 @@ eidogo.Player.prototype = {
                 this.dom.searchButton.style.display = "inline";
             }
         } else {
-            // black stone, white stone, labels
+            // place black stone, white stone, labels
             var prop;
             var stone = this.board.getStone({x:x,y:y});
             if (this.mode == "add_b" || this.mode == "add_w") {
-                // if (stone != this.board.EMPTY) {
-                    this.cursor.node.emptyPoint(this.pointToSgfCoord({x:x,y:y}));
-                // }
+                this.cursor.node.emptyPoint(this.pointToSgfCoord({x:x,y:y}));
                 if (stone != this.board.BLACK && this.mode == "add_b") {
                     prop = "AB";
                 } else if (stone != this.board.WHITE && this.mode == "add_w") {
@@ -667,6 +767,15 @@ eidogo.Player.prototype = {
                     case "sq": prop = "SQ"; break;
                     case "cr": prop = "CR"; break;
                     case "x": prop = "MA"; break;
+                    case "number":
+                        prop = "LB";
+                        coord = coord + ":" + this.labelLastNumber;
+                        this.labelLastNumber++;
+                        break;
+                    case "letter":
+                        prop = "LB";
+                        coord = coord + ":" + this.labelLastLetter;
+                        this.labelLastLetter = String.fromCharCode(this.labelLastLetter.charCodeAt(0)+1);
                 }    
             }
             this.cursor.node.pushProperty(prop, coord);
@@ -725,17 +834,20 @@ eidogo.Player.prototype = {
 	        {
     	        success: function(req) {
     	            this.doneLoading();
-    	            this.dom.comments.innerHTML = req.responseText;
+    	            this.dom.comments.style.display = "none";
+    	            this.dom.searchContainer.style.display = "block";
+    	            this.dom.searchContainer.innerHTML = req.responseText;
+    	            this.progressiveLoad = false;
+    	            this.progressiveUrl = null;
+    	            this.prefs.markNext = false;
     	        },
     	        failure: function(req) {
-    	            this.croak(
-    					eidogo.i18n['error retrieving']
-    					+ req.statusText
-    				);
-	        },
-	        scope: this,
-	        timeout: 45000
-	    });
+    	            this.croak(eidogo.i18n['error retrieving'] + req.statusText);
+	            },
+	            scope: this,
+    	        timeout: 45000
+	        }
+	    );
 	},
 	
 	/**
@@ -817,7 +929,7 @@ eidogo.Player.prototype = {
 	
 	handleKeypress: function(e) {
 		var charCode = e.keyCode || YAHOO.util.Event.getCharCode(e);
-		if (!charCode || e.ctrlKey || e.altKey || e.metaKey) return true;
+        if (!charCode || e.ctrlKey || e.altKey || e.metaKey) return true;
 		var charKey = String.fromCharCode(charCode).toLowerCase();
 		
 		// Variations can be selected by pressing the appropriate alphanumberic
@@ -837,6 +949,12 @@ eidogo.Player.prototype = {
 				YAHOO.util.Event.stopEvent(e);
 				return;
 			}
+		}
+        
+		// tool shortcuts
+		if (charCode == 112 || charCode == 27) { 
+		    // f1 or esc
+		    this.selectTool("play");
 		}
 		
 		var stop = true;
@@ -886,6 +1004,7 @@ eidogo.Player.prototype = {
 	},
 	
 	showInfo: function() {
+	    this.dom.infoGame.innerHTML = "";
 		var gameInfo = this.gameTree.trees.first().nodes.first();//this.cursor.node;
 		var dl = document.createElement('dl');
 		for (var propName in this.infoLabels) {
@@ -904,8 +1023,10 @@ eidogo.Player.prototype = {
 				}
 				if (propName == "DT") {
 					var dateParts = gameInfo[propName].split(/[\.-]/);
-					gameInfo[propName] = dateParts[2].replace(/^0+/, "") + " "
-						+ this.months[dateParts[1]-1] + " " + dateParts[0];
+					if (dateParts.length == 3) {
+					    gameInfo[propName] = dateParts[2].replace(/^0+/, "") + " "
+    						+ this.months[dateParts[1]-1] + " " + dateParts[0];
+					}
 				}
 				var dt = document.createElement('dt');
 				dt.innerHTML = this.infoLabels[propName] + ':';
@@ -916,7 +1037,7 @@ eidogo.Player.prototype = {
 			}
 		}
 		if (this.prefs.showGameInfo) {
-			this.dom.infoGame.appendChild(dl);
+		    this.dom.infoGame.appendChild(dl);
 		}
 	},
 	
@@ -924,20 +1045,22 @@ eidogo.Player.prototype = {
         var cursor;
         if (tool == "region") {
             cursor = "crosshair";
-            this.dom.comments.innerHTML = "<div id='comment-info-" + this.uniq + "'class='comment-info'>" +
-                eidogo.i18n['region info'] + "</div>" + this.dom.comments.innerHTML;
+            // this.dom.comments.innerHTML = "<div id='comment-info-" + this.uniq + "'class='comment-info'>" +
+                // eidogo.i18n['region info'] + "</div>" + this.dom.comments.innerHTML;
         } else {
             cursor = "default";
+            this.regionBegun = false;
             this.dom.searchRegion.style.display = "none";
             this.dom.searchButton.style.display = "none";
             this.dom.searchAlgo.style.display = "none";
-            var info = document.getElementById('comment-info-' + this.uniq);
-            if (info) {
-                info.parentNode.removeChild(info);
-            }
+            // var info = document.getElementById('comment-info-' + this.uniq);
+            // if (info) {
+                // info.parentNode.removeChild(info);
+            // }
         }
         this.board.renderer.domNode.style.cursor = cursor;
         this.mode = tool;
+        this.dom.toolSelector.value = tool;
 	},
 	
 	updateControls: function() {
@@ -1012,7 +1135,7 @@ eidogo.Player.prototype = {
 		    var domWidth = this.dom.slider.offsetWidth -
     				this.dom.sliderThumb.offsetWidth;
     		this.sliderIgnore = true;
-    		this.slider.setValue(this.moveNumber / this.totalMoves * domWidth);
+    		this.slider.setValue(this.cursor.node.getPosition() / this.totalMoves * domWidth);
     		this.sliderIgnore = false;
 		}
 	},
@@ -1171,6 +1294,7 @@ eidogo.Player.prototype = {
                 <input type='button' id='search-button' class='search-button' value='" + eidogo.i18n['search'] + "'>\
             </div>\
 	        <div id='comments' class='comments'></div>\
+	        <div id='search-container' class='search-container'></div>\
 	        <div id='board-container' class='board-container with-coords'></div>\
 	        <div id='info' class='info'>\
 	            <div id='info-players' class='players'>\
@@ -1187,7 +1311,10 @@ eidogo.Player.prototype = {
     	        </div>\
 	            <div id='info-game' class='game'></div>\
 	        </div>\
-	        <div id='preferences' class='preferences'></div>\
+	        <div id='preferences' class='preferences'>\
+	            <div><input type='checkbox'> Show variations on board</div>\
+	            <div><input type='checkbox'> Mark current move</div>\
+	        </div>\
 	        <div id='footer' class='footer'></div>\
 	    ";
 	    domHtml = domHtml.replace(/ id='([^']+)'/g, " id='$1-" + this.uniq + "'");
@@ -1238,6 +1365,7 @@ eidogo.Player.prototype = {
 		    this.selectTool.apply(this, [YAHOO.util.Event.getTarget(evt).value]);
 		}, this, true);
 		
+		this.dom.searchContainer = document.getElementById('search-container-' + this.uniq);
 		this.dom.searchButton = document.getElementById('search-button-' + this.uniq);
 		YAHOO.util.Event.on(this.dom.searchButton, 'click', this.searchRegion, this, true);
 		this.dom.searchAlgo = document.getElementById('search-algo-' + this.uniq);
@@ -1285,6 +1413,11 @@ eidogo.Player.prototype = {
 				this.refresh();
 			}
 		}, null, this);
+	},
+	
+	resetLastLabels: function() {
+	    this.labelLastNumber = 1;
+		this.labelLastLetter = "A";
 	},
 	
 	sgfCoordToPoint: function(coord) {
@@ -1338,7 +1471,8 @@ eidogo.Player.prototype = {
 	setPermalink: function() {
 		// Safari doesn't need the pound sign
 		var prefix = /Apple/.test(navigator.vendor) ? "" : "#";
-		location.hash = prefix + this.cursor.getPath().join(",");
+		location.hash = prefix + (this.gameName ? this.gameName : "") + ":" +
+		    this.cursor.getPath().join(",");
 	},
 	
 	nowLoading: function(msg) {

@@ -173,9 +173,6 @@ eidogo.BoardRendererHtml = function(domNode, boardSize) {
 	this.init(domNode, boardSize);
 }
 eidogo.BoardRendererHtml.prototype = {
-	pointWidth: 19,
-	pointHeight: 19,
-	margin: 5,
 	/**
 	 * @constructor
 	 * @param {HTMLElement} domContainer Where to put the board
@@ -198,6 +195,11 @@ eidogo.BoardRendererHtml.prototype = {
 			'<div id="{id}" class="{cls}" style="left: {left}; top: {top};">{text}</div>'
 		);
 		this.pointTpl.compile();
+		// auto-detect point width, point height, and margin
+		var stone = this.renderStone({x:0,y:0}, "black");
+		this.pointWidth = this.pointHeight = stone.offsetWidth;
+		this.clear();
+		this.margin = (this.domNode.offsetWidth - (this.boardSize * this.pointWidth)) / 2;
 	},
 	clear: function() {
 		this.domNode.innerHTML = "";
@@ -208,7 +210,7 @@ eidogo.BoardRendererHtml.prototype = {
 			stone.parentNode.removeChild(stone);
 		}
 		if (color != "empty") {
-			this.pointTpl.append(this.domNode, {
+			return this.pointTpl.append(this.domNode, {
 				id:		"stone-" + pt.x + "-" + pt.y,
 				cls:	"point stone " + color,
 				left:	(pt.x * this.pointWidth + this.margin) + "px",
@@ -219,7 +221,7 @@ eidogo.BoardRendererHtml.prototype = {
 	},
 	renderMarker: function(pt, type) {
 		if (this.renderCache.markers[pt.x][pt.y]) {
-		    marker = document.getElementById("marker-" + pt.x + "-" + pt.y);
+		    var marker = document.getElementById("marker-" + pt.x + "-" + pt.y);
 			if (marker) {
 			    marker.parentNode.removeChild(marker);
 			}
@@ -250,7 +252,7 @@ eidogo.BoardRendererHtml.prototype = {
 					}
 					break;
 			}
-			this.pointTpl.append(this.domNode, {
+			return this.pointTpl.append(this.domNode, {
 				id:		"marker-" + pt.x + "-" + pt.y,
 				cls:	"point marker " + type,
 				left:	(pt.x * this.pointWidth + this.margin) + "px",
