@@ -191,11 +191,10 @@ eidogo.BoardRendererHtml.prototype = {
 		    stones: [].setLength(this.boardSize, 0).addDimension(this.boardSize, 0),
 		    markers: [].setLength(this.boardSize, 0).addDimension(this.boardSize, 0)
 		}
-		this.pointTpl = new YAHOO.ext.DomHelper.Template(
-			'<div id="{id}" class="{cls}" style="left: {left}; top: {top};">{text}</div>'
-		);
-		this.pointTpl.compile();
 		// auto-detect point width, point height, and margin
+		this.pointWidth = 0;
+		this.pointHeight = 0;
+		this.margin = 0;
 		var stone = this.renderStone({x:0,y:0}, "black");
 		this.pointWidth = this.pointHeight = stone.offsetWidth;
 		this.clear();
@@ -210,13 +209,13 @@ eidogo.BoardRendererHtml.prototype = {
 			stone.parentNode.removeChild(stone);
 		}
 		if (color != "empty") {
-			return this.pointTpl.append(this.domNode, {
-				id:		"stone-" + pt.x + "-" + pt.y,
-				cls:	"point stone " + color,
-				left:	(pt.x * this.pointWidth + this.margin) + "px",
-				top:	(pt.y * this.pointHeight + this.margin) + "px",
-				text:	""
-			});
+            var div = document.createElement("div");
+            div.id = "stone-" + pt.x + "-" + pt.y;
+            div.className = "point stone " + color;
+            div.style.left = (pt.x * this.pointWidth + this.margin) + "px";
+            div.style.top = (pt.y * this.pointHeight + this.margin) + "px";
+            this.domNode.appendChild(div);
+		    return div;
 		}
 	},
 	renderMarker: function(pt, type) {
@@ -252,13 +251,14 @@ eidogo.BoardRendererHtml.prototype = {
 					}
 					break;
 			}
-			return this.pointTpl.append(this.domNode, {
-				id:		"marker-" + pt.x + "-" + pt.y,
-				cls:	"point marker " + type,
-				left:	(pt.x * this.pointWidth + this.margin) + "px",
-				top:	(pt.y * this.pointHeight + this.margin) + "px",
-				text:	text
-			});
+			var div = document.createElement("div");
+			div.id = "marker-" + pt.x + "-" + pt.y;
+			div.className = "point marker " + type;
+			div.style.left = (pt.x * this.pointWidth + this.margin) + "px";
+			div.style.top = (pt.y * this.pointHeight + this.margin) + "px";
+			div.appendChild(document.createTextNode(text));
+			this.domNode.appendChild(div);
+			return div;
 		}
 	}
 }

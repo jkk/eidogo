@@ -1,5 +1,4 @@
 planned for 1.0
-- shortcuts for player.js (t = eidogo.i18n, etc)
 - showTools preference (disallow implicit selection too)
 - load search results via front page rather than Player to keep history
   state separated from core functionality. consider the same for permalinks?
@@ -19,14 +18,3 @@ maybe
 - exhaustive FF[4] SGF support
 - more robust SGF parser
 - navigable variation tree like CGoban
-
-done
-- search caching
-- implicit mouse-drag region select
-- detect point width and height
-- add letter/number labels
-- f1 or esc to select "play" tool
-
-suggestions for ulrich
-- move number, variation as individual field
-- search hit limit

@@ -46,6 +46,8 @@ if (typeof eidogo.i18n == "undefined") {
 
         'captures':         'captures',
         'time left':        'time left',
+        
+        'you':              'You',
     
         'game':             'Game',
         'handicap':         'Handicap',

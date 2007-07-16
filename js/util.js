@@ -3,7 +3,7 @@
  * Code licensed under the BSD license:
  * http://www.opensource.org/licenses/bsd-license.php
  *
- * Supplements the Array prototype with useful methods.
+ * Adds some useful methods to built-in objects
  */
 Array.prototype.contains = function(needle) {
 	for (var i in this) {
@@ -147,4 +147,20 @@ if (!Array.prototype.some)
 
     return false;
   };
+}
+
+Array.from = function(it) {
+    var arr = [];
+    for (var i = 0; i < it.length; i++) {
+        arr[i] = it[i];
+    }
+    return arr;
+}
+
+Function.prototype.bind = function($thisObj) {
+    var $method = this;
+    var $args = Array.from(arguments).slice(1);
+    return function() {
+        return $method.apply($thisObj, $args.concat(Array.from(arguments)));
+    }
 }

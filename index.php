@@ -33,7 +33,6 @@
 
 <script type="text/javascript" src="/eidogo/js/yui-util.js"></script>
 <script type="text/javascript" src="/eidogo/js/yui-slider.js"></script>
-<script type="text/javascript" src="/eidogo/js/yui-ext-domhelper.js"></script>
 <script type="text/javascript" src="/eidogo/js/util.js"></script>
 <script type="text/javascript" src="/eidogo/js/eidogo.js"></script>
 <script type="text/javascript" src="/eidogo/js/i18n.js"></script>
