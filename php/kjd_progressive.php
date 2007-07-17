@@ -1,6 +1,5 @@
 <?php
 
-require("JSON.php");
 require("db.php");
 
 mysql_connect(DB_HOST, DB_USER, DB_PASS);
@@ -21,8 +20,7 @@ if (!$tree_query) {
 		$tree['trees'] = array();
 		$trees[] = $tree;
 	}
-	$json = new Services_JSON();
-	echo $json->encode(array(
+	echo json_encode(array(
 		"id"	=> $id,
 		"nodes"	=> array(),
 		"trees"	=> $trees,

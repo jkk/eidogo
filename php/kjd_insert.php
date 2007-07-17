@@ -1,7 +1,6 @@
 <?php
 
 require("sgf.php");
-require("json.php");
 require("db.php");
 
 // Change these as appropriate:

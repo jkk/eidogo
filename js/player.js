@@ -7,30 +7,18 @@
  
 (function() {
     
-    // helpful shortcuts (local only to this file)
+    // shortcuts (local only to this file)
     var t = eidogo.i18n;
-    var ajax = function(method, url, params, successFn, failureFn, scope, timeout) {
-        var pairs = [];
-        for (var key in params) {
-            pairs.push(key + "=" + encodeURIComponent(params[key]));
-        }
-        params = pairs.join("&");
-        if (method.toUpperCase() == "GET") {   
-            url = url + "?" + params;
-            params = null;
-        }
-        YAHOO.util.Connect.asyncRequest(method.toUpperCase(), url,
-            {success: successFn, failure: failureFn, scope: scope, timeout: timeout},
-            params);
-    }
-    var addEvent = YAHOO.util.Event.on.bind(YAHOO.util.Event);
-    var stopEvent = YAHOO.util.Event.stopEvent.bind(YAHOO.util.Event);
-    var addClass = YAHOO.util.Dom.addClass;
-    var removeClass = YAHOO.util.Dom.removeClass;
-    var hasClass = YAHOO.util.Dom.hasClass;
-    var byId = function(id) { return document.getElementById(id) };
-    var getElX = YAHOO.util.Dom.getX;
-    var getElY = YAHOO.util.Dom.getY;
+    var byId = eidogo.util.byId;
+    var ajax = eidogo.util.ajax;
+    var addEvent = eidogo.util.addEvent;
+    var onClick = eidogo.util.onClick;
+    var getElClickXY = eidogo.util.getElClickXY;
+    var stopEvent = eidogo.util.stopEvent;
+    var addClass = eidogo.util.addClass;
+    var removeClass = eidogo.util.removeClass;
+    var getElX = eidogo.util.getElX;
+    var getElY = eidogo.util.getElY;
     
     /**
      * @class Player is the overarching control structure that allows you to
@@ -198,11 +186,6 @@
     		    OW: this.showTime
     		};
 		
-    		// a YUI Slider widget
-    		this.slider = null;
-    		this.sliderIgnore = true;
-    		this.sliderFirst = true;
-		
     		this.constructDom();
     		this.nowLoading();
 		
@@ -279,9 +262,7 @@
     		if (this.prefs.showPlayerInfo) {
     			this.dom.infoPlayers.style.display = "block";
     		}
-    		if (!this.slider) {
-    		    this.enableNavSlider();
-    		}
+    		this.enableNavSlider();
     		this.selectTool("play");
     	},
 	
@@ -431,7 +412,7 @@
     				this.reset(true);
     			}
     			while (path.length) {
-    				var position = parseInt(path.shift());
+    				var position = parseInt(path.shift(), 10);
     				if (path.length == 0) {
     					// node position
     					for (var i = 0; i < position; i++) {
@@ -450,9 +431,9 @@
     				}
     			}
     			this.refresh();
-    		} else if (!isNaN(parseInt(path))) {
+    		} else if (!isNaN(parseInt(path, 10))) {
     			// Go to a move number.
-    			var steps = parseInt(path);
+    			var steps = parseInt(path, 10);
     			if (fromStart) {
     				this.reset(true);
     				steps++;
@@ -643,21 +624,14 @@
     	 *  Gets the board coordinates (0-18) for a mouse event
     	**/
     	getXY: function(e) {
-    	    // for IE
-    	    if(!e.pageX) {
-                e.pageX = e.clientX + (document.documentElement.scrollLeft || document.body.scrollLeft);
-                e.pageY = e.clientY + (document.documentElement.scrollTop || document.body.scrollTop);
-            }
-	        var boardX = getElX(this.board.renderer.domNode);
-	        var boardY = getElY(this.board.renderer.domNode);
-    		
-    		var clickX = e.pageX - boardX;
-    		var clickY = e.pageY - boardY;
-		
-    		var x = Math.round((clickX - this.board.renderer.margin -
-    			(this.board.renderer.pointWidth / 2)) / this.board.renderer.pointWidth);
-    		var y = Math.round((clickY - this.board.renderer.margin -
-    			(this.board.renderer.pointHeight / 2)) / this.board.renderer.pointHeight);
+    	    var clickXY = getElClickXY(e, this.board.renderer.domNode);
+    	    
+		    var m = this.board.renderer.margin;
+		    var pw = this.board.renderer.pointWidth;
+		    var ph = this.board.renderer.pointHeight;
+		    
+    		var x = Math.round((clickXY[0] - m - (pw / 2)) / pw);
+    		var y = Math.round((clickXY[1] - m - (ph / 2)) / ph);
 		
     		return [x, y];
     	},
@@ -667,6 +641,7 @@
     	    var xy = this.getXY(e);
     	    var x = xy[0];
     	    var y = xy[1];
+    	    if (!this.boundsCheck(x, y, [0, this.board.boardSize-1])) return;
     	    this.mouseDown = true;
     	    this.mouseDownX = x;
     	    this.mouseDownY = y;
@@ -682,17 +657,19 @@
     	    if (this.domLoading) return;
     	    if (this.mouseDown || this.regionBegun) {
     	        var xy = this.getXY(e);
-    	        if (!this.regionBegun && (xy[0] != this.mouseDownX || xy[1] != this.mouseDownY)) {
-    	            // implicit region select
+    	        var x = xy[0];
+    	        var y = xy[1];
+    	        if (!this.boundsCheck(x, y, [0, this.board.boardSize-1])) return;
+    	        if (!this.regionBegun && (x != this.mouseDownX || y != this.mouseDownY)) {
+    	            // click and drag: implicit region select
     	            this.selectTool("region");
     	            this.regionBegun = true;
     	            this.regionTop = this.mouseDownY;
     	            this.regionLeft = this.mouseDownX;
     	        }
     	        if (this.regionBegun) {
-        	        if (xy[0] < 0 || xy[1] < 0 || xy[0] > this.board.boardSize-1 || xy[1] > this.board.boardSize-1) return;
-            	    this.regionRight = xy[0] + (xy[0] >= this.regionLeft ? 1 : 0);
-            	    this.regionBottom = xy[1] + (xy[1] >= this.regionTop ? 1 : 0);
+            	    this.regionRight = x + (x >= this.regionLeft ? 1 : 0);
+            	    this.regionBottom = y + (y >= this.regionTop ? 1 : 0);
                     this.showRegion();
         	    }
     	    }
@@ -700,7 +677,7 @@
 	
     	handleBoardMouseUp: function(e) {
     	    if (this.domLoading) return;
-	    
+	        
     	    this.mouseDown = false;
 	    
     	    var xy = this.getXY(e);
@@ -735,8 +712,10 @@
                     // end of region selection
                     this.regionBegun = false;
                     this.regionClickSelect = false;
-                    this.regionBottom = (y >= this.board.boardSize) ? y : y + (y > this.regionTop ? 1 : 0);
-                    this.regionRight = (x >= this.board.boardSize) ? x : x + (x > this.regionLeft ? 1 : 0);
+                    this.regionBottom = (y < 0 ? 0 : (y >= this.board.boardSize) ?
+                        y : y + (y > this.regionTop ? 1 : 0));
+                    this.regionRight = (x < 0 ? 0 :  (x >= this.board.boardSize) ?
+                        x : x + (x > this.regionLeft ? 1 : 0));
                     this.showRegion();
                     this.dom.searchAlgo.style.display = "inline";
                     this.dom.searchButton.style.display = "inline";
@@ -768,12 +747,22 @@
                         case "letter":
                             prop = "LB";
                             coord = coord + ":" + this.labelLastLetter;
-                            this.labelLastLetter = String.fromCharCode(this.labelLastLetter.charCodeAt(0)+1);
+                            this.labelLastLetter = String.fromCharCode(
+                                this.labelLastLetter.charCodeAt(0)+1);
                     }    
                 }
                 this.cursor.node.pushProperty(prop, coord);
                 this.refresh();
             }
+    	},
+    	
+    	boundsCheck: function(x, y, region) {
+    	    if (region.length == 2) {
+    	        region[3] = region[2] = region[1];
+    	        region[1] = region[0];
+    	    }
+    	    return (x >= region[0] && y >= region[1] &&
+    	        x <= region[2] && y <= region[3]);
     	},
 	
     	getRegionBounds: function() {
@@ -875,7 +864,7 @@
     	        c = pattern.charAt(i);
     	        if (c == "." || c == "X" || c == "O") {
     	            if (s != null) {
-    	                n = parseInt(n);
+    	                n = parseInt(n, 10);
     	                n = isNaN(n) ? 1 : n;
                         for (var j = 0; j < n; j++) {
                             ret += s;
@@ -887,7 +876,7 @@
     	            n += c;
     	        }
     	    }
-    	    n = parseInt(n);
+    	    n = parseInt(n, 10);
             n = isNaN(n) ? 1 : n;
             for (var j = 0; j < n; j++) {
                 ret += s;
@@ -999,16 +988,16 @@
 	
     	showInfo: function() {
     	    this.dom.infoGame.innerHTML = "";
-    		var gameInfo = this.gameTree.trees.first().nodes.first();//this.cursor.node;
+    		var gameInfo = this.gameTree.trees.first().nodes.first();
     		var dl = document.createElement('dl');
     		for (var propName in this.infoLabels) {
     			if (gameInfo[propName]) {
     				if (propName == "PW") {
-    					this.dom.playerW.name.innerHTML = gameInfo[propName] +
+    					this.dom.whiteName.innerHTML = gameInfo[propName] +
     						(gameInfo['WR'] ? ", " + gameInfo['WR'] : "");
     					continue;
     				} else if (propName == "PB") {
-    					this.dom.playerB.name.innerHTML = gameInfo[propName] +
+    					this.dom.blackName.innerHTML = gameInfo[propName] +
     						(gameInfo['BR'] ? ", " + gameInfo['BR'] : "");
     					continue;
     				}
@@ -1048,7 +1037,7 @@
             }
             this.board.renderer.domNode.style.cursor = cursor;
             this.mode = tool;
-            this.dom.toolSelector.value = tool;
+            this.dom.toolsSelect.value = tool;
     	},
 	
     	updateControls: function() {
@@ -1056,17 +1045,17 @@
     		this.dom.moveNumber.innerHTML = (this.moveNumber ?
     		    t['move'] + " " + this.moveNumber : "permalink");
 		
-    		this.dom.playerW.captures.innerHTML = t['captures'] +
+    		this.dom.whiteCaptures.innerHTML = t['captures'] +
     		    ": <span>" + this.board.captures.W + "</span>";
-    		this.dom.playerB.captures.innerHTML = t['captures'] +
+    		this.dom.blackCaptures.innerHTML = t['captures'] +
     		    ": <span>" + this.board.captures.B + "</span>";
 		
-    		this.dom.playerB.time.innerHTML = t['time left'] + ": <span>" +
+		    this.dom.whiteTime.innerHTML = t['time left'] + ": <span>" +
+        		(this.timeW ? this.timeW : "--") + "</span>";
+    		this.dom.blackTime.innerHTML = t['time left'] + ": <span>" +
     		    (this.timeB ? this.timeB : "--") + "</span>";
-    		this.dom.playerW.time.innerHTML = t['time left'] + ": <span>" +
-    		    (this.timeW ? this.timeW : "--") + "</span>";
 
-    		removeClass(this.dom.controls.pass, "pass-on");
+    		removeClass(this.dom.controlPass, "pass-on");
 		
     		// variations?
     		this.dom.variations.innerHTML = "";
@@ -1074,7 +1063,7 @@
     			var varLabel = i + 1;
     			if (!this.variations[i].move || this.variations[i].move == "tt") {
     				// 'pass' variation
-    				addClass(this.dom.controls.pass, "pass-on");
+    				addClass(this.dom.controlPass, "pass-on");
     			} else {
     				// show clickable variation on the board
     				var varPt = this.sgfCoordToPoint(this.variations[i].move);
@@ -1103,26 +1092,22 @@
     		}
 		
     		if (this.cursor.hasNext()) {
-    			addClass(this.dom.controls.forward, "forward-on");
-    			addClass(this.dom.controls.last, "last-on");
+    			addClass(this.dom.controlForward, "forward-on");
+    			addClass(this.dom.controlLast, "last-on");
     		} else {
-    			removeClass(this.dom.controls.forward, "forward-on");
-    			removeClass(this.dom.controls.last, "last-on");
+    			removeClass(this.dom.controlForward, "forward-on");
+    			removeClass(this.dom.controlLast, "last-on");
     		}
     		if (this.cursor.hasPrevious()) {
-    			addClass(this.dom.controls.back, "back-on");
-    			addClass(this.dom.controls.first, "first-on");
+    			addClass(this.dom.controlBack, "back-on");
+    			addClass(this.dom.controlFirst, "first-on");
     		} else {
-    			removeClass(this.dom.controls.back, "back-on");
-    			removeClass(this.dom.controls.first, "first-on");
+    			removeClass(this.dom.controlBack, "back-on");
+    			removeClass(this.dom.controlFirst, "first-on");
     		}
 		
     		if (!this.progressiveLoad) {
-    		    var domWidth = this.dom.slider.offsetWidth -
-        				this.dom.sliderThumb.offsetWidth;
-        		this.sliderIgnore = true;
-        		this.slider.setValue(this.cursor.node.getPosition() / this.totalMoves * domWidth);
-        		this.sliderIgnore = false;
+                this.updateNavSlider();
     		}
     	},
 	
@@ -1151,8 +1136,8 @@
     				this.addMarker(coord, "current");
     			}
     		} else if (!noRender) {
-    		    this.prependComment((color == this.board.WHITE ? t['white'] : t['black']) +
-    			    " " + t['passed'], "comment-pass");
+    		    this.prependComment((color == this.board.WHITE ?
+    		        t['white'] : t['black']) + " " + t['passed'], "comment-pass");
     		}
     	},
 	
@@ -1234,6 +1219,11 @@
     	        this.dom.comments.innerHTML;
     	},
 	
+	    /**
+	     * Create the Player layout and insert it into the page. Also store
+	     * references to all our DOM elements for later use, and add
+	     * appropriate event handlers.
+	    **/
     	constructDom: function() {
 	    
     	    this.dom.player = document.createElement('div');
@@ -1303,107 +1293,112 @@
     	        </div>\
     	        <div id='footer' class='footer'></div>\
     	    ";
+    	    
+    	    // unique ids for each element so we can have multiple Player
+    	    // instances on a page
     	    domHtml = domHtml.replace(/ id='([^']+)'/g, " id='$1-" + this.uniq + "'");
-	    
-            this.dom.player.innerHTML = domHtml;
-
-    		this.dom.player = byId('player-' + this.uniq);
-    		this.dom.comments = byId('comments-' + this.uniq);
-    		this.dom.boardContainer = byId('board-container-' + this.uniq);
-    		this.dom.info = byId('info-' + this.uniq);
-    		this.dom.infoGame = byId('info-game-' + this.uniq);
-    		this.dom.infoPlayers = byId('info-players-' + this.uniq);
-		
-    		this.dom.playerW = {};
-    		this.dom.playerW.name = byId('white-name-' + this.uniq);
-    		this.dom.playerW.captures = byId('white-captures-' + this.uniq);
-    		this.dom.playerW.time = byId('white-time-' + this.uniq);
-		
-    		this.dom.playerB = {};
-    		this.dom.playerB.name = byId('black-name-' + this.uniq);
-    		this.dom.playerB.captures = byId('black-captures-' + this.uniq);
-    		this.dom.playerB.time = byId('black-time-' + this.uniq);
-		
-    		this.dom.moveNumber = byId('move-number-' + this.uniq);
-    		addEvent(this.dom.moveNumber, 'click', this.setPermalink, this, true);
-		
-    		this.dom.variations = byId('variations-' + this.uniq);
-		
-    		this.dom.controls = {};
-		
-    		this.dom.controls.first = byId('control-first-' + this.uniq);
-    		addEvent(this.dom.controls.first, 'click', this.first, this, true);
-		
-    		this.dom.controls.back = byId('control-back-' + this.uniq);
-    		addEvent(this.dom.controls.back, 'click', this.back, this, true);
-		
-    		this.dom.controls.forward = byId('control-forward-' + this.uniq);
-    		addEvent(this.dom.controls.forward, 'click', this.forward, this, true);
-		
-    		this.dom.controls.last = byId('control-last-' + this.uniq);
-    		addEvent(this.dom.controls.last, 'click', this.last, this, true);
-		
-    		this.dom.controls.pass = byId('control-pass-' + this.uniq);
-    		addEvent(this.dom.controls.pass, 'click', this.pass, this, true);
-		
-    		this.dom.toolSelector = byId('tools-select-' + this.uniq);
-    		addEvent(this.dom.toolSelector, 'change', function(e) {
-    		    this.selectTool.apply(this, [(e.target || e.srcElement).value]);
-    		}, this, true);
-		
-    		this.dom.searchContainer = byId('search-container-' + this.uniq);
-    		this.dom.searchButton = byId('search-button-' + this.uniq);
-    		addEvent(this.dom.searchButton, 'click', this.searchRegion, this, true);
-    		this.dom.searchAlgo = byId('search-algo-' + this.uniq);
+    	    
+    	    this.dom.player.innerHTML = domHtml;
+    	    
+    	    // grab all the dom elements for later use
+    	    var re = / id='([^']+)-\d+'/g;
+    	    var match;
+    	    var id;
+    	    var jsName;
+    	    while (match = re.exec(domHtml)) {
+    	        id = match[0].replace(/'/g, "").replace(/ id=/, "");
+    	        jsName = "";
+    	        match[1].split("-").forEach(function(word, i) {
+    	            word = i ? word.charAt(0).toUpperCase() + word.substring(1) : word;
+    	            jsName += word
+    	        });
+    	        this.dom[jsName] = byId(id);
+    	    }
+    	    
+    	    // this has to be inserted after the board is created
     		this.dom.searchRegion = document.createElement('div');
     		this.dom.searchRegion.id = "search-region-" + this.uniq;
     		this.dom.searchRegion.className = "search-region";
-		
-    		this.dom.footer = byId('footer-' + this.uniq);
-		
-    		this.dom.slider = byId('nav-slider-' + this.uniq);
-    		this.dom.sliderThumb = byId('nav-slider-thumb-' + this.uniq);
+    	    
+    	    // dom element      handler
+    	    [['moveNumber',     'setPermalink'],
+    	     ['controlFirst',   'first'],
+    	     ['controlBack',    'back'],
+    	     ['controlForward', 'forward'],
+    	     ['controlPass',    'pass'],
+    	     ['searchButton',   'searchRegion']
+    	    ].forEach(function(eh) {
+    	        onClick(this.dom[eh[0]], this[eh[1]], this);
+    	    }.bind(this));
+    	    
+			addEvent(this.dom.toolsSelect, 'change', function(e) {
+    		    this.selectTool.apply(this, [(e.target || e.srcElement).value]);
+    		}, this, true);
     	},
-	
+    	
     	enableNavSlider: function() {
-    		if (!this.progressiveLoad) {
-    			this.dom.sliderThumb.style.display = "block";
-    			this.dom.slider.style.cursor = "pointer";
-    		}
-    		this.slider = YAHOO.widget.Slider.getHorizSlider(this.dom.slider.id, this.dom.sliderThumb.id, 0, 305);
-    		this.slider.animate = false;
-    		this.slider.enableKeys = false;
-		
-    		this.slider.subscribe("change", function(offset) {
-    			if (this.sliderIgnore) return;
-    			var domWidth = this.dom.slider.offsetWidth -
-    					this.dom.sliderThumb.offsetWidth;
-    			this.sliderOffset = parseInt(offset / domWidth * this.totalMoves);
-    		}, null, this);
-    		this.slider.subscribe("slideEnd", function() {
-    			if (this.sliderIgnore) return;
-    			if (this.sliderFirst) {
-    			    // for some reason, this event fires at the beginning
-    			    this.sliderFirst = false;
-    			    return;
-    			}
-    			if (this.totalMoves) {
-    				var delta = this.sliderOffset - this.moveNumber;
-    				for (var i = 0; i < Math.abs(delta); i++) {
-    					if (delta > 0) {
-    						this.variation(null, true);
-    					} else if (delta < 0) {
-    						this.cursor.previous();
-                            this.moveNumber--;
-    					}
-    				}
-    				if (delta < 0) {
-                        if (this.moveNumber < 0) this.moveNumber = 0;
-    					this.board.revert(Math.abs(delta));
-    				}
-    				this.refresh();
-    			}
-    		}, null, this);
+    	    // don't use slider for progressively-loaded games
+    		if (this.progressiveLoad) return;
+    	
+            this.dom.navSliderThumb.style.display = "block";
+			this.dom.navSlider.style.cursor = "pointer";
+	
+			var sliding = false;
+    		var timeout = null;
+    		
+    		addEvent(this.dom.navSlider, "mousedown", function(e) {
+    		    sliding = true;
+    		}, this, true);
+    		
+    		addEvent(document, "mousemove", function(e) {
+    		    if (!sliding) return;
+    		    var xy = getElClickXY(e, this.dom.navSlider);
+    		    clearTimeout(timeout);
+    		    timeout = setTimeout(function() {
+    		        this.updateNavSlider(xy[0]);
+    		    }.bind(this), 10);
+    		    stopEvent(e);
+    		}, this, true);
+    		
+    		addEvent(document, "mouseup", function(e) {
+    		    if (!sliding) return;
+                sliding = false;
+                var xy = getElClickXY(e, this.dom.navSlider);
+                this.updateNavSlider(xy[0]);
+    		}, this, true);
+    	},
+    	
+    	updateNavSlider: function(offset) {
+    	    var width = this.dom.navSlider.offsetWidth - this.dom.navSliderThumb.offsetWidth;
+    	    var steps = this.totalMoves;
+    	    var offsetGiven = !!offset;
+    	    var offset = offset || this.moveNumber / steps * width;
+    	    offset = offset > width ? width : offset;
+    	    offset = offset < 0 ? 0 : offset;
+            var moveOffset = parseInt(offset / width * steps, 10);
+            
+            // only update the board when we're given an offset; otherwise,
+            // assume we're just reflecting the board position
+            if (offsetGiven) {
+                var delta = moveOffset - this.cursor.node.getPosition() ;
+				for (var i = 0; i < Math.abs(delta); i++) {
+					if (delta > 0) {
+						this.variation(null, true);
+					} else if (delta < 0) {
+						this.cursor.previous();
+                        this.moveNumber--;
+					}
+				}
+				if (delta < 0) {
+                    if (this.moveNumber < 0) this.moveNumber = 0;
+					this.board.revert(Math.abs(delta));
+				}
+				this.refresh();
+            }
+            
+            // snap to move interval
+            offset = parseInt(moveOffset / steps * width, 10);
+            this.dom.navSliderThumb.style.left = offset + "px";
     	},
 	
     	resetLastLabels: function() {
@@ -1424,8 +1419,7 @@
     	},
 	
     	pointToSgfCoord: function(pt) {
-    		if (!pt || pt.x < 0 || pt.x > this.board.boardSize
-    		    || pt.y < 0 || pt.y > this.board.boardSize) {
+    		if (!pt || !this.boundsCheck(pt.x, pt.y, [0, this.board.boardSize-1])) {
     		    return null;
     	    }
     		var pts = {

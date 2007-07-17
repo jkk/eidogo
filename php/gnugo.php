@@ -36,6 +36,8 @@ if (preg_match("/([A-Z])([0-9]+)/", $move, $matches)) {
     echo "$x$y";
 } elseif ($move == "PASS") {
     echo "tt";
+} elseif (strpos($move, "resign") !== false) {
+    echo "resign";
 } else {
     echo $result;
 }

@@ -98,6 +98,7 @@
 }
 .eidogo-player .nav-slider {
 	clear: both;
+	position: relative;
 	height: 10px;
 	width: 315px;
 	margin: 0px 5px 5px 5px;
@@ -107,13 +108,14 @@
 /*  display: none;*/
 }
 .eidogo-player .nav-slider-thumb {
+    position: absolute;
 	width: 9px;
 	height: 9px;
 	background: #d11;
 /*  border-top: 1px solid #f44;*/
 /*  border-left: 1px solid #f44;*/
-	border-bottom: 1px solid #800;
-	border-right: 1px solid #800;
+    border-bottom: 1px solid #800;
+    border-right: 1px solid #800;
 	cursor: pointer;
 	display: none;
 }
@@ -122,6 +124,9 @@
 /*    background: #ddd;*/
     min-height: 20px;
 	padding: 10px 5px 0px 5px;
+	user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
 }
 .eidogo-player .variations-label {
 	float: left;

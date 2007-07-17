@@ -10,8 +10,9 @@ rm $OUTFILE
 $RHINOC js/yui-util.js >> $OUTFILE 2>&1
 $RHINOC js/yui-slider.js >> $OUTFILE 2>&1
 $RHINOC js/yui-ext-domhelper.js >> $OUTFILE 2>&1
-$RHINOC js/util.js >> $OUTFILE 2>&1
+$RHINOC js/lang.js >> $OUTFILE 2>&1
 $RHINOC js/eidogo.js >> $OUTFILE 2>&1
+$RHINOC js/util.js >> $OUTFILE 2>&1
 $RHINOC js/i18n.js >> $OUTFILE 2>&1
 $RHINOC js/gametree.js >> $OUTFILE 2>&1
 $RHINOC js/sgf.js >> $OUTFILE 2>&1

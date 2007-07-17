@@ -3,164 +3,68 @@
  * Code licensed under the BSD license:
  * http://www.opensource.org/licenses/bsd-license.php
  *
- * Adds some useful methods to built-in objects
+ * General-purpose utility functions. All references to external libraries are
+ * in this file. Pretty much any modern JS library could be used (YUI, jQuery,
+ * Dojo, Prototype, Mootools).
  */
-Array.prototype.contains = function(needle) {
-	for (var i in this) {
-		if (this[i] == needle) {
-			return true;
-		}
-	}
-	return false;
-}
-Array.prototype.setLength = function(len, val) {
-	val = typeof val != "undefined" ? val : null;
-	for (var i = 0; i < len; i++) {
-		this[i] = val;
-	}
-	return this;
-}
-Array.prototype.addDimension = function(len, val) {
-	val = typeof val != "undefined" ? val : null;
-	var thisLen = this.length; // minor optimization
-	for (var i = 0; i < thisLen; i++) {
-		this[i] = [].setLength(len, val);
-	}
-	return this;
-}
-Array.prototype.first = function() {
-	return this[0];
-}
-Array.prototype.last = function() {
-	return this[this.length-1];
-}
-Array.prototype.copy = function() {
-	var copy = [];
-	var len = this.length; // minor optimization
-	for (var i = 0; i < len; i++) {
-		if (this[i] instanceof Array) {
-			copy[i] = this[i].copy();
-		} else {
-			copy[i] = this[i];
-		}
-	}
-	return copy;
-}
 
+eidogo.util = {
 
-if (!Array.prototype.map)
-{
-  Array.prototype.map = function(fun /*, thisp*/)
-  {
-    var len = this.length;
-    if (typeof fun != "function")
-      throw new TypeError();
-
-    var res = new Array(len);
-    var thisp = arguments[1];
-    for (var i = 0; i < len; i++)
-    {
-      if (i in this)
-        res[i] = fun.call(thisp, this[i], i, this);
-    }
-
-    return res;
-  };
-}
-
-if (!Array.prototype.filter)
-{
-  Array.prototype.filter = function(fun /*, thisp*/)
-  {
-    var len = this.length;
-    if (typeof fun != "function")
-      throw new TypeError();
-
-    var res = new Array();
-    var thisp = arguments[1];
-    for (var i = 0; i < len; i++)
-    {
-      if (i in this)
-      {
-        var val = this[i]; // in case fun mutates this
-        if (fun.call(thisp, val, i, this))
-          res.push(val);
-      }
-    }
-
-    return res;
-  };
-}
-
-if (!Array.prototype.forEach)
-{
-  Array.prototype.forEach = function(fun /*, thisp*/)
-  {
-    var len = this.length;
-    if (typeof fun != "function")
-      throw new TypeError();
-
-    var thisp = arguments[1];
-    for (var i = 0; i < len; i++)
-    {
-      if (i in this)
-        fun.call(thisp, this[i], i, this);
-    }
-  };
-}
-
-if (!Array.prototype.every)
-{
-  Array.prototype.every = function(fun /*, thisp*/)
-  {
-    var len = this.length;
-    if (typeof fun != "function")
-      throw new TypeError();
-
-    var thisp = arguments[1];
-    for (var i = 0; i < len; i++)
-    {
-      if (i in this &&
-          !fun.call(thisp, this[i], i, this))
-        return false;
-    }
-
-    return true;
-  };
-}
-
-if (!Array.prototype.some)
-{
-  Array.prototype.some = function(fun /*, thisp*/)
-  {
-    var len = this.length;
-    if (typeof fun != "function")
-      throw new TypeError();
-
-    var thisp = arguments[1];
-    for (var i = 0; i < len; i++)
-    {
-      if (i in this &&
-          fun.call(thisp, this[i], i, this))
-        return true;
-    }
-
-    return false;
-  };
-}
-
-Array.from = function(it) {
-    var arr = [];
-    for (var i = 0; i < it.length; i++) {
-        arr[i] = it[i];
-    }
-    return arr;
-}
-
-Function.prototype.bind = function($thisObj) {
-    var $method = this;
-    var $args = Array.from(arguments).slice(1);
-    return function() {
-        return $method.apply($thisObj, $args.concat(Array.from(arguments)));
-    }
-}
+    byId: function(id) {
+        return YAHOO.util.Dom.get(id);
+    },
+    
+    ajax: function(method, url, params, successFn, failureFn, scope, timeout) {
+        var pairs = [];
+        for (var key in params) {
+            pairs.push(key + "=" + encodeURIComponent(params[key]));
+        }
+        params = pairs.join("&");
+        if (method.toUpperCase() == "GET") {   
+            url = url + "?" + params;
+            params = null;
+        }
+        YAHOO.util.Connect.asyncRequest(method.toUpperCase(), url,
+            {success: successFn, failure: failureFn, scope: scope, timeout: timeout},
+            params);
+    },
+    
+    addEvent: function(el, eventType, handler, arg, override) {
+        if (override) {
+            handler = handler.bind(arg);
+        } else if (arg) {
+            // use a closure to pass an extra argument
+            var oldHandler = handler;
+            handler = function(e) {
+                oldHandler(e, arg);
+            }
+        }
+        YAHOO.util.Event.on(el, eventType, handler);
+    },
+    
+    onClick: function(el, handler, scope) {
+        eidogo.util.addEvent(el, "click", handler, scope, true);
+    },
+    
+    getElClickXY: function(e, el) {
+        // for IE
+	    if(!e.pageX) {
+            e.pageX = e.clientX + (document.documentElement.scrollLeft ||
+                document.body.scrollLeft);
+            e.pageY = e.clientY + (document.documentElement.scrollTop ||
+                document.body.scrollTop);
+        }
+        var elX = eidogo.util.getElX(el);
+        var elY = eidogo.util.getElY(el);
+		return [e.pageX - elX, e.pageY - elY];
+    },
+    
+    // var addEvent = YAHOO.util.Event.on.bind(YAHOO.util.Event);
+    stopEvent: YAHOO.util.Event.stopEvent.bind(YAHOO.util.Event),
+    addClass: YAHOO.util.Dom.addClass,
+    removeClass: YAHOO.util.Dom.removeClass,
+    hasClass: YAHOO.util.Dom.hasClass,
+    getElX: YAHOO.util.Dom.getX,
+    getElY: YAHOO.util.Dom.getY
+    
+};
