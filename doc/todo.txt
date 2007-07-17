@@ -1,4 +1,5 @@
 planned for 1.0
+- use base 62 number for games instead of predictable digits
 - showTools preference (disallow implicit selection too)
 - load search results via front page rather than Player to keep history
   state separated from core functionality. consider the same for permalinks?

@@ -272,7 +272,7 @@
                     var wr = gameRoot.WR ? " " + gameRoot.WR : "";
                     var br = gameRoot.BR ? " " + gameRoot.BR : "";
                     document.title += " - " + gameRoot.PW + wr +
-        		        " vs " + gameRoot.PB + " " + br;
+        		        " vs " + gameRoot.PB + br;
         		}
     		}
     	},

@@ -77,8 +77,6 @@ if (!$in || $in == "kjd") {
 	    if ($size) {
 	        $cfg['boardSize'] = (string)(int)$size;
 	    }
-	} elseif (strpos($in, "games/") === 0) {
-	    $cfg['sgfUrl'] = "/eidogo/games.php?id=" . str_replace("games/", "", $in);
 	} elseif ($in != "blank") {
 	    $cfg['sgfPath'] = "/eidogo/sgf/";
 	    $cfg['gameName'] = $in;

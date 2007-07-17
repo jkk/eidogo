@@ -63,15 +63,15 @@ echo "<div class='search-result'>
 $odd = true;
 
 foreach ($output as $line) {
-    list($fn, $pw, $pb, $re, $dt, $mv) = split("\t", $line);
+    list($fn, $pw, $wr, $pb, $br, $re, $dt, $mv) = split("\t", $line);
     $id = str_replace(".sgf", "", $fn);
     $mv = split(",", $mv);
     $mv = (int)$mv[count($mv)-2] - 1;
     $href = "javascript:player.loadPath=[0,$mv];player.remoteLoad(\"sgf/games/$id.sgf\")";
     echo "<div class='search-result" . ($odd ? " odd" : ""). "'>
         <a href='$href'>
-        <span class='pw'>$pw</span>
-        <span class='pb'>$pb</span>
+        <span class='pw'>$pw $wr</span>
+        <span class='pb'>$pb $br</span>
         <span class='re'>$re</span>
         <span class='dt'>$dt</span>
         <div class='clear'>&nbsp;</div>
