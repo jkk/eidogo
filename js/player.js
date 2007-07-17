@@ -1348,6 +1348,7 @@
     		
     		addEvent(this.dom.navSlider, "mousedown", function(e) {
     		    sliding = true;
+    		    stopEvent(e);
     		}, this, true);
     		
     		addEvent(document, "mousemove", function(e) {

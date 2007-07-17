@@ -124,9 +124,6 @@
 /*    background: #ddd;*/
     min-height: 20px;
 	padding: 10px 5px 0px 5px;
-	user-select: none;
-	-khtml-user-select: none;
-	-moz-user-select: none;
 }
 .eidogo-player .variations-label {
 	float: left;
