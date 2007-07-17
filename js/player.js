@@ -238,6 +238,7 @@
             		var root = blankGame.trees.first().nodes.first();
             		root.PW = t['you'];
             		root.PB = "GNU Go"
+            		this.gameName = "gnugo";
         		}
     		
     			this.load(blankGame);
@@ -249,7 +250,8 @@
     	 * dynamically-loaded games).
     	**/
     	initGame: function(target) {
-    		var size = target.trees.first().nodes.first().SZ;
+    	    var gameRoot = target.trees.first().nodes.first();
+    		var size = gameRoot.SZ;
     		if (!this.board) {
     		    this.createBoard(size || 19);
     	    }
@@ -264,6 +266,15 @@
     		}
             this.enableNavSlider();
     		this.selectTool("play");
+    		if (this.gameName) {
+    		    document.title = "EidoGo - " + this.gameName;
+        		if (gameRoot.PW && gameRoot.PB) {
+                    var wr = gameRoot.WR ? " " + gameRoot.WR : "";
+                    var br = gameRoot.BR ? " " + gameRoot.BR : "";
+                    document.title += " - " + gameRoot.PW + wr +
+        		        " vs " + gameRoot.PB + " " + br;
+        		}
+    		}
     	},
 	
     	/**
@@ -1455,6 +1466,7 @@
     	},
 	
     	setPermalink: function() {
+    	    if (this.gameName == "gnugo") return;
     		// Safari doesn't need the pound sign
     		var prefix = /Apple/.test(navigator.vendor) ? "" : "#";
     		location.hash = prefix + (this.gameName ? this.gameName : "") + ":" +
