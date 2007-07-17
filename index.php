@@ -31,7 +31,6 @@
     Uncomment the following to work with the original source.
 -->
 <script type="text/javascript" src="/eidogo/js/yui-util.js"></script>
-<script type="text/javascript" src="/eidogo/js/yui-slider.js"></script>
 <script type="text/javascript" src="/eidogo/js/lang.js"></script>
 <script type="text/javascript" src="/eidogo/js/eidogo.js"></script>
 <script type="text/javascript" src="/eidogo/js/util.js"></script>

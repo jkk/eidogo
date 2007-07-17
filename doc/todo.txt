@@ -9,7 +9,7 @@ planned for 1.0
 - checkboxes for preferences
 - game archive browsing/searching
 - brief help text (keyboard shortcuts, etc)
-- figure out why updateControls is slow when there are lots of search results
+- figure out why updateControls is slow in FF when there are lots of search results
   (guessing YUI/DOM related)
 
 maybe

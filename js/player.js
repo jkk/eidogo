@@ -262,7 +262,7 @@
     		if (this.prefs.showPlayerInfo) {
     			this.dom.infoPlayers.style.display = "block";
     		}
-    		this.enableNavSlider();
+            this.enableNavSlider();
     		this.selectTool("play");
     	},
 	
@@ -317,7 +317,7 @@
     		} else {
     			this.progressiveLoads--;
     		}
-		
+    		
     		if (this.loadPath.length) {
     			this.goTo(this.loadPath, false);
                 if (!this.progressiveLoad) {
@@ -472,6 +472,7 @@
     			setTimeout(function() { me.refresh.call(me); }, 10);
     			return;
     		}
+    		
             this.moveNumber--;
             if (this.moveNumber < 0) this.moveNumber = 0;
             this.board.revert(1);
@@ -531,7 +532,7 @@
     				);
     			}
     		}
-		
+            
     		if (noRender) {
     			this.board.commit();
     		} else {
@@ -545,7 +546,7 @@
     			this.board.commit();
     			this.board.render();
     		}
-		
+            
     		// progressive loading?
     		if (this.progressiveUrl && !this.cursor.node.parent.cached) {
     			this.nowLoading();
@@ -1041,7 +1042,6 @@
     	},
 	
     	updateControls: function() {
-
     		this.dom.moveNumber.innerHTML = (this.moveNumber ?
     		    t['move'] + " " + this.moveNumber : "permalink");
 		
@@ -1056,7 +1056,7 @@
     		    (this.timeB ? this.timeB : "--") + "</span>";
 
     		removeClass(this.dom.controlPass, "pass-on");
-		
+            
     		// variations?
     		this.dom.variations.innerHTML = "";
     		for (var i = 0; i < this.variations.length; i++) {
@@ -1105,7 +1105,7 @@
     			removeClass(this.dom.controlBack, "back-on");
     			removeClass(this.dom.controlFirst, "first-on");
     		}
-		
+            
     		if (!this.progressiveLoad) {
                 this.updateNavSlider();
     		}
@@ -1397,7 +1397,7 @@
             }
             
             // snap to move interval
-            offset = parseInt(moveOffset / steps * width, 10);
+            offset = parseInt(moveOffset / steps * width, 10) || 0;
             this.dom.navSliderThumb.style.left = offset + "px";
     	},
 	
