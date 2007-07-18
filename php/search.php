@@ -1,5 +1,7 @@
 <?php
 
+require("json.php");
+
 $kombilo_dir = "../kombilo";
 
 // safety checks
@@ -71,6 +73,7 @@ foreach ($output as $line) {
     $odd = $odd ? false : true;
 }
 
-echo json_encode($results);
+$json = new Services_JSON();
+echo $json->encode($results);
 
 ?>
