@@ -113,8 +113,10 @@
     		// Allow outside scripts to hook into Player events. Format:
     		//      hookName:   hookHandler
     		// Available hooks:
+    		// - initDone
     		// - initGame
     		// - setPermalink
+    		// - searchRegion
     		this.hooks = cfg.hooks || {};
 
     		// these are populated after load
@@ -225,7 +227,10 @@
     		    }
 		    
     		    // load data from a URL
-    			this.remoteLoad(cfg.sgfUrl, null, false);
+    			this.remoteLoad(cfg.sgfUrl, null, false, null, function() {
+    			    this.hook("initDone");
+    			}.bind(this));
+    			var noHook = true;
     			if (cfg.progressiveLoad) {
     				this.progressiveLoads = 0;
     				this.progressiveUrl = cfg.progressiveUrl
@@ -249,6 +254,10 @@
         		}
     		
     			this.load(blankGame);
+    		}
+    		
+    		if (!noHook) {
+    		    this.hook("initDone");
     		}
     	},
     	

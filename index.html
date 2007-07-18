@@ -43,14 +43,6 @@ var player;
 
 (function() {
     
-    // backwards compatibility: redirect /eidogo/xxx#yyy to /eidogo/#xxx:yyy
-    // var path = location.pathname;
-    //     if (path != "/eidogo/") {
-    //         var game = path.split("/").last();
-    //         var hash = location.hash.replace(/^#/, "");
-    //         location.href = "/eidogo/#" + game + (hash ? ":" + hash : "");
-    //     }
-    
     var hooks = {
         initGame: function() {
             var gameRoot = this.gameTree.trees.first().nodes.first();
@@ -80,7 +72,7 @@ var player;
         }
 	};
     
-    function loadGame(params) {
+    function loadGame(params, completeFn) {
         cfg = {
             domId:              "player-container",
 	        mode:               "play",
@@ -130,7 +122,15 @@ var player;
 	            params.boardSize = parts[1];
 	        }
 	    } else if (gameName == "search") {
-            // alert(rest);
+	        if (jQuery.browser.safari) {
+	            hooks.initDone = function() {
+	                player.loadSearch.apply(player, rest);
+	            }
+	            loadGame({
+	                gameName:   "blank",
+	                loadPath:   [0,0]
+	            });
+	        }
     	} else if (gameName != "" && gameName != "kjd") {
     	    params = {
     	        gameName:   gameName,
