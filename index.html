@@ -61,7 +61,7 @@ var player;
         setPermalink: function() {
     		var hash = (this.gameName ? this.gameName : "") + ":" +
     		    this.cursor.getPath().join(",");
-            jQuery.historyLoad(hash);
+    		jQuery.historyLoad(hash);
         },
         searchRegion: function(params) {
             var hash = "search:" + params.q + ":" + params.w + "x" + params.h +
@@ -146,12 +146,12 @@ var player;
     	        showPlayerInfo:     false
     	    };
     	}
-        loadGame(params);
         
         var first = true;
         
         jQuery.historyInit(function(hash) {
             if (jQuery.browser.safari) return; // argh, safari 2 sucks
+            
             if (first) {
                 first = false;
                 return;
@@ -176,9 +176,12 @@ var player;
             }
         });
         
-        if (!jQuery.browser.safari) {
+        loadGame(params);
+        
+        if (jQuery.browser.msie) {
             jQuery.historyLoad(location.hash.replace(/^#/, ""));
         }
+
     }
     
     eidogo.util.addEvent(window, "load", init);

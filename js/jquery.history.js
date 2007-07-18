@@ -51,7 +51,7 @@ jQuery.extend({
 		jQuery.historyBackStack.push(hash);
 		
 		jQuery.historyForwardStack.length = 0; // clear forwardStack (true click occured)
-		this.isFirst = true;
+		jQuery.isFirst = true;
 	},
 	
 	historyCheck: function(){
@@ -127,9 +127,11 @@ jQuery.extend({
 			jQuery.historyCallback(hash);
 		}
 		else if (jQuery.browser.safari) {
+		    
 			jQuery.dontCheck = true;
+			
 			// Manually keep track of the history values for Safari
-			this.historyAddHistory(hash);
+			jQuery.historyAddHistory(hash);
 			
 			// Wait a while before allowing checking so that Safari has time to update the "history" object
 			// correctly (otherwise the check loop would detect a false change in hash).

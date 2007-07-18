@@ -879,6 +879,9 @@
     	},
     	
     	searchRegion: function() {
+    	    if (this.searching) return;
+    	    this.searching = true;
+    	    
     	    if (!this.searchUrl) {
     	        this.dom.comments.style.display = "block";
 	            this.dom.searchContainer.style.display = "none";
@@ -912,6 +915,7 @@
     	    this.nowLoading();
     	    
     	    var success = function(req) {
+    	        this.searching = false;
     	        this.doneLoading();
 	            this.dom.comments.style.display = "none";
 	            this.dom.searchContainer.style.display = "block";
