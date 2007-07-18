@@ -4,10 +4,10 @@
 <head>
 <title>EidoGo - SGF Replayer</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<link rel="stylesheet" href="/eidogo/site-style.css">
-<link rel="stylesheet" href="/eidogo/player/player.css">
+<link rel="stylesheet" href="site-style.css">
+<link rel="stylesheet" href="player/player.css">
 <!--[if IE 6]>
-<link rel="stylesheet" href="/eidogo/player/player-ie6.css">
+<link rel="stylesheet" href="player/player-ie6.css">
 <![endif]-->
 
 <!--
@@ -21,21 +21,21 @@
 <!--
     Uncomment the following to work with the original source.
 -->
-<!-- <script type="text/javascript" src="/eidogo/js/yui-dom-event.js"></script>
-<script type="text/javascript" src="/eidogo/js/yui-connection.js"></script>
-<script type="text/javascript" src="/eidogo/js/yui-history.js"></script> -->
-<script type="text/javascript" src="/eidogo/js/jquery.js"></script>
-<script type="text/javascript" src="/eidogo/js/jquery.dimensions.js"></script>
-<script type="text/javascript" src="/eidogo/js/jquery.history.js"></script>
-<script type="text/javascript" src="/eidogo/js/lang.js"></script>
-<script type="text/javascript" src="/eidogo/js/eidogo.js"></script>
-<script type="text/javascript" src="/eidogo/js/util.js"></script>
-<script type="text/javascript" src="/eidogo/js/i18n.js"></script>
-<script type="text/javascript" src="/eidogo/js/gametree.js"></script>
-<script type="text/javascript" src="/eidogo/js/sgf.js"></script>
-<script type="text/javascript" src="/eidogo/js/board.js"></script>
-<script type="text/javascript" src="/eidogo/js/rules.js"></script>
-<script type="text/javascript" src="/eidogo/js/player.js"></script>
+<!-- <script type="text/javascript" src="js/yui-dom-event.js"></script>
+<script type="text/javascript" src="js/yui-connection.js"></script>
+<script type="text/javascript" src="js/yui-history.js"></script> -->
+<script type="text/javascript" src="js/jquery.js"></script>
+<script type="text/javascript" src="js/jquery.dimensions.js"></script>
+<script type="text/javascript" src="js/jquery.history.js"></script>
+<script type="text/javascript" src="js/lang.js"></script>
+<script type="text/javascript" src="js/eidogo.js"></script>
+<script type="text/javascript" src="js/util.js"></script>
+<script type="text/javascript" src="js/i18n.js"></script>
+<script type="text/javascript" src="js/gametree.js"></script>
+<script type="text/javascript" src="js/sgf.js"></script>
+<script type="text/javascript" src="js/board.js"></script>
+<script type="text/javascript" src="js/rules.js"></script>
+<script type="text/javascript" src="js/player.js"></script>
 
 <script type="text/javascript">
 
@@ -44,12 +44,12 @@ var player;
 (function() {
     
     // backwards compatibility: redirect /eidogo/xxx#yyy to /eidogo/#xxx:yyy
-    var path = location.pathname;
-    if (path != "/eidogo/") {
-        var game = path.split("/").last();
-        var hash = location.hash.replace(/^#/, "");
-        location.href = "/eidogo/#" + game + (hash ? ":" + hash : "");
-    }
+    // var path = location.pathname;
+    //     if (path != "/eidogo/") {
+    //         var game = path.split("/").last();
+    //         var hash = location.hash.replace(/^#/, "");
+    //         location.href = "/eidogo/#" + game + (hash ? ":" + hash : "");
+    //     }
     
     var hooks = {
         initGame: function() {
@@ -70,6 +70,13 @@ var player;
     		var hash = (this.gameName ? this.gameName : "") + ":" +
     		    this.cursor.getPath().join(",");
             jQuery.historyLoad(hash);
+        },
+        searchRegion: function(params) {
+            var hash = "search:" + params.q + ":" + params.w + "x" + params.h +
+                ":" + this.compressPattern(params.p) + ":" + params.a;
+            if (hash != location.hash.replace(/^#/, "")) {
+                jQuery.historyLoad(hash);
+            }
         }
 	};
     
@@ -77,9 +84,9 @@ var player;
         cfg = {
             domId:              "player-container",
 	        mode:               "play",
-	        sgfPath:            "/eidogo/sgf/",
+	        sgfPath:            "sgf/",
 	        progressiveLoad:    false,
-            searchUrl:          "/eidogo/php/search.php",
+            searchUrl:          "php/search.php",
 	        markCurrent:        true,
 	        markVariations:     true,
 	        markNext:           false,
@@ -103,7 +110,7 @@ var player;
     	if (hashParts[1]) {
     	    loadPath = hashParts[1].split(",");
     	}
-    	return [hashParts[0] || "", loadPath];
+    	return [hashParts[0] || "", loadPath, hashParts.slice(1)];
     }
     
     function init() {
@@ -111,17 +118,19 @@ var player;
     	var input = parseHash(location.hash);
     	var gameName = input[0];
     	var loadPath = input[1];
-    	
+    	var rest = input[2];
     	if (gameName.indexOf("gnugo") === 0) {
     	    params = {
     	        gameName:       "",
-    	        opponentUrl:    "/eidogo/php/gnugo.php",
+    	        opponentUrl:    "php/gnugo.php",
     	        opponentColor:  "B"
     	    };
 	        var parts = gameName.split(";");
 	        if (parts[1]) {
 	            params.boardSize = parts[1];
 	        }
+	    } else if (gameName == "search") {
+            // alert(rest);
     	} else if (gameName != "" && gameName != "kjd") {
     	    params = {
     	        gameName:   gameName,
@@ -129,7 +138,7 @@ var player;
     	    };
 	    } else {
     	    params = {
-    	        sgfUrl:             "/eidogo/php/kjd_progressive.php",
+    	        sgfUrl:             "php/kjd_progressive.php",
     	        gameName:           "kjd",
     	        loadPath:           loadPath,
     	        progressiveLoad:    true,
@@ -142,7 +151,7 @@ var player;
         var first = true;
         
         jQuery.historyInit(function(hash) {
-            if (jQuery.browser.safari) return; // argh
+            if (jQuery.browser.safari) return; // argh, safari 2 sucks
             if (first) {
                 first = false;
                 return;
@@ -150,9 +159,15 @@ var player;
             var input = parseHash(hash);
             var gameName = input[0];
             var loadPath = input[1];
+            var rest = input[2];
+            if (gameName.indexOf("gnugo") === 0) return;
             if (typeof gameName != "undefined" && gameName != player.gameName) {
                 if (!gameName || gameName == "kjd") {
                     location.href = "kjd";
+                } else if (gameName == "search" && loadPath) {
+                    // alert(rest);
+                    player.loadSearch.apply(player, rest);
+                    return;
                 }
                 loadGame({
                     gameName:   gameName,
@@ -160,6 +175,10 @@ var player;
                 });
             }
         });
+        
+        if (!jQuery.browser.safari) {
+            jQuery.historyLoad(location.hash.replace(/^#/, ""));
+        }
     }
     
     eidogo.util.addEvent(window, "load", init);

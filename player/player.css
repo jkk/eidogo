@@ -162,24 +162,28 @@
 .eidogo-player .tools-container {
     float: right;
     clear: right;
-    background: #446;
+/*    background: #446;*/
+    background: #744;
     width: 315px;
-    height: 25px;
-    padding: 5px 5px 0px 5px;
+/*    height: 25px;*/
+    padding: 5px 5px 5px 5px;
     margin: 5px 0 0 0;
 }
 .eidogo-player .tools-label {
     float: left;
     padding: 5px 5px 0 0;
-    color: #88a;
+/*    color: #88a;*/
+    color: #a88;
     cursor: default;
 }
 .eidogo-player .search-button {
     margin: 0 0 0 5px;
-    color: #a00;
+    color: #800;
     font-size: 11px;
-    background-color: #88a;
-    border: 1px solid #88a;
+/*    background-color: #88a;*/
+/*    border: 1px solid #88a;*/
+    background: #b88;
+    border: 1px solid #b88;
     cursor: pointer;
     font-weight: bold;
     display: none;
@@ -190,9 +194,8 @@
     left: 0px;
     width: 133px;
     height: 133px;
-/*    border: 2px solid #ff0;*/
     background-color: #80f;
-    opacity: 0.3;
+    opacity: 0.30;
     filter: alpha(opacity=30);
     z-index: 9999;
     display: none;
@@ -261,6 +264,15 @@
     margin: 0 0 10px 0;
     border-bottom: 1px solid #778;
 }
+.eidogo-player .search-container .search-close {
+    float: right;
+    padding: 4px 7px;
+    background: #aad;
+    color: #008;
+    cursor: pointer;
+    margin-top: -10px;
+    font-weight: bold;
+}
 .eidogo-player .search-container .search-count span {
     font-weight: bold;
 }
@@ -272,6 +284,7 @@
 }
 .eidogo-player .search-container div.search-result {
     cursor: default;
+    color: #000;
 }
 .eidogo-player .search-container a.search-result.odd {
     background: #aad;

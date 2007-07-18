@@ -256,9 +256,9 @@
     	 * Delegate to a hook handler. 'this' will be bound to the Player
     	 * instance
     	**/
-    	hook: function(hook) {
+    	hook: function(hook, params) {
     	    if (hook in this.hooks) {
-    	        this.hooks[hook].bind(this)();
+    	        this.hooks[hook].bind(this)(params);
     	    }
     	},
 	
@@ -828,7 +828,47 @@
                 bounds[3] + "px";
             this.dom.searchRegion.style.display = "block";
     	},
-	
+    	
+    	loadSearch: function(q, dim, p, a) {
+    	    this.reset();
+    	    p = this.uncompressPattern(p);
+    	    dim = dim.split("x");
+    	    var w = dim[0];
+    	    var h = dim[1];
+    	    var bs = this.board.boardSize;
+    	    var l;
+    	    var t;
+    	    switch (q) {
+    	        case "nw": l = 0; t = 0; break;
+    	        case "ne": l = bs - w; t = 0; break;
+    	        case "se": l = bs - w; t = bs - h; break;
+    	        case "sw": l = 0; t = bs - h; break;
+    	    }
+    	    var c;
+    	    var x;
+    	    var y;
+    	    for (y = 0; y < h; y++) {
+    	        for (x = 0; x < w; x++) {
+    	            c = p.charAt(y * w + x);
+    	            if (c == "O") {
+    	                c = "AW";
+    	            } else if (c == "X") {
+    	                c = "AB";
+    	            } else {
+    	                c = "";
+    	            }
+    	            this.cursor.node.pushProperty(c, this.pointToSgfCoord({x:l+x, y:t+y}));
+    	        }
+    	    }
+    	    this.refresh();
+            this.regionLeft = l;
+            this.regionTop = t;
+            this.regionRight = l + x;
+            this.regionBottom = t + y;
+            
+            this.searchRegion();
+    	},
+    	
     	searchRegion: function() {
     	    if (!this.searchUrl) {
     	        this.dom.comments.style.display = "block";
@@ -906,10 +946,13 @@
     	        t: (new Date()).getTime()
     	    };
     	    
+    	    this.hook("searchRegion", params);
+    	    
     	    ajax('get', this.searchUrl, params, success, failure, this, 45000);	    
     	},
     	
     	loadSearchResult: function(e) {
+    	    this.nowLoading();
             var target = e.target || e.srcElement;
             if (target.nodeName == "SPAN") {
                 target = target.parentNode;
@@ -932,9 +975,15 @@
             this.prefs.markNext = false;
             this.prefs.showPlayerInfo = true;
             this.remoteLoad(id, null, true, [0, mv], function() {
+                this.doneLoading();
                 this.setPermalink();
             }.bind(this));
             stopEvent(e);
+    	},
+    	
+    	closeSearch: function() {
+            this.dom.searchContainer.style.display = "none";
+            this.dom.comments.style.display = "block";
     	},
 	
     	/**
@@ -1374,6 +1423,7 @@
                 </div>\
     	        <div id='comments' class='comments'></div>\
     	        <div id='search-container' class='search-container'>\
+    	            <div id='search-close' class='search-close'>close search</div>\
         	        <p class='search-count'><span id='search-count'></span>&nbsp;matches found.</p>\
                     <div id='search-results-container' class='search-results-container'>\
                         <div class='search-result'>\
@@ -1440,9 +1490,11 @@
     	     ['controlFirst',   'first'],
     	     ['controlBack',    'back'],
     	     ['controlForward', 'forward'],
+    	     ['controlLast',    'last'],
     	     ['controlPass',    'pass'],
     	     ['searchButton',   'searchRegion'],
-    	     ['searchResults',  'loadSearchResult']
+    	     ['searchResults',  'loadSearchResult'],
+    	     ['searchClose',    'closeSearch']
     	    ].forEach(function(eh) {
     	        onClick(this.dom[eh[0]], this[eh[1]], this);
     	    }.bind(this));
@@ -1571,7 +1623,7 @@
     	},
 	
     	setPermalink: function() {
-    	    if (this.gameName == "gnugo") return;
+    	    if (!this.gameName || this.gameName == "search" || this.gameName == "gnugo") return;
     	    this.hook("setPermalink");
     	},
 	

@@ -1,18 +1,19 @@
 planned for 1.0
-- use base 62 number for games instead of predictable digits
 - showTools preference (disallow implicit selection too)
 - create compact embeddedable version
 - move source.html to index, dom show/hide
 - "download eidogo"
 - brief help text (keyboard shortcuts, etc)
+- get rid of comments
+- continuations?
 
 maybe
-- hold down arrow keys to keep navigating
+- hold down arrow keys to keep navigating in FF/Safari
 - checkboxes for preferences
 - game archive browsing/searching
+- uploading
 - decouple player and board renderer
 - canvas renderer?
-- uploading
 - exhaustive FF[4] SGF support
 - more robust SGF parser
 - navigable variation tree like CGoban

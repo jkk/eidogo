@@ -59,7 +59,7 @@ foreach ($output as $line) {
     $mv = split(",", $mv);
     $mv = (int)$mv[count($mv)-2];
     array_push($results, array(
-        "id"    => "games/" . $id,
+        "id"    => $id,
         "pw"    => $pw,
         "wr"    => $wr,
         "pb"    => $pb,
