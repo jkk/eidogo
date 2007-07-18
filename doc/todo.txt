@@ -1,19 +1,15 @@
 planned for 1.0
 - use base 62 number for games instead of predictable digits
 - showTools preference (disallow implicit selection too)
-- load search results via front page rather than Player to keep history
-  state separated from core functionality. consider the same for permalinks?
-  create gameloadhandler/permalinkhandler?
-- use hashes for permalinks!
-- search results back navigation or permalinks
+- create compact embeddedable version
+- move source.html to index, dom show/hide
+- "download eidogo"
+- brief help text (keyboard shortcuts, etc)
+
+maybe
 - hold down arrow keys to keep navigating
 - checkboxes for preferences
 - game archive browsing/searching
-- brief help text (keyboard shortcuts, etc)
-- figure out why updateControls is slow in FF when there are lots of search results
-  (guessing YUI/DOM related)
-
-maybe
 - decouple player and board renderer
 - canvas renderer?
 - uploading

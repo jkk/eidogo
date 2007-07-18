@@ -1,0 +1,206 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>EidoGo - SGF Replayer</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="/eidogo/site-style.css">
+<link rel="stylesheet" href="/eidogo/player/player.css">
+<!--[if IE 6]>
+<link rel="stylesheet" href="/eidogo/player/player-ie6.css">
+<![endif]-->
+
+<!--
+    For international support, uncomment the following line and put in the
+    appropriate language code (see the 'player/i18n' folder).
+-->
+<!-- <script type="text/javascript" src="player/i18n/pt_br.js"></script> -->
+
+<!-- <script type="text/javascript" src="player/player.compressed.js"></script> -->
+
+<!--
+    Uncomment the following to work with the original source.
+-->
+<!-- <script type="text/javascript" src="/eidogo/js/yui-dom-event.js"></script>
+<script type="text/javascript" src="/eidogo/js/yui-connection.js"></script>
+<script type="text/javascript" src="/eidogo/js/yui-history.js"></script> -->
+<script type="text/javascript" src="/eidogo/js/jquery.js"></script>
+<script type="text/javascript" src="/eidogo/js/jquery.dimensions.js"></script>
+<script type="text/javascript" src="/eidogo/js/jquery.history.js"></script>
+<script type="text/javascript" src="/eidogo/js/lang.js"></script>
+<script type="text/javascript" src="/eidogo/js/eidogo.js"></script>
+<script type="text/javascript" src="/eidogo/js/util.js"></script>
+<script type="text/javascript" src="/eidogo/js/i18n.js"></script>
+<script type="text/javascript" src="/eidogo/js/gametree.js"></script>
+<script type="text/javascript" src="/eidogo/js/sgf.js"></script>
+<script type="text/javascript" src="/eidogo/js/board.js"></script>
+<script type="text/javascript" src="/eidogo/js/rules.js"></script>
+<script type="text/javascript" src="/eidogo/js/player.js"></script>
+
+<script type="text/javascript">
+
+var player;
+
+(function() {
+    
+    // backwards compatibility: redirect /eidogo/xxx#yyy to /eidogo/#xxx:yyy
+    var path = location.pathname;
+    if (path != "/eidogo/") {
+        var game = path.split("/").last();
+        var hash = location.hash.replace(/^#/, "");
+        location.href = "/eidogo/#" + game + (hash ? ":" + hash : "");
+    }
+    
+    var hooks = {
+        initGame: function() {
+            var gameRoot = this.gameTree.trees.first().nodes.first();
+            var gn = gameRoot.GN || this.gameName;
+            if (gn) {
+                // set the page title
+                document.title = "EidoGo - " + gn;
+                if (gameRoot.PW && gameRoot.PB) {
+                    var wr = gameRoot.WR ? " " + gameRoot.WR : "";
+                    var br = gameRoot.BR ? " " + gameRoot.BR : "";
+                    document.title += " - " + gameRoot.PW + wr +
+                        " vs " + gameRoot.PB + br;
+                }
+            }
+        },
+        setPermalink: function() {
+    		var hash = (this.gameName ? this.gameName : "") + ":" +
+    		    this.cursor.getPath().join(",");
+            jQuery.historyLoad(hash);
+        }
+	};
+    
+    function loadGame(params) {
+        cfg = {
+            domId:              "player-container",
+	        mode:               "play",
+	        sgfPath:            "/eidogo/sgf/",
+	        progressiveLoad:    false,
+            searchUrl:          "/eidogo/php/search.php",
+	        markCurrent:        true,
+	        markVariations:     true,
+	        markNext:           false,
+	        showGameInfo:       true,
+	        showPlayerInfo:     true,
+	        hooks:              hooks
+        };
+        for (var key in params) {
+            cfg[key] = params[key];
+        }
+        if (!player) {
+            player = new eidogo.Player(cfg);
+        } else {
+            player.remoteLoad(params.gameName, null, true, params.loadPath);
+        }
+    }
+    
+    function parseHash(hash) {
+        var hashParts = hash ? hash.replace(/^#/, "").split(/:/) : [];
+    	var loadPath = null;
+    	if (hashParts[1]) {
+    	    loadPath = hashParts[1].split(",");
+    	}
+    	return [hashParts[0] || "", loadPath];
+    }
+    
+    function init() {
+    	var params;
+    	var input = parseHash(location.hash);
+    	var gameName = input[0];
+    	var loadPath = input[1];
+    	
+    	if (gameName.indexOf("gnugo") === 0) {
+    	    params = {
+    	        gameName:       "",
+    	        opponentUrl:    "/eidogo/php/gnugo.php",
+    	        opponentColor:  "B"
+    	    };
+	        var parts = gameName.split(";");
+	        if (parts[1]) {
+	            params.boardSize = parts[1];
+	        }
+    	} else if (gameName != "" && gameName != "kjd") {
+    	    params = {
+    	        gameName:   gameName,
+    	        loadPath:   loadPath
+    	    };
+	    } else {
+    	    params = {
+    	        sgfUrl:             "/eidogo/php/kjd_progressive.php",
+    	        gameName:           "kjd",
+    	        loadPath:           loadPath,
+    	        progressiveLoad:    true,
+    	        markNext:           true,
+    	        showPlayerInfo:     false
+    	    };
+    	}
+        loadGame(params);
+        
+        var first = true;
+        
+        jQuery.historyInit(function(hash) {
+            if (jQuery.browser.safari) return; // argh
+            if (first) {
+                first = false;
+                return;
+            }
+            var input = parseHash(hash);
+            var gameName = input[0];
+            var loadPath = input[1];
+            if (typeof gameName != "undefined" && gameName != player.gameName) {
+                if (!gameName || gameName == "kjd") {
+                    location.href = "kjd";
+                }
+                loadGame({
+                    gameName:   gameName,
+                    loadPath:   loadPath
+                });
+            }
+        });
+    }
+    
+    eidogo.util.addEvent(window, "load", init);
+		
+})();
+
+</script>
+
+</head>
+<body>
+    
+<div id="container">
+    
+    <div id="header">
+
+        <h1>Eido<span>Go</span></h1>
+
+        <p id="ownership">EidoGo is <a href="source.html">Open Source</a>.
+            &nbsp;Maintained by <a href="http://tin.nu/">Justin Kramer</a>.</p>
+
+        <ul id="links">
+        	<li><a href="kjd">Joseki Tutor</a></li>
+            <!-- <li><a href="games">Game Archive</a></li> -->
+        	<li><a href="search">Pattern Search</a></li>
+        	<li><a href="gnugo" style='padding-right: 5px'>GNU Go</a></li>
+        	<li><a href="gnugo;9" style='padding-left: 5px; padding-right: 5px'>9x9</a></li>
+        	<li><a href="gnugo;13" style='padding-left: 5px'>13x13</a></li>
+        	<li><a href="blank">Blank Board</a></li>
+            <!-- <li><a href="upload">Upload</a></li> -->
+        	<li><a href="http://senseis.xmp.net/?EidoGo">Info</a></li>
+        </ul>
+
+    </div>
+
+    <div id="content">
+
+        <div id="player-container"></div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

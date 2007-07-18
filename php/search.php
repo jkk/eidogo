@@ -36,50 +36,41 @@ if (file_exists($cache_fn)) {
 }
 
 if ($retval) {
-    echo "Error searching database.";
+    echo "ERROR";
     exit;
 }
 
 if (!count($output)) {
-    echo "No games found matching the given pattern.";
+    echo "NONE";
     exit;
 }
 
-if (count($output) > 150) {
-    $output = array_slice($output, 0, 150);
+if (count($output) > 50) {
+    $output = array_slice($output, 0, 50);
 }
 
-echo "<p class='search-count'><span>" . count($output) . "</span> matches found.</p>";
-
-echo "<div class='search-results'>";
-echo "<div class='search-result'>
-    <span class='pw'><b>White</b></span>
-    <span class='pb'><b>Black</b></span>
-    <span class='re'><b>Result</b></span>
-    <span class='dt'><b>Date</b></span>
-    <div class='clear'></div>
-    </div>";
-
 $odd = true;
+
+$results = array();
 
 foreach ($output as $line) {
     list($fn, $pw, $wr, $pb, $br, $re, $dt, $mv) = split("\t", $line);
     $id = str_replace(".sgf", "", $fn);
     $mv = split(",", $mv);
-    $mv = (int)$mv[count($mv)-2] - 1;
-    $href = "javascript:player.loadPath=[0,$mv];player.remoteLoad(\"sgf/games/$id.sgf\")";
-    echo "<div class='search-result" . ($odd ? " odd" : ""). "'>
-        <a href='$href'>
-        <span class='pw'>$pw $wr</span>
-        <span class='pb'>$pb $br</span>
-        <span class='re'>$re</span>
-        <span class='dt'>$dt</span>
-        <div class='clear'>&nbsp;</div>
-        </a>
-        </div>";
+    $mv = (int)$mv[count($mv)-2];
+    array_push($results, array(
+        "id"    => "games/" . $id,
+        "pw"    => $pw,
+        "wr"    => $wr,
+        "pb"    => $pb,
+        "br"    => $br,
+        "re"    => $re,
+        "dt"    => $dt,
+        "mv"    => $mv,
+    ));
     $odd = $odd ? false : true;
 }
 
-echo "</div>";
+echo json_encode($results);
 
 ?>

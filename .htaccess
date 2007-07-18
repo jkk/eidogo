@@ -2,4 +2,10 @@ Options -MultiViews
 RewriteEngine on
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ index.php?$1
+RewriteRule ^(kjd)$ /eidogo/#$1 [R,L,NE]
+RewriteRule ^(search)$ /eidogo/#$1 [R,L,NE]
+RewriteRule ^(gnugo.*)$ /eidogo/#$1 [R,L,NE]
+RewriteRule ^(blank)$ /eidogo/#$1 [R,L,NE]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ /eidogo/ [L]

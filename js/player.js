@@ -105,10 +105,17 @@
     		// used for Ajaxy dynamic tree loading
     		this.progressiveLoad = cfg.progressiveLoad ? true : false;
     		this.progressiveLoads = null;
-    		this.progressiveUrl = null
+    		this.progressiveUrl = null;
 		
     		// pattern and game info search
     		this.searchUrl = cfg.searchUrl;
+    		
+    		// Allow outside scripts to hook into Player events. Format:
+    		//      hookName:   hookHandler
+    		// Available hooks:
+    		// - initGame
+    		// - setPermalink
+    		this.hooks = cfg.hooks || {};
 
     		// these are populated after load
     		this.board = null;
@@ -198,7 +205,7 @@
 		
     		// game name (= file name) of load the currently-loaded game
     		this.gameName = cfg.gameName;
-
+    		
     		if (typeof cfg.sgf == "string") {
 		    
     			// raw SGF data
@@ -244,6 +251,16 @@
     			this.load(blankGame);
     		}
     	},
+    	
+    	/**
+    	 * Delegate to a hook handler. 'this' will be bound to the Player
+    	 * instance
+    	**/
+    	hook: function(hook) {
+    	    if (hook in this.hooks) {
+    	        this.hooks[hook].bind(this)();
+    	    }
+    	},
 	
     	/**
     	 * Sets up a new game for playing. Can be called repeatedly (e.g., for
@@ -253,6 +270,7 @@
     	    var gameRoot = target.trees.first().nodes.first();
     		var size = gameRoot.SZ;
     		if (!this.board) {
+    		    // first time
     		    this.createBoard(size || 19);
     	    }
     		this.reset(true);
@@ -266,15 +284,7 @@
     		}
             this.enableNavSlider();
     		this.selectTool("play");
-    		if (this.gameName) {
-    		    document.title = "EidoGo - " + this.gameName;
-        		if (gameRoot.PW && gameRoot.PB) {
-                    var wr = gameRoot.WR ? " " + gameRoot.WR : "";
-                    var br = gameRoot.BR ? " " + gameRoot.BR : "";
-                    document.title += " - " + gameRoot.PW + wr +
-        		        " vs " + gameRoot.PB + br;
-        		}
-    		}
+    		this.hook("initGame");
     	},
 	
     	/**
@@ -316,7 +326,7 @@
     	**/
     	load: function(data, target) {
             if (!target) {
-                // initial load
+                // load from scratch
                 target = new eidogo.GameTree();
                 this.gameTree = target;
             }
@@ -347,14 +357,21 @@
     	 * @param {boolean} useSgfPath if true, prepends sgfPath to url
     	 * @param {Array} loadPath gameTree path to load
     	**/
-    	remoteLoad: function(url, target, useSgfPath, loadPath) {
+    	remoteLoad: function(url, target, useSgfPath, loadPath, completeFn) {
     	    useSgfPath = useSgfPath == "undefined" ? true : useSgfPath;
-	    
+	        
     	    if (useSgfPath) {
+    	        if (!target) {
+    	            this.gameName = url;
+    	        }
     	        // if we're using sgfPath, assume url does not include .sgf extension
     	        url = this.sgfPath + url + ".sgf";
     	    }
-	    
+    	    
+    	    if (loadPath) {
+    	        this.loadPath = loadPath;
+    	    }
+            
     	    var success = function(req) {
     		    var data = req.responseText;
 		    
@@ -364,7 +381,7 @@
     		    while (i < data.length && (first == " " || first == "\r" || first == "\n")) {
     	            first = data.charAt(i++);
     		    }
-		    
+		        
     			// infer the kind of file we got
     			if (first == '(') {
     				// SGF
@@ -376,11 +393,15 @@
     				this.load(data, target);
     			} else {
     				this.croak(t['invalid data']);
-    			}	        
+    			}
+    			
+    			if (typeof completeFn == "function") {
+    			    completeFn();
+			    }
     	    }
 	    
     	    var failure = function(req) {
-    	        this.croak(t['error retrieving'] + req.statusText);
+    	        this.croak(t['error retrieving']);
     	    }
 	    
 	        ajax('get', url, null, success, failure, this, 10000);
@@ -399,7 +420,7 @@
     			this.createMove(req.responseText);
     	    }
     	    var failure = function(req) {
-    	        this.croak(t['error retrieving'] + o.statusText);
+    	        this.croak(t['error retrieving']);
     	    } 
     	    var params = {
     	        sgf: this.gameTree.trees[0].toSgf(),
@@ -684,6 +705,7 @@
             	    this.regionBottom = y + (y >= this.regionTop ? 1 : 0);
                     this.showRegion();
         	    }
+        	    stopEvent(e);
     	    }
     	},
 	
@@ -808,12 +830,31 @@
     	},
 	
     	searchRegion: function() {
+    	    if (!this.searchUrl) {
+    	        this.dom.comments.style.display = "block";
+	            this.dom.searchContainer.style.display = "none";
+    	        this.prependComment("No search URL provided.");
+    	        return;
+    	    }
+    	    
     	    var bounds = this.getRegionBounds();
     	    var region = this.board.getRegion(bounds[0], bounds[1], bounds[2], bounds[3]);
     	    var pattern = region.join("")
     	        .replace(new RegExp(this.board.EMPTY, "g"), ".")
     	        .replace(new RegExp(this.board.BLACK, "g"), "X")
     	        .replace(new RegExp(this.board.WHITE, "g"), "O");
+    	    
+    	    // check for empty or meaningless searches
+    	    var empty = /^\.*$/.test(pattern);
+    	    var oneW = /^\.*O\.*$/.test(pattern);
+    	    var oneB = /^\.*X\.*$/.test(pattern);
+    	    if (empty || oneW || oneB) {
+    	        this.dom.comments.style.display = "block";
+	            this.dom.searchContainer.style.display = "none";
+    	        this.prependComment("Please select at least two stones to search for.");
+    	        return;
+	        }
+    	    
     	    var quadrant = (bounds[0] < this.board.boardSize / 2) ? "n" : "s";
     	    quadrant += (bounds[1] < this.board.boardSize / 2) ? "w" : "e";
     	    var algo = this.dom.searchAlgo.value;
@@ -825,13 +866,36 @@
     	        this.doneLoading();
 	            this.dom.comments.style.display = "none";
 	            this.dom.searchContainer.style.display = "block";
-	            this.dom.searchContainer.innerHTML = req.responseText;
-	            this.progressiveLoad = false;
-	            this.progressiveUrl = null;
-	            this.prefs.markNext = false;
+	            if (req.responseText == "ERROR") {
+	                this.croak(t['error retrieving']);
+	                return;
+	            } else if (req.responseText == "NONE") {
+	                this.dom.searchResultsContainer.style.display = "none";
+	                this.dom.searchCount.innerHTML = "No";
+	                return;
+	            }
+	            var results = eval("(" + req.responseText + ")");
+	            var result;
+                var html = "";
+                var odd;
+                for(var i = 0; result = results[i]; i++) {
+                    odd = odd ? false : true;
+                    html += "<a class='search-result" + (odd ? " odd" : "") + "' href='#'>\
+                        <span class='id'>" + result.id + "</span>\
+                        <span class='mv'>" + result.mv + "</span>\
+                        <span class='pw'>" + result.pw + " " + result.wr + "</span>\
+                        <span class='pb'>" + result.pb + " " + result.br + "</span>\
+                        <span class='re'>" + result.re + "</span>\
+                        <span class='dt'>" + result.dt + "</span>\
+                        <div class='clear'>&nbsp;</div>\
+                        </a>";
+                }
+                this.dom.searchResultsContainer.style.display = "block";
+                this.dom.searchResults.innerHTML = html;
+	            this.dom.searchCount.innerHTML = results.length;
     	    }
     	    var failure = function(req) {
-    	        this.croak(t['error retrieving'] + req.statusText);
+    	        this.croak(t['error retrieving']);
     	    }
     	    var params = {
     	        q: quadrant,
@@ -843,6 +907,34 @@
     	    };
     	    
     	    ajax('get', this.searchUrl, params, success, failure, this, 45000);	    
+    	},
+    	
+    	loadSearchResult: function(e) {
+            var target = e.target || e.srcElement;
+            if (target.nodeName == "SPAN") {
+                target = target.parentNode;
+            }
+            if (target.nodeName == "A") {
+                var span;
+                var id;
+                var mv;
+                for (var i = 0; span = target.childNodes[i]; i++) {
+                    if (span.className == "id") {
+                        id = span.innerHTML;
+                    }
+                    if (span.className == "mv") {
+                        mv = parseInt(span.innerHTML, 10);
+                    }
+                }
+            }
+            this.progressiveLoad = false;
+            this.progressiveUrl = null;
+            this.prefs.markNext = false;
+            this.prefs.showPlayerInfo = true;
+            this.remoteLoad(id, null, true, [0, mv], function() {
+                this.setPermalink();
+            }.bind(this));
+            stopEvent(e);
     	},
 	
     	/**
@@ -1281,7 +1373,19 @@
                     <input type='button' id='search-button' class='search-button' value='" + t['search'] + "'>\
                 </div>\
     	        <div id='comments' class='comments'></div>\
-    	        <div id='search-container' class='search-container'></div>\
+    	        <div id='search-container' class='search-container'>\
+        	        <p class='search-count'><span id='search-count'></span>&nbsp;matches found.</p>\
+                    <div id='search-results-container' class='search-results-container'>\
+                        <div class='search-result'>\
+                            <span class='pw'><b>White</b></span>\
+                            <span class='pb'><b>Black</b></span>\
+                            <span class='re'><b>Result</b></span>\
+                            <span class='dt'><b>Date</b></span>\
+                            <div class='clear'></div>\
+                        </div>\
+                        <div id='search-results' class='search-results'></div>\
+                    </div>\
+    	        </div>\
     	        <div id='board-container' class='board-container with-coords'></div>\
     	        <div id='info' class='info'>\
     	            <div id='info-players' class='players'>\
@@ -1337,7 +1441,8 @@
     	     ['controlBack',    'back'],
     	     ['controlForward', 'forward'],
     	     ['controlPass',    'pass'],
-    	     ['searchButton',   'searchRegion']
+    	     ['searchButton',   'searchRegion'],
+    	     ['searchResults',  'loadSearchResult']
     	    ].forEach(function(eh) {
     	        onClick(this.dom[eh[0]], this[eh[1]], this);
     	    }.bind(this));
@@ -1467,10 +1572,7 @@
 	
     	setPermalink: function() {
     	    if (this.gameName == "gnugo") return;
-    		// Safari doesn't need the pound sign
-    		var prefix = /Apple/.test(navigator.vendor) ? "" : "#";
-    		location.hash = prefix + (this.gameName ? this.gameName : "") + ":" +
-    		    this.cursor.getPath().join(",");
+    	    this.hook("setPermalink");
     	},
 	
     	nowLoading: function(msg) {

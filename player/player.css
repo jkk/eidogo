@@ -264,16 +264,19 @@
 .eidogo-player .search-container .search-count span {
     font-weight: bold;
 }
-.eidogo-player .search-container .search-result a {
+.eidogo-player .search-container .search-result {
     display: block;
     text-decoration: none;
     color: #008;
     cursor: pointer;
 }
-.eidogo-player .search-container .search-result.odd a {
+.eidogo-player .search-container div.search-result {
+    cursor: default;
+}
+.eidogo-player .search-container a.search-result.odd {
     background: #aad;
 }
-.eidogo-player .search-container .search-result a:hover {
+.eidogo-player .search-container a.search-result:hover {
     color: #fff;
     background-color: #77c;
 }
@@ -281,6 +284,9 @@
     display: inline;
     float: left;
     padding: 5px;
+}
+.eidogo-player .search-container .search-result .id, .eidogo-player .search-container .search-result .mv {
+    display: none;
 }
 .eidogo-player .search-container .search-result .pw {
     width: 70px;

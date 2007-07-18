@@ -7,25 +7,28 @@
  * in this file. Pretty much any modern JS library could be used (YUI, jQuery,
  * Dojo, Prototype, Mootools).
  */
- 
-jQuery.noConflict();
 
 eidogo.util = {
 
     byId: function(id) {
-        return jQuery("#" + id)[0];
+        return YAHOO.util.Dom.get(id);
     },
     
     ajax: function(method, url, params, successFn, failureFn, scope, timeout) {
-        scope = scope || window;
-        jQuery.ajax({
-            type: method.toUpperCase(),
-            url: url,
-            data: params,
-            success: function(text) { successFn.call(scope, {responseText: text}) },
-            error: failureFn.bind(scope),
-            timeout: timeout
-        });
+        params = params || {};
+        // params.stamp = (new Date()).getTime(); // prevent caching
+        var pairs = [];
+        for (var key in params) {
+            pairs.push(key + "=" + encodeURIComponent(params[key]));
+        }
+        params = pairs.join("&");
+        if (method.toUpperCase() == "GET") {   
+            url = url + "?" + params;
+            params = null;
+        }
+        YAHOO.util.Connect.asyncRequest(method.toUpperCase(), url,
+            {success: successFn, failure: failureFn, scope: scope, timeout: timeout},
+            params);
     },
     
     addEvent: function(el, eventType, handler, arg, override) {
@@ -38,7 +41,7 @@ eidogo.util = {
                 oldHandler(e, arg);
             }
         }
-        jQuery(el).bind(eventType, {}, handler);
+        YAHOO.util.Event.on(el, eventType, handler);
     },
     
     onClick: function(el, handler, scope) {
@@ -58,33 +61,12 @@ eidogo.util = {
 		return [e.pageX - elX, e.pageY - elY];
     },
     
-    stopEvent: function(e) {
-        if (e.stopPropagation) {
-            e.stopPropagation();
-        } else {
-            e.cancelBubble = true;
-        }
-        if (e.preventDefault) {
-            e.preventDefault();
-        } else {
-            e.returnValue = false;
-        }
-    },
-    
-    addClass: function(el, cls) {
-        jQuery(el).addClass(cls);
-    },
-    
-    removeClass: function(el, cls) {
-        jQuery(el).removeClass(cls);
-    },
-    
-    getElX: function(el) {
-        return jQuery(el).offset({scroll:false}).left;
-    },
-    
-    getElY: function(el) {
-        return jQuery(el).offset({scroll:false}).top;
-    }
+    // var addEvent = YAHOO.util.Event.on.bind(YAHOO.util.Event);
+    stopEvent: YAHOO.util.Event.stopEvent.bind(YAHOO.util.Event),
+    addClass: YAHOO.util.Dom.addClass,
+    removeClass: YAHOO.util.Dom.removeClass,
+    hasClass: YAHOO.util.Dom.hasClass,
+    getElX: YAHOO.util.Dom.getX,
+    getElY: YAHOO.util.Dom.getY
     
 };
