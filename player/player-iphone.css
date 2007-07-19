@@ -1,9 +1,9 @@
 .eidogo-player {
-	width: 750px;
+    width: 421px;
 	position: relative;
     background: #222;
 /*    background: #ddd;*/
-	padding: 5px;
+    padding: 5px 0 0 0;
 }
 .eidogo-player ul, .eidogo-player ol, .eidogo-player dl, .eidogo-player dd, .eidogo-player dt {
 	margin: 0;
@@ -11,88 +11,105 @@
 	list-style: none;
 }
 .eidogo-player .controls-container {
-	width: 325px;
-	float: right;
+	width: 421px;
+/*  float: right;*/
 	position: relative;
-	padding: 5px 0 0 0;
+	padding: 0;
     background: #466;
     color: #8aa;
 }
 .eidogo-player .controls {
-	height: 30px;
+	height: 70px;
 	text-indent: -9999px;
 	font-size: 0;
 /*  border-top: 1px solid #777;*/
 	padding-left: 2px;
 }
 .eidogo-player .controls .control {
-	margin: 5px 0 0px 3px;
+	margin: 5px 8px 0px 8px;
 	user-select: none;
 	-khtml-user-select: none;
 	-moz-user-select: none;
 	cursor: default;
 }
 .eidogo-player .controls .back {
-	width: 44px;
-	height: 19px;
-	background: url(images/back_off.gif);
+	width: 88px;
+	height: 38px;
+	background-repeat: no-repeat;
+	background-position: 22px 9px;
+	background-color: #8aa;
+	background-image: url(images/back_off.gif);
 	float: left;
 }
 .eidogo-player .controls .back-on {
-	background: url(images/back_on.gif);
+	background-image: url(images/back_on.gif);
 	cursor: pointer;
 }
 .eidogo-player .controls .forward {
-	width: 44px;
-	height: 19px;
-	background: url(images/forward_off.gif);
+	width: 88px;
+	height: 38px;
+	background-repeat: no-repeat;
+	background-position: 22px 9px;
+	background-color: #8aa;
+	background-image: url(images/forward_off.gif);
 	float: left;
 }
 .eidogo-player .controls .forward-on {
-	background: url(images/forward_on.gif);
+	background-image: url(images/forward_on.gif);
 	cursor: pointer;
 }
 .eidogo-player .controls .first {
-	width: 44px;
-	height: 19px;
-	background: url(images/first_off.gif);
+	width: 88px;
+	height: 38px;
+	background-repeat: no-repeat;
+	background-position: 22px 9px;
+	background-color: #8aa;
+	background-image: url(images/first_off.gif);
 	float: left;
 	margin-bottom: 5px;
 }
 .eidogo-player .controls .first-on {
-	background: url(images/first_on.gif);
+	background-image: url(images/first_on.gif);
 	cursor: pointer;
 }
 .eidogo-player .controls .last {
-	width: 44px;
-	height: 19px;
-	background: url(images/last_off.gif);
+	width: 88px;
+	height: 38px;
+	background-repeat: no-repeat;
+	background-position: 22px 9px;
+	background-color: #8aa;
+	background-image: url(images/last_off.gif);
 	cursor: default;
 	float: left;
 	margin-bottom: 5px;
 }
 .eidogo-player .controls .last-on {
-	background: url(images/last_on.gif);
+	background-image: url(images/last_on.gif);
 	cursor: pointer;
 }
 .eidogo-player .controls .pass {
 	float: right;
-	width: 44px;
-	height: 19px;
-	background: url(images/pass_off.gif);
-	margin-right: 5px;
+	width: 88px;
+	height: 38px;
+	background-repeat: no-repeat;
+	background-position: 22px 9px;
+	background-color: #8aa;
+	background-image: url(images/pass_off.gif);
+	margin-right: 11px;
+	margin-bottom: 10px;
 	display: inline;
 	cursor: pointer;
 }
 .eidogo-player .controls .pass-on {
-	background: url(images/pass_on.gif);
+	background-image: url(images/pass_on.gif);
 	cursor: pointer;
 }
 .eidogo-player .move-number {
 	position: absolute;
-	top: 12px;
-	left: 210px;
+	top: 65px;
+	left: 180px;
 	color: #8aa;
+	font-size: 13px;
 	text-decoration: underline;
 	cursor: pointer;
 }
@@ -100,7 +117,7 @@
 	clear: both;
 	position: relative;
 	height: 10px;
-	width: 315px;
+	width: 411px;
 	margin: 0px 5px 5px 5px;
 	border-top: 1px solid #122;
 	background: #244;
@@ -120,7 +137,7 @@
 	display: none;
 }
 .eidogo-player .variations-container {
-	width: 290px;
+	width: 386px;
 /*    background: #ddd;*/
     min-height: 20px;
 	padding: 10px 5px 0px 5px;
@@ -130,6 +147,7 @@
 	padding: 0 5px 0 0;
 /*  color: #aaa;*/
 	cursor: default;
+	font-size: 13px;
 }
 .eidogo-player .variation-nav {
 	float: left;
@@ -140,10 +158,11 @@
     background: #799;
     color: #b00;
 	font-weight: bold;
-	margin: 1px;
+	margin: 3px;
 	position: relative;
 	top: -3px;
-	padding: 2px 5px 1px 5px;
+	padding: 7px 10px 6px 10px;
+	font-size: 13px;
 	width: auto;
 	height: 14px;
 	cursor: pointer;
@@ -160,11 +179,11 @@
 	cursor: default;
 }
 .eidogo-player .tools-container {
-    float: right;
-    clear: right;
+/*    float: right;*/
+/*    clear: right;*/
 /*    background: #446;*/
     background: #744;
-    width: 315px;
+    width: 411px;
 /*    height: 25px;*/
     padding: 5px 5px 5px 5px;
     margin: 5px 0 0 0;
@@ -174,6 +193,7 @@
     padding: 5px 5px 0 0;
 /*    color: #88a;*/
     color: #a88;
+    font-size: 13px;
     cursor: default;
 }
 .eidogo-player .search-button {
@@ -201,7 +221,7 @@
     display: none;
 }
 .eidogo-player .tools-select, .eidogo-player .search-algo {
-    font-size: 11px;
+    font-size: 13px;
 }
 .eidogo-player .search-algo {
     margin: 0 0 0 10px;
@@ -218,9 +238,9 @@
 	margin: 0 0 10px 0;
 }
 .eidogo-player .comments {
-	clear: right;
-	float: right;
-	width: 302px;
+/*  clear: right;*/
+/*  float: right;*/
+	width: 398px;
 /*  min-height: 271px;*/
 	height: 243px;
 	font-size: 11px;
@@ -245,9 +265,9 @@
     margin: 0 0 10px 0;
 }
 .eidogo-player .search-container {
-	clear: right;
-	float: right;
-	width: 302px;
+/*  clear: right;*/
+/*  float: right;*/
+	width: 398px;
 	height: 243px;
 	font-size: 11px;
 	margin: 5px 0 0 0;
@@ -319,7 +339,6 @@
 }
 .eidogo-player .board-container {
 /*  position: absolute;*/
-    float: left;
 	width: 371px;
 	height: 371px;
 	background: #555;
@@ -434,7 +453,7 @@
 }
 .eidogo-player .info {
 /*    clear: both;*/
-    float: left;
+/*    float: left;*/
 /*  padding-top: 375px;*/
 	width: 421px;
 	margin: 5px 0 0 0;
@@ -525,8 +544,8 @@
 	position: absolute;
 	width: 150px;
 	height: 40px;
-	top: 62px;
-	left: 730px;
+	top: 560px;
+	left: 380px;
 	padding: 0px 0 0 0px;
 	color: #777;
 	z-index: 9999;
@@ -535,9 +554,10 @@
 }
 .eidogo-error {
 	position: absolute;
-	top: 130px;
-	left: 150px;
-	width: 350px;
+	top: 140px;
+	left: 0;
+	width: 421px;
+	font-size: 13px;
 	background: #933;
 	border-right: 2px solid #622;
 	border-bottom: 2px solid #622;

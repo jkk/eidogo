@@ -1,4 +1,7 @@
 planned for 1.0
+- uploading
+- saving
+- permalink notice for unsaved changes
 - showTools preference (disallow implicit selection too)
 - create compact embeddedable version
 - move source.html to index, dom show/hide
@@ -11,7 +14,6 @@ maybe
 - hold down arrow keys to keep navigating in FF/Safari
 - checkboxes for preferences
 - game archive browsing/searching
-- uploading
 - decouple player and board renderer
 - canvas renderer?
 - exhaustive FF[4] SGF support

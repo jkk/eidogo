@@ -1,8 +1,8 @@
 .eidogo-player .board .point.stone.black {
 	background: none;
-	filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src="/eidogo/player/images/b.png");
+	filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src="player/images/b.png");
 }
 .eidogo-player .board .point.stone.white {
 	background: none;
-	filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src="/eidogo/player/images/w.png");
+	filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src="player/images/w.png");
 }

@@ -5,11 +5,13 @@
 <title>EidoGo - SGF Replayer</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="stylesheet" href="site-style.css">
+<link media="only screen and (max-device-width: 480px)" rel="stylesheet" href="site-style-iphone.css">
 <link rel="stylesheet" href="player/player.css">
 <!--[if IE 6]>
 <link rel="stylesheet" href="player/player-ie6.css">
 <![endif]-->
-
+<meta name="viewport" content="width=421, minimum-scale=0.76">
+<link media="only screen and (max-device-width: 480px)" href="player/player-iphone.css" type="text/css" rel="stylesheet">
 <!--
     For international support, uncomment the following line and put in the
     appropriate language code (see the 'player/i18n' folder).
@@ -178,7 +180,7 @@ var player;
         
         loadGame(params);
         
-        if (jQuery.browser.msie) {
+        if (!jQuery.browser.safari) {
             jQuery.historyLoad(location.hash.replace(/^#/, ""));
         }
 

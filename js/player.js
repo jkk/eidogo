@@ -839,7 +839,9 @@
     	},
     	
     	loadSearch: function(q, dim, p, a) {
-    	    this.reset();
+    	    var blankGame = {nodes: [], trees: [{nodes: [{SZ: this.board.boardSize}], trees: []}]};
+    	    this.load(blankGame);
+    	    
     	    p = this.uncompressPattern(p);
     	    dim = dim.split("x");
     	    var w = dim[0];
@@ -959,6 +961,11 @@
     	        t: (new Date()).getTime()
     	    };
     	    
+    	    this.progressiveLoad = false;
+            this.progressiveUrl = null;
+            this.prefs.markNext = false;
+            this.prefs.showPlayerInfo = true;
+    	    
     	    this.hook("searchRegion", params);
     	    
     	    ajax('get', this.searchUrl, params, success, failure, this, 45000);	    
@@ -983,10 +990,6 @@
                     }
                 }
             }
-            this.progressiveLoad = false;
-            this.progressiveUrl = null;
-            this.prefs.markNext = false;
-            this.prefs.showPlayerInfo = true;
             this.remoteLoad(id, null, true, [0, mv], function() {
                 this.doneLoading();
                 this.setPermalink();
@@ -1397,6 +1400,7 @@
     	    this.dom.container.appendChild(this.dom.player);
 	    
     	    var domHtml = "\
+    	        <div id='board-container' class='board-container with-coords'></div>\
     	        <div id='controls-container' class='controls-container'>\
     	            <ul id='controls' class='controls'>\
     	                <li id='control-first' class='control first'>First</li>\
@@ -1449,7 +1453,6 @@
                         <div id='search-results' class='search-results'></div>\
                     </div>\
     	        </div>\
-    	        <div id='board-container' class='board-container with-coords'></div>\
     	        <div id='info' class='info'>\
     	            <div id='info-players' class='players'>\
         	            <div id='white' class='player white'>\
