@@ -745,7 +745,14 @@
         		}
         		// play the move
         	    if (coord) {
-        	        this.createMove(coord);
+        	        var nextMoves = this.cursor.getNextMoves();
+        	        if (nextMoves && coord in nextMoves) {
+        	            // move already exists
+        	            this.variation(nextMoves[coord]);
+        	        } else {
+        	            // move doesn't exist yet
+            	        this.createMove(coord);
+        	        }
         		}
             } else if (this.mode == "region" && x >= -1 && y >= -1 && this.regionBegun) {
                 if (this.regionTop == y && this.regionLeft == x && !this.regionClickSelect) {
@@ -1300,7 +1307,7 @@
     		if (coord && coord != "tt") {
     			this.board.addStone(pt, color);
     			this.rules.apply(pt, color);
-    			if (this.prefs.markCurrent) {
+    			if (this.prefs.markCurrent && !noRender) {
     				this.addMarker(coord, "current");
     			}
     		} else if (!noRender) {
