@@ -9,6 +9,7 @@ planned for 1.0
 - brief help text (keyboard shortcuts, etc)
 - get rid of comments
 - continuations?
+- figure out why blood_vomit doesn't load on iphone
 
 maybe
 - hold down arrow keys to keep navigating in FF/Safari

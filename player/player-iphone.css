@@ -144,7 +144,7 @@
 }
 .eidogo-player .variations-label {
 	float: left;
-	padding: 0 5px 0 0;
+	padding: 5px 5px 0 0;
 /*  color: #aaa;*/
 	cursor: default;
 	font-size: 13px;
@@ -243,7 +243,7 @@
 	width: 398px;
 /*  min-height: 271px;*/
 	height: 243px;
-	font-size: 11px;
+	font-size: 13px;
 	margin: 5px 0 0 0;
 	padding: 15px 10px 40px 10px;
 	overflow: auto;
@@ -269,7 +269,7 @@
 /*  float: right;*/
 	width: 398px;
 	height: 243px;
-	font-size: 11px;
+	font-size: 12px;
 	margin: 5px 0 0 0;
 	padding: 15px 10px 40px 10px;
 	overflow: auto;
@@ -316,22 +316,22 @@
 .eidogo-player .search-container .search-result span {
     display: inline;
     float: left;
-    padding: 5px;
+    padding: 15px 5px;
 }
 .eidogo-player .search-container .search-result .id, .eidogo-player .search-container .search-result .mv {
     display: none;
 }
 .eidogo-player .search-container .search-result .pw {
-    width: 70px;
+    width: 105px;
 }
 .eidogo-player .search-container .search-result .pb {
-    width: 70px;
+    width: 105px;
 }
 .eidogo-player .search-container .search-result .re {
-    width: 30px;
+    width: 50px;
 }
 .eidogo-player .search-container .search-result .dt {
-    width: 60px;
+    width: 70px;
 }
 .eidogo-player .search-container .search-result .clear {
     clear: both;
@@ -476,14 +476,16 @@
 	padding-right: 1px;
 }
 .eidogo-player .info .players .player.white .name {
+    font-size: 13px;
 	border-top: 1px solid #999;
-    height: 11px;
+    height: 14px;
 	padding: 4px 3px 3px 20px;
 	background: #555 url(images/territory-white.gif) no-repeat;
 }
 .eidogo-player .info .players .player.black .name {
+    font-size: 13px;
 	border-top: 1px solid #999;
-    height: 11px;
+    height: 14px;
 	padding: 4px 3px 3px 20px;
 	background: #555 url(images/territory-black.gif) no-repeat;
 }

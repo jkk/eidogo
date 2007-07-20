@@ -1572,6 +1572,7 @@
             // only update the board when we're given an offset; otherwise,
             // assume we're just reflecting the board position
             if (offsetGiven) {
+                this.nowLoading();
                 var delta = moveOffset - this.cursor.node.getPosition() ;
 				for (var i = 0; i < Math.abs(delta); i++) {
 					if (delta > 0) {
@@ -1585,6 +1586,7 @@
                     if (this.moveNumber < 0) this.moveNumber = 0;
 					this.board.revert(Math.abs(delta));
 				}
+				this.doneLoading();
 				this.refresh();
             }
             

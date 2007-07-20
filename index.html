@@ -45,6 +45,11 @@ var player;
 
 (function() {
     
+    // To Detect iPhone Safari (420+) and Safari 3 (500+)
+    var version = parseInt(jQuery.browser.version, 10);
+    
+    // Provide handlers for frontend things (page title, permalinks) that
+    // aren't handled by Player directly
     var hooks = {
         initGame: function() {
             var gameRoot = this.gameTree.trees.first().nodes.first();
@@ -74,8 +79,9 @@ var player;
         }
 	};
     
+    // Create a new Player from scratch or load in new game data
     function loadGame(params, completeFn) {
-        cfg = {
+        var cfg = {
             domId:              "player-container",
 	        mode:               "play",
 	        sgfPath:            "sgf/",
@@ -98,6 +104,7 @@ var player;
         }
     }
     
+    // All our input comes from the URL hash
     function parseHash(hash) {
         var hashParts = hash ? hash.replace(/^#/, "").split(/:/) : [];
     	var loadPath = null;
@@ -107,6 +114,7 @@ var player;
     	return [hashParts[0] || "", loadPath, hashParts.slice(1)];
     }
     
+    // Start things up
     function init() {
     	var params;
     	var input = parseHash(location.hash);
@@ -124,7 +132,8 @@ var player;
 	            params.boardSize = parts[1];
 	        }
 	    } else if (gameName == "search") {
-	        if (jQuery.browser.safari) {
+	        if (jQuery.browser.safari && version < 420) {
+	            // Safari 2 is broken; provide a workaround
 	            hooks.initDone = function() {
 	                player.loadSearch.apply(player, rest);
 	            }
@@ -152,7 +161,7 @@ var player;
         var first = true;
         
         jQuery.historyInit(function(hash) {
-            if (jQuery.browser.safari) return; // argh, safari 2 sucks
+            if (jQuery.browser.safari && version < 420) return; // safari 2 sucks
             
             if (first) {
                 first = false;
@@ -180,7 +189,7 @@ var player;
         
         loadGame(params);
         
-        if (!jQuery.browser.safari) {
+        if (!jQuery.browser.safari && version < 420) {
             jQuery.historyLoad(location.hash.replace(/^#/, ""));
         }
 

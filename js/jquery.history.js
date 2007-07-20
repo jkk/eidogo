@@ -34,7 +34,7 @@ jQuery.extend({
 			iframe.close();
 			iframe.location.hash = current_hash;
 		}
-		else if (jQuery.browser.safari) {
+		else if (jQuery.browser.safari && parseInt(jQuery.browser.version, 10) < 420) {
 			// etablish back/forward stacks
 			jQuery.historyBackStack = [];
 			jQuery.historyBackStack.length = history.length;
@@ -67,7 +67,7 @@ jQuery.extend({
 				jQuery.historyCallback(current_hash.replace(/^#/, ''));
 				
 			}
-		} else if (jQuery.browser.safari) {
+		} else if (jQuery.browser.safari && parseInt(jQuery.browser.version, 10) < 420) {
 			if (!jQuery.dontCheck) {
 				var historyDelta = history.length - jQuery.historyBackStack.length;
 				
@@ -111,6 +111,9 @@ jQuery.extend({
 		
 		if (jQuery.browser.safari) {
 			newhash = hash;
+			if (parseInt(jQuery.browser.version, 10) >= 420) {
+			    location.hash = newhash;
+			}
 		}
 		else {
 			newhash = '#' + hash;
@@ -126,7 +129,7 @@ jQuery.extend({
 			iframe.location.hash = newhash;
 			jQuery.historyCallback(hash);
 		}
-		else if (jQuery.browser.safari) {
+		else if (jQuery.browser.safari && parseInt(jQuery.browser.version, 10) < 420) {
 		    
 			jQuery.dontCheck = true;
 			
