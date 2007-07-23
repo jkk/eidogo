@@ -1,21 +1,23 @@
 planned for 1.0
-- uploading
+- improve quadrant detection for search
+- uploading (or url or paste)
 - saving
 - permalink notice for unsaved changes
+- "more" search results link
+- decouple player and board renderer
+- game archive browsing/searching
 - showTools preference (disallow implicit selection too)
 - create compact embeddedable version
-- move source.html to index, dom show/hide
 - "download eidogo"
 - brief help text (keyboard shortcuts, etc)
-- get rid of comments
+- get rid of comments in css/code
+- different homepage than KJD, move replayer to /game
 - continuations?
-- figure out why blood_vomit doesn't load on iphone
+- figure out why blood_vomit doesn't load on iphone, sometimes search results
 
 maybe
-- hold down arrow keys to keep navigating in FF/Safari
+- hold down arrow keys to keep navigating in FF/Safari (keydown, keyup)
 - checkboxes for preferences
-- game archive browsing/searching
-- decouple player and board renderer
 - canvas renderer?
 - exhaustive FF[4] SGF support
 - more robust SGF parser

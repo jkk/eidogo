@@ -149,16 +149,12 @@
 		
     		// user-changeable preferences
     		this.prefs = {};
-    		this.prefs.markCurrent = typeof cfg.markCurrent != "undefined" ?
-    			cfg.markCurrent : true;
+    		this.prefs.markCurrent = !!cfg.markCurrent;
     		this.prefs.markNext = typeof cfg.markNext != "undefined" ?
     			cfg.markNext : false;
-    		this.prefs.markVariations = typeof cfg.markVariations != "undefined" ?
-    			cfg.markVariations : true;
-    		this.prefs.showGameInfo = typeof cfg.showGameInfo != "undefined" ?
-    			cfg.showGameInfo : true;
-    		this.prefs.showPlayerInfo = typeof cfg.showPlayerInfo != "undefined" ?
-    			cfg.showPlayerInfo : true;
+    		this.prefs.markVariations = !!cfg.markVariations;
+    		this.prefs.showGameInfo = !!cfg.showGameInfo;
+    		this.prefs.showPlayerInfo = !!cfg.showPlayerInfo;
 		
     		// handlers for the various types of GameNode properties
     		this.propertyHandlers = {
@@ -413,7 +409,7 @@
     	        this.croak(t['error retrieving']);
     	    }
 	    
-	        ajax('get', url, null, success, failure, this, 10000);
+	        ajax('get', url, null, success, failure, this, 30000);
     	},
 	
     	/**
@@ -922,6 +918,7 @@
 	    
     	    this.showComments("");
     	    this.nowLoading();
+    	    this.gameName = "search";
     	    
     	    var success = function(req) {
     	        this.searching = false;

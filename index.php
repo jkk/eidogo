@@ -2,7 +2,7 @@
     "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<title>EidoGo - SGF Replayer</title>
+<title>EidoGo - Go Games, Pattern Search, Joseki Tutor, SGF Editor</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="stylesheet" href="site-style.css">
 <link media="only screen and (max-device-width: 480px)" rel="stylesheet" href="site-style-iphone.css">
@@ -66,33 +66,34 @@ var player;
             }
         },
         setPermalink: function() {
-    		var hash = (this.gameName ? this.gameName : "") + ":" +
-    		    this.cursor.getPath().join(",");
-    		jQuery.historyLoad(hash);
+            var hash = (this.gameName ? this.gameName : "") + ":" +
+                this.cursor.getPath().join(",");
+            jQuery.historyLoad(hash);
         },
         searchRegion: function(params) {
+            this.hooks.initGame.call(this); // update title
             var hash = "search:" + params.q + ":" + params.w + "x" + params.h +
                 ":" + this.compressPattern(params.p) + ":" + params.a;
             if (hash != location.hash.replace(/^#/, "")) {
                 jQuery.historyLoad(hash);
             }
         }
-	};
+    };
     
     // Create a new Player from scratch or load in new game data
     function loadGame(params, completeFn) {
         var cfg = {
             domId:              "player-container",
-	        mode:               "play",
-	        sgfPath:            "sgf/",
-	        progressiveLoad:    false,
+            mode:               "play",
+            sgfPath:            "sgf/",
+            progressiveLoad:    false,
             searchUrl:          "php/search.php",
-	        markCurrent:        true,
-	        markVariations:     true,
-	        markNext:           false,
-	        showGameInfo:       true,
-	        showPlayerInfo:     true,
-	        hooks:              hooks
+            markCurrent:        true,
+            markVariations:     true,
+            markNext:           false,
+            showGameInfo:       true,
+            showPlayerInfo:     true,
+            hooks:              hooks
         };
         for (var key in params) {
             cfg[key] = params[key];
@@ -107,56 +108,56 @@ var player;
     // All our input comes from the URL hash
     function parseHash(hash) {
         var hashParts = hash ? hash.replace(/^#/, "").split(/:/) : [];
-    	var loadPath = null;
-    	if (hashParts[1]) {
-    	    loadPath = hashParts[1].split(",");
-    	}
-    	return [hashParts[0] || "", loadPath, hashParts.slice(1)];
+        var loadPath = null;
+        if (hashParts[1]) {
+            loadPath = hashParts[1].split(",");
+        }
+        return [hashParts[0] || "", loadPath, hashParts.slice(1)];
     }
     
     // Start things up
     function init() {
-    	var params;
-    	var input = parseHash(location.hash);
-    	var gameName = input[0];
-    	var loadPath = input[1];
-    	var rest = input[2];
-    	if (gameName.indexOf("gnugo") === 0) {
-    	    params = {
-    	        gameName:       "",
-    	        opponentUrl:    "php/gnugo.php",
-    	        opponentColor:  "B"
-    	    };
-	        var parts = gameName.split(";");
-	        if (parts[1]) {
-	            params.boardSize = parts[1];
-	        }
-	    } else if (gameName == "search") {
-	        if (jQuery.browser.safari && version < 420) {
-	            // Safari 2 is broken; provide a workaround
-	            hooks.initDone = function() {
-	                player.loadSearch.apply(player, rest);
-	            }
-	            loadGame({
-	                gameName:   "blank",
-	                loadPath:   [0,0]
-	            });
-	        }
-    	} else if (gameName != "" && gameName != "kjd") {
-    	    params = {
-    	        gameName:   gameName,
-    	        loadPath:   loadPath
-    	    };
-	    } else {
-    	    params = {
-    	        sgfUrl:             "php/kjd_progressive.php",
-    	        gameName:           "kjd",
-    	        loadPath:           loadPath,
-    	        progressiveLoad:    true,
-    	        markNext:           true,
-    	        showPlayerInfo:     false
-    	    };
-    	}
+        var params;
+        var input = parseHash(location.hash);
+        var gameName = input[0];
+        var loadPath = input[1];
+        var rest = input[2];
+        if (gameName.indexOf("gnugo") === 0) {
+            params = {
+                gameName:       "",
+                opponentUrl:    "php/gnugo.php",
+                opponentColor:  "B"
+            };
+            var parts = gameName.split(";");
+            if (parts[1]) {
+                params.boardSize = parts[1];
+            }
+        } else if (gameName == "search") {
+            if (jQuery.browser.safari && version < 420) {
+                // Safari 2 is broken; provide a workaround
+                hooks.initDone = function() {
+                    player.loadSearch.apply(player, rest);
+                }
+                loadGame({
+                    gameName:   "blank",
+                    loadPath:   [0,0]
+                });
+            }
+        } else if (gameName != "" && gameName != "kjd") {
+            params = {
+                gameName:   gameName,
+                loadPath:   loadPath
+            };
+        } else {
+            params = {
+                sgfUrl:             "php/kjd_progressive.php",
+                gameName:           "kjd",
+                loadPath:           loadPath,
+                progressiveLoad:    true,
+                markNext:           true,
+                showPlayerInfo:     false
+            };
+        }
         
         var first = true;
         
@@ -189,14 +190,14 @@ var player;
         
         loadGame(params);
         
-        if (!jQuery.browser.safari && version < 420) {
+        if (!jQuery.browser.safari || (jQuery.browser.safari && version >= 420)) {
             jQuery.historyLoad(location.hash.replace(/^#/, ""));
         }
 
     }
     
     eidogo.util.addEvent(window, "load", init);
-		
+    
 })();
 
 </script>
@@ -214,15 +215,15 @@ var player;
             &nbsp;Maintained by <a href="http://tin.nu/">Justin Kramer</a>.</p>
 
         <ul id="links">
-        	<li><a href="kjd">Joseki Tutor</a></li>
+            <li><a href="kjd">Joseki Tutor</a></li>
             <!-- <li><a href="games">Game Archive</a></li> -->
-        	<li><a href="search">Pattern Search</a></li>
-        	<li><a href="gnugo" style='padding-right: 5px'>GNU Go</a></li>
-        	<li><a href="gnugo;9" style='padding-left: 5px; padding-right: 5px'>9x9</a></li>
-        	<li><a href="gnugo;13" style='padding-left: 5px'>13x13</a></li>
-        	<li><a href="blank">Blank Board</a></li>
+            <li><a href="search">Pattern Search</a></li>
+            <li><a href="gnugo" style='padding-right: 5px'>GNU Go</a></li>
+            <li><a href="gnugo;9" style='padding-left: 5px; padding-right: 5px'>9x9</a></li>
+            <li><a href="gnugo;13" style='padding-left: 5px'>13x13</a></li>
+            <li><a href="blank">Blank Board</a></li>
             <!-- <li><a href="upload">Upload</a></li> -->
-        	<li><a href="http://senseis.xmp.net/?EidoGo">Info</a></li>
+            <li><a href="http://senseis.xmp.net/?EidoGo">Info</a></li>
         </ul>
 
     </div>

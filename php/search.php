@@ -27,7 +27,7 @@ if (file_exists($cache_fn)) {
     }
     $retval = 0;
 } else {
-    exec("$kombilo_dir/search.py " .
+    exec("python $kombilo_dir/search.py " .
         escapeshellcmd($q) . " " .
         escapeshellcmd($w) . " " .
         escapeshellcmd($h) . " " .
@@ -38,7 +38,7 @@ if (file_exists($cache_fn)) {
 }
 
 if ($retval) {
-    echo "ERROR";
+    echo "ERROR $retval"; 
     exit;
 }
 
