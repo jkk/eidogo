@@ -1023,12 +1023,12 @@ Algo_signature::~Algo_signature() {
 void Algo_signature::initialize_process(sqlite3* DB) throw(DBError) {
   db = DB;
   char sql[100];
-  sprintf(sql, "create table if not exists algo_signature_%d ( id integer primary key, signature varchar(12) );", boardsize);
+  sprintf(sql, "create table algo_signature_%d ( id integer primary key, signature varchar(12) );", boardsize);
   int rc = sqlite3_exec(db, sql, 0, 0, 0);
-  if (rc != SQLITE_OK) throw DBError();
-  sprintf(sql, "create index if not exists sig_idx on algo_signature_%d(signature);", boardsize);
+  //if (rc != SQLITE_OK) throw DBError();
+  sprintf(sql, "create index sig_idx on algo_signature_%d(signature);", boardsize);
   rc = sqlite3_exec(db, sql, 0, 0, 0);
-  if (rc != SQLITE_OK) throw DBError();
+  //if (rc != SQLITE_OK) throw DBError();
 }
 
 void Algo_signature::newgame_process(int game_id) {
@@ -1181,10 +1181,10 @@ void Algo_finalpos::initialize_process(sqlite3* DB) throw(DBError) {
   // printf("init Algo_finalpos\n");
   db = DB;
   char sql[100];
-  sprintf(sql, "create table if not exists algo_finalpos_%d ( id integer primary key, data blob );", boardsize);
+  sprintf(sql, "create table algo_finalpos_%d ( id integer primary key, data blob );", boardsize);
   int rc = sqlite3_exec(db, sql, 0, 0, 0);
   if (rc != SQLITE_OK) {
-    throw DBError();
+    //throw DBError();
   }
   // printf("init Algo_finalpos\n");
 }
@@ -1483,9 +1483,9 @@ void Algo_movelist::initialize_process(sqlite3* DB) throw(DBError) {
   // printf("init Algo_movelist\n");
   db = DB;
   char sql[100];
-  sprintf(sql, "create table if not exists algo_movelist_%d ( id integer primary key, movelist blob, fpC blob );", boardsize);
+  sprintf(sql, "create table algo_movelist_%d ( id integer primary key, movelist blob, fpC blob );", boardsize);
   int rc = sqlite3_exec(db, sql, 0, 0, 0);
-  if (rc != SQLITE_OK) throw DBError();
+  //if (rc != SQLITE_OK) throw DBError();
   // printf("init Algo_movelist\n");
 }
 
@@ -2426,12 +2426,12 @@ void Algo_hash_full::initialize_process(sqlite3* DB) throw(DBError) {
   // printf("enter algo_hash_full::initialize_processing\n");
   db = DB;
   char sql[200];
-  sprintf(sql, "create table if not exists algo_hash_full_%d ( id integer primary key, hash integer, gameid integer, hit text );", boardsize);
+  sprintf(sql, "create table algo_hash_full_%d ( id integer primary key, hash integer, gameid integer, hit text );", boardsize);
   int rc = sqlite3_exec(db, sql, 0, 0, 0);
-  if (rc != SQLITE_OK) throw DBError();
-  sprintf(sql, "create index if not exists hash_idx on algo_hash_full_%d(hash);", boardsize);
+  //if (rc != SQLITE_OK) throw DBError();
+  sprintf(sql, "create index hash_idx on algo_hash_full_%d(hash);", boardsize);
   rc = sqlite3_exec(db, sql, 0, 0, 0);
-  if (rc != SQLITE_OK) throw DBError();
+  //if (rc != SQLITE_OK) throw DBError();
   // printf("leave algo_hash_full::initialize_processing\n");
 }
 
@@ -2729,12 +2729,12 @@ void Algo_hash::initialize_process(sqlite3* DB) throw(DBError) {
   // printf("enter algo_hash::initialize_processing\n");
   db = DB;
   char buf[200];
-  sprintf(buf, "create table if not exists algo_hash_%d_%s ( hash integer, gameid integer, position integer );", boardsize, dbnameext.c_str());
+  sprintf(buf, "create table algo_hash_%d_%s ( hash integer, gameid integer, position integer );", boardsize, dbnameext.c_str());
   int rc = sqlite3_exec(db, buf, 0, 0, 0);
-  if (rc != SQLITE_OK) throw DBError();
-  sprintf(buf, "create index if not exists hash_idx_%d_%s on algo_hash_%d_%s(hash);", boardsize, dbnameext.c_str(), boardsize, dbnameext.c_str());
+  //if (rc != SQLITE_OK) throw DBError();
+  sprintf(buf, "create index hash_idx_%d_%s on algo_hash_%d_%s(hash);", boardsize, dbnameext.c_str(), boardsize, dbnameext.c_str());
   rc = sqlite3_exec(db, buf, 0, 0, 0);
-  if (rc != SQLITE_OK) throw DBError();
+  //if (rc != SQLITE_OK) throw DBError();
   // printf("leave algo_hash::initialize_processing\n");
 }
         
@@ -3843,8 +3843,8 @@ GameList::GameList(char* DBNAME, string ORDERBY, string FORMAT, ProcessOptions* 
   rc = sqlite3_exec(db, cache_str, 0, 0, 0);
   if (rc) throw DBError();
 
-  rc = sqlite3_exec(db, "create table if not exists db_info ( info text );", 0, 0, 0);
-  if (rc != SQLITE_OK) throw DBError();
+  rc = sqlite3_exec(db, "create table db_info ( info text );", 0, 0, 0);
+  //if (rc != SQLITE_OK) throw DBError();
   char* dbinfo = 0;
   rc = sqlite3_exec(db, "select * from db_info where rowid = 1;", dbinfo_callback, &dbinfo, 0);
   if (rc != SQLITE_OK) throw DBError();
@@ -3887,7 +3887,7 @@ GameList::GameList(char* DBNAME, string ORDERBY, string FORMAT, ProcessOptions* 
 
   // set up snapshot db
   rc = sqlite3_exec(db, "create table snapshots ( data text );", 0, 0, 0);
-  if (rc != SQLITE_OK) throw DBError();
+  //if (rc != SQLITE_OK) throw DBError();
 
   // printf("set up Algorithm instances\n");
   for(vector<int>::iterator it = boardsizes.begin(); it != boardsizes.end(); it++)
@@ -4601,7 +4601,7 @@ void GameList::readPlayersList() throw(DBError) {
 void GameList::createGamesDB() throw(DBError) {
   SGFtags = p_op->SGFTagsAsStrings();
 
-  string sql1 =          "create table if not exists GAMES ( ";
+  string sql1 =          "create table GAMES ( ";
   sql1 +=                  "id integer primary key, ";
   sql1 +=                  "path text, ";
   sql1 +=                  "filename text, ";
@@ -4656,11 +4656,11 @@ void GameList::createGamesDB() throw(DBError) {
   sql_ins_rnp +=           ") values (" + question_marks + ");";
 
   int rc = sqlite3_exec(db, sql1.c_str(), 0, 0, 0);
-  if(rc != SQLITE_OK) throw DBError();
+  //if(rc != SQLITE_OK) throw DBError();
 
-  sql1 = "create table if not exists TAGS ( id integer primary key, name text, visible integer default 1 );";
+  sql1 = "create table TAGS ( id integer primary key, name text, visible integer default 1 );";
   rc = sqlite3_exec(db, sql1.c_str(), 0, 0, 0);
-  if (rc != SQLITE_OK) throw DBError();
+  //if (rc != SQLITE_OK) throw DBError();
   char sql[100];
   sprintf(sql, "insert into TAGS (id, name) values (%d, '%d');", HANDI_TAG, HANDI_TAG);
   rc = sqlite3_exec(db, sql, 0, 0, 0);
@@ -4668,9 +4668,9 @@ void GameList::createGamesDB() throw(DBError) {
   sprintf(sql, "insert into TAGS (id, name) values (%d, '%d');", PROFESSIONAL_TAG, PROFESSIONAL_TAG);
   rc = sqlite3_exec(db, sql, 0, 0, 0);
   // if (rc != SQLITE_OK) throw DBError();
-  sql1 = "create table if not exists GAME_TAGS ( id integer primary key, game_id integer, tag_id integer );";
+  sql1 = "create table GAME_TAGS ( id integer primary key, game_id integer, tag_id integer );";
   rc = sqlite3_exec(db, sql1.c_str(), 0, 0, 0);
-  if (rc != SQLITE_OK) throw DBError();
+  //if (rc != SQLITE_OK) throw DBError();
 }
 
 void GameList::start_processing(int PROCESSVARIATIONS) throw(DBError) {
