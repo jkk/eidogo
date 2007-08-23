@@ -16,7 +16,7 @@ ss.listen(1)
 while 1:
     (cs, ca) = ss.accept()
     
-    print "Accepted %s\n" % (str(ca))
+    #print "Accepted %s\n" % (str(ca))
     
     cf = cs.makefile('rw', 0)
     args = cf.readline().strip().split(' ')
@@ -27,7 +27,7 @@ while 1:
     pattern = args[3]
     algo = args[4]
     
-    print "Args:\n  q: %s, w: %d, h: %d, p: %s, a: %s\n" % (quadrant, width, height, pattern, algo)
+    #print "Args:\n  q: %s, w: %d, h: %d, p: %s, a: %s\n" % (quadrant, width, height, pattern, algo)
     
     if algo == "center":
       algo = CENTER_PATTERN
@@ -45,11 +45,11 @@ while 1:
     
     so = SearchOptions()
     
-    print "Searching...\n"
+    #print "Searching...\n"
     
     gl.search(p, so)
     
-    print "Done. Sending results...\n"
+    #print "Done. Sending results...\n"
     
     for i in range(gl.size()):
         cf.write(gl.getCurrentProperty(i, 'filename') + "\t" +\
@@ -61,13 +61,13 @@ while 1:
             gl.getCurrentProperty(i, 'DT') + "\t" +\
             gl.currentEntryAsString(i) + "\n");
     
-    print "Done. Closing connection...\n"
+    #print "Done. Closing connection...\n"
     
     cf.close()
     cs.close()
     
-    print "Resetting GameList...\n"
+    #print "Resetting GameList...\n"
     
     gl.reset()
     
-    print "Done.\n\n"
+    #print "Done.\n\n"
