@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# depends on http://dojotoolkit.org/svn/dojo/trunk/buildscripts/lib/custom_rhino.jar
+# depends on http://svn.dojotoolkit.org/dojo/trunk/buildscripts/lib/custom_rhino.jar
 
 OUTFILE="player/player.compressed.js"
 RHINOC="java -jar custom_rhino.jar -c "
