@@ -23,13 +23,17 @@ def process(filenames):
         # pop.algos = 0
         # pop.rootNodeTags = 'PW,PB,RE,DT'
         pop.sgfInDB = False
-	    #pop.algos = ALGO_FINALPOS | ALGO_MOVELIST
+        pop.algos = ALGO_FINALPOS | ALGO_MOVELIST
         gl = GameList('t1.db', 'id', '', pop, 100)
     except DBError:
         print 'Database error'
     gl.start_processing()
     counter = 0
+    i = 0;
     for filename in filenames:
+        i += 1
+        if i % 4 != 0:
+            continue
         # print filename
         try:
             file = open(filename)

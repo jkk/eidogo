@@ -12,7 +12,6 @@ $p = preg_replace("/[^\.OX]/", "", $_GET['p']);
 $a = preg_replace("/[^a-z]/", "", $_GET['a']);
 
 $output = null;
-$retval = null;
 
 $cache_fn = "$kombilo_dir/cache/$q-$w-$h-$p-$a";
 if (file_exists($cache_fn)) {
@@ -25,21 +24,35 @@ if (file_exists($cache_fn)) {
     if ($output[0] == "") {
         $output = null;
     }
-    $retval = 0;
 } else {
-    exec("python $kombilo_dir/search.py " .
+    /*exec("python $kombilo_dir/search.py " .
         escapeshellcmd($q) . " " .
         escapeshellcmd($w) . " " .
         escapeshellcmd($h) . " " .
         escapeshellcmd($p) . " " .
         escapeshellcmd($a),
         $output, $retval);
+    if ($retval) {
+        echo "ERROR $retval"; 
+        exit;
+    }
+    */
+    $fp = fsockopen("127.0.0.1", 6060, $errno, $errstr, 10);
+    if (!$fp) {
+        echo "$errstr ($errno)<br />\n";
+        exit;
+    }    
+    fwrite($fp, "$q $w $h $p $a\n");
+    $output = "";
+    while (!feof($fp)) {
+        $output .= fgets($fp, 2048);
+    }
+    fclose($fp);
+    
+    $output = split("\n", $output);
+    // print_r($output);
+    
     file_put_contents($cache_fn, join("\n", $output));
-}
-
-if ($retval) {
-    echo "ERROR $retval"; 
-    exit;
 }
 
 if (!count($output)) {
