@@ -23,7 +23,8 @@ def process(filenames):
         # pop.algos = 0
         # pop.rootNodeTags = 'PW,PB,RE,DT'
         pop.sgfInDB = False
-        gl = GameList('t1.db', 'id', '', pop, 1000)
+	    pop.algos = ALGO_FINALPOS | ALGO_MOVELIST
+        gl = GameList('t1.db', 'id', '', pop, 100)
     except DBError:
         print 'Database error'
     gl.start_processing()
@@ -49,14 +50,20 @@ def process(filenames):
     print 'Processed %d games in %.2f seconds' % (counter, time.time()-starttime)
 
 # filelist = glob.glob('./*.sgf')
-filelist = glob.glob('/home/ug/go/gogod06/*/*.sgf')
 # filelist = glob.glob('/home/ug/go/KGS2005/*.sgf')
+# filelist = glob.glob('/Users/tin/Sites/eidogo/sgf/downloaded/Honinbo/*.sgf')
+filelist = glob.glob('/Users/tin/Sites/eidogo/sgf/games/*.sgf')
 
 filelist.sort()
 process(filelist)
 
-gl = GameList("t1.db", "id", "[[filename.]], ")
+gl = GameList("t1.db", "id", "")
 
+# .X.
+# .OX
+# .OX
+# .OX
+# OXO
 p = Pattern(CENTER_PATTERN, 19, 3, 5, ".X..OX.OX.OXOXO")
 so = SearchOptions()
 
