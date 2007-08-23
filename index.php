@@ -46,13 +46,20 @@ var player;
 (function() {
     
     // To Detect iPhone Safari (420+) and Safari 3 (500+)
-    var version = parseInt(jQuery.browser.version, 10);
+    var sfVersion = parseInt(jQuery.browser.version, 10);
     
     // Provide handlers for frontend things (page title, permalinks) that
     // aren't handled by Player directly
     var hooks = {
         initGame: function() {
             var gameRoot = this.gameTree.trees.first().nodes.first();
+            if (this.gameName == "kjd" || this.gameName == "gnugo" || this.gameName == "search" || this.gameName == "url") {
+                this.dom.optionSave.style.display = "none";
+                this.dom.optionDownload.style.display = "none";
+            } else {
+                this.dom.optionSave.style.display = "block";
+                this.dom.optionDownload.style.display = "block";
+            }
             var gn = gameRoot.GN || this.gameName;
             if (gn) {
                 // set the page title
@@ -77,6 +84,13 @@ var player;
             if (hash != location.hash.replace(/^#/, "")) {
                 jQuery.historyLoad(hash);
             }
+        },
+        saved: function(gn) {
+            loadGame({gameName: gn, loadPath: [0,0]}, function() {
+                var url = location.href.replace(/#[^#]+$/, "") + "#" + this.gameName;
+                this.setPermalink();
+                this.prependComment("Game saved to <a href='" + url + "'>" + url + "</a>");
+            }.bind(this));
         }
     };
     
@@ -88,6 +102,7 @@ var player;
             sgfPath:            "sgf/",
             progressiveLoad:    false,
             searchUrl:          "php/search.php",
+            saveUrl:            "php/save.php",
             markCurrent:        true,
             markVariations:     true,
             markNext:           false,
@@ -101,7 +116,11 @@ var player;
         if (!player) {
             player = new eidogo.Player(cfg);
         } else {
-            player.remoteLoad(params.gameName, null, true, params.loadPath);
+            if (cfg.sgfUrl) {
+                params.gameName = cfg.sgfUrl;
+                player.gameName = cfg.gameName;
+            }
+            player.remoteLoad(params.gameName, null, !cfg.sgfUrl, params.loadPath, completeFn);
         }
     }
     
@@ -133,7 +152,7 @@ var player;
                 params.boardSize = parts[1];
             }
         } else if (gameName == "search") {
-            if (jQuery.browser.safari && version < 420) {
+            if (jQuery.browser.safari && sfVersion < 420) {
                 // Safari 2 is broken; provide a workaround
                 hooks.initDone = function() {
                     player.loadSearch.apply(player, rest);
@@ -143,6 +162,11 @@ var player;
                     loadPath:   [0,0]
                 });
             }
+        } else if (gameName == "url") {
+            params = {
+                gameName:   "url",
+                sgfUrl:     "php/fetch.php?url=" + location.hash.replace(/^#?url:/, "")
+            };
         } else if (gameName != "" && gameName != "kjd") {
             params = {
                 gameName:   gameName,
@@ -150,8 +174,8 @@ var player;
             };
         } else {
             params = {
-                sgfUrl:             "php/kjd_progressive.php",
                 gameName:           "kjd",
+                sgfUrl:             "php/kjd_progressive.php",                
                 loadPath:           loadPath,
                 progressiveLoad:    true,
                 markNext:           true,
@@ -162,7 +186,7 @@ var player;
         var first = true;
         
         jQuery.historyInit(function(hash) {
-            if (jQuery.browser.safari && version < 420) return; // safari 2 sucks
+            if (jQuery.browser.safari && sfVersion < 420) return; // safari 2 sucks
             
             if (first) {
                 first = false;
@@ -176,6 +200,12 @@ var player;
             if (typeof gameName != "undefined" && gameName != player.gameName) {
                 if (!gameName || gameName == "kjd") {
                     location.href = "kjd";
+                } else if (gameName == "url") {
+                    loadGame({
+                        gameName:   "url",
+                        sgfUrl:     "php/fetch.php?url=" + hash.replace(/^#?url:/, "")
+                    });
+                    return;
                 } else if (gameName == "search" && loadPath) {
                     // alert(rest);
                     player.loadSearch.apply(player, rest);
@@ -190,7 +220,7 @@ var player;
         
         loadGame(params);
         
-        if (!jQuery.browser.safari || (jQuery.browser.safari && version >= 420)) {
+        if (!jQuery.browser.safari || (jQuery.browser.safari && sfVersion >= 420)) {
             jQuery.historyLoad(location.hash.replace(/^#/, ""));
         }
 

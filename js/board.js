@@ -141,9 +141,10 @@ eidogo.Board.prototype = {
 			stones = this.stones;
 			markers = this.markers;
 		}
+		var offset;
 		for (var x = 0; x < this.boardSize; x++) {
 			for (var y = 0; y < this.boardSize; y++) {
-			    var offset = y * this.boardSize + x;
+			    offset = y * this.boardSize + x;
 				if (stones[offset] == null) {
 					continue;
 				} else if (stones[offset] == this.EMPTY) {
@@ -157,7 +158,7 @@ eidogo.Board.prototype = {
 		}
 		for (var x = 0; x < this.boardSize; x++) {
 			for (var y = 0; y < this.boardSize; y++) {
-			    var offset = y * this.boardSize + x;
+			    offset = y * this.boardSize + x;
 				if (markers[offset] == null) continue;
 				this.renderer.renderMarker({x: x, y: y}, markers[offset]);
 				this.lastRender.markers[offset] = markers[offset];

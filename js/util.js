@@ -53,8 +53,15 @@ eidogo.util = {
             e.pageY = e.clientY + (document.documentElement.scrollTop ||
                 document.body.scrollTop);
         }
-        var elX = eidogo.util.getElX(el);
-        var elY = eidogo.util.getElY(el);
+        if (!el._x) {
+            var elX = eidogo.util.getElX(el);
+            var elY = eidogo.util.getElY(el);
+            el._x = elX;
+            el._y = elY;
+        } else {
+            var elX = el._x;
+            var elY = el._y;
+        }
 		return [e.pageX - elX, e.pageY - elY];
     },
     
@@ -80,11 +87,11 @@ eidogo.util = {
     },
     
     getElX: function(el) {
-        return jQuery(el).offset({scroll:false}).left;
+        return jQuery(el).offsetLite({scroll:false}).left;
     },
     
     getElY: function(el) {
-        return jQuery(el).offset({scroll:false}).top;
+        return jQuery(el).offsetLite({scroll:false}).top;
     }
     
 };

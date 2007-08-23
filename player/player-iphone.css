@@ -542,6 +542,19 @@
     color: #888;
     display: none;
 }
+.eidogo-player .option-save {
+    float: left;
+    display: block;
+    width: 390px;
+    padding: 10px 0;
+    margin: 5px 0 50px 5px;
+    background: #181818;
+    border: 1px solid #282828;
+    text-align: center;
+}
+.eidogo-player .option-download {
+    display: none;
+}
 .eidogo-loading {
 	position: absolute;
 	width: 150px;

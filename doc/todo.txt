@@ -1,13 +1,15 @@
 planned for 1.0
+- end region select on mouseup outside of board
 - improve quadrant detection for search
-- uploading (or url or paste)
-- saving
-- permalink notice for unsaved changes
+- uploading (or url or paste), fetch restrictions
+- unsaved changes notice for permalink, save
+- show resignation comment
 - "more" search results link
-- decouple player and board renderer
+- decouple player and board renderer (click events)
 - game archive browsing/searching
 - showTools preference (disallow implicit selection too)
 - create compact embeddedable version
+- test multiple instances on a page
 - "download eidogo"
 - brief help text (keyboard shortcuts, etc)
 - get rid of comments in css/code
@@ -15,7 +17,8 @@ planned for 1.0
 - continuations?
 - figure out why blood_vomit doesn't load on iphone, sometimes search results
 
-maybe
+future features?
+- non-regular-sized boards
 - hold down arrow keys to keep navigating in FF/Safari (keydown, keyup)
 - checkboxes for preferences
 - canvas renderer?

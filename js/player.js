@@ -17,8 +17,6 @@
     var stopEvent = eidogo.util.stopEvent;
     var addClass = eidogo.util.addClass;
     var removeClass = eidogo.util.removeClass;
-    var getElX = eidogo.util.getElX;
-    var getElY = eidogo.util.getElY;
     
     /**
      * @class Player is the overarching control structure that allows you to
@@ -109,6 +107,9 @@
 		
     		// pattern and game info search
     		this.searchUrl = cfg.searchUrl;
+    		
+    		// save to file
+    		this.saveUrl = cfg.saveUrl;
     		
     		// Allow outside scripts to hook into Player events. Format:
     		//      hookName:   hookHandler
@@ -1390,6 +1391,23 @@
     	    this.dom.comments.innerHTML = "<div class='" + cls + "'>" + content + "</div>" +
     	        this.dom.comments.innerHTML;
     	},
+    	
+    	downloadSgf: function(evt) {    	    
+    	    stopEvent(evt);
+    	    location.href = "php/download.php?id=" + this.gameName;
+    	},
+    	
+    	save: function(evt) {
+    	    stopEvent(evt);
+    	    var success = function(req) {
+    	        this.hook("saved", [req.responseText]);
+    	    }
+	        var failure = function(req) {
+    	        this.croak(t['error retrieving']);
+    	    }
+    	    var sgf = this.gameTree.trees.first().toSgf();
+            ajax('POST', this.saveUrl, {sgf: sgf}, success, failure, this, 30000);
+    	},
 	
 	    /**
 	     * Create the Player layout and insert it into the page. Also store
@@ -1472,6 +1490,10 @@
         	        </div>\
     	            <div id='info-game' class='game'></div>\
     	        </div>\
+    	        <div id='options' class='options'>\
+    	            <a id='option-save' class='option-save' href='#' title='Save this game'>Save</a>\
+    	            <a id='option-download' class='option-download' href='#' title='Download this game as SGF'>Download SGF</a>\
+    	        </div>\
     	        <div id='preferences' class='preferences'>\
     	            <div><input type='checkbox'> Show variations on board</div>\
     	            <div><input type='checkbox'> Mark current move</div>\
@@ -1493,6 +1515,7 @@
     	    while (match = re.exec(domHtml)) {
     	        id = match[0].replace(/'/g, "").replace(/ id=/, "");
     	        jsName = "";
+    	        // camel-case the id
     	        match[1].split("-").forEach(function(word, i) {
     	            word = i ? word.charAt(0).toUpperCase() + word.substring(1) : word;
     	            jsName += word
@@ -1504,6 +1527,10 @@
     		this.dom.searchRegion = document.createElement('div');
     		this.dom.searchRegion.id = "search-region-" + this.uniq;
     		this.dom.searchRegion.className = "search-region";
+    		
+    		// for speedup
+    		this.dom.navSlider._width = this.dom.navSlider.offsetWidth;
+    		this.dom.navSliderThumb._width = this.dom.navSliderThumb.offsetWidth;
     	    
     	    // dom element      handler
     	    [['moveNumber',     'setPermalink'],
@@ -1514,7 +1541,9 @@
     	     ['controlPass',    'pass'],
     	     ['searchButton',   'searchRegion'],
     	     ['searchResults',  'loadSearchResult'],
-    	     ['searchClose',    'closeSearch']
+    	     ['searchClose',    'closeSearch'],
+    	     ['optionDownload', 'downloadSgf'],
+    	     ['optionSave',     'save']
     	    ].forEach(function(eh) {
     	        onClick(this.dom[eh[0]], this[eh[1]], this);
     	    }.bind(this));
@@ -1558,7 +1587,7 @@
     	},
     	
     	updateNavSlider: function(offset) {
-    	    var width = this.dom.navSlider.offsetWidth - this.dom.navSliderThumb.offsetWidth;
+    	    var width = this.dom.navSlider._width - this.dom.navSliderThumb._width;
     	    var steps = this.totalMoves;
     	    var offsetGiven = !!offset;
     	    var offset = offset || this.moveNumber / steps * width;
@@ -1645,7 +1674,10 @@
     	},
 	
     	setPermalink: function() {
-    	    if (!this.gameName || this.gameName == "search" || this.gameName == "gnugo") return;
+    	    if (!this.gameName || this.gameName == "search"
+    	        || this.gameName == "gnugo" || this.gameName == "url") {
+    	        return;
+	        }
     	    this.hook("setPermalink");
     	},
 	
