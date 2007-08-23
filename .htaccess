@@ -1,11 +1,11 @@
-Options -MultiViews
+#Options -MultiViews
 RewriteEngine on
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(kjd)$ /eidogo/#$1 [R,L,NE]
-RewriteRule ^(search)$ /eidogo/#$1 [R,L,NE]
-RewriteRule ^(gnugo.*)$ /eidogo/#$1 [R,L,NE]
-RewriteRule ^(blank)$ /eidogo/#$1 [R,L,NE]
+RewriteRule ^(kjd)$ /#$1 [R,L,NE]
+RewriteRule ^(search)$ /#$1 [R,L,NE]
+RewriteRule ^(gnugo.*)$ /#$1 [R,L,NE]
+RewriteRule ^(blank)$ /#$1 [R,L,NE]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ /eidogo/ [L]
+RewriteRule ^(.*)$ / [L]
