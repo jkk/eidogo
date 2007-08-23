@@ -53,7 +53,7 @@ var player;
     var hooks = {
         initGame: function() {
             var gameRoot = this.gameTree.trees.first().nodes.first();
-            if (this.gameName == "kjd" || this.gameName == "gnugo" || this.gameName == "search" || this.gameName == "url") {
+            if (this.gameName == "kjd" || this.gameName == "gnugo" || this.gameName == "search") {
                 this.dom.optionSave.style.display = "none";
                 this.dom.optionDownload.style.display = "none";
             } else {
