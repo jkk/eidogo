@@ -134,7 +134,7 @@
     border-bottom: 1px solid #800;
     border-right: 1px solid #800;
 	cursor: pointer;
-	display: none;
+/*  display: none;*/
 }
 .eidogo-player .variations-container {
 	width: 386px;

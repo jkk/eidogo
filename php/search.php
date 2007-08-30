@@ -70,6 +70,7 @@ $results = array();
 
 foreach ($output as $line) {
     list($fn, $pw, $wr, $pb, $br, $re, $dt, $mv) = split("\t", $line);
+    if (!$fn) continue;
     $id = str_replace(".sgf", "", $fn);
     $mv = split(",", $mv);
     $mv = (int)$mv[count($mv)-2];

@@ -1,10 +1,8 @@
 * {
-    zoom: 1.0; /* because IE makes no sense */
+    zoom: 1; /* because IE makes no sense */
 }
 body {
 	margin: 0;
-/*  background: #444 url(images/bg.png) repeat-x;*/
-/*  color: #fff;*/
 	font-family: arial, helvetica, sans-serif;
 	font-size: 11px;
 	background: #999;
@@ -19,7 +17,14 @@ body {
 }
 #content {
     margin: 10px 0 30px 0;
-/*    background: #fff;*/
+}
+#text-content {
+    background: #eee;
+    padding: 0 20px 20px 20px;
+    border-top: 2px solid #fff;
+}
+#text-content a {
+    color: #008;
 }
 a:link, a:visited, a:active {
     color: #fff;
@@ -27,9 +32,7 @@ a:link, a:visited, a:active {
 h1 {
 	font-size: 20px;
 	font-weight: normal;
-/*  font-variant: small-caps;*/
     text-transform: uppercase;
-/*  color: #ccc;*/
 	margin: 5px 0 5px 10px;
 	padding: 0;
 	float: left;
@@ -41,15 +44,19 @@ h1 span {
     float: right;
     font-size: 9px;
     margin: 10px 10px 0 0;
-/*    color: #ddd;*/
 }
 #ownership a {
-    color: black;
+    color: #008;
 }
 h2 {
 	font-size: 18px;
 	margin: 20px 0 10px 0;
 	padding: 0;
+	color: #744;
+}
+h3 {
+    font-size: 14px;
+    margin: 10px 0 10px 0;
 }
 p {
 	margin: 10px 0 10px 0;
@@ -62,8 +69,6 @@ ol {
 pre, code {
 	font-weight: normal;
 	font-style: normal;
-/*  background: #333;*/
-/*    color: #800;*/
     padding: 10px 5px;
     margin: 0;
 }
@@ -74,17 +79,13 @@ pre, code {
 	min-height: 300px;
 	position: relative;
     background: #fff;
-/*  padding: 10px 10px 20px 10px;*/
-/*  border-top: 1px solid #666;*/
 }
 #links {
     clear: both;
-/*    zoom: 1;*/
     width: 760px;
     height: 33px;
 	display: block;
-/*  color: #777;*/
-  padding: 0;
+    padding: 0;
 	margin: 0;
     background-color: #ccc;
 	border-top: 1px solid #999;
@@ -92,28 +93,16 @@ pre, code {
 }
 #links li {
   list-style-type: none;
-/*  display: inline;*/
   float: left;
 }
 #links li a {
     height: 13px;
-/*    background-color: #222;*/
     display: block;
     float: left;
-    color: #000;
-/*  color: #aaa;*/
-/*  text-decoration: none;*/
-/*    border-left: 1px solid #ddd;*/
-/*    border-bottom: 1px solid #ccc;*/
-  padding: 10px 15px 10px 15px;
- 
-	font-size: 11px;
+    color: #008;
+    padding: 10px 15px 10px 15px;
+    font-size: 11px;
 }
 #links li a:hover {
-/*  background: #622;*/
     background: #bbb;
-/*    border-left: 1px solid #ccc;*/
-/*    border-bottom: 1px solid #888;*/
-/*  color: #fff;*/
-/*    text-decoration: underline;*/
 }

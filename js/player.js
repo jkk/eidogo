@@ -17,6 +17,8 @@
     var stopEvent = eidogo.util.stopEvent;
     var addClass = eidogo.util.addClass;
     var removeClass = eidogo.util.removeClass;
+    var show = eidogo.util.show;
+    var hide = eidogo.util.hide;
     
     /**
      * @class Player is the overarching control structure that allows you to
@@ -222,7 +224,7 @@
     		    if (!cfg.sgfUrl) {
     		        cfg.sgfUrl = this.sgfPath + this.gameName + ".sgf";
     		    }
-		    
+		        
     		    // load data from a URL
     			this.remoteLoad(cfg.sgfUrl, null, false, null, function() {
     			    this.hook("initDone");
@@ -286,7 +288,7 @@
     		this.totalMoves--;
     		this.showInfo();
     		if (this.prefs.showPlayerInfo) {
-    			this.dom.infoPlayers.style.display = "block";
+    		    show(this.dom.infoPlayers);
     		}
             this.enableNavSlider();
     		this.selectTool("play");
@@ -324,6 +326,7 @@
     		addEvent(domBoard, "mousedown", this.handleBoardMouseDown, this, true);
     		addEvent(domBoard, "mouseup", this.handleBoardMouseUp, this, true);
             addEvent(document, "keydown", this.handleKeypress, this, true);
+            addEvent(document, "mouseup", this.handleDocMouseUp, this, true);
     	},
 	
     	/**
@@ -409,7 +412,7 @@
     	    var failure = function(req) {
     	        this.croak(t['error retrieving']);
     	    }
-	    
+            
 	        ajax('get', url, null, success, failure, this, 30000);
     	},
 	
@@ -699,7 +702,7 @@
     	        var x = xy[0];
     	        var y = xy[1];
     	        if (!this.boundsCheck(x, y, [0, this.board.boardSize-1])) return;
-    	        if (!this.regionBegun && (x != this.mouseDownX || y != this.mouseDownY)) {
+    	        if (this.searchUrl && !this.regionBegun && (x != this.mouseDownX || y != this.mouseDownY)) {
     	            // click and drag: implicit region select
     	            this.selectTool("region");
     	            this.regionBegun = true;
@@ -764,8 +767,9 @@
                     this.regionRight = (x < 0 ? 0 :  (x >= this.board.boardSize) ?
                         x : x + (x > this.regionLeft ? 1 : 0));
                     this.showRegion();
-                    this.dom.searchAlgo.style.display = "inline";
-                    this.dom.searchButton.style.display = "inline";
+                    show(this.dom.searchAlgo, "inline");
+                    show(this.dom.searchButton, "inline");
+                    stopEvent(e);
                 }
             } else {
                 // place black stone, white stone, labels
@@ -801,6 +805,17 @@
                 this.cursor.node.pushProperty(prop, coord);
                 this.refresh();
             }
+    	},
+    	
+    	handleDocMouseUp: function(evt) {
+    	    if (this.domLoading) return;
+    	    if (this.mode == "region" && this.regionBegun && !this.regionClickSelect) {
+    	        // end of region selection
+        	    this.mouseDown = false;
+                this.regionBegun = false;
+                show(this.dom.searchAlgo, "inline");
+                show(this.dom.searchButton, "inline");
+    	    }
     	},
     	
     	boundsCheck: function(x, y, region) {
@@ -839,13 +854,13 @@
                 bounds[2] + "px";
             this.dom.searchRegion.style.height = this.board.renderer.pointHeight *
                 bounds[3] + "px";
-            this.dom.searchRegion.style.display = "block";
+            show(this.dom.searchRegion);
     	},
     	
     	loadSearch: function(q, dim, p, a) {
     	    var blankGame = {nodes: [], trees: [{nodes: [{SZ: this.board.boardSize}], trees: []}]};
     	    this.load(blankGame);
-    	    
+            
     	    p = this.uncompressPattern(p);
     	    dim = dim.split("x");
     	    var w = dim[0];
@@ -881,6 +896,8 @@
             this.regionRight = l + x;
             this.regionBottom = t + y;
             
+            this.dom.searchAlgo.value = a;
+            
             this.searchRegion();
     	},
     	
@@ -889,8 +906,8 @@
     	    this.searching = true;
     	    
     	    if (!this.searchUrl) {
-    	        this.dom.comments.style.display = "block";
-	            this.dom.searchContainer.style.display = "none";
+    	        show(this.dom.comments);
+    	        hide(this.dom.searchContainer);
     	        this.prependComment("No search URL provided.");
     	        return;
     	    }
@@ -907,30 +924,50 @@
     	    var oneW = /^\.*O\.*$/.test(pattern);
     	    var oneB = /^\.*X\.*$/.test(pattern);
     	    if (empty || oneW || oneB) {
-    	        this.dom.comments.style.display = "block";
-	            this.dom.searchContainer.style.display = "none";
+    	        this.searching = false;
+    	        show(this.dom.comments);
+    	        hide(this.dom.searchContainer);
     	        this.prependComment("Please select at least two stones to search for.");
     	        return;
 	        }
+	        
+	        // make sure corner search regions touch two adjacent edges of the board
+	        var edges = [];
+	        if (bounds[0] == 0) edges.push('n');
+	        if (bounds[1] == 0) edges.push('w')
+	        if (bounds[0] + bounds[3] == this.board.boardSize) edges.push('s');
+	        if (bounds[1] + bounds[2] == this.board.boardSize) edges.push('e');
+	        if (!(edges.length == 2 &&
+	             ((edges.contains('n') && edges.contains('e')) ||
+	              (edges.contains('n') && edges.contains('w')) ||
+	              (edges.contains('s') && edges.contains('e')) ||
+	              (edges.contains('s') && edges.contains('w'))))) {
+	            this.searching = false;
+	            show(this.dom.comments);
+    	        hide(this.dom.searchContainer);
+    	        this.prependComment("For corner searches, your selection must " +
+    	            "touch two adjacent edges of the board.");
+    	        return;
+	        }
     	    
-    	    var quadrant = (bounds[0] < this.board.boardSize / 2) ? "n" : "s";
-    	    quadrant += (bounds[1] < this.board.boardSize / 2) ? "w" : "e";
+    	    var quadrant = (edges.contains('n') ? "n" : "s");
+    	    quadrant += (edges.contains('w') ? "w" : "e");
     	    var algo = this.dom.searchAlgo.value;
 	    
     	    this.showComments("");
     	    this.nowLoading();
     	    this.gameName = "search";
-    	    
+
     	    var success = function(req) {
     	        this.searching = false;
     	        this.doneLoading();
-	            this.dom.comments.style.display = "none";
-	            this.dom.searchContainer.style.display = "block";
+    	        hide(this.dom.comments);
+    	        show(this.dom.searchContainer);
 	            if (req.responseText == "ERROR") {
 	                this.croak(t['error retrieving']);
 	                return;
 	            } else if (req.responseText == "NONE") {
-	                this.dom.searchResultsContainer.style.display = "none";
+	                hide(this.dom.searchResultsContainer);
 	                this.dom.searchCount.innerHTML = "No";
 	                return;
 	            }
@@ -950,7 +987,7 @@
                         <div class='clear'>&nbsp;</div>\
                         </a>";
                 }
-                this.dom.searchResultsContainer.style.display = "block";
+                show(this.dom.searchResultsContainer);
                 this.dom.searchResults.innerHTML = html;
 	            this.dom.searchCount.innerHTML = results.length;
     	    }
@@ -1003,8 +1040,8 @@
     	},
     	
     	closeSearch: function() {
-            this.dom.searchContainer.style.display = "none";
-            this.dom.comments.style.display = "block";
+    	    hide(this.dom.searchContainer);
+    	    show(this.dom.comments);
     	},
 	
     	/**
@@ -1205,9 +1242,9 @@
             } else {
                 cursor = "default";
                 this.regionBegun = false;
-                this.dom.searchRegion.style.display = "none";
-                this.dom.searchButton.style.display = "none";
-                this.dom.searchAlgo.style.display = "none";
+                hide(this.dom.searchRegion);
+                hide(this.dom.searchButton);
+                hide(this.dom.searchAlgo);
             }
             this.board.renderer.domNode.style.cursor = cursor;
             this.mode = tool;
@@ -1446,7 +1483,7 @@
                         <option value='play'>" + t['play'] + "</option>\
                         <option value='add_b'>" + t['add_b'] + "</option>\
                         <option value='add_w'>" + t['add_w'] + "</option>\
-                        <option value='region'>" + t['region'] + "</option>\
+                        " + (this.searchUrl ? ("<option value='region'>" + t['region'] + "</option>") : "") +"\
                         <option value='tr'>" + t['triangle'] + "</option>\
                         <option value='sq'>" + t['square'] + "</option>\
                         <option value='cr'>" + t['circle'] + "</option>\
@@ -1555,9 +1592,11 @@
     	
     	enableNavSlider: function() {
     	    // don't use slider for progressively-loaded games
-    		if (this.progressiveLoad) return;
+    		if (this.progressiveLoad) {
+    		    hide(this.dom.navSliderThumb);
+    		    return;
+		    }
     	
-            this.dom.navSliderThumb.style.display = "block";
 			this.dom.navSlider.style.cursor = "pointer";
 	
 			var sliding = false;

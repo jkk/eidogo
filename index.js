@@ -1,52 +1,10 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-    "http://www.w3.org/TR/html4/loose.dtd">
-<html>
-<head>
-<title>EidoGo - Go Games, Pattern Search, Joseki Tutor, SGF Editor</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<link rel="stylesheet" href="site-style.css">
-<link media="only screen and (max-device-width: 480px)" rel="stylesheet" href="site-style-iphone.css">
-<link rel="stylesheet" href="player/player.css">
-<!--[if IE 6]>
-<link rel="stylesheet" href="player/player-ie6.css">
-<![endif]-->
-<meta name="viewport" content="width=421, minimum-scale=0.76">
-<link media="only screen and (max-device-width: 480px)" href="player/player-iphone.css" type="text/css" rel="stylesheet">
-<!--
-    For international support, uncomment the following line and put in the
-    appropriate language code (see the 'player/i18n' folder).
--->
-<!-- <script type="text/javascript" src="player/i18n/pt_br.js"></script> -->
-
-<!-- <script type="text/javascript" src="player/player.compressed.js"></script> -->
-
-<!--
-    Uncomment the following to work with the original source.
--->
-<!-- <script type="text/javascript" src="js/yui-dom-event.js"></script>
-<script type="text/javascript" src="js/yui-connection.js"></script>
-<script type="text/javascript" src="js/yui-history.js"></script> -->
-<script type="text/javascript" src="js/jquery.js"></script>
-<script type="text/javascript" src="js/jquery.dimensions.js"></script>
-<script type="text/javascript" src="js/jquery.history.js"></script>
-<script type="text/javascript" src="js/lang.js"></script>
-<script type="text/javascript" src="js/eidogo.js"></script>
-<script type="text/javascript" src="js/util.js"></script>
-<script type="text/javascript" src="js/i18n.js"></script>
-<script type="text/javascript" src="js/gametree.js"></script>
-<script type="text/javascript" src="js/sgf.js"></script>
-<script type="text/javascript" src="js/board.js"></script>
-<script type="text/javascript" src="js/rules.js"></script>
-<script type="text/javascript" src="js/player.js"></script>
-
-<script type="text/javascript">
-
 var player;
 
 (function() {
     
     // To Detect iPhone Safari (420+) and Safari 3 (500+)
     var sfVersion = parseInt(jQuery.browser.version, 10);
+    var safari2 = (jQuery.browser.safari && sfVersion < 420);
     
     // Provide handlers for frontend things (page title, permalinks) that
     // aren't handled by Player directly
@@ -54,11 +12,11 @@ var player;
         initGame: function() {
             var gameRoot = this.gameTree.trees.first().nodes.first();
             if (this.gameName == "kjd" || this.gameName == "gnugo" || this.gameName == "search") {
-                this.dom.optionSave.style.display = "none";
-                this.dom.optionDownload.style.display = "none";
+                eidogo.util.hide(this.dom.optionSave);
+                eidogo.util.hide(this.dom.optionDownload);
             } else {
-                this.dom.optionSave.style.display = "block";
-                this.dom.optionDownload.style.display = "block";
+                eidogo.util.show(this.dom.optionSave);
+                eidogo.util.show(this.dom.optionDownload);
             }
             var gn = gameRoot.GN || this.gameName;
             if (gn) {
@@ -96,6 +54,7 @@ var player;
     
     // Create a new Player from scratch or load in new game data
     function loadGame(params, completeFn) {
+        params = params || {};
         var cfg = {
             domId:              "player-container",
             mode:               "play",
@@ -141,6 +100,7 @@ var player;
         var gameName = input[0];
         var loadPath = input[1];
         var rest = input[2];
+        
         if (gameName.indexOf("gnugo") === 0) {
             params = {
                 gameName:       "",
@@ -152,15 +112,17 @@ var player;
                 params.boardSize = parts[1];
             }
         } else if (gameName == "search") {
-            if (jQuery.browser.safari && sfVersion < 420) {
+            if (safari2) {
                 // Safari 2 is broken; provide a workaround
                 hooks.initDone = function() {
-                    player.loadSearch.apply(player, rest);
+                    if (loadPath) {
+                        player.loadSearch.apply(player, rest);
+                    }
                 }
-                loadGame({
-                    gameName:   "blank",
+                params = {
+                    gameName:   "search",
                     loadPath:   [0,0]
-                });
+                };
             }
         } else if (gameName == "url") {
             params = {
@@ -172,7 +134,7 @@ var player;
                 gameName:   gameName,
                 loadPath:   loadPath
             };
-        } else {
+        } else if (gameName == "kjd") {
             params = {
                 gameName:           "kjd",
                 sgfUrl:             "php/kjd_progressive.php",                
@@ -186,19 +148,27 @@ var player;
         var first = true;
         
         jQuery.historyInit(function(hash) {
-            if (jQuery.browser.safari && sfVersion < 420) return; // safari 2 sucks
+            if (safari2) return; // safari 2 sucks
             
             if (first) {
                 first = false;
                 return;
             }
+            
+            eidogo.util.show('player-container');
+            
             var input = parseHash(hash);
             var gameName = input[0];
             var loadPath = input[1];
             var rest = input[2];
             if (gameName.indexOf("gnugo") === 0) return;
+            
             if (typeof gameName != "undefined" && gameName != player.gameName) {
-                if (!gameName || gameName == "kjd") {
+                if (!gameName) {
+                    eidogo.util.hide('player-container');
+                    eidogo.util.show('text-content');
+                    return;
+                } else if(gameName == "kjd") {
                     location.href = "kjd";
                 } else if (gameName == "url") {
                     loadGame({
@@ -207,7 +177,6 @@ var player;
                     });
                     return;
                 } else if (gameName == "search" && loadPath) {
-                    // alert(rest);
                     player.loadSearch.apply(player, rest);
                     return;
                 }
@@ -218,53 +187,24 @@ var player;
             }
         });
         
+        if (location.pathname == "/" && !gameName) {
+            eidogo.util.hide('player-container');
+            eidogo.util.show('text-content');
+        } else {
+            eidogo.util.show('player-container');
+            eidogo.util.hide('text-content');
+        }
+        
         loadGame(params);
         
-        if (!jQuery.browser.safari || (jQuery.browser.safari && sfVersion >= 420)) {
+        if (gameName) {
             jQuery.historyLoad(location.hash.replace(/^#/, ""));
         }
 
     }
     
-    eidogo.util.addEvent(window, "load", init);
+    if (location.pathname == "/") {
+       eidogo.util.addEvent(window, "load", init); 
+    }
     
 })();
-
-</script>
-
-</head>
-<body>
-    
-<div id="container">
-    
-    <div id="header">
-
-        <h1>Eido<span>Go</span></h1>
-
-        <p id="ownership">EidoGo is <a href="source.html">Open Source</a>.
-            &nbsp;Maintained by <a href="http://tin.nu/">Justin Kramer</a>.</p>
-
-        <ul id="links">
-            <li><a href="kjd">Joseki Tutor</a></li>
-            <!-- <li><a href="games">Game Archive</a></li> -->
-            <li><a href="search">Pattern Search</a></li>
-            <li><a href="gnugo" style='padding-right: 5px'>GNU Go</a></li>
-            <li><a href="gnugo;9" style='padding-left: 5px; padding-right: 5px'>9x9</a></li>
-            <li><a href="gnugo;13" style='padding-left: 5px'>13x13</a></li>
-            <li><a href="blank">Blank Board</a></li>
-            <!-- <li><a href="upload">Upload</a></li> -->
-            <li><a href="http://senseis.xmp.net/?EidoGo">Info</a></li>
-        </ul>
-
-    </div>
-
-    <div id="content">
-
-        <div id="player-container"></div>
-
-    </div>
-
-</div>
-
-</body>
-</html>

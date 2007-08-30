@@ -86,6 +86,21 @@ eidogo.util = {
         jQuery(el).removeClass(cls);
     },
     
+    show: function(el, display) {
+        display = display || "block";
+        if (typeof el == "string") {
+            el = eidogo.util.byId(el);
+        }
+        el.style.display = display;
+    },
+    
+    hide: function(el) {
+        if (typeof el == "string") {
+            el = eidogo.util.byId(el);
+        }
+        el.style.display = "none";
+    },
+    
     getElX: function(el) {
         return jQuery(el).offsetLite({scroll:false}).left;
     },
