@@ -12,3 +12,9 @@ RewriteRule ^(blank)$ /#$1 [R,L,NE]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ / [L]
+
+php_flag zlib.output_compression On 
+php_value zlib.output_compression_level 5
+AddHandler application/x-httpd-php .css .js
+php_value auto_prepend_file php/content_header.php
+php_value include_path .:..
