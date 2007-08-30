@@ -92,8 +92,8 @@ pre, code {
 	border-bottom: 3px solid #777;
 }
 #links li {
-  list-style-type: none;
-  float: left;
+    list-style-type: none;
+    float: left;
 }
 #links li a {
     height: 13px;

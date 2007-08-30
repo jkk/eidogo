@@ -1629,7 +1629,7 @@
     	    var width = this.dom.navSlider._width - this.dom.navSliderThumb._width;
     	    var steps = this.totalMoves;
     	    var offsetGiven = !!offset;
-    	    var offset = offset || this.moveNumber / steps * width;
+    	    offset = offset || (this.moveNumber / steps * width);
     	    offset = offset > width ? width : offset;
     	    offset = offset < 0 ? 0 : offset;
             var moveOffset = parseInt(offset / width * steps, 10);

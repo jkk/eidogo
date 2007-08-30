@@ -218,6 +218,7 @@ eidogo.BoardRendererHtml.prototype = {
             this.domNode.appendChild(div);
 		    return div;
 		}
+		return null;
 	},
 	renderMarker: function(pt, type) {
 		if (this.renderCache.markers[pt.x][pt.y]) {
@@ -228,7 +229,7 @@ eidogo.BoardRendererHtml.prototype = {
 		}
 		if (type == "empty" || !type) { 
 		    this.renderCache.markers[pt.x][pt.y] = 0;
-		    return;
+		    return null;
 	    }
 		this.renderCache.markers[pt.x][pt.y] = 1;
 		if (type) {
@@ -261,6 +262,7 @@ eidogo.BoardRendererHtml.prototype = {
 			this.domNode.appendChild(div);
 			return div;
 		}
+		return null;
 	}
 }
 

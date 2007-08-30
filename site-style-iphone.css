@@ -14,7 +14,6 @@ body {
 }
 #content {
     margin: 10px 0 0 0;
-/*    background: #fff;*/
 }
 #text-content {
     margin: 40px 0 0 0;
@@ -25,9 +24,7 @@ a:link, a:visited, a:active {
 h1 {
 	font-size: 20px;
 	font-weight: normal;
-/*  font-variant: small-caps;*/
     text-transform: uppercase;
-/*  color: #ccc;*/
 	margin: 5px 0 5px 10px;
 	padding: 0;
 	float: left;
@@ -39,7 +36,6 @@ h1 span {
     float: right;
     font-size: 9px;
     margin: 10px 10px 0 0;
-/*    color: #ddd;*/
 }
 #ownership a {
     color: black;
@@ -60,61 +56,39 @@ ol {
 pre, code {
 	font-weight: normal;
 	font-style: normal;
-/*  background: #333;*/
-/*    color: #800;*/
     padding: 10px 5px;
     margin: 0;
 }
 #player-container {
 	clear: both;
-	zoom: 1;
 	width: 421px;
 	min-height: 300px;
 	position: relative;
     background: #fff;
-/*  padding: 10px 10px 20px 10px;*/
-/*  border-top: 1px solid #666;*/
 }
 #links {
     clear: both;
-/*    zoom: 1;*/
     width: 421px;
-/*    height: 33px;*/
 	display: block;
-/*  color: #777;*/
-  padding: 0;
+    padding: 0;
 	margin: 0;
     background-color: #ccc;
 	border-top: 1px solid #999;
 	border-bottom: none;
-/*  border: 1px solid red;*/
-/*  border-bottom: 3px solid #777;*/
 }
 #links li {
   list-style-type: none;
-/*  display: inline;*/
   float: left;
 }
 #links li a {
     height: 13px;
-/*    background-color: #222;*/
     display: block;
     float: left;
-    color: #000;
+    color: #008;
     background-color: #ccc;
-/*  color: #aaa;*/
-/*  text-decoration: none;*/
-/*    border-left: 1px solid #ddd;*/
-/*    border-bottom: 1px solid #ccc;*/
-  padding: 10px 15px 10px 15px;
- 
-	font-size: 11px;
+    padding: 10px 15px 10px 15px;
+    font-size: 11px;
 }
 #links li a:hover {
-/*  background: #622;*/
     background: #bbb;
-/*    border-left: 1px solid #ccc;*/
-/*    border-bottom: 1px solid #888;*/
-/*  color: #fff;*/
-/*    text-decoration: underline;*/
 }

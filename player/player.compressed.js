@@ -1708,7 +1708,7 @@ _4.open();
 _4.close();
 _4.location.hash=_2;
 }else{
-if(jQuery.browser.safari){
+if(jQuery.browser.safari&&parseInt(jQuery.browser.version,10)<420){
 jQuery.historyBackStack=[];
 jQuery.historyBackStack.length=history.length;
 jQuery.historyForwardStack=[];
@@ -1732,7 +1732,7 @@ jQuery.historyCurrentHash=_8;
 jQuery.historyCallback(_8.replace(/^#/,""));
 }
 }else{
-if(jQuery.browser.safari){
+if(jQuery.browser.safari&&parseInt(jQuery.browser.version,10)<420){
 if(!jQuery.dontCheck){
 var _9=history.length-jQuery.historyBackStack.length;
 if(_9){
@@ -1775,6 +1775,9 @@ jQuery.historyCallback(_8.replace(/^#/,""));
 var _d;
 if(jQuery.browser.safari){
 _d=_c;
+if(parseInt(jQuery.browser.version,10)>=420){
+location.hash=_d;
+}
 }else{
 _d="#"+_c;
 location.hash=_d;
@@ -1788,7 +1791,7 @@ _f.close();
 _f.location.hash=_d;
 jQuery.historyCallback(_c);
 }else{
-if(jQuery.browser.safari){
+if(jQuery.browser.safari&&parseInt(jQuery.browser.version,10)<420){
 jQuery.dontCheck=true;
 jQuery.historyAddHistory(_c);
 var fn=function(){
@@ -1967,8 +1970,15 @@ if(!e.pageX){
 e.pageX=e.clientX+(document.documentElement.scrollLeft||document.body.scrollLeft);
 e.pageY=e.clientY+(document.documentElement.scrollTop||document.body.scrollTop);
 }
+if(!el._x){
 var elX=eidogo.util.getElX(el);
 var elY=eidogo.util.getElY(el);
+el._x=elX;
+el._y=elY;
+}else{
+var elX=el._x;
+var elY=el._y;
+}
 return [e.pageX-elX,e.pageY-elY];
 },stopEvent:function(e){
 if(e.stopPropagation){
@@ -1985,10 +1995,21 @@ e.returnValue=false;
 jQuery(el).addClass(cls);
 },removeClass:function(el,cls){
 jQuery(el).removeClass(cls);
+},show:function(el,_1e){
+_1e=_1e||"block";
+if(typeof el=="string"){
+el=eidogo.util.byId(el);
+}
+el.style.display=_1e;
+},hide:function(el){
+if(typeof el=="string"){
+el=eidogo.util.byId(el);
+}
+el.style.display="none";
 },getElX:function(el){
-return jQuery(el).offset({scroll:false}).left;
+return jQuery(el).offsetLite({scroll:false}).left;
 },getElY:function(el){
-return jQuery(el).offset({scroll:false}).top;
+return jQuery(el).offsetLite({scroll:false}).top;
 }};
 
 if(typeof eidogo.i18n=="undefined"){
@@ -2187,20 +2208,34 @@ return true;
 }else{
 return false;
 }
-},next:function(_2a){
+},getNextMoves:function(){
+if(!this.hasNext()){
+return null;
+}
+var _2a={};
+if(this.node.nextSibling&&this.node.nextSibling.getMove()){
+_2a[this.node.nextSibling.getMove()]=null;
+}
+var _2b=this.node.parent.trees;
+var _2c;
+for(var i=0;_2c=_2b[i];i++){
+_2a[_2c.nodes.first().getMove()]=i;
+}
+return _2a;
+},next:function(_2e){
 if(!this.hasNext()){
 return false;
 }
-if((typeof _2a=="undefined"||_2a==null)&&this.node.nextSibling!=null){
+if((typeof _2e=="undefined"||_2e==null)&&this.node.nextSibling!=null){
 this.node=this.node.nextSibling;
 }else{
 if(this.node.parent.trees.length){
-if(typeof _2a=="undefined"||_2a==null){
-_2a=this.node.parent.preferredTree;
+if(typeof _2e=="undefined"||_2e==null){
+_2e=this.node.parent.preferredTree;
 }else{
-this.node.parent.preferredTree=_2a;
+this.node.parent.preferredTree=_2e;
 }
-this.node=this.node.parent.trees[_2a].nodes.first();
+this.node=this.node.parent.trees[_2e].nodes.first();
 }
 }
 return true;
@@ -2219,19 +2254,19 @@ return this.node&&(this.node.nextSibling!=null||(this.node.parent&&this.node.par
 },hasPrevious:function(){
 return this.node&&((this.node.parent.parent&&this.node.parent.parent.nodes.length&&this.node.parent.parent.parent)||(this.node.previousSibling!=null));
 },getPath:function(){
-var _2b=[];
-var _2c=new eidogo.GameCursor(this.node);
-var _2d=prevId=_2c.node.parent.id;
-_2b.push(_2c.node.getPosition());
-_2b.push(_2c.node.parent.getPosition());
-while(_2c.previous()){
-_2d=_2c.node.parent.id;
-if(prevId!=_2d){
-_2b.push(_2c.node.parent.getPosition());
-prevId=_2d;
+var _2f=[];
+var _30=new eidogo.GameCursor(this.node);
+var _31=prevId=_30.node.parent.id;
+_2f.push(_30.node.getPosition());
+_2f.push(_30.node.parent.getPosition());
+while(_30.previous()){
+_31=_30.node.parent.id;
+if(prevId!=_31){
+_2f.push(_30.node.parent.getPosition());
+prevId=_31;
 }
 }
-return _2b.reverse();
+return _2f.reverse();
 }};
 
 eidogo.SgfParser=function(_1){
@@ -2390,30 +2425,31 @@ _1a=this.markers;
 _19=this.stones;
 _1a=this.markers;
 }
+var _1e;
 for(var x=0;x<this.boardSize;x++){
 for(var y=0;y<this.boardSize;y++){
-var _20=y*this.boardSize+x;
-if(_19[_20]==null){
+_1e=y*this.boardSize+x;
+if(_19[_1e]==null){
 continue;
 }else{
-if(_19[_20]==this.EMPTY){
+if(_19[_1e]==this.EMPTY){
 _1b="empty";
 }else{
-_1b=(_19[_20]==this.WHITE?"white":"black");
+_1b=(_19[_1e]==this.WHITE?"white":"black");
 }
 }
 this.renderer.renderStone({x:x,y:y},_1b);
-this.lastRender.stones[_20]=_19[_20];
+this.lastRender.stones[_1e]=_19[_1e];
 }
 }
 for(var x=0;x<this.boardSize;x++){
 for(var y=0;y<this.boardSize;y++){
-var _20=y*this.boardSize+x;
-if(_1a[_20]==null){
+_1e=y*this.boardSize+x;
+if(_1a[_1e]==null){
 continue;
 }
-this.renderer.renderMarker({x:x,y:y},_1a[_20]);
-this.lastRender.markers[_20]=_1a[_20];
+this.renderer.renderMarker({x:x,y:y},_1a[_1e]);
+this.lastRender.markers[_1e]=_1a[_1e];
 }
 }
 }};
@@ -2454,6 +2490,7 @@ div.style.top=(pt.y*this.pointHeight+this.margin)+"px";
 this.domNode.appendChild(div);
 return div;
 }
+return null;
 },renderMarker:function(pt,_2c){
 if(this.renderCache.markers[pt.x][pt.y]){
 var _2d=document.getElementById("marker-"+pt.x+"-"+pt.y);
@@ -2463,7 +2500,7 @@ _2d.parentNode.removeChild(_2d);
 }
 if(_2c=="empty"||!_2c){
 this.renderCache.markers[pt.x][pt.y]=0;
-return;
+return null;
 }
 this.renderCache.markers[pt.x][pt.y]=1;
 if(_2c){
@@ -2496,6 +2533,7 @@ div.appendChild(document.createTextNode(_2e));
 this.domNode.appendChild(div);
 return div;
 }
+return null;
 }};
 eidogo.BoardRendererAscii=function(_30,_31){
 this.init(_30,_31);
@@ -2603,8 +2641,8 @@ var _6=eidogo.util.getElClickXY;
 var _7=eidogo.util.stopEvent;
 var _8=eidogo.util.addClass;
 var _9=eidogo.util.removeClass;
-var _a=eidogo.util.getElX;
-var _b=eidogo.util.getElY;
+var _a=eidogo.util.show;
+var _b=eidogo.util.hide;
 eidogo.Player=function(_c){
 this.init(_c);
 };
@@ -2624,6 +2662,7 @@ this.progressiveLoad=_d.progressiveLoad?true:false;
 this.progressiveLoads=null;
 this.progressiveUrl=null;
 this.searchUrl=_d.searchUrl;
+this.saveUrl=_d.saveUrl;
 this.hooks=_d.hooks||{};
 this.board=null;
 this.rules=null;
@@ -2646,11 +2685,11 @@ this.labelLastLetter=null;
 this.labelLastNumber=null;
 this.resetLastLabels();
 this.prefs={};
-this.prefs.markCurrent=typeof _d.markCurrent!="undefined"?_d.markCurrent:true;
+this.prefs.markCurrent=!!_d.markCurrent;
 this.prefs.markNext=typeof _d.markNext!="undefined"?_d.markNext:false;
-this.prefs.markVariations=typeof _d.markVariations!="undefined"?_d.markVariations:true;
-this.prefs.showGameInfo=typeof _d.showGameInfo!="undefined"?_d.showGameInfo:true;
-this.prefs.showPlayerInfo=typeof _d.showPlayerInfo!="undefined"?_d.showPlayerInfo:true;
+this.prefs.markVariations=!!_d.markVariations;
+this.prefs.showGameInfo=!!_d.showGameInfo;
+this.prefs.showPlayerInfo=!!_d.showPlayerInfo;
 this.propertyHandlers={W:this.playMove,B:this.playMove,KO:this.playMove,MN:this.setMoveNumber,AW:this.addStone,AB:this.addStone,AE:this.addStone,CR:this.addMarker,LB:this.addMarker,TR:this.addMarker,MA:this.addMarker,SQ:this.addMarker,TW:this.addMarker,TB:this.addMarker,PL:this.setColor,C:this.showComments,N:this.showAnnotation,GB:this.showAnnotation,GW:this.showAnnotation,DM:this.showAnnotation,HO:this.showAnnotation,UC:this.showAnnotation,V:this.showAnnotation,BM:this.showAnnotation,DO:this.showAnnotation,IT:this.showAnnotation,TE:this.showAnnotation,BL:this.showTime,OB:this.showTime,WL:this.showTime,OW:this.showTime};
 this.constructDom();
 this.nowLoading();
@@ -2713,7 +2752,7 @@ this.totalMoves++;
 this.totalMoves--;
 this.showInfo();
 if(this.prefs.showPlayerInfo){
-this.dom.infoPlayers.style.display="block";
+_a(this.dom.infoPlayers);
 }
 this.enableNavSlider();
 this.selectTool("play");
@@ -2740,6 +2779,7 @@ _4(_1b,"mousemove",this.handleBoardHover,this,true);
 _4(_1b,"mousedown",this.handleBoardMouseDown,this,true);
 _4(_1b,"mouseup",this.handleBoardMouseUp,this,true);
 _4(document,"keydown",this.handleKeypress,this,true);
+_4(document,"mouseup",this.handleDocMouseUp,this,true);
 },load:function(_1c,_1d){
 if(!_1d){
 _1d=new eidogo.GameTree();
@@ -2797,7 +2837,7 @@ _22();
 var _29=function(req){
 this.croak(t["error retrieving"]);
 };
-_3("get",url,null,_23,_29,this,10000);
+_3("get",url,null,_23,_29,this,30000);
 },fetchOpponentMove:function(){
 this.nowLoading(t["gnugo thinking"]);
 var _2b=function(req){
@@ -3013,7 +3053,7 @@ var y=xy[1];
 if(!this.boundsCheck(x,y,[0,this.board.boardSize-1])){
 return;
 }
-if(!this.regionBegun&&(x!=this.mouseDownX||y!=this.mouseDownY)){
+if(this.searchUrl&&!this.regionBegun&&(x!=this.mouseDownX||y!=this.mouseDownY)){
 this.selectTool("region");
 this.regionBegun=true;
 this.regionTop=this.mouseDownY;
@@ -3048,7 +3088,12 @@ if(!this.rules.check({x:x,y:y},this.currentColor)){
 return;
 }
 if(_5b){
+var _5e=this.cursor.getNextMoves();
+if(_5e&&_5b in _5e){
+this.variation(_5e[_5b]);
+}else{
 this.createMove(_5b);
+}
 }
 }else{
 if(this.mode=="region"&&x>=-1&&y>=-1&&this.regionBegun){
@@ -3060,58 +3105,69 @@ this.regionClickSelect=false;
 this.regionBottom=(y<0?0:(y>=this.board.boardSize)?y:y+(y>this.regionTop?1:0));
 this.regionRight=(x<0?0:(x>=this.board.boardSize)?x:x+(x>this.regionLeft?1:0));
 this.showRegion();
-this.dom.searchAlgo.style.display="inline";
-this.dom.searchButton.style.display="inline";
+_a(this.dom.searchAlgo,"inline");
+_a(this.dom.searchButton,"inline");
+_7(e);
 }
 }else{
-var _5e;
-var _5f=this.board.getStone({x:x,y:y});
+var _5f;
+var _60=this.board.getStone({x:x,y:y});
 if(this.mode=="add_b"||this.mode=="add_w"){
 this.cursor.node.emptyPoint(this.pointToSgfCoord({x:x,y:y}));
-if(_5f!=this.board.BLACK&&this.mode=="add_b"){
-_5e="AB";
+if(_60!=this.board.BLACK&&this.mode=="add_b"){
+_5f="AB";
 }else{
-if(_5f!=this.board.WHITE&&this.mode=="add_w"){
-_5e="AW";
+if(_60!=this.board.WHITE&&this.mode=="add_w"){
+_5f="AW";
 }else{
-_5e="AE";
+_5f="AE";
 }
 }
 }else{
 switch(this.mode){
 case "tr":
-_5e="TR";
+_5f="TR";
 break;
 case "sq":
-_5e="SQ";
+_5f="SQ";
 break;
 case "cr":
-_5e="CR";
+_5f="CR";
 break;
 case "x":
-_5e="MA";
+_5f="MA";
 break;
 case "number":
-_5e="LB";
+_5f="LB";
 _5b=_5b+":"+this.labelLastNumber;
 this.labelLastNumber++;
 break;
 case "letter":
-_5e="LB";
+_5f="LB";
 _5b=_5b+":"+this.labelLastLetter;
 this.labelLastLetter=String.fromCharCode(this.labelLastLetter.charCodeAt(0)+1);
 }
 }
-this.cursor.node.pushProperty(_5e,_5b);
+this.cursor.node.pushProperty(_5f,_5b);
 this.refresh();
 }
 }
-},boundsCheck:function(x,y,_62){
-if(_62.length==2){
-_62[3]=_62[2]=_62[1];
-_62[1]=_62[0];
+},handleDocMouseUp:function(evt){
+if(this.domLoading){
+return;
 }
-return (x>=_62[0]&&y>=_62[1]&&x<=_62[2]&&y<=_62[3]);
+if(this.mode=="region"&&this.regionBegun&&!this.regionClickSelect){
+this.mouseDown=false;
+this.regionBegun=false;
+_a(this.dom.searchAlgo,"inline");
+_a(this.dom.searchButton,"inline");
+}
+},boundsCheck:function(x,y,_64){
+if(_64.length==2){
+_64[3]=_64[2]=_64[1];
+_64[1]=_64[0];
+}
+return (x>=_64[0]&&y>=_64[1]&&x<=_64[2]&&y<=_64[3]);
 },getRegionBounds:function(){
 var l=this.regionLeft;
 var w=this.regionRight-this.regionLeft;
@@ -3127,14 +3183,15 @@ h=-h+1;
 }
 return [t,l,w,h];
 },showRegion:function(){
-var _67=this.getRegionBounds();
-this.dom.searchRegion.style.top=(this.board.renderer.margin+this.board.renderer.pointHeight*_67[0])+"px";
-this.dom.searchRegion.style.left=(this.board.renderer.margin+this.board.renderer.pointWidth*_67[1])+"px";
-this.dom.searchRegion.style.width=this.board.renderer.pointWidth*_67[2]+"px";
-this.dom.searchRegion.style.height=this.board.renderer.pointHeight*_67[3]+"px";
-this.dom.searchRegion.style.display="block";
+var _69=this.getRegionBounds();
+this.dom.searchRegion.style.top=(this.board.renderer.margin+this.board.renderer.pointHeight*_69[0])+"px";
+this.dom.searchRegion.style.left=(this.board.renderer.margin+this.board.renderer.pointWidth*_69[1])+"px";
+this.dom.searchRegion.style.width=this.board.renderer.pointWidth*_69[2]+"px";
+this.dom.searchRegion.style.height=this.board.renderer.pointHeight*_69[3]+"px";
+_a(this.dom.searchRegion);
 },loadSearch:function(q,dim,p,a){
-this.reset();
+var _6e={nodes:[],trees:[{nodes:[{SZ:this.board.boardSize}],trees:[]}]};
+this.load(_6e);
 p=this.uncompressPattern(p);
 dim=dim.split("x");
 var w=dim[0];
@@ -3183,6 +3240,7 @@ this.regionLeft=l;
 this.regionTop=t;
 this.regionRight=l+x;
 this.regionBottom=t+y;
+this.dom.searchAlgo.value=a;
 this.searchRegion();
 },searchRegion:function(){
 if(this.searching){
@@ -3190,99 +3248,121 @@ return;
 }
 this.searching=true;
 if(!this.searchUrl){
-this.dom.comments.style.display="block";
-this.dom.searchContainer.style.display="none";
+_a(this.dom.comments);
+_b(this.dom.searchContainer);
 this.prependComment("No search URL provided.");
 return;
 }
-var _74=this.getRegionBounds();
-var _75=this.board.getRegion(_74[0],_74[1],_74[2],_74[3]);
-var _76=_75.join("").replace(new RegExp(this.board.EMPTY,"g"),".").replace(new RegExp(this.board.BLACK,"g"),"X").replace(new RegExp(this.board.WHITE,"g"),"O");
-var _77=/^\.*$/.test(_76);
-var _78=/^\.*O\.*$/.test(_76);
-var _79=/^\.*X\.*$/.test(_76);
-if(_77||_78||_79){
-this.dom.comments.style.display="block";
-this.dom.searchContainer.style.display="none";
+var _77=this.getRegionBounds();
+var _78=this.board.getRegion(_77[0],_77[1],_77[2],_77[3]);
+var _79=_78.join("").replace(new RegExp(this.board.EMPTY,"g"),".").replace(new RegExp(this.board.BLACK,"g"),"X").replace(new RegExp(this.board.WHITE,"g"),"O");
+var _7a=/^\.*$/.test(_79);
+var _7b=/^\.*O\.*$/.test(_79);
+var _7c=/^\.*X\.*$/.test(_79);
+if(_7a||_7b||_7c){
+this.searching=false;
+_a(this.dom.comments);
+_b(this.dom.searchContainer);
 this.prependComment("Please select at least two stones to search for.");
 return;
 }
-var _7a=(_74[0]<this.board.boardSize/2)?"n":"s";
-_7a+=(_74[1]<this.board.boardSize/2)?"w":"e";
-var _7b=this.dom.searchAlgo.value;
+var _7d=[];
+if(_77[0]==0){
+_7d.push("n");
+}
+if(_77[1]==0){
+_7d.push("w");
+}
+if(_77[0]+_77[3]==this.board.boardSize){
+_7d.push("s");
+}
+if(_77[1]+_77[2]==this.board.boardSize){
+_7d.push("e");
+}
+if(!(_7d.length==2&&((_7d.contains("n")&&_7d.contains("e"))||(_7d.contains("n")&&_7d.contains("w"))||(_7d.contains("s")&&_7d.contains("e"))||(_7d.contains("s")&&_7d.contains("w"))))){
+this.searching=false;
+_a(this.dom.comments);
+_b(this.dom.searchContainer);
+this.prependComment("For corner searches, your selection must "+"touch two adjacent edges of the board.");
+return;
+}
+var _7e=(_7d.contains("n")?"n":"s");
+_7e+=(_7d.contains("w")?"w":"e");
+var _7f=this.dom.searchAlgo.value;
 this.showComments("");
 this.nowLoading();
-var _7c=function(req){
+this.gameName="search";
+var _80=function(req){
 this.searching=false;
 this.doneLoading();
-this.dom.comments.style.display="none";
-this.dom.searchContainer.style.display="block";
+_b(this.dom.comments);
+_a(this.dom.searchContainer);
 if(req.responseText=="ERROR"){
 this.croak(t["error retrieving"]);
 return;
 }else{
 if(req.responseText=="NONE"){
-this.dom.searchResultsContainer.style.display="none";
+_b(this.dom.searchResultsContainer);
 this.dom.searchCount.innerHTML="No";
 return;
 }
 }
-var _7e=eval("("+req.responseText+")");
-var _7f;
-var _80="";
+var _82=eval("("+req.responseText+")");
+var _83;
+var _84="";
 var odd;
-for(var i=0;_7f=_7e[i];i++){
+for(var i=0;_83=_82[i];i++){
 odd=odd?false:true;
-_80+="<a class='search-result"+(odd?" odd":"")+"' href='#'>                        <span class='id'>"+_7f.id+"</span>                        <span class='mv'>"+_7f.mv+"</span>                        <span class='pw'>"+_7f.pw+" "+_7f.wr+"</span>                        <span class='pb'>"+_7f.pb+" "+_7f.br+"</span>                        <span class='re'>"+_7f.re+"</span>                        <span class='dt'>"+_7f.dt+"</span>                        <div class='clear'>&nbsp;</div>                        </a>";
+_84+="<a class='search-result"+(odd?" odd":"")+"' href='#'>                        <span class='id'>"+_83.id+"</span>                        <span class='mv'>"+_83.mv+"</span>                        <span class='pw'>"+_83.pw+" "+_83.wr+"</span>                        <span class='pb'>"+_83.pb+" "+_83.br+"</span>                        <span class='re'>"+_83.re+"</span>                        <span class='dt'>"+_83.dt+"</span>                        <div class='clear'>&nbsp;</div>                        </a>";
 }
-this.dom.searchResultsContainer.style.display="block";
-this.dom.searchResults.innerHTML=_80;
-this.dom.searchCount.innerHTML=_7e.length;
+_a(this.dom.searchResultsContainer);
+this.dom.searchResults.innerHTML=_84;
+this.dom.searchCount.innerHTML=_82.length;
 };
-var _83=function(req){
+var _87=function(req){
 this.croak(t["error retrieving"]);
 };
-var _85={q:_7a,w:_74[2],h:_74[3],p:_76,a:_7b,t:(new Date()).getTime()};
-this.hook("searchRegion",_85);
-_3("get",this.searchUrl,_85,_7c,_83,this,45000);
-},loadSearchResult:function(e){
-this.nowLoading();
-var _87=e.target||e.srcElement;
-if(_87.nodeName=="SPAN"){
-_87=_87.parentNode;
-}
-if(_87.nodeName=="A"){
-var _88;
-var id;
-var mv;
-for(var i=0;_88=_87.childNodes[i];i++){
-if(_88.className=="id"){
-id=_88.innerHTML;
-}
-if(_88.className=="mv"){
-mv=parseInt(_88.innerHTML,10);
-}
-}
-}
+var _89={q:_7e,w:_77[2],h:_77[3],p:_79,a:_7f,t:(new Date()).getTime()};
 this.progressiveLoad=false;
 this.progressiveUrl=null;
 this.prefs.markNext=false;
 this.prefs.showPlayerInfo=true;
+this.hook("searchRegion",_89);
+_3("get",this.searchUrl,_89,_80,_87,this,45000);
+},loadSearchResult:function(e){
+this.nowLoading();
+var _8b=e.target||e.srcElement;
+if(_8b.nodeName=="SPAN"){
+_8b=_8b.parentNode;
+}
+if(_8b.nodeName=="A"){
+var _8c;
+var id;
+var mv;
+for(var i=0;_8c=_8b.childNodes[i];i++){
+if(_8c.className=="id"){
+id=_8c.innerHTML;
+}
+if(_8c.className=="mv"){
+mv=parseInt(_8c.innerHTML,10);
+}
+}
+}
 this.remoteLoad(id,null,true,[0,mv],function(){
 this.doneLoading();
 this.setPermalink();
 }.bind(this));
 _7(e);
 },closeSearch:function(){
-this.dom.searchContainer.style.display="none";
-this.dom.comments.style.display="block";
-},compressPattern:function(_8c){
+_b(this.dom.searchContainer);
+_a(this.dom.comments);
+},compressPattern:function(_90){
 var c=null;
 var pc="";
 var n=1;
 var ret="";
-for(var i=0;i<_8c.length;i++){
-c=_8c.charAt(i);
+for(var i=0;i<_90.length;i++){
+c=_90.charAt(i);
 if(c==pc){
 n++;
 }else{
@@ -3293,13 +3373,13 @@ pc=c;
 }
 ret=ret+pc+(n>1?n:"");
 return ret;
-},uncompressPattern:function(_92){
+},uncompressPattern:function(_96){
 var c=null;
 var s=null;
 var n="";
 var ret="";
-for(var i=0;i<_92.length;i++){
-c=_92.charAt(i);
+for(var i=0;i<_96.length;i++){
+c=_96.charAt(i);
 if(c=="."||c=="X"||c=="O"){
 if(s!=null){
 n=parseInt(n,10);
@@ -3320,46 +3400,46 @@ for(var j=0;j<n;j++){
 ret+=s;
 }
 return ret;
-},createMove:function(_99){
-var _9a={};
-_9a[this.currentColor]=_99;
-_9a["MN"]=(++this.moveNumber).toString();
-var _9b=new eidogo.GameNode(_9a);
+},createMove:function(_9d){
+var _9e={};
+_9e[this.currentColor]=_9d;
+_9e["MN"]=(++this.moveNumber).toString();
+var _9f=new eidogo.GameNode(_9e);
 this.totalMoves++;
 if(this.cursor.hasNext()){
 if(this.cursor.node.nextSibling){
 this.cursor.node.parent.createVariationTree(this.cursor.node.getPosition());
 }
-this.cursor.node.parent.appendTree(new eidogo.GameTree({nodes:[_9b],trees:[]}));
+this.cursor.node.parent.appendTree(new eidogo.GameTree({nodes:[_9f],trees:[]}));
 this.variation(this.cursor.node.parent.trees.length-1);
 }else{
-this.cursor.node.parent.appendNode(_9b);
+this.cursor.node.parent.appendNode(_9f);
 this.variation();
 }
 },handleKeypress:function(e){
-var _9d=e.keyCode||e.charCode;
-if(!_9d||e.ctrlKey||e.altKey||e.metaKey){
+var _a1=e.keyCode||e.charCode;
+if(!_a1||e.ctrlKey||e.altKey||e.metaKey){
 return true;
 }
-var _9e=String.fromCharCode(_9d).toLowerCase();
+var _a2=String.fromCharCode(_a1).toLowerCase();
 for(var i=0;i<this.variations.length;i++){
-var _a0=this.sgfCoordToPoint(this.variations[i].move);
-var _a1=""+(i+1);
-if(_a0.x!=null&&this.board.getMarker(_a0)!=this.board.EMPTY&&typeof this.board.getMarker(_a0)=="string"){
-_a1=this.board.getMarker(_a0).toLowerCase();
+var _a4=this.sgfCoordToPoint(this.variations[i].move);
+var _a5=""+(i+1);
+if(_a4.x!=null&&this.board.getMarker(_a4)!=this.board.EMPTY&&typeof this.board.getMarker(_a4)=="string"){
+_a5=this.board.getMarker(_a4).toLowerCase();
 }
-_a1=_a1.replace(/^var:/,"");
-if(_9e==_a1.charAt(0)){
+_a5=_a5.replace(/^var:/,"");
+if(_a2==_a5.charAt(0)){
 this.variation(this.variations[i].treeNum);
 _7(e);
 return;
 }
 }
-if(_9d==112||_9d==27){
+if(_a1==112||_a1==27){
 this.selectTool("play");
 }
-var _a2=true;
-switch(_9d){
+var _a6=true;
+switch(_a1){
 case 32:
 if(e.shiftKey){
 this.back();
@@ -3369,9 +3449,9 @@ this.forward();
 break;
 case 39:
 if(e.shiftKey){
-var _a3=this.totalMoves-this.moveNumber;
-var _a4=(_a3>9?9:_a3-1);
-for(var i=0;i<_a4;i++){
+var _a7=this.totalMoves-this.moveNumber;
+var _a8=(_a7>9?9:_a7-1);
+for(var i=0;i<_a8;i++){
 this.forward(null,null,true);
 }
 }
@@ -3379,8 +3459,8 @@ this.forward();
 break;
 case 37:
 if(e.shiftKey){
-var _a4=(this.moveNumber>9?9:this.moveNumber-1);
-for(var i=0;i<_a4;i++){
+var _a8=(this.moveNumber>9?9:this.moveNumber-1);
+for(var i=0;i<_a8;i++){
 this.back(null,null,true);
 }
 }
@@ -3396,40 +3476,40 @@ case 192:
 this.pass();
 break;
 default:
-_a2=false;
+_a6=false;
 break;
 }
-if(_a2){
+if(_a6){
 _7(e);
 }
 },showInfo:function(){
 this.dom.infoGame.innerHTML="";
-var _a5=this.gameTree.trees.first().nodes.first();
+var _a9=this.gameTree.trees.first().nodes.first();
 var dl=document.createElement("dl");
-for(var _a7 in this.infoLabels){
-if(_a5[_a7]){
-if(_a7=="PW"){
-this.dom.whiteName.innerHTML=_a5[_a7]+(_a5["WR"]?", "+_a5["WR"]:"");
+for(var _ab in this.infoLabels){
+if(_a9[_ab]){
+if(_ab=="PW"){
+this.dom.whiteName.innerHTML=_a9[_ab]+(_a9["WR"]?", "+_a9["WR"]:"");
 continue;
 }else{
-if(_a7=="PB"){
-this.dom.blackName.innerHTML=_a5[_a7]+(_a5["BR"]?", "+_a5["BR"]:"");
+if(_ab=="PB"){
+this.dom.blackName.innerHTML=_a9[_ab]+(_a9["BR"]?", "+_a9["BR"]:"");
 continue;
 }
 }
-if(_a7=="WR"||_a7=="BR"){
+if(_ab=="WR"||_ab=="BR"){
 continue;
 }
-if(_a7=="DT"){
-var _a8=_a5[_a7].split(/[\.-]/);
-if(_a8.length==3){
-_a5[_a7]=_a8[2].replace(/^0+/,"")+" "+this.months[_a8[1]-1]+" "+_a8[0];
+if(_ab=="DT"){
+var _ac=_a9[_ab].split(/[\.-]/);
+if(_ac.length==3){
+_a9[_ab]=_ac[2].replace(/^0+/,"")+" "+this.months[_ac[1]-1]+" "+_ac[0];
 }
 }
 var dt=document.createElement("dt");
-dt.innerHTML=this.infoLabels[_a7]+":";
+dt.innerHTML=this.infoLabels[_ab]+":";
 var dd=document.createElement("dd");
-dd.innerHTML=_a5[_a7];
+dd.innerHTML=_a9[_ab];
 dl.appendChild(dt);
 dl.appendChild(dd);
 }
@@ -3437,20 +3517,20 @@ dl.appendChild(dd);
 if(this.prefs.showGameInfo){
 this.dom.infoGame.appendChild(dl);
 }
-},selectTool:function(_ab){
-var _ac;
-if(_ab=="region"){
-_ac="crosshair";
+},selectTool:function(_af){
+var _b0;
+if(_af=="region"){
+_b0="crosshair";
 }else{
-_ac="default";
+_b0="default";
 this.regionBegun=false;
-this.dom.searchRegion.style.display="none";
-this.dom.searchButton.style.display="none";
-this.dom.searchAlgo.style.display="none";
+_b(this.dom.searchRegion);
+_b(this.dom.searchButton);
+_b(this.dom.searchAlgo);
 }
-this.board.renderer.domNode.style.cursor=_ac;
-this.mode=_ab;
-this.dom.toolsSelect.value=_ab;
+this.board.renderer.domNode.style.cursor=_b0;
+this.mode=_af;
+this.dom.toolsSelect.value=_af;
 },updateControls:function(){
 this.dom.moveNumber.innerHTML=(this.moveNumber?t["move"]+" "+this.moveNumber:"permalink");
 this.dom.whiteCaptures.innerHTML=t["captures"]+": <span>"+this.board.captures.W+"</span>";
@@ -3460,25 +3540,25 @@ this.dom.blackTime.innerHTML=t["time left"]+": <span>"+(this.timeB?this.timeB:"-
 _9(this.dom.controlPass,"pass-on");
 this.dom.variations.innerHTML="";
 for(var i=0;i<this.variations.length;i++){
-var _ae=i+1;
+var _b2=i+1;
 if(!this.variations[i].move||this.variations[i].move=="tt"){
 _8(this.dom.controlPass,"pass-on");
 }else{
-var _af=this.sgfCoordToPoint(this.variations[i].move);
-if(this.board.getMarker(_af)!=this.board.EMPTY){
-_ae=this.board.getMarker(_af);
+var _b3=this.sgfCoordToPoint(this.variations[i].move);
+if(this.board.getMarker(_b3)!=this.board.EMPTY){
+_b2=this.board.getMarker(_b3);
 }
 if(this.prefs.markVariations){
-this.board.addMarker(_af,"var:"+_ae);
+this.board.addMarker(_b3,"var:"+_b2);
 }
 }
-var _b0=document.createElement("div");
-_b0.className="variation-nav";
-_b0.innerHTML=_ae;
-_4(_b0,"click",function(e,arg){
+var _b4=document.createElement("div");
+_b4.className="variation-nav";
+_b4.innerHTML=_b2;
+_4(_b4,"click",function(e,arg){
 arg.me.variation(arg.treeNum);
 },{me:this,treeNum:this.variations[i].treeNum});
-this.dom.variations.appendChild(_b0);
+this.dom.variations.appendChild(_b4);
 }
 if(!this.variations.length){
 this.dom.variations.innerHTML="<div class='variation-nav none'>"+t["no variations"]+"</div>";
@@ -3500,98 +3580,98 @@ _9(this.dom.controlFirst,"first-on");
 if(!this.progressiveLoad){
 this.updateNavSlider();
 }
-},setColor:function(_b3){
-this.prependComment(_b3=="B"?t["black to play"]:t["white to play"]);
-this.currentColor=_b3;
+},setColor:function(_b7){
+this.prependComment(_b7=="B"?t["black to play"]:t["white to play"]);
+this.currentColor=_b7;
 },setMoveNumber:function(num){
 this.moveNumber=num;
-},playMove:function(_b5,_b6,_b7){
-_b6=_b6||this.currentColor;
-this.currentColor=(_b6=="B"?"W":"B");
-_b6=_b6=="W"?this.board.WHITE:this.board.BLACK;
-var pt=this.sgfCoordToPoint(_b5);
+},playMove:function(_b9,_ba,_bb){
+_ba=_ba||this.currentColor;
+this.currentColor=(_ba=="B"?"W":"B");
+_ba=_ba=="W"?this.board.WHITE:this.board.BLACK;
+var pt=this.sgfCoordToPoint(_b9);
 if(!this.cursor.node["MN"]){
 this.moveNumber++;
 }
-if(_b5&&_b5!="tt"){
-this.board.addStone(pt,_b6);
-this.rules.apply(pt,_b6);
-if(this.prefs.markCurrent){
-this.addMarker(_b5,"current");
+if(_b9&&_b9!="tt"){
+this.board.addStone(pt,_ba);
+this.rules.apply(pt,_ba);
+if(this.prefs.markCurrent&&!_bb){
+this.addMarker(_b9,"current");
 }
 }else{
-if(!_b7){
-this.prependComment((_b6==this.board.WHITE?t["white"]:t["black"])+" "+t["passed"],"comment-pass");
+if(!_bb){
+this.prependComment((_ba==this.board.WHITE?t["white"]:t["black"])+" "+t["passed"],"comment-pass");
 }
 }
-},addStone:function(_b9,_ba){
-if(!(_b9 instanceof Array)){
-_b9=[_b9];
+},addStone:function(_bd,_be){
+if(!(_bd instanceof Array)){
+_bd=[_bd];
 }
-_b9=this.expandCompressedPoints(_b9);
-for(var i=0;i<_b9.length;i++){
-this.board.addStone(this.sgfCoordToPoint(_b9[i]),_ba=="AW"?this.board.WHITE:_ba=="AB"?this.board.BLACK:this.board.EMPTY);
+_bd=this.expandCompressedPoints(_bd);
+for(var i=0;i<_bd.length;i++){
+this.board.addStone(this.sgfCoordToPoint(_bd[i]),_be=="AW"?this.board.WHITE:_be=="AB"?this.board.BLACK:this.board.EMPTY);
 }
-},addMarker:function(_bc,_bd){
-if(!(_bc instanceof Array)){
-_bc=[_bc];
+},addMarker:function(_c0,_c1){
+if(!(_c0 instanceof Array)){
+_c0=[_c0];
 }
-_bc=this.expandCompressedPoints(_bc);
-var _be;
-for(var i=0;i<_bc.length;i++){
-switch(_bd){
+_c0=this.expandCompressedPoints(_c0);
+var _c2;
+for(var i=0;i<_c0.length;i++){
+switch(_c1){
 case "TR":
-_be="triangle";
+_c2="triangle";
 break;
 case "SQ":
-_be="square";
+_c2="square";
 break;
 case "CR":
-_be="circle";
+_c2="circle";
 break;
 case "MA":
-_be="ex";
+_c2="ex";
 break;
 case "TW":
-_be="territory-white";
+_c2="territory-white";
 break;
 case "TB":
-_be="territory-black";
+_c2="territory-black";
 break;
 case "LB":
-_be=(_bc[i].split(":"))[1];
-_bc[i];
+_c2=(_c0[i].split(":"))[1];
+_c0[i];
 break;
 default:
-_be=_bd;
+_c2=_c1;
 break;
 }
-this.board.addMarker(this.sgfCoordToPoint((_bc[i].split(":"))[0]),_be);
+this.board.addMarker(this.sgfCoordToPoint((_c0[i].split(":"))[0]),_c2);
 }
-},showTime:function(_c0,_c1){
-var tp=(_c1=="BL"||_c1=="OB"?"timeB":"timeW");
-if(_c1=="BL"||_c1=="WL"){
-var _c3=Math.floor(_c0/60);
-var _c4=(_c0%60).toFixed(0);
-_c4=(_c4<10?"0":"")+_c4;
-this[tp]=_c3+":"+_c4+this[tp];
+},showTime:function(_c4,_c5){
+var tp=(_c5=="BL"||_c5=="OB"?"timeB":"timeW");
+if(_c5=="BL"||_c5=="WL"){
+var _c7=Math.floor(_c4/60);
+var _c8=(_c4%60).toFixed(0);
+_c8=(_c8<10?"0":"")+_c8;
+this[tp]=_c7+":"+_c8+this[tp];
 }else{
-this[tp]+=" ("+_c0+")";
+this[tp]+=" ("+_c4+")";
 }
-},showAnnotation:function(_c5,_c6){
+},showAnnotation:function(_c9,_ca){
 var msg;
-switch(_c6){
+switch(_ca){
 case "N":
-msg=_c5;
+msg=_c9;
 break;
 case "GB":
-msg=(_c5>1?t["vgb"]:t["gb"]);
+msg=(_c9>1?t["vgb"]:t["gb"]);
 break;
 case "GW":
-msg=(_c5>1?t["vgw"]:t["gw"]);
+msg=(_c9>1?t["vgw"]:t["gw"]);
 break;
 case "DM":
-msg=(_c5>1?t["dmj"]:t["dm"]);
+msg=(_c9>1?t["dmj"]:t["dm"]);
 break;
 case "UC":
 msg=t["uc"];
@@ -3600,7 +3680,7 @@ case "TE":
 msg=t["te"];
 break;
 case "BM":
-msg=(_c5>1?t["vbm"]:t["bm"]);
+msg=(_c9>1?t["vbm"]:t["bm"]);
 break;
 case "DO":
 msg=t["do"];
@@ -3613,39 +3693,54 @@ msg=t["ho"];
 break;
 }
 this.prependComment(msg);
-},showComments:function(_c8,_c9,_ca){
-if(!_c8||_ca){
+},showComments:function(_cc,_cd,_ce){
+if(!_cc||_ce){
 return;
 }
-this.dom.comments.innerHTML+=_c8.replace(/\n/g,"<br />");
-},prependComment:function(_cb,cls){
+this.dom.comments.innerHTML+=_cc.replace(/\n/g,"<br />");
+},prependComment:function(_cf,cls){
 cls=cls||"comment-status";
-this.dom.comments.innerHTML="<div class='"+cls+"'>"+_cb+"</div>"+this.dom.comments.innerHTML;
+this.dom.comments.innerHTML="<div class='"+cls+"'>"+_cf+"</div>"+this.dom.comments.innerHTML;
+},downloadSgf:function(evt){
+_7(evt);
+location.href="php/download.php?id="+this.gameName;
+},save:function(evt){
+_7(evt);
+var _d3=function(req){
+this.hook("saved",[req.responseText]);
+};
+var _d5=function(req){
+this.croak(t["error retrieving"]);
+};
+var sgf=this.gameTree.trees.first().toSgf();
+_3("POST",this.saveUrl,{sgf:sgf},_d3,_d5,this,30000);
 },constructDom:function(){
 this.dom.player=document.createElement("div");
 this.dom.player.className="eidogo-player";
 this.dom.player.id="player-"+this.uniq;
 this.dom.container.appendChild(this.dom.player);
-var _cd="    \t        <div id='controls-container' class='controls-container'>    \t            <ul id='controls' class='controls'>    \t                <li id='control-first' class='control first'>First</li>    \t                <li id='control-back' class='control back'>Back</li>    \t                <li id='control-forward' class='control forward'>Forward</li>    \t                <li id='control-last' class='control last'>Last</li>    \t                <li id='control-pass' class='control pass'>Pass</li>    \t            </ul>    \t            <div id='move-number' class='move-number'></div>    \t            <div id='nav-slider' class='nav-slider'>    \t                <div id='nav-slider-thumb' class='nav-slider-thumb'></div>    \t            </div>    \t            <div id='variations-container' class='variations-container'>    \t                <div id='variations-label' class='variations-label'>"+t["variations"]+":</div>    \t                <div id='variations' class='variations'></div>    \t            </div>    \t        </div>    \t        <div id='tools-container' class='tools-container'>                    <div id='tools-label' class='tools-label'>"+t["tool"]+":</div>                    <select id='tools-select' class='tools-select'>                        <option value='play'>"+t["play"]+"</option>                        <option value='add_b'>"+t["add_b"]+"</option>                        <option value='add_w'>"+t["add_w"]+"</option>                        <option value='region'>"+t["region"]+"</option>                        <option value='tr'>"+t["triangle"]+"</option>                        <option value='sq'>"+t["square"]+"</option>                        <option value='cr'>"+t["circle"]+"</option>                        <option value='x'>"+t["x"]+"</option>                        <option value='letter'>"+t["letter"]+"</option>                        <option value='number'>"+t["number"]+"</option>                    </select>                    <select id='search-algo' class='search-algo'>                        <option value='corner'>"+t["search corner"]+"</option>                        <option value='center'>"+t["search center"]+"</option>                    </select>                    <input type='button' id='search-button' class='search-button' value='"+t["search"]+"'>                </div>    \t        <div id='comments' class='comments'></div>    \t        <div id='search-container' class='search-container'>    \t            <div id='search-close' class='search-close'>close search</div>        \t        <p class='search-count'><span id='search-count'></span>&nbsp;matches found.</p>                    <div id='search-results-container' class='search-results-container'>                        <div class='search-result'>                            <span class='pw'><b>White</b></span>                            <span class='pb'><b>Black</b></span>                            <span class='re'><b>Result</b></span>                            <span class='dt'><b>Date</b></span>                            <div class='clear'></div>                        </div>                        <div id='search-results' class='search-results'></div>                    </div>    \t        </div>    \t        <div id='board-container' class='board-container with-coords'></div>    \t        <div id='info' class='info'>    \t            <div id='info-players' class='players'>        \t            <div id='white' class='player white'>        \t                <div id='white-name' class='name'></div>        \t                <div id='white-captures' class='captures'></div>        \t                <div id='white-time' class='time'></div>        \t            </div>        \t            <div id='black' class='player black'>        \t                <div id='black-name' class='name'></div>        \t                <div id='black-captures' class='captures'></div>        \t                <div id='black-time' class='time'></div>        \t            </div>        \t        </div>    \t            <div id='info-game' class='game'></div>    \t        </div>    \t        <div id='preferences' class='preferences'>    \t            <div><input type='checkbox'> Show variations on board</div>    \t            <div><input type='checkbox'> Mark current move</div>    \t        </div>    \t        <div id='footer' class='footer'></div>    \t    ";
-_cd=_cd.replace(/ id='([^']+)'/g," id='$1-"+this.uniq+"'");
-this.dom.player.innerHTML=_cd;
+var _d8="    \t        <div id='board-container' class='board-container with-coords'></div>    \t        <div id='controls-container' class='controls-container'>    \t            <ul id='controls' class='controls'>    \t                <li id='control-first' class='control first'>First</li>    \t                <li id='control-back' class='control back'>Back</li>    \t                <li id='control-forward' class='control forward'>Forward</li>    \t                <li id='control-last' class='control last'>Last</li>    \t                <li id='control-pass' class='control pass'>Pass</li>    \t            </ul>    \t            <div id='move-number' class='move-number'></div>    \t            <div id='nav-slider' class='nav-slider'>    \t                <div id='nav-slider-thumb' class='nav-slider-thumb'></div>    \t            </div>    \t            <div id='variations-container' class='variations-container'>    \t                <div id='variations-label' class='variations-label'>"+t["variations"]+":</div>    \t                <div id='variations' class='variations'></div>    \t            </div>    \t        </div>    \t        <div id='tools-container' class='tools-container'>                    <div id='tools-label' class='tools-label'>"+t["tool"]+":</div>                    <select id='tools-select' class='tools-select'>                        <option value='play'>"+t["play"]+"</option>                        <option value='add_b'>"+t["add_b"]+"</option>                        <option value='add_w'>"+t["add_w"]+"</option>                        "+(this.searchUrl?("<option value='region'>"+t["region"]+"</option>"):"")+"                        <option value='tr'>"+t["triangle"]+"</option>                        <option value='sq'>"+t["square"]+"</option>                        <option value='cr'>"+t["circle"]+"</option>                        <option value='x'>"+t["x"]+"</option>                        <option value='letter'>"+t["letter"]+"</option>                        <option value='number'>"+t["number"]+"</option>                    </select>                    <select id='search-algo' class='search-algo'>                        <option value='corner'>"+t["search corner"]+"</option>                        <option value='center'>"+t["search center"]+"</option>                    </select>                    <input type='button' id='search-button' class='search-button' value='"+t["search"]+"'>                </div>    \t        <div id='comments' class='comments'></div>    \t        <div id='search-container' class='search-container'>    \t            <div id='search-close' class='search-close'>close search</div>        \t        <p class='search-count'><span id='search-count'></span>&nbsp;matches found.</p>                    <div id='search-results-container' class='search-results-container'>                        <div class='search-result'>                            <span class='pw'><b>White</b></span>                            <span class='pb'><b>Black</b></span>                            <span class='re'><b>Result</b></span>                            <span class='dt'><b>Date</b></span>                            <div class='clear'></div>                        </div>                        <div id='search-results' class='search-results'></div>                    </div>    \t        </div>    \t        <div id='info' class='info'>    \t            <div id='info-players' class='players'>        \t            <div id='white' class='player white'>        \t                <div id='white-name' class='name'></div>        \t                <div id='white-captures' class='captures'></div>        \t                <div id='white-time' class='time'></div>        \t            </div>        \t            <div id='black' class='player black'>        \t                <div id='black-name' class='name'></div>        \t                <div id='black-captures' class='captures'></div>        \t                <div id='black-time' class='time'></div>        \t            </div>        \t        </div>    \t            <div id='info-game' class='game'></div>    \t        </div>    \t        <div id='options' class='options'>    \t            <a id='option-save' class='option-save' href='#' title='Save this game'>Save</a>    \t            <a id='option-download' class='option-download' href='#' title='Download this game as SGF'>Download SGF</a>    \t        </div>    \t        <div id='preferences' class='preferences'>    \t            <div><input type='checkbox'> Show variations on board</div>    \t            <div><input type='checkbox'> Mark current move</div>    \t        </div>    \t        <div id='footer' class='footer'></div>    \t    ";
+_d8=_d8.replace(/ id='([^']+)'/g," id='$1-"+this.uniq+"'");
+this.dom.player.innerHTML=_d8;
 var re=/ id='([^']+)-\d+'/g;
-var _cf;
+var _da;
 var id;
-var _d1;
-while(_cf=re.exec(_cd)){
-id=_cf[0].replace(/'/g,"").replace(/ id=/,"");
-_d1="";
-_cf[1].split("-").forEach(function(_d2,i){
-_d2=i?_d2.charAt(0).toUpperCase()+_d2.substring(1):_d2;
-_d1+=_d2;
+var _dc;
+while(_da=re.exec(_d8)){
+id=_da[0].replace(/'/g,"").replace(/ id=/,"");
+_dc="";
+_da[1].split("-").forEach(function(_dd,i){
+_dd=i?_dd.charAt(0).toUpperCase()+_dd.substring(1):_dd;
+_dc+=_dd;
 });
-this.dom[_d1]=_2(id);
+this.dom[_dc]=_2(id);
 }
 this.dom.searchRegion=document.createElement("div");
 this.dom.searchRegion.id="search-region-"+this.uniq;
 this.dom.searchRegion.className="search-region";
-[["moveNumber","setPermalink"],["controlFirst","first"],["controlBack","back"],["controlForward","forward"],["controlLast","last"],["controlPass","pass"],["searchButton","searchRegion"],["searchResults","loadSearchResult"],["searchClose","closeSearch"]].forEach(function(eh){
+this.dom.navSlider._width=this.dom.navSlider.offsetWidth;
+this.dom.navSliderThumb._width=this.dom.navSliderThumb.offsetWidth;
+[["moveNumber","setPermalink"],["controlFirst","first"],["controlBack","back"],["controlForward","forward"],["controlLast","last"],["controlPass","pass"],["searchButton","searchRegion"],["searchResults","loadSearchResult"],["searchClose","closeSearch"],["optionDownload","downloadSgf"],["optionSave","save"]].forEach(function(eh){
 _5(this.dom[eh[0]],this[eh[1]],this);
 }.bind(this));
 _4(this.dom.toolsSelect,"change",function(e){
@@ -3653,103 +3748,105 @@ this.selectTool.apply(this,[(e.target||e.srcElement).value]);
 },this,true);
 },enableNavSlider:function(){
 if(this.progressiveLoad){
+_b(this.dom.navSliderThumb);
 return;
 }
-this.dom.navSliderThumb.style.display="block";
 this.dom.navSlider.style.cursor="pointer";
-var _d6=false;
-var _d7=null;
+var _e1=false;
+var _e2=null;
 _4(this.dom.navSlider,"mousedown",function(e){
-_d6=true;
+_e1=true;
 _7(e);
 },this,true);
 _4(document,"mousemove",function(e){
-if(!_d6){
+if(!_e1){
 return;
 }
 var xy=_6(e,this.dom.navSlider);
-clearTimeout(_d7);
-_d7=setTimeout(function(){
+clearTimeout(_e2);
+_e2=setTimeout(function(){
 this.updateNavSlider(xy[0]);
 }.bind(this),10);
 _7(e);
 },this,true);
 _4(document,"mouseup",function(e){
-if(!_d6){
+if(!_e1){
 return;
 }
-_d6=false;
+_e1=false;
 var xy=_6(e,this.dom.navSlider);
 this.updateNavSlider(xy[0]);
 },this,true);
-},updateNavSlider:function(_dd){
-var _de=this.dom.navSlider.offsetWidth-this.dom.navSliderThumb.offsetWidth;
-var _df=this.totalMoves;
-var _e0=!!_dd;
-var _dd=_dd||this.moveNumber/_df*_de;
-_dd=_dd>_de?_de:_dd;
-_dd=_dd<0?0:_dd;
-var _e1=parseInt(_dd/_de*_df,10);
-if(_e0){
-var _e2=_e1-this.cursor.node.getPosition();
-for(var i=0;i<Math.abs(_e2);i++){
-if(_e2>0){
+},updateNavSlider:function(_e8){
+var _e9=this.dom.navSlider._width-this.dom.navSliderThumb._width;
+var _ea=this.totalMoves;
+var _eb=!!_e8;
+_e8=_e8||(this.moveNumber/_ea*_e9);
+_e8=_e8>_e9?_e9:_e8;
+_e8=_e8<0?0:_e8;
+var _ec=parseInt(_e8/_e9*_ea,10);
+if(_eb){
+this.nowLoading();
+var _ed=_ec-this.cursor.node.getPosition();
+for(var i=0;i<Math.abs(_ed);i++){
+if(_ed>0){
 this.variation(null,true);
 }else{
-if(_e2<0){
+if(_ed<0){
 this.cursor.previous();
 this.moveNumber--;
 }
 }
 }
-if(_e2<0){
+if(_ed<0){
 if(this.moveNumber<0){
 this.moveNumber=0;
 }
-this.board.revert(Math.abs(_e2));
+this.board.revert(Math.abs(_ed));
 }
+this.doneLoading();
 this.refresh();
 }
-_dd=parseInt(_e1/_df*_de,10)||0;
-this.dom.navSliderThumb.style.left=_dd+"px";
+_e8=parseInt(_ec/_ea*_e9,10)||0;
+this.dom.navSliderThumb.style.left=_e8+"px";
 },resetLastLabels:function(){
 this.labelLastNumber=1;
 this.labelLastLetter="A";
-},sgfCoordToPoint:function(_e4){
-if(!_e4||_e4=="tt"){
+},sgfCoordToPoint:function(_ef){
+if(!_ef||_ef=="tt"){
 return {x:null,y:null};
 }
-var _e5={a:0,b:1,c:2,d:3,e:4,f:5,g:6,h:7,i:8,j:9,k:10,l:11,m:12,n:13,o:14,p:15,q:16,r:17,s:18};
-return {x:_e5[_e4.charAt(0)],y:_e5[_e4.charAt(1)]};
+var _f0={a:0,b:1,c:2,d:3,e:4,f:5,g:6,h:7,i:8,j:9,k:10,l:11,m:12,n:13,o:14,p:15,q:16,r:17,s:18};
+return {x:_f0[_ef.charAt(0)],y:_f0[_ef.charAt(1)]};
 },pointToSgfCoord:function(pt){
 if(!pt||!this.boundsCheck(pt.x,pt.y,[0,this.board.boardSize-1])){
 return null;
 }
 var pts={0:"a",1:"b",2:"c",3:"d",4:"e",5:"f",6:"g",7:"h",8:"i",9:"j",10:"k",11:"l",12:"m",13:"n",14:"o",15:"p",16:"q",17:"r",18:"s"};
 return pts[pt.x]+pts[pt.y];
-},expandCompressedPoints:function(_e8){
-var _e9;
+},expandCompressedPoints:function(_f3){
+var _f4;
 var ul,lr;
 var x,y;
-var _ee=[];
-var _ef=[];
-for(var i=0;i<_e8.length;i++){
-_e9=_e8[i].split(/:/);
-if(_e9.length>1){
-ul=this.sgfCoordToPoint(_e9[0]);
-lr=this.sgfCoordToPoint(_e9[1]);
+var _f9=[];
+var _fa=[];
+for(var i=0;i<_f3.length;i++){
+_f4=_f3[i].split(/:/);
+if(_f4.length>1){
+ul=this.sgfCoordToPoint(_f4[0]);
+lr=this.sgfCoordToPoint(_f4[1]);
 for(x=ul.x;x<=lr.x;x++){
 for(y=ul.y;y<=lr.y;y++){
-_ee.push(this.pointToSgfCoord({x:x,y:y}));
+_f9.push(this.pointToSgfCoord({x:x,y:y}));
 }
 }
-_ef.push(i);
+_fa.push(i);
 }
 }
-_e8=_e8.concat(_ee);
-return _e8;
+_f3=_f3.concat(_f9);
+return _f3;
 },setPermalink:function(){
-if(!this.gameName||this.gameName=="search"||this.gameName=="gnugo"){
+if(!this.gameName||this.gameName=="search"||this.gameName=="gnugo"||this.gameName=="url"){
 return;
 }
 this.hook("setPermalink");
