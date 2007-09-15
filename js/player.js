@@ -758,6 +758,9 @@
                 if (this.regionTop == y && this.regionLeft == x && !this.regionClickSelect) {
                     // allow two-click selection in addition to click-and-drag (for iphone!)
                     this.regionClickSelect = true;
+                    this.regionRight = x + 1;
+                    this.regionBottom = y + 1;
+                    this.showRegion();
                 } else {
                     // end of region selection
                     this.regionBegun = false;
@@ -912,6 +915,8 @@
     	        return;
     	    }
     	    
+    	    var algo = this.dom.searchAlgo.value;
+    	    
     	    var bounds = this.getRegionBounds();
     	    var region = this.board.getRegion(bounds[0], bounds[1], bounds[2], bounds[3]);
     	    var pattern = region.join("")
@@ -937,7 +942,7 @@
 	        if (bounds[1] == 0) edges.push('w')
 	        if (bounds[0] + bounds[3] == this.board.boardSize) edges.push('s');
 	        if (bounds[1] + bounds[2] == this.board.boardSize) edges.push('e');
-	        if (!(edges.length == 2 &&
+	        if (algo == "corner" && !(edges.length == 2 &&
 	             ((edges.contains('n') && edges.contains('e')) ||
 	              (edges.contains('n') && edges.contains('w')) ||
 	              (edges.contains('s') && edges.contains('e')) ||
@@ -952,7 +957,6 @@
     	    
     	    var quadrant = (edges.contains('n') ? "n" : "s");
     	    quadrant += (edges.contains('w') ? "w" : "e");
-    	    var algo = this.dom.searchAlgo.value;
 	    
     	    this.showComments("");
     	    this.nowLoading();
