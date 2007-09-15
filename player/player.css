@@ -497,10 +497,11 @@
     display: block;
     width: 147px;
     padding: 7px 5px 7px 5px;
-    margin: 5px 0 0 5px;
+    margin: 5px 0 20px 5px;
     background: #181818;
     border: 1px solid #282828;
     text-align: center;
+    display: none;
 }
 .eidogo-loading {
 	position: absolute;

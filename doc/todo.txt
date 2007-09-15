@@ -2,25 +2,24 @@ planned for 1.0
 - fix broken back button in IE (change links to "#kjd" + onclick handler to invoke history loader?)
 - uploading (or url or paste), fetch restrictions
 - unsaved changes notice for permalink, save
-- security checks for fetch.php
 - show resignation comment
-- "more" search results link
+- blank 9x9, 13x13 boards
 - showTools preference (disallow implicit selection too)
 - create compact embeddedable version
 - test multiple instances on a page
-- "download eidogo"?
 - time left issue
 - brief help text (keyboard shortcuts, etc)
-- get rid of comments in css/code
 
 planned for after 1.0
 - improve forward/back behavior in IE
 - continuations for pattern search
+- "more" search results link
 - game archive browsing/searching
 - decouple player and board renderer (click events)
-- canvas renderer: dojo.gfx or similar? (can do non-regular-sized boards)
+- canvas renderer: dojo.gfx or similar? (non-regular-sized boards)
 - exhaustive FF[4] SGF support
 - checkboxes for preferences
+- Facebook App??
 
 maybe
 - navigable variation tree like CGoban
