@@ -4,10 +4,11 @@
 #   ne 6 5 .............O.......X........ corner
 #   ne 6 6 .............OOOX....X....X.X....... corner
 #
+import os
 from socket import *
 from libkombilo import *
 
-gl = GameList('../kombilo/t1.db')
+gl = GameList(os.path.join(os.path.dirname(os.path.abspath(__file__)), 't1.db'))
 
 ss = socket(AF_INET, SOCK_STREAM)
 ss.bind(('', 6060))
