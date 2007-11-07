@@ -52,7 +52,7 @@ h2 {
 	font-size: 18px;
 	margin: 20px 0 10px 0;
 	padding: 0;
-	color: #744;
+	color: #944;
 }
 h3 {
     font-size: 14px;
@@ -105,4 +105,32 @@ pre, code {
 }
 #links li a:hover {
     background: #bbb;
+}
+#tourney-games {
+    margin: 0 0 10px 0;
+    border-bottom: 1px solid #bbb;
+    padding: 0;
+    border-collapse: collapse;
+}
+#tourney-games td {
+    padding: 0;
+}
+#tourney-games th {
+    padding: 5px;
+    text-align: left;
+    font-weight: bold;
+    color: #888;
+}
+#tourney-games tr.odd {
+    background: #ddd;
+}
+#tourney-games a {
+    color: #008;
+    text-decoration: none;
+    display: block;
+    padding: 5px;
+}
+#tourney-games tr.odd:hover a, #tourney-games tr.even:hover a {
+    background: #bbe;
+    text-decoration: underline;
 }
