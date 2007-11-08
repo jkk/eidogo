@@ -8,7 +8,8 @@ import re
 import os
 import sgfparser
 
-con = sqlite3.connect("titles.db", isolation_level=None)
+curdir = os.path.dirname(os.path.abspath(__file__))
+con = sqlite3.connect(os.path.join(curdir, 'titles.db'), isolation_level=None)
 cur = con.cursor()
 cur.executescript("""
     create table if not exists notices (
@@ -98,7 +99,7 @@ for tr in trs:
 cur.execute("select * from games order by dt desc limit 250")
 rows = cur.fetchall()
 
-f = open("titles.html", "w")
+f = open(os.path.join(curdir, 'titles.html'), "w")
 f.write("<table id='tourney-games'><tr><th>Date</th><th>Event</th><th>White</th><th>Black</th><th>Result</th></tr>")
 cl = ""
 for row in rows:
