@@ -72,6 +72,7 @@
     	],
 
     	/**
+    	 * Inits settings that are persistent among games
     	 * @constructor
     	 * @param {Object} cfg A hash of configuration values
     	 */
@@ -93,8 +94,94 @@
 		
     		// so we can have more than one player on a page
     		this.uniq = (new Date()).getTime();
-
-            // gameTree here is actually more like a Collection as described in the
+    		
+    		// URL path to SGF files
+    		this.sgfPath = cfg.sgfPath;
+    		
+    		// pattern and game info search
+    		this.searchUrl = cfg.searchUrl;
+    		
+    		// save to file
+    		this.saveUrl = cfg.saveUrl;
+    		
+    		// url to handle downloads
+    		this.downloadUrl = cfg.downloadUrl;
+    		
+    		// Allow outside scripts to hook into Player events. Format:
+    		//      hookName:   hookHandler
+    		// Available hooks:
+    		// - initDone
+    		// - initGame
+    		// - setPermalink
+    		// - searchRegion
+    		this.hooks = cfg.hooks || {};
+    		
+    		// handlers for the various types of GameNode properties
+    		this.propertyHandlers = {
+    			W:	this.playMove,
+    			B:	this.playMove,
+    			KO: this.playMove,
+    			MN: this.setMoveNumber,
+    			AW:	this.addStone,
+    			AB:	this.addStone,
+    			AE: this.addStone,
+    			CR: this.addMarker, // circle
+    			LB: this.addMarker, // label
+    			TR: this.addMarker, // triangle
+    			MA: this.addMarker, // X
+    			SQ: this.addMarker, // square
+    			TW: this.addMarker,
+    			TB: this.addMarker,
+    			PL: this.setColor,
+    			C:	this.showComments,
+    		    N:  this.showAnnotation,
+    		    GB: this.showAnnotation,
+    		    GW: this.showAnnotation,
+    		    DM: this.showAnnotation,
+    		    HO: this.showAnnotation,
+    		    UC: this.showAnnotation,
+    		    V:  this.showAnnotation,
+    		    BM: this.showAnnotation,
+    		    DO: this.showAnnotation,
+    		    IT: this.showAnnotation,
+    		    TE: this.showAnnotation,
+    		    BL: this.showTime,
+    		    OB: this.showTime,
+    		    WL: this.showTime,
+    		    OW: this.showTime
+    		};
+    		
+    		// set up the elements we'll use
+    		this.constructDom();
+    		
+    		// player-wide events
+    		addEvent(document, "keydown", this.handleKeypress, this, true);
+            addEvent(document, "mouseup", this.handleDocMouseUp, this, true);
+            
+    		// get the game data and go!
+            // this.loadSgf(cfg);
+    		
+    		this.hook("initDone");
+    	},
+    	
+    	/**
+    	 * Delegate to a hook handler. 'this' will be bound to the Player
+    	 * instance
+    	**/
+    	hook: function(hook, params) {
+    	    if (hook in this.hooks) {
+    	        this.hooks[hook].bind(this)(params);
+    	    }
+    	},
+    	
+    	/**
+    	 * Resets settings that can change per game
+    	**/
+    	reset: function(cfg) {
+    	    
+    	    this.gameName = "";
+    	    
+    	    // gameTree here is actually more like a Collection as described in the
             // EBNF definition in the SGF spec, http://www.red-bean.com/sgf/sgf4.html.
             // Each element of gameTree.trees is actually a GameTree as defined in the
             // spec. Right now we only really support a single game at a time -- i.e.,
@@ -106,23 +193,12 @@
     		this.progressiveLoad = cfg.progressiveLoad ? true : false;
     		this.progressiveLoads = null;
     		this.progressiveUrl = null;
+    		
+    		// gnugo/computer opponent
+    		this.opponentUrl = null;
+    		this.opponentColor = null;
 		
-    		// pattern and game info search
-    		this.searchUrl = cfg.searchUrl;
-    		
-    		// save to file
-    		this.saveUrl = cfg.saveUrl;
-    		
-    		// Allow outside scripts to hook into Player events. Format:
-    		//      hookName:   hookHandler
-    		// Available hooks:
-    		// - initDone
-    		// - initGame
-    		// - setPermalink
-    		// - searchRegion
-    		this.hooks = cfg.hooks || {};
-
-    		// these are populated after load
+			// these are populated after load
     		this.board = null;
     		this.rules = null;
     		this.currentColor = null;
@@ -158,51 +234,22 @@
     		this.prefs.markVariations = !!cfg.markVariations;
     		this.prefs.showGameInfo = !!cfg.showGameInfo;
     		this.prefs.showPlayerInfo = !!cfg.showPlayerInfo;
-		
-    		// handlers for the various types of GameNode properties
-    		this.propertyHandlers = {
-    			W:	this.playMove,
-    			B:	this.playMove,
-    			KO: this.playMove,
-    			MN: this.setMoveNumber,
-    			AW:	this.addStone,
-    			AB:	this.addStone,
-    			AE: this.addStone,
-    			CR: this.addMarker, // circle
-    			LB: this.addMarker, // label
-    			TR: this.addMarker, // triangle
-    			MA: this.addMarker, // X
-    			SQ: this.addMarker, // square
-    			TW: this.addMarker,
-    			TB: this.addMarker,
-    			PL: this.setColor,
-    			C:	this.showComments,
-    		    N:  this.showAnnotation,
-    		    GB: this.showAnnotation,
-    		    GW: this.showAnnotation,
-    		    DM: this.showAnnotation,
-    		    HO: this.showAnnotation,
-    		    UC: this.showAnnotation,
-    		    V:  this.showAnnotation,
-    		    BM: this.showAnnotation,
-    		    DO: this.showAnnotation,
-    		    IT: this.showAnnotation,
-    		    TE: this.showAnnotation,
-    		    BL: this.showTime,
-    		    OB: this.showTime,
-    		    WL: this.showTime,
-    		    OW: this.showTime
-    		};
-		
-    		this.constructDom();
-    		this.nowLoading();
+    	},
+    	
+    	/**
+    	 * Load an SGF file or start from a blank board
+    	**/
+    	loadSgf: function(cfg, completeFn) {
+    	    this.nowLoading();
+    	    
+    	    this.reset(cfg);
+    	    
+    	    // URL path to SGF files
+    		this.sgfPath = cfg.sgfPath || this.sgfPath;
 		
     		// Load the first tree and first node by default.
     		this.loadPath = cfg.loadPath && cfg.loadPath.length > 1 ?
     			cfg.loadPath : [0, 0];
-			
-    		// URL path to SGF files (for dynamic loading)
-    		this.sgfPath = cfg.sgfPath;
 		
     		// game name (= file name) of load the currently-loaded game
     		this.gameName = cfg.gameName;
@@ -226,10 +273,8 @@
     		    }
 		        
     		    // load data from a URL
-    			this.remoteLoad(cfg.sgfUrl, null, false, null, function() {
-    			    this.hook("initDone");
-    			}.bind(this));
-    			var noHook = true;
+    			this.remoteLoad(cfg.sgfUrl, null, false, null, completeFn);
+    			var noCb = true;
     			if (cfg.progressiveLoad) {
     				this.progressiveLoads = 0;
     				this.progressiveUrl = cfg.progressiveUrl
@@ -254,20 +299,9 @@
     		
     			this.load(blankGame);
     		}
-    		
-    		if (!noHook) {
-    		    this.hook("initDone");
+    		if (!noCb && typeof completeFn == "function") {
+    		    completeFn();
     		}
-    	},
-    	
-    	/**
-    	 * Delegate to a hook handler. 'this' will be bound to the Player
-    	 * instance
-    	**/
-    	hook: function(hook, params) {
-    	    if (hook in this.hooks) {
-    	        this.hooks[hook].bind(this)(params);
-    	    }
     	},
 	
     	/**
@@ -281,7 +315,7 @@
     		    // first time
     		    this.createBoard(size || 19);
     	    }
-    		this.reset(true);
+    		this.resetCursor(true);
     		this.totalMoves = 0;
     		var moveCursor = new eidogo.GameCursor(this.cursor.node);
     		while (moveCursor.next()) { this.totalMoves++; }
@@ -289,6 +323,8 @@
     		this.showInfo();
     		if (this.prefs.showPlayerInfo) {
     		    show(this.dom.infoPlayers);
+    		} else {
+    		    hide(this.dom.infoPlayers);
     		}
             this.enableNavSlider();
     		this.selectTool("play");
@@ -297,11 +333,12 @@
 	
     	/**
     	 * Create our board, tie it to a Rules instance, and add appropriate event
-    	 * handlers. This only gets called once.
+    	 * handlers. This can be called multiple times.
     	**/
     	createBoard: function(size) {
     		size = size || 19;
     		try {
+    		    this.dom.boardContainer.innerHTML = "";
     		    var renderer = new eidogo.BoardRendererHtml(this.dom.boardContainer, size);
     			this.board = new eidogo.Board(renderer, size);
     		} catch (e) {
@@ -313,6 +350,8 @@
 		
     		if (size != 19) {
     		    removeClass(this.dom.boardContainer, "with-coords");
+    		} else {
+    		    addClass(this.dom.boardContainer, "with-coords");
     		}
 		
     		// add the search region selection box for later use
@@ -325,8 +364,6 @@
             addEvent(domBoard, "mousemove", this.handleBoardHover, this, true);
     		addEvent(domBoard, "mousedown", this.handleBoardMouseDown, this, true);
     		addEvent(domBoard, "mouseup", this.handleBoardMouseUp, this, true);
-            addEvent(document, "keydown", this.handleKeypress, this, true);
-            addEvent(document, "mouseup", this.handleDocMouseUp, this, true);
     	},
 	
     	/**
@@ -450,7 +487,7 @@
     			// Go to an absolute path.
     			if (!path.length) return;
     			if (fromStart) {
-    				this.reset(true);
+    				this.resetCursor(true);
     			}
     			while (path.length) {
     				var position = parseInt(path.shift(), 10);
@@ -476,7 +513,7 @@
     			// Go to a move number.
     			var steps = parseInt(path, 10);
     			if (fromStart) {
-    				this.reset(true);
+    				this.resetCursor(true);
     				steps++;
     			}
     			for (var i = 0; i < steps; i++) {
@@ -489,9 +526,9 @@
     	},
 
         /**
-         * Resets the game to the first node
+         * Resets the game cursor to the first node
         **/
-    	reset: function(noRender, firstGame) {
+    	resetCursor: function(noRender, firstGame) {
     		this.board.reset();
     		this.currentColor = "B";
     		this.moveNumber = 0;
@@ -642,7 +679,7 @@
 	
     	first: function() {
     		if (!this.cursor.hasPrevious()) return;
-    		this.reset(false, true);
+    		this.resetCursor(false, true);
     	},
 
     	last: function() {
@@ -911,7 +948,7 @@
     	    if (!this.searchUrl) {
     	        show(this.dom.comments);
     	        hide(this.dom.searchContainer);
-    	        this.prependComment("No search URL provided.");
+    	        this.prependComment(t['no search url']);
     	        return;
     	    }
     	    
@@ -932,7 +969,7 @@
     	        this.searching = false;
     	        show(this.dom.comments);
     	        hide(this.dom.searchContainer);
-    	        this.prependComment("Please select at least two stones to search for.");
+    	        this.prependComment(t['two stones']);
     	        return;
 	        }
 	        
@@ -950,8 +987,7 @@
 	            this.searching = false;
 	            show(this.dom.comments);
     	        hide(this.dom.searchContainer);
-    	        this.prependComment("For corner searches, your selection must " +
-    	            "touch two adjacent edges of the board.");
+    	        this.prependComment(t['two edges']);
     	        return;
 	        }
     	    
@@ -1203,6 +1239,8 @@
 	
     	showInfo: function() {
     	    this.dom.infoGame.innerHTML = "";
+    	    this.dom.whiteName.innerHTML = "";
+    	    this.dom.blackName.innerHTML = "";
     		var gameInfo = this.gameTree.trees.first().nodes.first();
     		var dl = document.createElement('dl');
     		for (var propName in this.infoLabels) {
@@ -1435,7 +1473,7 @@
     	
     	downloadSgf: function(evt) {    	    
     	    stopEvent(evt);
-    	    location.href = "php/download.php?id=" + this.gameName;
+    	    location.href = this.downloadUrl + this.gameName;
     	},
     	
     	save: function(evt) {

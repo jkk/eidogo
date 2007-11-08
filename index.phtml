@@ -1,31 +1,7 @@
 <?php include("header.phtml"); ?>
 
-<div id="player-container" style="display: none"></div>
+<script type="text/javascript" src="index.js"></script>
 
-<div id="text-content" style="display: none">
-
-<h2>Recent Tournament Games</h2>
-
-<?php
-
-exec("/usr/bin/python titles/titles.py", $output, $retval);
-$rows = json_decode($output[0]);
-echo "<table id='tourney-games'><tr><th>Date</th><th>Event</th><th>White</th><th>Black</th><th>Result</th></tr>";
-foreach ($rows as $row) {
-    $class = ($class == " class='odd'" ? " class='even'" : " class='odd'");
-    echo "<tr$class>";
-    $fn = str_replace(".sgf", "", array_shift($row));
-    foreach ($row as $col) {
-        echo "<td><a href='./#titles/$fn'>$col</a></td>";
-    }
-    echo "</tr>";
-}
-echo "</table>";
-
-?>
-
-<p>Games are collected primarily from <a href="http://igo-kisen.hp.infoseek.co.jp/">KIN's Homepage</a>.</p>
-
-</div>
+<div id="player-container"></div>
 
 <?php include("footer.phtml"); ?>

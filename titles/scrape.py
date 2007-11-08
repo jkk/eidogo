@@ -94,3 +94,22 @@ for tr in trs:
             f = open(os.path.join(sgf_path, fn), "w")
             f.write(raw_sgf)
             f.close()
+
+cur.execute("select * from games order by dt desc limit 250")
+rows = cur.fetchall()
+
+f = open("titles.html", "w")
+f.write("<table id='tourney-games'><tr><th>Date</th><th>Event</th><th>White</th><th>Black</th><th>Result</th></tr>")
+cl = ""
+for row in rows:
+    if (cl == " class='odd'"):
+        cl = " class='even'"
+    else:
+        cl = " class='odd'"
+    fn = row[0].replace(".sgf", "")
+    f.write("<tr" + cl + ">")
+    for col in row[1:]:
+        f.write("<td><a href='./#titles/" + fn + "'>" + col + "</a></td>")
+    f.write("</tr>")
+f.write("</table>")
+f.close()

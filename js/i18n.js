@@ -35,6 +35,10 @@ if (typeof eidogo.i18n == "undefined") {
         'region info':      'Click and drag to select a region. If your browser\
             does not support dragging (e.g., iPhone), click once to begin the selection\
             and click once to end it.',
+        'two stones':       'Please select at least two stones to search for.',
+        'two edges':        'For corner searches, your selection must \
+            touch two adjacent edges of the board.',
+        'no search url':    'No search URL provided.',
     
         'white':            'White',
         'white rank':       'White rank',

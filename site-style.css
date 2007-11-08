@@ -12,7 +12,7 @@ body {
     margin: 0 auto;
 }
 #header {
-    background: #eee;
+    background: #eee url(images/header_bg.png) repeat-x;
     padding: 5px 0 0 0;
 }
 #content {
@@ -21,7 +21,7 @@ body {
 #text-content {
     background: #eee;
     padding: 0 20px 20px 20px;
-    border-top: 2px solid #fff;
+    border: 3px solid #444;
 }
 #text-content a {
     color: #008;
@@ -50,7 +50,7 @@ h1 span {
 }
 h2 {
 	font-size: 18px;
-	margin: 20px 0 10px 0;
+	margin: 15px 0 10px 0;
 	padding: 0;
 	color: #944;
 }
@@ -87,7 +87,7 @@ pre, code {
 	display: block;
     padding: 0;
 	margin: 0;
-    background-color: #ccc;
+    background-color: #ddd;
 	border-top: 1px solid #999;
 	border-bottom: 3px solid #777;
 }
@@ -104,7 +104,7 @@ pre, code {
     font-size: 11px;
 }
 #links li a:hover {
-    background: #bbb;
+    background: #ccc;
 }
 #tourney-games {
     margin: 0 0 10px 0;

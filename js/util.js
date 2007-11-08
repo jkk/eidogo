@@ -78,6 +78,12 @@ eidogo.util = {
         }
     },
     
+    getTarget: function(ev) {
+        var t = ev.target || ev.srcElement;
+        return (t && t.nodeName && t.nodeName.toUpperCase() == "#TEXT") ?
+            t.parentNode : t;
+    },
+    
     addClass: function(el, cls) {
         jQuery(el).addClass(cls);
     },

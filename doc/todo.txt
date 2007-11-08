@@ -1,17 +1,14 @@
 planned for 1.0
-- fix broken back button in IE (change links to "#kjd" + onclick handler to invoke history loader?)
-- uploading (or url or paste), fetch restrictions
 - unsaved changes notice for permalink, save
 - show resignation comment
-- blank 9x9, 13x13 boards
-- showTools preference (disallow implicit selection too)
+- showTools/showComments/showButtons(?) preference (disallow implicit selection too)
 - create compact embeddedable version
 - test multiple instances on a page
 - time left issue
+- remove core language modifications?
 - brief help text (keyboard shortcuts, etc)
 
 planned for after 1.0
-- improve forward/back behavior in IE
 - continuations for pattern search
 - "more" search results link
 - game archive browsing/searching

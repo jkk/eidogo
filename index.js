@@ -2,10 +2,6 @@ var player;
 
 (function() {
     
-    // To Detect iPhone Safari (420+) and Safari 3 (500+)
-    var sfVersion = parseInt(jQuery.browser.version, 10);
-    var safari2 = (jQuery.browser.safari && sfVersion < 420);
-    
     // Provide handlers for frontend things (page title, permalinks) that
     // aren't handled by Player directly
     var hooks = {
@@ -56,155 +52,92 @@ var player;
     function loadGame(params, completeFn) {
         params = params || {};
         var cfg = {
-            domId:              "player-container",
-            mode:               "play",
-            sgfPath:            "sgf/",
             progressiveLoad:    false,
-            searchUrl:          "php/search.php",
-            saveUrl:            "php/save.php",
             markCurrent:        true,
             markVariations:     true,
             markNext:           false,
             showGameInfo:       true,
-            showPlayerInfo:     true,
-            hooks:              hooks
+            showPlayerInfo:     true
         };
         for (var key in params) {
             cfg[key] = params[key];
         }
         if (!player) {
-            player = new eidogo.Player(cfg);
-        } else {
-            if (cfg.sgfUrl) {
-                params.gameName = cfg.sgfUrl;
-                player.gameName = cfg.gameName;
-            }
-            player.remoteLoad(params.gameName, null, !cfg.sgfUrl, params.loadPath, completeFn);
+            player = new eidogo.Player({
+                domId:              "player-container",
+                mode:               "play",
+                sgfPath:            "sgf/",
+                searchUrl:          "php/search.php",
+                saveUrl:            "php/save.php",
+                downloadUrl:        "php/download.php?id=",
+                hooks:              hooks
+            });
         }
+        player.loadSgf(cfg, completeFn);
     }
     
-    // All our input comes from the URL hash
-    function parseHash(hash) {
+    function loadState(hash) {
         var hashParts = hash ? hash.replace(/^#/, "").split(/:/) : [];
-        var loadPath = null;
-        if (hashParts[1]) {
-            loadPath = hashParts[1].split(",");
-        }
-        return [hashParts[0] || "", loadPath, hashParts.slice(1)];
-    }
-    
-    // Start things up
-    function init() {
-        var params;
-        var input = parseHash(location.hash);
-        var gameName = input[0];
-        var loadPath = input[1];
-        var rest = input[2];
-        
-        if (gameName.indexOf("gnugo") === 0) {
-            params = {
-                gameName:       "",
-                opponentUrl:    "php/gnugo.php",
-                opponentColor:  "B"
-            };
-            var parts = gameName.split(";");
-            if (parts[1]) {
-                params.boardSize = parts[1];
-            }
-        } else if (gameName == "search") {
-            if (safari2) {
-                // Safari 2 is broken; provide a workaround
-                hooks.initDone = function() {
-                    if (loadPath) {
-                        player.loadSearch.apply(player, rest);
-                    }
-                }
-                params = {
-                    gameName:   "search",
-                    loadPath:   [0,0]
-                };
-            }
-        } else if (gameName == "url") {
-            params = {
-                gameName:   "url",
-                sgfUrl:     "php/fetch.php?url=" + location.hash.replace(/^#?url:/, "")
-            };
-        } else if (gameName != "" && gameName != "kjd") {
-            params = {
-                gameName:   gameName,
-                loadPath:   loadPath
-            };
-        } else if (gameName == "kjd") {
-            params = {
+        var gameName = hashParts[0] || "";
+        var loadPath = hashParts[1] ? hashParts[1].split(",") : null;
+        var rest = hashParts.slice(1);
+        if (!gameName || gameName == "kjd") {
+            loadGame({
                 gameName:           "kjd",
                 sgfUrl:             "php/kjd_progressive.php",                
                 loadPath:           loadPath,
                 progressiveLoad:    true,
                 markNext:           true,
                 showPlayerInfo:     false
-            };
+            });
+            return;
         }
-        
-        var first = true;
-        
-        jQuery.historyInit(function(hash) {
-            if (safari2) return; // safari 2 sucks
-            
-            if (first) {
-                first = false;
-                return;
-            }
-            
-            eidogo.util.show('player-container');
-            
-            var input = parseHash(hash);
-            var gameName = input[0];
-            var loadPath = input[1];
-            var rest = input[2];
-            if (gameName.indexOf("gnugo") === 0) return;
-            
-            if (typeof gameName != "undefined" && gameName != player.gameName) {
-                if (!gameName) {
-                    eidogo.util.hide('player-container');
-                    eidogo.util.show('text-content');
-                    return;
-                } else if(gameName == "kjd") {
-                    location.href = "kjd";
-                } else if (gameName == "url") {
-                    loadGame({
-                        gameName:   "url",
-                        sgfUrl:     "php/fetch.php?url=" + hash.replace(/^#?url:/, "")
-                    });
-                    return;
-                } else if (gameName == "search" && loadPath) {
-                    player.loadSearch.apply(player, rest);
-                    return;
-                }
+        if (gameName == "url") {
+            loadGame({
+                gameName:   "url",
+                sgfUrl:     "php/fetch.php?url=" + hash.replace(/^#?url:/, "")
+            });
+            return;
+        }
+        if (gameName == "search") {
+            if (loadPath) {
+                loadGame();
+                player.loadSearch.apply(player, rest);
+            } else {
                 loadGame({
-                    gameName:   gameName,
-                    loadPath:   loadPath
+                    gameName:   "search",
+                    loadPath:   [0,0]
                 });
             }
+            return;
+        }
+        if (gameName.indexOf("gnugo") === 0) {
+            var params = {
+                gameName:       "",
+                opponentUrl:    "php/gnugo.php",
+                opponentColor:  "B"
+            };
+            var parts = gameName.split("-");
+            if (parts[1]) {
+                params.boardSize = parts[1];
+            }
+            loadGame(params);
+            return;
+        }
+        loadGame({
+            gameName:   gameName,
+            loadPath:   loadPath
         });
-        
-        if (location.pathname == "/" && !gameName) {
-            eidogo.util.hide('player-container');
-            eidogo.util.show('text-content');
-        } else {
-            eidogo.util.show('player-container');
-            eidogo.util.hide('text-content');
-        }
-        
-        loadGame(params);
-        
-        if (gameName) {
-            jQuery.historyLoad(location.hash.replace(/^#/, ""));
-        }
-
     }
     
-    if (location.pathname == "/") {
-       eidogo.util.addEvent(window, "load", init); 
-    }
+    eidogo.util.addEvent(window, "load", function() {
+        eidogo.util.addEvent(document, "click", function(evt) {
+            var target = eidogo.util.getTarget(evt)
+            if (target.nodeName.toUpperCase() != "A" || target.href.indexOf("#") == -1) return;
+            jQuery.historyLoad(target.href.replace(/^.*#/, ""));
+            eidogo.util.stopEvent(evt);
+        });
+        jQuery.historyInit(loadState);
+    }); 
     
 })();
