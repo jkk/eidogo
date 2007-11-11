@@ -7,13 +7,6 @@ var player;
     var hooks = {
         initGame: function() {
             var gameRoot = this.gameTree.trees.first().nodes.first();
-            if (this.gameName == "kjd" || this.gameName == "gnugo" || this.gameName == "search") {
-                eidogo.util.hide(this.dom.optionSave);
-                eidogo.util.hide(this.dom.optionDownload);
-            } else {
-                eidogo.util.show(this.dom.optionSave);
-                eidogo.util.show(this.dom.optionDownload);
-            }
             var gn = gameRoot.GN || this.gameName;
             if (gn) {
                 // set the page title
@@ -29,14 +22,14 @@ var player;
         setPermalink: function() {
             var hash = (this.gameName ? this.gameName : "") + ":" +
                 this.cursor.getPath().join(",");
-            jQuery.historyLoad(hash);
+            addHistory(hash);
         },
         searchRegion: function(params) {
             this.hooks.initGame.call(this); // update title
             var hash = "search:" + params.q + ":" + params.w + "x" + params.h +
                 ":" + this.compressPattern(params.p) + ":" + params.a;
             if (hash != location.hash.replace(/^#/, "")) {
-                jQuery.historyLoad(hash);
+                addHistory(hash);
             }
         },
         saved: function(gn) {
@@ -57,7 +50,9 @@ var player;
             markVariations:     true,
             markNext:           false,
             showGameInfo:       true,
-            showPlayerInfo:     true
+            showPlayerInfo:     true,
+            showSave:           true,
+            showTools:          true
         };
         for (var key in params) {
             cfg[key] = params[key];
@@ -76,7 +71,10 @@ var player;
         player.loadSgf(cfg, completeFn);
     }
     
+    var notLoaded = true;
+    
     function loadState(hash) {
+        notLoaded = false;
         var hashParts = hash ? hash.replace(/^#/, "").split(/:/) : [];
         var gameName = hashParts[0] || "";
         var loadPath = hashParts[1] ? hashParts[1].split(",") : null;
@@ -88,7 +86,8 @@ var player;
                 loadPath:           loadPath,
                 progressiveLoad:    true,
                 markNext:           true,
-                showPlayerInfo:     false
+                showPlayerInfo:     false,
+                showSave:           false
             });
             return;
         }
@@ -101,11 +100,12 @@ var player;
         }
         if (gameName == "search") {
             if (loadPath) {
-                loadGame();
+                loadGame({showSave: false});
                 player.loadSearch.apply(player, rest);
             } else {
                 loadGame({
                     gameName:   "search",
+                    showSave:   false,
                     loadPath:   [0,0]
                 });
             }
@@ -130,14 +130,39 @@ var player;
         });
     }
     
+    function addHistory(hash) {
+        if (dhtmlHistory.isSafari) {
+            // this doesn't really work, but oh well
+            location.hash = hash;
+        } else {
+            dhtmlHistory.add(hash);
+        }
+    }
+    
+    window.dhtmlHistory.create({
+        toJSON: function(o) {
+            return JSON.stringify(o);
+        },
+        fromJSON: function(s) {
+            return JSON.parse(s);
+        }
+    });
+    
     eidogo.util.addEvent(window, "load", function() {
         eidogo.util.addEvent(document, "click", function(evt) {
             var target = eidogo.util.getTarget(evt)
-            if (target.nodeName.toUpperCase() != "A" || target.href.indexOf("#") == -1) return;
-            jQuery.historyLoad(target.href.replace(/^.*#/, ""));
+            if (target.nodeName.toUpperCase() != "A" || target.href.indexOf("#") == -1) return true;
+            var hash = target.href.replace(/^.*#/, "");
+            addHistory(hash);
+            loadState(hash);
             eidogo.util.stopEvent(evt);
         });
-        jQuery.historyInit(loadState);
+        dhtmlHistory.initialize();
+        dhtmlHistory.addListener(loadState);
+        if (notLoaded) {
+            // make sure we load our state on first page load (RSH quirk)
+            loadState(location.hash.replace(/^#/, ""));
+        }
     }); 
     
 })();

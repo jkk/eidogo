@@ -14,6 +14,7 @@ if (typeof eidogo.i18n == "undefined") {
         'move':             'Move',
         'loading':          'Loading',
         'passed':           'passed',
+        'resigned':         'resigned',
         
         'variations':       'Variations',
         'no variations':    'none',
@@ -29,15 +30,13 @@ if (typeof eidogo.i18n == "undefined") {
         'x':                'X',
         'letter':           'Letter',
         'number':           'Number',
+        'dim':              'Dim',
         'search':           'Search',
         'search corner':    'Corner Search',
         'search center':    'Center Search',
-        'region info':      'Click and drag to select a region. If your browser\
-            does not support dragging (e.g., iPhone), click once to begin the selection\
-            and click once to end it.',
+        'region info':      'Click and drag to select a region.',
         'two stones':       'Please select at least two stones to search for.',
-        'two edges':        'For corner searches, your selection must \
-            touch two adjacent edges of the board.',
+        'two edges':        'For corner searches, your selection must touch two adjacent edges of the board.',
         'no search url':    'No search URL provided.',
     
         'white':            'White',

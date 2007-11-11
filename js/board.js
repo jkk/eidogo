@@ -189,8 +189,8 @@ eidogo.BoardRendererHtml.prototype = {
 		domContainer.appendChild(domBoard);
 		this.domNode = domBoard;
 		this.renderCache = {
-		    stones: [].setLength(this.boardSize, 0).addDimension(this.boardSize, 0),
-		    markers: [].setLength(this.boardSize, 0).addDimension(this.boardSize, 0)
+            stones: [].setLength(this.boardSize, 0).addDimension(this.boardSize, 0),
+            markers: [].setLength(this.boardSize, 0).addDimension(this.boardSize, 0)
 		}
 		// auto-detect point width, point height, and margin
 		this.pointWidth = 0;
@@ -241,6 +241,7 @@ eidogo.BoardRendererHtml.prototype = {
 				case "ex":
 				case "territory-white":
 				case "territory-black":
+				case "dim":
 				case "current":
 					break;
 				default:

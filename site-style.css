@@ -130,7 +130,7 @@ pre, code {
     display: block;
     padding: 5px;
 }
-#tourney-games tr.odd:hover a, #tourney-games tr.even:hover a {
+#tourney-games tr.odd:hover, #tourney-games tr.even:hover {
     background: #bbe;
     text-decoration: underline;
 }

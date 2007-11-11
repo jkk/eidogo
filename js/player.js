@@ -132,6 +132,7 @@
     			SQ: this.addMarker, // square
     			TW: this.addMarker,
     			TB: this.addMarker,
+    			DD: this.addMarker,
     			PL: this.setColor,
     			C:	this.showComments,
     		    N:  this.showAnnotation,
@@ -234,6 +235,8 @@
     		this.prefs.markVariations = !!cfg.markVariations;
     		this.prefs.showGameInfo = !!cfg.showGameInfo;
     		this.prefs.showPlayerInfo = !!cfg.showPlayerInfo;
+    		this.prefs.showTools = !!cfg.showTools;
+    		this.prefs.showSave = !!cfg.showSave;
     	},
     	
     	/**
@@ -309,6 +312,7 @@
     	 * dynamically-loaded games).
     	**/
     	initGame: function(target) {
+    	    this.handleDisplayPrefs();
     	    var gameRoot = target.trees.first().nodes.first();
     		var size = gameRoot.SZ;
     		if (!this.board) {
@@ -321,14 +325,20 @@
     		while (moveCursor.next()) { this.totalMoves++; }
     		this.totalMoves--;
     		this.showInfo();
-    		if (this.prefs.showPlayerInfo) {
-    		    show(this.dom.infoPlayers);
-    		} else {
-    		    hide(this.dom.infoPlayers);
-    		}
-            this.enableNavSlider();
+    		this.enableNavSlider();
     		this.selectTool("play");
     		this.hook("initGame");
+    	},
+    	
+    	/**
+    	 * Shows or hides interface elements as configured
+    	**/
+    	handleDisplayPrefs: function() {
+    	    (this.prefs.showGameInfo || this.prefs.showPlayerInfo ? show : hide)(this.dom.info);
+    		(this.prefs.showGameInfo ? show : hide)(this.dom.infoGame);
+    		(this.prefs.showPlayerInfo ? show : hide)(this.dom.infoPlayers);  
+    		(this.prefs.showSave ? show : hide)(this.dom.options);
+            (this.prefs.showTools ? show : hide)(this.dom.toolsContainer);
     	},
 	
     	/**
@@ -337,6 +347,7 @@
     	**/
     	createBoard: function(size) {
     		size = size || 19;
+    		if (this.board && this.board.renderer && this.board.boardSize == size) return;
     		try {
     		    this.dom.boardContainer.innerHTML = "";
     		    var renderer = new eidogo.BoardRendererHtml(this.dom.boardContainer, size);
@@ -498,17 +509,17 @@
     					}
     				} else if (path.length) {
     					// tree position
-    					this.variation(position, true);
-    					if (path.length != 1) {
+                        this.variation(position, true);
+                        if (path.length != 1) {
     						// go to the end of the line for each tree we pass
     						while (this.cursor.nextNode()) {
-    							this.execNode(true);
+    							this.execNode(true, true);
     						}
     					}
-    					if (path.length > 1 && this.progressiveLoads) return;
-    				}
+    					if (this.progressiveLoads) return;
+    				}	
     			}
-    			this.refresh();
+                this.refresh();
     		} else if (!isNaN(parseInt(path, 10))) {
     			// Go to a move number.
     			var steps = parseInt(path, 10);
@@ -550,7 +561,6 @@
     			setTimeout(function() { me.refresh.call(me); }, 10);
     			return;
     		}
-    		
             this.moveNumber--;
             if (this.moveNumber < 0) this.moveNumber = 0;
             this.board.revert(1);
@@ -580,10 +590,13 @@
     	 * functions. Also resets some settings and makes sure the interface
     	 * gets updated.
     	 * @param {Boolean} noRender If true, don't render the board
+    	 * @param {Boolean} ignoreProgressive Ignores progressive loading
+    	 *      considerations. Useful when executing to the end of a sibling
+    	 *      line when a variation load is still in progress.
     	 */
-    	execNode: function(noRender) {
+    	execNode: function(noRender, ignoreProgressive) {
     		// don't execute a node while it's being loaded
-    		if (this.progressiveLoads) {
+    		if (!ignoreProgressive && this.progressiveLoads) {
     			var me = this;
     			setTimeout(function() { me.execNode.call(me, noRender); }, 10);
     			return;
@@ -626,7 +639,7 @@
     		}
             
     		// progressive loading?
-    		if (this.progressiveUrl && !this.cursor.node.parent.cached) {
+    		if (!ignoreProgressive && this.progressiveUrl && !this.cursor.node.parent.cached) {
     			this.nowLoading();
     			this.progressiveLoads++;
     			this.remoteLoad(
@@ -830,6 +843,7 @@
                         case "sq": prop = "SQ"; break;
                         case "cr": prop = "CR"; break;
                         case "x": prop = "MA"; break;
+                        case "dim": prop = "DD"; break;
                         case "number":
                             prop = "LB";
                             coord = coord + ":" + this.labelLastNumber;
@@ -848,7 +862,7 @@
     	},
     	
     	handleDocMouseUp: function(evt) {
-    	    if (this.domLoading) return;
+    	    if (this.domLoading) return true;
     	    if (this.mode == "region" && this.regionBegun && !this.regionClickSelect) {
     	        // end of region selection
         	    this.mouseDown = false;
@@ -856,6 +870,7 @@
                 show(this.dom.searchAlgo, "inline");
                 show(this.dom.searchButton, "inline");
     	    }
+            return true;
     	},
     	
     	boundsCheck: function(x, y, region) {
@@ -930,14 +945,23 @@
     	            this.cursor.node.pushProperty(c, this.pointToSgfCoord({x:l+x, y:t+y}));
     	        }
     	    }
-    	    this.refresh();
+    	    
             this.regionLeft = l;
             this.regionTop = t;
             this.regionRight = l + x;
             this.regionBottom = t + y;
+            var b = this.getRegionBounds();
+            var r = [b[1], b[0], b[1]+b[2], b[0]+b[3]];
+            for (y = 0; y < this.board.boardSize; y++) {
+                for (x = 0; x < this.board.boardSize; x++) {
+                    if (!this.boundsCheck(x, y, r)) {
+                        this.cursor.node.pushProperty('DD', this.pointToSgfCoord({x:x, y:y}));
+                    }
+                }
+            }
             
             this.dom.searchAlgo.value = a;
-            
+            this.refresh();
             this.searchRegion();
     	},
     	
@@ -995,7 +1019,6 @@
     	    quadrant += (edges.contains('w') ? "w" : "e");
 	    
     	    this.showComments("");
-    	    this.nowLoading();
     	    this.gameName = "search";
 
     	    var success = function(req) {
@@ -1048,8 +1071,9 @@
             this.prefs.markNext = false;
             this.prefs.showPlayerInfo = true;
     	    
-    	    this.hook("searchRegion", params);
+            this.hook("searchRegion", params);
     	    
+    	    this.nowLoading();
     	    ajax('get', this.searchUrl, params, success, failure, this, 45000);	    
     	},
     	
@@ -1272,9 +1296,7 @@
     				dl.appendChild(dd);
     			}
     		}
-    		if (this.prefs.showGameInfo) {
-    		    this.dom.infoGame.appendChild(dl);
-    		}
+    		this.dom.infoGame.appendChild(dl);
     	},
 	
     	selectTool: function(tool) {
@@ -1381,15 +1403,18 @@
     	    if (!this.cursor.node['MN']) {
                 this.moveNumber++;
     	    }
-    		if (coord && coord != "tt") {
+    	    if ((!coord || coord == "tt" || coord == "") && !noRender) {
+    	        this.prependComment((color == this.board.WHITE ?
+    		        t['white'] : t['black']) + " " + t['passed'], "comment-pass");
+    	    } else if (coord == "resign") {
+    	        this.prependComment((color == this.board.WHITE ?
+    		        t['white'] : t['black']) + " " + t['resigned'], "comment-resign");
+    	    } else {
     			this.board.addStone(pt, color);
     			this.rules.apply(pt, color);
     			if (this.prefs.markCurrent && !noRender) {
     				this.addMarker(coord, "current");
     			}
-    		} else if (!noRender) {
-    		    this.prependComment((color == this.board.WHITE ?
-    		        t['white'] : t['black']) + " " + t['passed'], "comment-pass");
     		}
     	},
 	
@@ -1421,6 +1446,7 @@
     				case "MA": label = "ex"; break;
     				case "TW": label = "territory-white"; break;
     				case "TB": label = "territory-black"; break;
+    				case "DD": label = "dim"; break;
     				case "LB": label = (coord[i].split(":"))[1]; coord[i]; break;
     				default: label = type; break;
     			}
@@ -1525,13 +1551,14 @@
                         <option value='play'>" + t['play'] + "</option>\
                         <option value='add_b'>" + t['add_b'] + "</option>\
                         <option value='add_w'>" + t['add_w'] + "</option>\
-                        " + (this.searchUrl ? ("<option value='region'>" + t['region'] + "</option>") : "") +"\
+                        " + (this.searchUrl && this.showTools ? ("<option value='region'>" + t['region'] + "</option>") : "") +"\
                         <option value='tr'>" + t['triangle'] + "</option>\
                         <option value='sq'>" + t['square'] + "</option>\
                         <option value='cr'>" + t['circle'] + "</option>\
                         <option value='x'>" + t['x'] + "</option>\
                         <option value='letter'>" + t['letter'] + "</option>\
                         <option value='number'>" + t['number'] + "</option>\
+                        <option value='dim'>" + t['dim'] + "</option>\
                     </select>\
                     <select id='search-algo' class='search-algo'>\
                         <option value='corner'>" + t['search corner'] + "</option>\
@@ -1628,9 +1655,9 @@
     	    }.bind(this));
     	    
 			addEvent(this.dom.toolsSelect, 'change', function(e) {
-    		    this.selectTool.apply(this, [(e.target || e.srcElement).value]);
-    		}, this, true);
-    	},
+                this.selectTool.apply(this, [(e.target || e.srcElement).value]);
+            }, this, true);
+        },
     	
     	enableNavSlider: function() {
     	    // don't use slider for progressively-loaded games
@@ -1660,10 +1687,11 @@
     		}, this, true);
     		
     		addEvent(document, "mouseup", function(e) {
-    		    if (!sliding) return;
+    		    if (!sliding) return true;
                 sliding = false;
                 var xy = getElClickXY(e, this.dom.navSlider);
                 this.updateNavSlider(xy[0]);
+                return true;
     		}, this, true);
     	},
     	
