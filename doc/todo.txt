@@ -2,7 +2,7 @@ planned for 1.0
 - sgf coord permalinks, named node permalinks (use MPTT)
     - allow sgf coord equivalent to Player.variation()?
 - unsaved changes notice for permalink, save
-- showComments?
+- showComments? default to on for all show___ stuff
 - create compact embeddedable version
 - test multiple instances on a page
 - time left issue
