@@ -31,6 +31,7 @@ $stamp = microtime(true) * (rand() / getrandmax()) * 100;
 $id = to_base((string)$stamp, 10, 62);
 
 $sgf = $_POST['sgf'];
+if (get_magic_quotes_gpc()) $sgf = stripslashes($_POST['sgf']);
 if (strlen($sgf) > 30000) {
     // ~ 30 KB limit
     exit;

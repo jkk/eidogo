@@ -21,8 +21,12 @@ var player;
             
         },
         setPermalink: function() {
-            var hash = (this.gameName ? this.gameName : "") + ":" +
-                this.cursor.getPath().join(",");
+            if (!this.gameName || ['search', 'gnugo', 'url'].contains(this.gameName)) return;
+            var gn = (this.gameName ? this.gameName : "");
+            var path = (gn == "kjd" ?
+                this.cursor.getPathMoves().join("") :
+                this.cursor.getPath().join(","));
+            var hash = gn + (path ? ":" + path : "");
             addHistory(hash);
         },
         searchRegion: function(params) {
@@ -81,6 +85,15 @@ var player;
         var loadPath = hashParts[1] ? hashParts[1].split(",") : null;
         var rest = hashParts.slice(1);
         if (!gameName || gameName == "kjd") {
+            if (loadPath) {
+                var s = loadPath[0];
+                var coord;
+                loadPath = [];
+                while (coord = s.substring(0, 2)) {
+                    loadPath.push(coord);
+                    s = s.substring(2);
+                }
+            }
             loadGame({
                 gameName:           "kjd",
                 sgfUrl:             "php/kjd_progressive.php",                

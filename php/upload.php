@@ -31,6 +31,7 @@ $id = to_base((string)$stamp, 10, 62);
 
 if ($_POST['type'] == "paste") {
     $sgf = $_POST['sgf'];
+    if (get_magic_quotes_gpc()) $sgf = stripslashes($_POST['sgf']);
 } elseif ($_POST['type'] == "file") {
     $sgf = file_get_contents($_FILES['sgf_file']['tmp_name']);
     @unlink($_FILES['sgf_file']['tmp_name']);

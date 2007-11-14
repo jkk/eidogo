@@ -5,21 +5,19 @@ planned for 1.0
 - showComments? default to on for all show___ stuff
 - create compact embeddedable version
 - test multiple instances on a page
-- time left issue
 - merge iphone and player css
 - finish i18n
 - hyperlink title
 - add source SGF for Kin's site
 - remove core language modifications?
 - brief help text (keyboard shortcuts, etc)?
-- improve search dim handling when editing
 - fix safari 2 history?
 - announce on senseis, godiscussions
 
 planned for after 1.0
+- score tool
 - continuations for pattern search
 - "more" search results link
-- score tool
 - game archive browsing/searching
 - decouple player and board renderer (click events)
 - canvas renderer: dojo.gfx or similar? (non-regular-sized boards)

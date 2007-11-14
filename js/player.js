@@ -493,6 +493,8 @@
         **/
         goTo: function(path, fromStart) {
             fromStart = typeof fromStart != "undefined" ? fromStart : true;
+            var position;
+            var vars;
             if (path instanceof Array) {
                 // Go to an absolute path.
                 if (!path.length) return;
@@ -500,23 +502,44 @@
                     this.resetCursor(true);
                 }
                 while (path.length) {
-                    var position = parseInt(path.shift(), 10);
-                    if (path.length == 0) {
-                        // node position
-                        for (var i = 0; i < position; i++) {
+                    position = path[0];
+                    if (isNaN(parseInt(position, 10))) {
+                        // move (coord) path item
+                        vars = this.getVariations(true);
+                        if (!vars.length || vars[0].move == null) {
                             this.variation(null, true);
-                        }
-                    } else if (path.length) {
-                        // tree position
-                        this.variation(position, true);
-                        if (path.length != 1) {
-                            // go to the end of the line for each tree we pass
-                            while (this.cursor.nextNode()) {
-                                this.execNode(true, true);
+                            if (this.progressiveLoads) {
+                                this.loadPath.push(position);
+                                return;
                             }
                         }
-                        if (this.progressiveLoads) return;
-                    }   
+                        for (var i = 0; i < vars.length; i++) {
+                            if (vars[i].move == position) {
+                                this.variation(vars[i].treeNum, true);
+                                break;
+                            }
+                        }
+                        path.shift();
+                    } else {
+                        // tree/node integer position
+                        position = parseInt(path.shift(), 10);
+                        if (path.length == 0) {
+                            // node position
+                            for (var i = 0; i < position; i++) {
+                                this.variation(null, true);
+                            }
+                        } else if (path.length) {
+                            // tree position
+                            this.variation(position, true);
+                            if (path.length != 1) {
+                                // go to the end of the line for each tree we pass
+                                while (this.cursor.nextNode()) {
+                                    this.execNode(true, true);
+                                }
+                            }
+                        }
+                    }
+                    if (this.progressiveLoads) return;
                 }
                 this.refresh();
             } else if (!isNaN(parseInt(path, 10))) {
@@ -603,8 +626,6 @@
         
             if (!noRender) {
                 this.dom.comments.innerHTML = "";
-                this.timeB = "";
-                this.timeW = "";
                 this.board.clearMarkers();
             }
         
@@ -653,11 +674,15 @@
          * move and position in the tree array
          */
         findVariations: function() {
-            this.variations = [];
-            if (!this.cursor.node) return;
-            if (this.prefs.markNext && this.cursor.node.nextSibling != null) {
+            this.variations = this.getVariations(this.prefs.markNext);
+        },
+        
+        getVariations: function(includeSibling) {
+            var vars = [];
+            if (!this.cursor.node) return vars;
+            if (includeSibling && this.cursor.node.nextSibling != null) {
                 // handle next sibling move as variation 1
-                this.variations.push({
+                vars.push({
                     move: this.cursor.node.nextSibling.getMove(),
                     treeNum: null
                 });
@@ -667,12 +692,13 @@
                 && this.cursor.node.parent.trees.length) {
                 var varTrees = this.cursor.node.parent.trees;
                 for (var i = 0; i < varTrees.length; i++) {
-                    this.variations.push({
+                    vars.push({
                         move: varTrees[i].nodes.first().getMove(),
                         treeNum: i
                     });
                 }
             }
+            return vars;
         },
     
         back: function(e, obj, noRender) {
@@ -914,7 +940,7 @@
         loadSearch: function(q, dim, p, a) {
             var blankGame = {nodes: [], trees: [{nodes: [{SZ: this.board.boardSize}], trees: []}]};
             this.load(blankGame);
-            
+            this.dom.searchAlgo.value = a;
             p = this.uncompressPattern(p);
             dim = dim.split("x");
             var w = dim[0];
@@ -945,6 +971,9 @@
                 }
             }
             
+            this.refresh();
+
+            // highlight the selected search region by dimming surroundings
             this.regionLeft = l;
             this.regionTop = t;
             this.regionRight = l + x;
@@ -954,13 +983,11 @@
             for (y = 0; y < this.board.boardSize; y++) {
                 for (x = 0; x < this.board.boardSize; x++) {
                     if (!this.boundsCheck(x, y, r)) {
-                        this.cursor.node.pushProperty('DD', this.pointToSgfCoord({x:x, y:y}));
+                        this.board.renderer.renderMarker({x:x,y:y}, "dim");
                     }
                 }
             }
             
-            this.dom.searchAlgo.value = a;
-            this.refresh();
             this.searchRegion();
         },
         
@@ -1462,7 +1489,7 @@
                 var mins = Math.floor(value / 60);
                 var secs = (value % 60).toFixed(0);
                 secs = (secs < 10 ? "0" : "") + secs;
-                this[tp] = mins + ":" + secs + this[tp];
+                this[tp] = mins + ":" + secs;
             } else {
                 this[tp] += " (" + value + ")";
             }
@@ -1596,8 +1623,8 @@
                     <div id='info-game' class='game'></div>\
                 </div>\
                 <div id='options' class='options'>\
-                    <a id='option-save' class='option-save' href='#' title='Save this game'>Save</a>\
-                    <a id='option-download' class='option-download' href='#' title='Download this game as SGF'>Download SGF</a>\
+                    " + (this.saveUrl ? "<a id='option-save' class='option-save' href='#' title='Save this game'>Save</a>" : "") + "\
+                    " + (this.downloadUrl ? "<a id='option-download' class='option-download' href='#' title='Download this game as SGF'>Download SGF</a>" : "") + "\
                 </div>\
                 <div id='preferences' class='preferences'>\
                     <div><input type='checkbox'> Show variations on board</div>\
@@ -1782,10 +1809,6 @@
         },
     
         setPermalink: function() {
-            if (!this.gameName || this.gameName == "search"
-                || this.gameName == "gnugo" || this.gameName == "url") {
-                return;
-            }
             this.hook("setPermalink");
         },
     

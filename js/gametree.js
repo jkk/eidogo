@@ -298,16 +298,26 @@ eidogo.GameCursor.prototype = {
     },
     getPath: function() {
         var path = [];
-        var pathCursor = new eidogo.GameCursor(this.node);
-        var treeId = prevId = pathCursor.node.parent.id;
-        path.push(pathCursor.node.getPosition());
-        path.push(pathCursor.node.parent.getPosition());
-        while (pathCursor.previous()) {
-            treeId = pathCursor.node.parent.id;
+        var cur = new eidogo.GameCursor(this.node);
+        var treeId = prevId = cur.node.parent.id;
+        path.push(cur.node.getPosition());
+        path.push(cur.node.parent.getPosition());
+        while (cur.previous()) {
+            treeId = cur.node.parent.id;
             if (prevId != treeId) {
-                path.push(pathCursor.node.parent.getPosition());
+                path.push(cur.node.parent.getPosition());
                 prevId = treeId;
             }
+        }
+        return path.reverse();
+    },
+    getPathMoves: function() {
+        var path = [];
+        var cur = new eidogo.GameCursor(this.node);
+        path.push(cur.node.getMove());
+        while (cur.previous()) {
+            var move = cur.node.getMove();
+            if (move) path.push(move);
         }
         return path.reverse();
     }
