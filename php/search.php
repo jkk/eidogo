@@ -8,7 +8,7 @@ $kombilo_dir = "../kombilo";
 $q = preg_replace("/[^nsew]/", "", $_GET['q']);
 $w = (int)$_GET['w'];
 $h = (int)$_GET['h'];
-$p = preg_replace("/[^\.OX]/", "", $_GET['p']);
+$p = preg_replace("/[^\.OX]/", "", strtoupper($_GET['p']));
 $a = preg_replace("/[^a-z]/", "", $_GET['a']);
 
 $output = null;

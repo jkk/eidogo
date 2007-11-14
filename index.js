@@ -32,7 +32,8 @@ var player;
         searchRegion: function(params) {
             this.hooks.initGame.call(this); // update title
             var hash = "search:" + params.q + ":" + params.w + "x" + params.h +
-                ":" + this.compressPattern(params.p) + ":" + params.a;
+                ":" + this.compressPattern(params.p);
+            if (params.a != "corner") hash += ":" + params.a;
             if (hash != location.hash.replace(/^#/, "")) {
                 addHistory(hash);
             }

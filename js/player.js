@@ -960,9 +960,9 @@
             for (y = 0; y < h; y++) {
                 for (x = 0; x < w; x++) {
                     c = p.charAt(y * w + x);
-                    if (c == "O") {
+                    if (c == "o") {
                         c = "AW";
-                    } else if (c == "X") {
+                    } else if (c == "x") {
                         c = "AB";
                     } else {
                         c = "";
@@ -973,11 +973,12 @@
             
             this.refresh();
 
-            // highlight the selected search region by dimming surroundings
             this.regionLeft = l;
             this.regionTop = t;
             this.regionRight = l + x;
             this.regionBottom = t + y;
+            
+            // highlight the selected search region by dimming surroundings
             var b = this.getRegionBounds();
             var r = [b[1], b[0], b[1]+b[2], b[0]+b[3]];
             for (y = 0; y < this.board.boardSize; y++) {
@@ -1008,8 +1009,8 @@
             var region = this.board.getRegion(bounds[0], bounds[1], bounds[2], bounds[3]);
             var pattern = region.join("")
                 .replace(new RegExp(this.board.EMPTY, "g"), ".")
-                .replace(new RegExp(this.board.BLACK, "g"), "X")
-                .replace(new RegExp(this.board.WHITE, "g"), "O");
+                .replace(new RegExp(this.board.BLACK, "g"), "x")
+                .replace(new RegExp(this.board.WHITE, "g"), "o");
             
             // check for empty or meaningless searches
             var empty = /^\.*$/.test(pattern);
@@ -1163,7 +1164,7 @@
             var ret = "";
             for (var i = 0; i < pattern.length; i++) {
                 c = pattern.charAt(i);
-                if (c == "." || c == "X" || c == "O") {
+                if (c == "." || c == "x" || c == "o") {
                     if (s != null) {
                         n = parseInt(n, 10);
                         n = isNaN(n) ? 1 : n;
@@ -1577,7 +1578,7 @@
                         <option value='play'>" + t['play'] + "</option>\
                         <option value='add_b'>" + t['add_b'] + "</option>\
                         <option value='add_w'>" + t['add_w'] + "</option>\
-                        " + (this.searchUrl && this.showTools ? ("<option value='region'>" + t['region'] + "</option>") : "") +"\
+                        " + (this.searchUrl ? ("<option value='region'>" + t['region'] + "</option>") : "") +"\
                         <option value='tr'>" + t['triangle'] + "</option>\
                         <option value='sq'>" + t['square'] + "</option>\
                         <option value='cr'>" + t['circle'] + "</option>\
