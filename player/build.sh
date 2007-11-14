@@ -2,7 +2,7 @@
 
 # depends on http://svn.dojotoolkit.org/dojo/trunk/buildscripts/lib/custom_rhino.jar
 
-OUTFILE="player/player.compressed.js"
+OUTFILE="js/all.compressed.js"
 RHINOC="java -jar custom_rhino.jar -c "
 
 rm $OUTFILE

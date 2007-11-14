@@ -1,8 +1,8 @@
 .eidogo-player {
-    width: 421px;
+	width: 750px;
 	position: relative;
     background: #222;
-    padding: 5px 0 0 0;
+	padding: 5px;
 }
 .eidogo-player ul, .eidogo-player ol, .eidogo-player dl, .eidogo-player dd, .eidogo-player dt {
 	margin: 0;
@@ -10,103 +10,87 @@
 	list-style: none;
 }
 .eidogo-player .controls-container {
-	width: 421px;
+	width: 325px;
+	float: right;
 	position: relative;
-	padding: 0;
+	padding: 5px 0 0 0;
     background: #466;
     color: #8aa;
 }
 .eidogo-player .controls {
-	height: 70px;
+	height: 30px;
 	text-indent: -9999px;
 	font-size: 0;
 	padding-left: 2px;
 }
 .eidogo-player .controls .control {
-	margin: 5px 8px 0px 8px;
+	margin: 5px 0 0px 3px;
 	user-select: none;
 	-khtml-user-select: none;
 	-moz-user-select: none;
 	cursor: default;
 }
 .eidogo-player .controls .back {
-	width: 88px;
-	height: 38px;
-	background-repeat: no-repeat;
-	background-position: 22px 9px;
-	background-color: #8aa;
-	background-image: url(images/back_off.gif);
+	width: 44px;
+	height: 19px;
+	background: url(../images/back_off.gif);
 	float: left;
 }
 .eidogo-player .controls .back-on {
-	background-image: url(images/back_on.gif);
+	background: url(../images/back_on.gif);
 	cursor: pointer;
 }
 .eidogo-player .controls .forward {
-	width: 88px;
-	height: 38px;
-	background-repeat: no-repeat;
-	background-position: 22px 9px;
-	background-color: #8aa;
-	background-image: url(images/forward_off.gif);
+	width: 44px;
+	height: 19px;
+	background: url(../images/forward_off.gif);
 	float: left;
 }
 .eidogo-player .controls .forward-on {
-	background-image: url(images/forward_on.gif);
+	background: url(../images/forward_on.gif);
 	cursor: pointer;
 }
 .eidogo-player .controls .first {
-	width: 88px;
-	height: 38px;
-	background-repeat: no-repeat;
-	background-position: 22px 9px;
-	background-color: #8aa;
-	background-image: url(images/first_off.gif);
+	width: 44px;
+	height: 19px;
+	background: url(../images/first_off.gif);
 	float: left;
 	margin-bottom: 5px;
 }
 .eidogo-player .controls .first-on {
-	background-image: url(images/first_on.gif);
+	background: url(../images/first_on.gif);
 	cursor: pointer;
 }
 .eidogo-player .controls .last {
-	width: 88px;
-	height: 38px;
-	background-repeat: no-repeat;
-	background-position: 22px 9px;
-	background-color: #8aa;
-	background-image: url(images/last_off.gif);
+	width: 44px;
+	height: 19px;
+	background: url(../images/last_off.gif);
 	cursor: default;
 	float: left;
 	margin-bottom: 5px;
 }
 .eidogo-player .controls .last-on {
-	background-image: url(images/last_on.gif);
+	background: url(../images/last_on.gif);
 	cursor: pointer;
 }
 .eidogo-player .controls .pass {
 	float: right;
-	width: 88px;
-	height: 38px;
-	background-repeat: no-repeat;
-	background-position: 22px 9px;
-	background-color: #8aa;
-	background-image: url(images/pass_off.gif);
-	margin-right: 11px;
-	margin-bottom: 10px;
+	width: 44px;
+	height: 19px;
+	background: url(../images/pass_off.gif);
+	margin-right: 5px;
 	display: inline;
 	cursor: pointer;
 }
 .eidogo-player .controls .pass-on {
-	background-image: url(images/pass_on.gif);
+	background: url(../images/pass_on.gif);
 	cursor: pointer;
 }
 .eidogo-player .move-number {
 	position: absolute;
-	top: 65px;
-	left: 180px;
+	top: 12px;
+	left: 210px;
 	color: #8aa;
-	font-size: 13px;
 	text-decoration: underline;
 	cursor: pointer;
 }
@@ -114,7 +98,7 @@
 	clear: both;
 	position: relative;
 	height: 10px;
-	width: 411px;
+	width: 315px;
 	margin: 0px 5px 5px 5px;
 	border-top: 1px solid #122;
 	background: #244;
@@ -129,26 +113,24 @@
 	cursor: pointer;
 }
 .eidogo-player .variations-container {
-	width: 386px;
+	width: 290px;
     min-height: 20px;
 	padding: 10px 5px 0px 5px;
 }
 .eidogo-player .variations-label {
 	float: left;
-	padding: 5px 5px 0 0;
+	padding: 0 5px 0 0;
 	cursor: default;
-	font-size: 13px;
 }
 .eidogo-player .variation-nav {
 	float: left;
     background: #799;
     color: #b00;
 	font-weight: bold;
-	margin: 3px;
+	margin: 1px;
 	position: relative;
 	top: -3px;
-	padding: 7px 10px 6px 10px;
-	font-size: 13px;
+	padding: 2px 5px 1px 5px;
 	width: auto;
 	height: 14px;
 	cursor: pointer;
@@ -159,14 +141,16 @@
 .eidogo-player .variation-nav.none {
 	font-weight: normal;
 	width: auto;
-	padding-right: 5px;
+    padding-right: 5px;
 	color: #244;
 	background: #688;
 	cursor: default;
 }
 .eidogo-player .tools-container {
+    float: right;
+    clear: right;
     background: #744;
-    width: 411px;
+    width: 315px;
     padding: 5px 5px 5px 5px;
     margin: 5px 0 0 0;
 }
@@ -174,7 +158,6 @@
     float: left;
     padding: 5px 5px 0 0;
     color: #a88;
-    font-size: 13px;
     cursor: default;
 }
 .eidogo-player .search-button {
@@ -200,10 +183,10 @@
     display: none;
 }
 .eidogo-player .tools-select, .eidogo-player .search-algo {
-    font-size: 13px;
+    font-size: 11px;
 }
 .eidogo-player .search-algo {
-    margin: 0 0 0 10px;
+    margin: 0 0 0 8px;
     display: none;
 }
 .eidogo-player .comment-pass, .eidogo-player .comment-resign {
@@ -217,9 +200,11 @@
 	margin: 0 0 10px 0;
 }
 .eidogo-player .comments {
-	width: 398px;
+	clear: right;
+	float: right;
+	width: 302px;
 	height: 243px;
-	font-size: 13px;
+	font-size: 11px;
 	margin: 5px 0 0 0;
 	padding: 15px 10px 40px 10px;
 	overflow: auto;
@@ -237,9 +222,11 @@
     margin: 0 0 10px 0;
 }
 .eidogo-player .search-container {
-	width: 398px;
+	clear: right;
+	float: right;
+	width: 302px;
 	height: 243px;
-	font-size: 12px;
+	font-size: 11px;
 	margin: 5px 0 0 0;
 	padding: 15px 10px 40px 10px;
 	overflow: auto;
@@ -286,28 +273,29 @@
 .eidogo-player .search-container .search-result span {
     display: inline;
     float: left;
-    padding: 15px 5px;
+    padding: 5px;
 }
 .eidogo-player .search-container .search-result .id, .eidogo-player .search-container .search-result .mv {
     display: none;
 }
 .eidogo-player .search-container .search-result .pw {
-    width: 105px;
+    width: 70px;
 }
 .eidogo-player .search-container .search-result .pb {
-    width: 105px;
+    width: 70px;
 }
 .eidogo-player .search-container .search-result .re {
-    width: 50px;
+    width: 30px;
 }
 .eidogo-player .search-container .search-result .dt {
-    width: 70px;
+    width: 60px;
 }
 .eidogo-player .search-container .search-result .clear {
     clear: both;
     font-size: 1px;
 }
 .eidogo-player .board-container {
+    float: left;
 	width: 371px;
 	height: 371px;
 	background: #555;
@@ -318,27 +306,27 @@
 	-moz-user-select: none;
 }
 .eidogo-player .board-container.with-coords {
-    background: #654 url(images/board-bg-coords.png) no-repeat 5px 5px;
+    background: #654 url(../images/board-bg-coords.png) no-repeat 5px 5px;
 }
 .eidogo-player .board.size9 {
 	position: absolute;
 	width: 181px;
 	height: 181px;
-	background: #888 url(images/board-9.gif);
+	background: #888 url(../images/board-9.gif);
 	margin: 90px 90px;
 }
 .eidogo-player .board.size13 {
 	position: absolute;
 	width: 257px;
 	height: 257px;
-	background: #888 url(images/board-13.gif);
+	background: #888 url(../images/board-13.gif);
 	margin: 57px 57px;
 }
 .eidogo-player .board.size19 {
 	position: absolute;
 	width: 371px;
 	height: 371px;
-	background: #E8C473 url(images/board-19.gif);
+	background: #E8C473 url(../images/board-19.gif);
 }
 .eidogo-player .board .point {
 	position: absolute;
@@ -347,13 +335,13 @@
 	z-index: 1;
 }
 .eidogo-player .board .point.stone.black {
-	background: url(images/b.png);
+	background: url(../images/b.png);
 }
 .eidogo-player .board .point.stone.white {
-	background: url(images/w.png);
+	background: url(../images/w.png);
 }
 .eidogo-player .board .point.marker.current {
-	background: url(images/current.gif);
+	background: url(../images/current.gif);
 }
 .eidogo-player .board .point.marker {
 	z-index: 2;
@@ -386,22 +374,25 @@
 	z-index: 3;
 }
 .eidogo-player .board .point.marker.triangle {
-	background: url(images/triangle.gif);
+	background: url(../images/triangle.gif);
 }
 .eidogo-player .board .point.marker.square {
-	background: url(images/square.gif);
+	background: url(../images/square.gif);
 }
 .eidogo-player .board .point.marker.circle {
-	background: url(images/circle.gif);
+	background: url(../images/circle.gif);
 }
 .eidogo-player .board .point.marker.ex {
-	background: url(images/ex.gif);
+	background: url(../images/ex.gif);
 }
 .eidogo-player .board .point.marker.territory-white {
-	background: url(images/territory-white.gif);
+	background: url(../images/territory-white.gif);
 }
 .eidogo-player .board .point.marker.territory-black {
-	background: url(images/territory-black.gif);
+	background: url(../images/territory-black.gif);
+}
+.eidogo-player .board .point.marker.dim {
+	background: url(../images/dim.png);
 }
 .eidogo-player .board-hover-move {
     position: absolute;
@@ -414,12 +405,14 @@
     display: none;
 }
 .eidogo-player .board-hover-move-b {
-    background-image: url(images/b.gif);
+    background-image: url(../images/b.gif);
 }
 .eidogo-player .board-hover-move-w {
-    background-image: url(images/w.gif);
+    background-image: url(../images/w.gif);
 }
 .eidogo-player .info {
+    display: none;
+    float: left;
 	width: 421px;
 	margin: 5px 0 0 0;
 	padding: 5px 0 0 0;
@@ -440,18 +433,16 @@
 	padding-right: 1px;
 }
 .eidogo-player .info .players .player.white .name {
-    font-size: 13px;
 	border-top: 1px solid #999;
-    height: 14px;
+    height: 11px;
 	padding: 4px 3px 3px 20px;
-	background: #555 url(images/territory-white.gif) no-repeat;
+	background: #555 url(../images/territory-white.gif) no-repeat;
 }
 .eidogo-player .info .players .player.black .name {
-    font-size: 13px;
 	border-top: 1px solid #999;
-    height: 14px;
+    height: 11px;
 	padding: 4px 3px 3px 20px;
-	background: #555 url(images/territory-black.gif) no-repeat;
+	background: #555 url(../images/territory-black.gif) no-repeat;
 }
 .eidogo-player .info .players .player .captures {
     float: left;
@@ -505,37 +496,36 @@
     color: #888;
     display: none;
 }
-.eidogo-player .option-save {
+.eidogo-player .options {
+    display: none;
+}
+.eidogo-player .options a {
     float: left;
     display: block;
-    width: 390px;
-    padding: 10px 0;
-    margin: 5px 0 50px 5px;
+    width: 147px;
+    padding: 7px 5px 7px 5px;
+    margin: 5px 0 20px 5px;
     background: #181818;
     border: 1px solid #282828;
     text-align: center;
-}
-.eidogo-player .option-download {
-    display: none;
 }
 .eidogo-loading {
 	position: absolute;
 	width: 150px;
 	height: 40px;
-	top: 560px;
-	left: 380px;
+	top: 62px;
+	left: 730px;
 	padding: 0px 0 0 0px;
 	color: #777;
 	z-index: 9999;
-    background: url(images/loading2.gif) no-repeat;
+    background: url(../images/loading2.gif) no-repeat;
     text-indent: -9999px;
 }
 .eidogo-error {
 	position: absolute;
-	top: 140px;
-	left: 0;
-	width: 381px;
-	font-size: 13px;
+	top: 130px;
+	left: 150px;
+	width: 350px;
 	background: #933;
 	border-right: 2px solid #622;
 	border-bottom: 2px solid #622;

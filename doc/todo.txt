@@ -3,11 +3,11 @@ planned for 1.0
 - finish i18n (+ copy to player/i18n/en.js)
 - hyperlink title
 - add source SGF for Kin's site
-- make tools selection prettier?
+- make tools selection prettier + fix FF/Leopard bug?
 - reconcile iphone and player css
 - create compact embeddedable version
 - test multiple instances on a page
-- remove core language modifications?
+- move Player's JS to player subdir
 - brief help text (keyboard shortcuts, etc)?
 - fix safari 2 history?
 - announce on senseis, godiscussions
@@ -29,3 +29,4 @@ maybe
 - native iPhone
 - IGS client
 - more robust SGF parser
+- remove core language modifications

@@ -20,6 +20,7 @@ body {
 }
 #text-content {
     background: #eee;
+    background: #eee url(images/content_bg.png) repeat-x;
     padding: 0 20px 20px 20px;
     border: 3px solid #444;
 }

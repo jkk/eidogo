@@ -1,5 +1,9 @@
 #Options -MultiViews
 RewriteEngine on
+
+RewriteCond %{HTTP_HOST} ^www\.eidogo\.com [NC]
+RewriteRule (.*) http://eidogo.com$1 [R=301,L]
+
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^source$ /source.phtml [L,NE]
@@ -18,4 +22,4 @@ php_flag zlib.output_compression On
 php_value zlib.output_compression_level 5
 AddHandler application/x-httpd-php .css .js
 php_value auto_prepend_file php/content_header.php
-php_value include_path .:..
+php_value include_path .:..:../..

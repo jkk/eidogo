@@ -63,7 +63,6 @@ var player;
         if (!player) {
             player = new eidogo.Player({
                 domId:              "player-container",
-                mode:               "play",
                 sgfPath:            "sgf/",
                 searchUrl:          "php/search.php",
                 saveUrl:            "php/save.php",
@@ -157,23 +156,24 @@ var player;
         fromJSON: function(s) { return {}; }
     });
     
-    eidogo.util.addEvent(window, "load", function() {
-        // ajaxify our links
-        eidogo.util.addEvent(document, "click", function(evt) {
-            var target = eidogo.util.getTarget(evt)
-            if (target.nodeName.toUpperCase() != "A" || target.href.indexOf("#") == -1) return true;
-            var hash = target.href.replace(/^.*#/, "");
-            addHistory(hash);
-            loadState(hash);
-            eidogo.util.stopEvent(evt);
-        });
-        dhtmlHistory.initialize();
-        dhtmlHistory.addListener(loadState);
-        if (notLoaded) {
-            // make sure we load our state on first page load (RSH quirk)
-            loadState(location.hash.replace(/^#/, ""));
-        }
-    }); 
+
+    // ajaxify our links
+    eidogo.util.addEvent(document, "click", function(evt) {
+        var target = eidogo.util.getTarget(evt)
+        if (target.nodeName.toUpperCase() != "A" || target.href.indexOf("#") == -1) return true;
+        var hash = target.href.replace(/^.*#/, "");
+        addHistory(hash);
+        loadState(hash);
+        eidogo.util.stopEvent(evt);
+    });
+    
+    dhtmlHistory.initialize();
+    dhtmlHistory.addListener(loadState);
+    
+    if (notLoaded) {
+        // make sure we load our state on first page load (RSH quirk)
+        loadState(location.hash.replace(/^#/, ""));
+    }
     
 })();
 
