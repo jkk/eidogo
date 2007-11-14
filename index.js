@@ -18,6 +18,7 @@ var player;
                         " vs " + gameRoot.PB + br;
                 }
             }
+            
         },
         setPermalink: function() {
             var hash = (this.gameName ? this.gameName : "") + ":" +
