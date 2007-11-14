@@ -104,6 +104,7 @@ if (typeof eidogo.i18n == "undefined") {
         'error retrieving': 'There was a problem retrieving the game data.',
         'invalid data':     'Received invalid game data',
         'error board':      'Error loading board container',
+        'unsaved changes':  'There are unsaved changes in this game. You must save before you can permalink or download.',
         
         'gnugo thinking':   'GNU Go is thinking...'
     }

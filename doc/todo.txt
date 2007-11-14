@@ -1,31 +1,31 @@
 planned for 1.0
-- sgf coord permalinks, named node permalinks (use MPTT)
-    - allow sgf coord equivalent to Player.variation()?
-- unsaved changes notice for permalink, save
-- showComments? default to on for all show___ stuff
-- create compact embeddedable version
-- test multiple instances on a page
-- merge iphone and player css
-- finish i18n
+- change show prefs to hide prefs, add hideComments
+- finish i18n (+ copy to player/i18n/en.js)
 - hyperlink title
 - add source SGF for Kin's site
+- make tools selection prettier?
+- reconcile iphone and player css
+- create compact embeddedable version
+- test multiple instances on a page
 - remove core language modifications?
 - brief help text (keyboard shortcuts, etc)?
 - fix safari 2 history?
 - announce on senseis, godiscussions
 
 planned for after 1.0
-- score tool
-- continuations for pattern search
-- "more" search results link
+- make failed game load non-fatal
+- show more search results
+- score tool, score estimate?
+- show continuations for pattern search
+- variation tree/hierarchy navigation
 - game archive browsing/searching
 - decouple player and board renderer (click events)
 - canvas renderer: dojo.gfx or similar? (non-regular-sized boards)
+- KJD permalinks that only require one JSON request
 - exhaustive FF[4] SGF support
 - checkboxes for preferences
-- Facebook App??
 
 maybe
-- navigable variation tree like CGoban
+- native iPhone
+- IGS client
 - more robust SGF parser
-- hold down arrow keys to keep navigating in FF/Safari (keydown, keyup)

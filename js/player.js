@@ -21,7 +21,7 @@
         hide = eidogo.util.hide,
         ua = navigator.userAgent.toLowerCase(),
         isMoz = /mozilla/.test(ua) && !/(compatible|webkit)/.test(ua);
-    
+            
     /**
      * @class Player is the overarching control structure that allows you to
      * load and replay games. It's a "player" in the sense of a DVD player, not
@@ -225,6 +225,9 @@
             this.labelLastLetter = null;
             this.labelLastNumber = null;
             this.resetLastLabels();
+            
+            // so we know when permalinks and downloads are unreliable
+            this.unsavedChanges = false;
         
             // user-changeable preferences
             this.prefs = {};
@@ -318,6 +321,7 @@
                 // first time
                 this.createBoard(size || 19);
             }
+            this.unsavedChanges = false;
             this.resetCursor(true);
             this.totalMoves = 0;
             var moveCursor = new eidogo.GameCursor(this.cursor.node);
@@ -940,6 +944,7 @@
         loadSearch: function(q, dim, p, a) {
             var blankGame = {nodes: [], trees: [{nodes: [{SZ: this.board.boardSize}], trees: []}]};
             this.load(blankGame);
+            a = a || "corner";
             this.dom.searchAlgo.value = a;
             p = this.uncompressPattern(p);
             dim = dim.split("x");
@@ -1126,6 +1131,8 @@
             this.remoteLoad(id, null, true, [0, mv], function() {
                 this.doneLoading();
                 this.setPermalink();
+                this.prefs.showSave = true;
+                this.handleDisplayPrefs();
             }.bind(this));
             stopEvent(e);
         },
@@ -1210,6 +1217,7 @@
                 this.cursor.node.parent.appendNode(varNode);
                 this.variation();
             }
+            this.unsavedChanges = true;
         },
     
         handleKeypress: function(e) {
@@ -1526,6 +1534,10 @@
         
         downloadSgf: function(evt) {            
             stopEvent(evt);
+            if (this.unsavedChanges) {
+                alert(t['unsaved changes']);
+                return;
+            }
             location.href = this.downloadUrl + this.gameName;
         },
         
@@ -1761,6 +1773,17 @@
             this.labelLastNumber = 1;
             this.labelLastLetter = "A";
         },
+        
+        getGameDescription: function() {
+            var root = this.gameTree.trees.first().nodes.first();
+            var desc = root.GN || this.gameName;
+            if (root.PW && root.PB) {
+                var wr = root.WR ? " " + root.WR : "";
+                var br = root.BR ? " " + root.BR : "";
+                desc += " - " + root.PW + wr + " vs " + root.PB + br;
+            }
+            return desc;
+        },
     
         sgfCoordToPoint: function(coord) {
             if (!coord || coord == "tt") return {x: null, y: null};
@@ -1809,7 +1832,15 @@
            return coords;
         },
     
+        /**
+         * Permalink delegator. An outside hook must handle the actual
+         * permalink creation.
+        **/
         setPermalink: function() {
+            if (this.unsavedChanges) {
+                alert(eidogo.i18n['unsaved changes']);
+                return;
+            }
             this.hook("setPermalink");
         },
     
@@ -1823,7 +1854,7 @@
             this.domLoading.innerHTML = msg;
             this.dom.player.appendChild(this.domLoading);
         },
-    
+        
         doneLoading: function() {
             if (this.domLoading && this.domLoading != null && this.domLoading.parentNode) {
                 this.domLoading.parentNode.removeChild(this.domLoading);
