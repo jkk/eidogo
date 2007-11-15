@@ -1,0 +1,72 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>EidoGo Advanced Example</title>
+
+    <!-- International support -->
+    <!-- <script type="text/javascript" src="player/i18n/en.js"></script> -->
+    
+    <!-- <script type="text/javascript" src="player/js/all.compressed.js"></script> -->
+
+    <!-- Uncomment the following to work with the original source. -->
+    <script type="text/javascript" src="player/js/jquery.js"></script>
+    <script type="text/javascript" src="player/js/jquery.dimensions.js"></script>
+    <script type="text/javascript" src="player/js/lang.js"></script>
+    <script type="text/javascript" src="player/js/eidogo.js"></script>
+    <script type="text/javascript" src="player/js/util.js"></script>
+    <script type="text/javascript" src="player/js/i18n.js"></script>
+    <script type="text/javascript" src="player/js/gametree.js"></script>
+    <script type="text/javascript" src="player/js/sgf.js"></script>
+    <script type="text/javascript" src="player/js/board.js"></script>
+    <script type="text/javascript" src="player/js/rules.js"></script>
+    <script type="text/javascript" src="player/js/player.js"></script>
+    <script type="text/javascript" src="player/js/init.js"></script>
+
+</head>
+<body>
+	
+    <h1>EidoGo Player Advanced Example</h1>
+
+    <p>This is an advanced example. <a href="javascript:player.goTo(4)">Click here to go to move 4 on the main line</a>.
+    <a href="javascript:player.goTo([0,0,1,2])">Or click here to go to a cool move</a></p>
+
+    <div id="player-container"></div>
+
+    <script type="text/javascript">
+
+    var player = new eidogo.Player({
+
+        // HTML element id indicating where to put the player
+        container: "player-container",
+
+        // URL to the SGF file to load, relative to here.
+        // NOTE: this does not work when viewing this page on your
+        // local filesystem.
+        sgfUrl: "sgf/test.sgf",
+
+        // Mark the current move
+        markCurrent: true,
+
+        // Show clickable variations on the board
+        markVariations: true,
+
+        // Show the next move as variation 1
+        markNext: false,
+
+        // Hiding the game info keeps the player at a fixed width and height
+        // (750px by 375px by default)
+        showGameInfo: true,
+        showPlayerInfo: true,
+        showTools: true,
+
+        disableShortcuts: false,
+
+        // The location within the game tree to start at
+        loadPath: location.hash.replace(/^#/, "").split(/,/)
+    });
+
+    </script>
+
+</body>
+</html>

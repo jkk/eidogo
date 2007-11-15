@@ -5,7 +5,6 @@ planned for 1.0
 - add source SGF for Kin's site
 - make tools selection prettier + fix FF/Leopard bug?
 - reconcile iphone and player css
-- create compact embeddedable version
 - test multiple instances on a page
 - add default font-size/family defs
 - permalink active/inactive class
@@ -14,6 +13,7 @@ planned for 1.0
 
 planned for after 1.0
 - make failed game load non-fatal
+- compact style
 - show more search results
 - score tool, score estimate?
 - show continuations for pattern search
