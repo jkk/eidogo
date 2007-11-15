@@ -1,5 +1,5 @@
 planned for 1.0
-- change show prefs to hide prefs, add hideComments
+- change show prefs to hide prefs (show by default), add hideComments
 - finish i18n (+ copy to player/i18n/en.js)
 - hyperlink title
 - add source SGF for Kin's site
@@ -7,9 +7,9 @@ planned for 1.0
 - reconcile iphone and player css
 - create compact embeddedable version
 - test multiple instances on a page
-- move Player's JS to player subdir
+- add default font-size/family defs
+- permalink active/inactive class
 - brief help text (keyboard shortcuts, etc)?
-- fix safari 2 history?
 - announce on senseis, godiscussions
 
 planned for after 1.0
@@ -26,6 +26,7 @@ planned for after 1.0
 - checkboxes for preferences
 
 maybe
+- fix safari 2 history
 - native iPhone
 - IGS client
 - more robust SGF parser

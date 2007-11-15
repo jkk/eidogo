@@ -16,6 +16,10 @@ eidogo.util = {
         return jQuery("#" + id)[0];
     },
     
+    byClass: function(cls) {
+        return jQuery("." + cls);
+    },
+    
     ajax: function(method, url, params, successFn, failureFn, scope, timeout) {
         scope = scope || window;
         jQuery.ajax({
@@ -39,6 +43,10 @@ eidogo.util = {
             }
         }
         jQuery(el).bind(eventType, {}, handler);
+    },
+    
+    onReady: function(fn) {
+        jQuery(fn);
     },
     
     onClick: function(el, handler, scope) {

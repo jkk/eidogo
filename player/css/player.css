@@ -1,3 +1,6 @@
+.eidogo-player-auto {
+    display: none;
+}
 .eidogo-player {
 	width: 750px;
 	position: relative;

@@ -188,6 +188,7 @@ eidogo.BoardRendererHtml.prototype = {
         domBoard.className = "board size" + this.boardSize;
         domContainer.appendChild(domBoard);
         this.domNode = domBoard;
+        this.uniq = domContainer.id + "-";
         this.renderCache = {
             stones: [].setLength(this.boardSize, 0).addDimension(this.boardSize, 0),
             markers: [].setLength(this.boardSize, 0).addDimension(this.boardSize, 0)
@@ -205,13 +206,13 @@ eidogo.BoardRendererHtml.prototype = {
         this.domNode.innerHTML = "";
     },
     renderStone: function(pt, color) {
-        var stone = document.getElementById("stone-" + pt.x + "-" + pt.y);
+        var stone = document.getElementById(this.uniq + "stone-" + pt.x + "-" + pt.y);
         if (stone) {
             stone.parentNode.removeChild(stone);
         }
         if (color != "empty") {
             var div = document.createElement("div");
-            div.id = "stone-" + pt.x + "-" + pt.y;
+            div.id = this.uniq + "stone-" + pt.x + "-" + pt.y;
             div.className = "point stone " + color;
             div.style.left = (pt.x * this.pointWidth + this.margin) + "px";
             div.style.top = (pt.y * this.pointHeight + this.margin) + "px";
@@ -222,7 +223,7 @@ eidogo.BoardRendererHtml.prototype = {
     },
     renderMarker: function(pt, type) {
         if (this.renderCache.markers[pt.x][pt.y]) {
-            var marker = document.getElementById("marker-" + pt.x + "-" + pt.y);
+            var marker = document.getElementById(this.uniq + "marker-" + pt.x + "-" + pt.y);
             if (marker) {
                 marker.parentNode.removeChild(marker);
             }
@@ -255,7 +256,7 @@ eidogo.BoardRendererHtml.prototype = {
                     break;
             }
             var div = document.createElement("div");
-            div.id = "marker-" + pt.x + "-" + pt.y;
+            div.id = this.uniq + "marker-" + pt.x + "-" + pt.y;
             div.className = "point marker " + type;
             div.style.left = (pt.x * this.pointWidth + this.margin) + "px";
             div.style.top = (pt.y * this.pointHeight + this.margin) + "px";

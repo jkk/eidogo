@@ -87,7 +87,8 @@
         
             // for references to all our DOM objects -- see constructDom()
             this.dom = {};
-            this.dom.container = byId(cfg.domId);
+            this.dom.container = (typeof cfg.container == "string" ?
+                byId(cfg.container) : cfg.container);
         
             if (!this.dom.container) {
                 alert(t['dom error']);
@@ -158,8 +159,14 @@
             this.constructDom();
             
             // player-wide events
-            addEvent(document, isMoz ? "keypress" : "keydown", this.handleKeypress, this, true);
+            if (!cfg.disableShortcuts) {
+                addEvent(document, isMoz ? "keypress" : "keydown", this.handleKeypress, this, true);
+            }
             addEvent(document, "mouseup", this.handleDocMouseUp, this, true);
+            
+            if (cfg.sgf || cfg.sgfUrl || (cfg.sgfPath && cfg.gameName)) {
+                this.loadSgf(cfg);
+            }
             
             this.hook("initDone");
         },
@@ -231,14 +238,17 @@
         
             // user-changeable preferences
             this.prefs = {};
-            this.prefs.markCurrent = !!cfg.markCurrent;
+            this.prefs.markCurrent = typeof cfg.markCurrent != "undefined" ?
+                !!cfg.markCurrent : true;
             this.prefs.markNext = typeof cfg.markNext != "undefined" ?
                 cfg.markNext : false;
-            this.prefs.markVariations = !!cfg.markVariations;
+            this.prefs.markVariations = typeof cfg.markVariations != "undefined" ?
+                !!cfg.markVariations : true;
             this.prefs.showGameInfo = !!cfg.showGameInfo;
             this.prefs.showPlayerInfo = !!cfg.showPlayerInfo;
             this.prefs.showTools = !!cfg.showTools;
             this.prefs.showSave = !!cfg.showSave;
+            this.prefs.disableShortcuts = !!cfg.disableShortcuts;
         },
         
         /**
@@ -256,7 +266,7 @@
             this.loadPath = cfg.loadPath && cfg.loadPath.length > 1 ?
                 cfg.loadPath : [0, 0];
         
-            // game name (= file name) of load the currently-loaded game
+            // game name (= file name) of the game to load
             this.gameName = cfg.gameName;
             
             if (typeof cfg.sgf == "string") {
@@ -1563,6 +1573,7 @@
             this.dom.player = document.createElement('div');
             this.dom.player.className = "eidogo-player";
             this.dom.player.id = "player-" + this.uniq;
+            this.dom.container.innerHTML = "";
             this.dom.container.appendChild(this.dom.player);
         
             var domHtml = "\
@@ -1690,7 +1701,7 @@
              ['optionDownload', 'downloadSgf'],
              ['optionSave',     'save']
             ].forEach(function(eh) {
-                onClick(this.dom[eh[0]], this[eh[1]], this);
+                if (this.dom[eh[0]]) onClick(this.dom[eh[0]], this[eh[1]], this);
             }.bind(this));
             
             addEvent(this.dom.toolsSelect, 'change', function(e) {
