@@ -155,6 +155,8 @@
                 OW: this.showTime
             };
             
+            this.reset(cfg);
+            
             // set up the elements we'll use
             this.constructDom();
             
@@ -1574,6 +1576,7 @@
             this.dom.player.className = "eidogo-player";
             this.dom.player.id = "player-" + this.uniq;
             this.dom.container.innerHTML = "";
+            eidogo.util.show(this.dom.container);
             this.dom.container.appendChild(this.dom.player);
         
             var domHtml = "\
@@ -1595,7 +1598,7 @@
                         <div id='variations' class='variations'></div>\
                     </div>\
                 </div>\
-                <div id='tools-container' class='tools-container'>\
+                <div id='tools-container' class='tools-container'" + (this.prefs.showTools ? "" : " style='display: none'") + ">\
                     <div id='tools-label' class='tools-label'>" + t['tool'] + ":</div>\
                     <select id='tools-select' class='tools-select'>\
                         <option value='play'>" + t['play'] + "</option>\

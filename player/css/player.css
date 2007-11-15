@@ -1,11 +1,20 @@
 .eidogo-player-auto {
-    display: none;
+    text-indent: -9999px;
+    font-size: 0;
+    background: #ccc;
+    width: 750px;
+    min-height: 421px;
+    height: auto !important;
+    height: 421px;
 }
 .eidogo-player {
 	width: 750px;
 	position: relative;
     background: #222;
 	padding: 5px;
+    font-family: arial, helvetica, sans-serif;
+    font-size: 11px;
+	text-indent: 0;
 }
 .eidogo-player ul, .eidogo-player ol, .eidogo-player dl, .eidogo-player dd, .eidogo-player dt {
 	margin: 0;
@@ -408,10 +417,10 @@
     display: none;
 }
 .eidogo-player .board-hover-move-b {
-    background-image: url(../images/b.gif);
+    background-image: url(../images/b.png);
 }
 .eidogo-player .board-hover-move-w {
-    background-image: url(../images/w.gif);
+    background-image: url(../images/w.png);
 }
 .eidogo-player .info {
     display: none;
@@ -521,7 +530,7 @@
 	padding: 0px 0 0 0px;
 	color: #777;
 	z-index: 9999;
-    background: url(../images/loading2.gif) no-repeat;
+    background: url(../images/loading.gif) no-repeat;
     text-indent: -9999px;
 }
 .eidogo-error {

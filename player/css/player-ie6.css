@@ -1,12 +1,12 @@
 .eidogo-player .board .point.stone.black {
 	background: none;
-	filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src="images/b.png");
+	filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src="player/images/b.png");
 }
 .eidogo-player .board .point.stone.white {
 	background: none;
-	filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src="images/w.png");
+	filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src="player/images/w.png");
 }
 .eidogo-player .board .point.marker.dim {
     background: none;
-	filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src="images/dim.png");
+	filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src="player/images/dim.png");
 }

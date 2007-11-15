@@ -105,6 +105,7 @@ eidogo.util = {
         if (typeof el == "string") {
             el = eidogo.util.byId(el);
         }
+        if (!el) return;
         el.style.display = display;
     },
     
@@ -112,6 +113,7 @@ eidogo.util = {
         if (typeof el == "string") {
             el = eidogo.util.byId(el);
         }
+        if (!el) return;
         el.style.display = "none";
     },
     
@@ -121,6 +123,18 @@ eidogo.util = {
     
     getElY: function(el) {
         return jQuery(el).offsetLite({scroll:false}).top;
+    },
+    
+    addStyleSheet: function(href) {
+        if (document.createStyleSheet) {
+            document.createStyleSheet(href);
+        } else {
+            var link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.type = 'text/css';
+            link.href = href;
+            document.getElementsByTagName("head")[0].appendChild(link);
+        }
     }
     
 };

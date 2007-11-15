@@ -338,7 +338,7 @@
 	position: absolute;
 	width: 371px;
 	height: 371px;
-	background: #E8C473 url(../images/board-19.gif);
+	background: #E8C473 url(../images/board-19-simple.gif);
 }
 .eidogo-player .board .point {
 	position: absolute;
@@ -527,7 +527,7 @@
 	padding: 0px 0 0 0px;
 	color: #777;
 	z-index: 9999;
-    background: url(../images/loading2.gif) no-repeat;
+    background: url(../images/loading.gif) no-repeat;
     text-indent: -9999px;
 }
 .eidogo-error {
