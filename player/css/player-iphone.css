@@ -34,45 +34,45 @@
 	background-position: 22px 9px;
 	background-color: #8aa;
 	float: left;
-	background: url(../images/buttons.gif) no-repeat top left;
+	background-image: url(../images/buttons.gif);
 }
 .eidogo-player .controls .back {
-    background-position: 0 -30px;
+    background-position: 22px -21px;
 }
 .eidogo-player .controls .back-on {
-    background-position: 0 -79px;
+    background-position: 22px -70px;
 	cursor: pointer;
 }
 .eidogo-player .controls .forward {
-    background-position: 0 -226px;
+    background-position: 22px -217px;
 }
 .eidogo-player .controls .forward-on {
-    background-position: 0 -275px;
+    background-position: 22px -266px;
 	cursor: pointer;
 }
 .eidogo-player .controls .first {
-    background-position: 0 -128px;
+    background-position: 22px -119px;
 }
 .eidogo-player .controls .first-on {
-    background-position: 0 -177px;
+    background-position: 22px -168px;
 	cursor: pointer;
 }
 .eidogo-player .controls .last {
-    background-position: 0 -324px;
+    background-position: 22px -313px;
 }
 .eidogo-player .controls .last-on {
-    background-position: 0 -373px;
+    background-position: 22px -364px;
 	cursor: pointer;
 }
 .eidogo-player .controls .pass {
 	float: right;
-	background-position: 0 -422px;
+	background-position: 22px -413px;
 	margin-right: 11px;
 	margin-bottom: 10px;
 	cursor: pointer;
 }
 .eidogo-player .controls .pass-on {
-	background-position: 0 -471px;
+	background-position: 22px -462px;
 	cursor: pointer;
 }
 .eidogo-player .move-number {
