@@ -1,25 +1,21 @@
 planned for 1.0
-- change show prefs to hide prefs (show by default), add hideComments
-- auto-detect player path
 - finish i18n (+ copy to player/i18n/en.js)
 - hyperlink title
-- add source SGF for Kin's site
+- accurate nav slider after new moves?
 - make tools selection prettier + fix FF/Leopard bug?
-- reconcile iphone and player css
-- test multiple instances on a page
-- add default font-size/family defs
-- permalink active/inactive class
-- brief help text (keyboard shortcuts, etc)?
+- free CDN? eidogo.massivebit.com? releases.eidogo.com/1.0/js/all.compressed.js?
+- remove js from example
 - announce on senseis, godiscussions
 
 planned for after 1.0
+- download SGF default without server-side dependence
 - make failed game load non-fatal
-- compact style
 - show more search results
 - score tool, score estimate?
 - show continuations for pattern search
 - variation tree/hierarchy navigation
 - game archive browsing/searching
+- brief help text (keyboard shortcuts, etc)?
 - decouple player and board renderer (click events)
 - canvas renderer: dojo.gfx or similar? (non-regular-sized boards)
 - KJD permalinks that only require one JSON request

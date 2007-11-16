@@ -1,0 +1,67 @@
+.eidogo-player {
+    width: 371px;
+    padding: 1px;
+    background: #555;
+}
+.eidogo-player .board-container {
+    padding: 0;
+    background: #654 !important;
+}
+.eidogo-player .board.size19 {
+    background-image: url(../images/board-19-simple.gif) !important;
+}
+.eidogo-player .controls-container {
+    width: 371px;
+    background: #555;
+}
+.eidogo-player .nav-slider {
+    width: 361px;
+    background: #333;
+}
+.eidogo-player .variations-container {
+    display: none;
+}
+.eidogo-player .move-number {
+    color: #999;
+}
+.eidogo-player .tools-container {
+    border-top: 1px solid #333;
+    width: 361px;
+    background: #644;
+}
+.eidogo-player .comments {
+    margin: 0;
+    width: 351px;
+    height: 35px;
+    padding: 5px 10px;
+    border: none;
+    background: #ccc;
+    border-top: 3px solid #999;
+    border-bottom: 0px solid #555;
+    overflow: auto;
+}
+.eidogo-player .info {
+    width: 371px;
+    padding: 0;
+    margin: 0;
+}
+.eidogo-player .info .players {
+    padding: 0;
+    margin: 0;
+    height: auto;
+}
+.eidogo-player .info .player {
+    padding-top: 0 !important;
+    width: 185px !important;
+}
+.eidogo-player .info .player .captures, .eidogo-player .info .player .time {
+    margin: 0 !important;
+}
+.eidogo-player .info .player .name {
+    border-top: 1px solid #444 !important;
+}
+.eidogo-loading {
+    background: none;
+    width: 0;
+    height: 0;
+}

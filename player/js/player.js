@@ -119,6 +119,8 @@
             // - searchRegion
             this.hooks = cfg.hooks || {};
             
+            this.permalinkable = !!this.hooks.setPermalink;
+            
             // handlers for the various types of GameNode properties
             this.propertyHandlers = {
                 W:  this.playMove,
@@ -161,7 +163,7 @@
             this.constructDom();
             
             // player-wide events
-            if (!cfg.disableShortcuts) {
+            if (cfg.enableShortcuts) {
                 addEvent(document, isMoz ? "keypress" : "keydown", this.handleKeypress, this, true);
             }
             addEvent(document, "mouseup", this.handleDocMouseUp, this, true);
@@ -249,8 +251,9 @@
             this.prefs.showGameInfo = !!cfg.showGameInfo;
             this.prefs.showPlayerInfo = !!cfg.showPlayerInfo;
             this.prefs.showTools = !!cfg.showTools;
+            this.prefs.showComments = typeof cfg.showComments != "undefined" ?
+                !!cfg.showComments : true;
             this.prefs.showSave = !!cfg.showSave;
-            this.prefs.disableShortcuts = !!cfg.disableShortcuts;
         },
         
         /**
@@ -352,8 +355,9 @@
             (this.prefs.showGameInfo || this.prefs.showPlayerInfo ? show : hide)(this.dom.info);
             (this.prefs.showGameInfo ? show : hide)(this.dom.infoGame);
             (this.prefs.showPlayerInfo ? show : hide)(this.dom.infoPlayers);  
-            (this.prefs.showSave ? show : hide)(this.dom.options);
             (this.prefs.showTools ? show : hide)(this.dom.toolsContainer);
+            (this.prefs.showComments ? show : hide)(this.dom.comments);
+            (this.prefs.showSave ? show : hide)(this.dom.options);
         },
     
         /**
@@ -1364,7 +1368,8 @@
     
         updateControls: function() {
             this.dom.moveNumber.innerHTML = (this.moveNumber ?
-                t['move'] + " " + this.moveNumber : "permalink");
+                (t['move'] + " " + this.moveNumber) :
+                (this.permalinkable ? "permalink" : ""));
         
             this.dom.whiteCaptures.innerHTML = t['captures'] +
                 ": <span>" + this.board.captures.W + "</span>";
@@ -1589,7 +1594,7 @@
                         <li id='control-last' class='control last'>Last</li>\
                         <li id='control-pass' class='control pass'>Pass</li>\
                     </ul>\
-                    <div id='move-number' class='move-number'></div>\
+                    <div id='move-number' class='move-number" + (this.permalinkable ? " permalink" : "") + "'></div>\
                     <div id='nav-slider' class='nav-slider'>\
                         <div id='nav-slider-thumb' class='nav-slider-thumb'></div>\
                     </div>\
@@ -1597,6 +1602,7 @@
                         <div id='variations-label' class='variations-label'>" + t['variations'] + ":</div>\
                         <div id='variations' class='variations'></div>\
                     </div>\
+                    <div class='controls-stop'></div>\
                 </div>\
                 <div id='tools-container' class='tools-container'" + (this.prefs.showTools ? "" : " style='display: none'") + ">\
                     <div id='tools-label' class='tools-label'>" + t['tool'] + ":</div>\

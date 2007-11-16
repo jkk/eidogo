@@ -4,18 +4,39 @@
 <head>
     <title>EidoGo Simple Example</title>
 
-    <!-- Optional config - defaults given -->
+    <!--
+        Optional config - defaults given
+    -->
     <script type="text/javascript">
     eidogoConfig = {
-        playerPath:     'player',
-        showGameInfo:   true,
+        theme:          "compact", // "standard" or "compact"
+        showComments:   true,
+        showPlayerInfo: false,
+        showGameInfo:   false, 
         showTools:      false,
-        showPlayerInfo: true
+        markCurrent:    true,
+        markVariations: true,
+        markNext:       false
     };
     </script>
     
-    <!-- Necessary script -->
-    <script type="text/javascript" src="player/js/all.compressed.js"></script>
+    <!--
+        Necessary script
+    -->
+    <!-- <script type="text/javascript" src="player/js/all.compressed.js"></script> -->
+    
+    <script type="text/javascript" src="player/js/jquery.js"></script>
+    <script type="text/javascript" src="player/js/jquery.dimensions.js"></script>
+    <script type="text/javascript" src="player/js/lang.js"></script>
+    <script type="text/javascript" src="player/js/eidogo.js"></script>
+    <script type="text/javascript" src="player/js/util.js"></script>
+    <script type="text/javascript" src="player/js/i18n.js"></script>
+    <script type="text/javascript" src="player/js/gametree.js"></script>
+    <script type="text/javascript" src="player/js/sgf.js"></script>
+    <script type="text/javascript" src="player/js/board.js"></script>
+    <script type="text/javascript" src="player/js/rules.js"></script>
+    <script type="text/javascript" src="player/js/player.js"></script>
+    <script type="text/javascript" src="player/js/init.js"></script>
 
 </head>
 <body>

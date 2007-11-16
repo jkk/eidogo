@@ -44,7 +44,7 @@ var player;
         }
     };
     
-    // Create a new Player from scratch or load in new game data
+    // Load game data; create a Player instance if necessary
     function loadGame(params, completeFn) {
         params = params || {};
         var cfg = {
@@ -67,7 +67,8 @@ var player;
                 searchUrl:          "php/search.php",
                 saveUrl:            "php/save.php",
                 downloadUrl:        "php/download.php?id=",
-                hooks:              hooks
+                hooks:              hooks,
+                enableShortcuts:    true
             });
         }
         player.loadSgf(cfg, completeFn);

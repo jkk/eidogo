@@ -2602,10 +2602,11 @@ this.searchUrl=_f.searchUrl;
 this.saveUrl=_f.saveUrl;
 this.downloadUrl=_f.downloadUrl;
 this.hooks=_f.hooks||{};
+this.permalinkable=!!this.hooks.setPermalink;
 this.propertyHandlers={W:this.playMove,B:this.playMove,KO:this.playMove,MN:this.setMoveNumber,AW:this.addStone,AB:this.addStone,AE:this.addStone,CR:this.addMarker,LB:this.addMarker,TR:this.addMarker,MA:this.addMarker,SQ:this.addMarker,TW:this.addMarker,TB:this.addMarker,DD:this.addMarker,PL:this.setColor,C:this.showComments,N:this.showAnnotation,GB:this.showAnnotation,GW:this.showAnnotation,DM:this.showAnnotation,HO:this.showAnnotation,UC:this.showAnnotation,V:this.showAnnotation,BM:this.showAnnotation,DO:this.showAnnotation,IT:this.showAnnotation,TE:this.showAnnotation,BL:this.showTime,OB:this.showTime,WL:this.showTime,OW:this.showTime};
 this.reset(_f);
 this.constructDom();
-if(!_f.disableShortcuts){
+if(_f.enableShortcuts){
 _4(document,_d?"keypress":"keydown",this.handleKeypress,this,true);
 }
 _4(document,"mouseup",this.handleDocMouseUp,this,true);
@@ -2654,8 +2655,8 @@ this.prefs.markVariations=typeof cfg.markVariations!="undefined"?!!cfg.markVaria
 this.prefs.showGameInfo=!!cfg.showGameInfo;
 this.prefs.showPlayerInfo=!!cfg.showPlayerInfo;
 this.prefs.showTools=!!cfg.showTools;
+this.prefs.showComments=typeof cfg.showComments!="undefined"?!!cfg.showComments:true;
 this.prefs.showSave=!!cfg.showSave;
-this.prefs.disableShortcuts=!!cfg.disableShortcuts;
 },loadSgf:function(cfg,_14){
 this.nowLoading();
 this.reset(cfg);
@@ -2720,8 +2721,9 @@ this.hook("initGame");
 (this.prefs.showGameInfo||this.prefs.showPlayerInfo?_a:_b)(this.dom.info);
 (this.prefs.showGameInfo?_a:_b)(this.dom.infoGame);
 (this.prefs.showPlayerInfo?_a:_b)(this.dom.infoPlayers);
-(this.prefs.showSave?_a:_b)(this.dom.options);
 (this.prefs.showTools?_a:_b)(this.dom.toolsContainer);
+(this.prefs.showComments?_a:_b)(this.dom.comments);
+(this.prefs.showSave?_a:_b)(this.dom.options);
 },createBoard:function(_1e){
 _1e=_1e||19;
 if(this.board&&this.board.renderer&&this.board.boardSize==_1e){
@@ -3543,7 +3545,7 @@ this.board.renderer.domNode.style.cursor=_bb;
 this.mode=_ba;
 this.dom.toolsSelect.value=_ba;
 },updateControls:function(){
-this.dom.moveNumber.innerHTML=(this.moveNumber?t["move"]+" "+this.moveNumber:"permalink");
+this.dom.moveNumber.innerHTML=(this.moveNumber?(t["move"]+" "+this.moveNumber):(this.permalinkable?"permalink":""));
 this.dom.whiteCaptures.innerHTML=t["captures"]+": <span>"+this.board.captures.W+"</span>";
 this.dom.blackCaptures.innerHTML=t["captures"]+": <span>"+this.board.captures.B+"</span>";
 this.dom.whiteTime.innerHTML=t["time left"]+": <span>"+(this.timeW?this.timeW:"--")+"</span>";
@@ -3741,7 +3743,7 @@ this.dom.player.id="player-"+this.uniq;
 this.dom.container.innerHTML="";
 eidogo.util.show(this.dom.container);
 this.dom.container.appendChild(this.dom.player);
-var _e3="                <div id='board-container' class='board-container with-coords'></div>                <div id='controls-container' class='controls-container'>                    <ul id='controls' class='controls'>                        <li id='control-first' class='control first'>First</li>                        <li id='control-back' class='control back'>Back</li>                        <li id='control-forward' class='control forward'>Forward</li>                        <li id='control-last' class='control last'>Last</li>                        <li id='control-pass' class='control pass'>Pass</li>                    </ul>                    <div id='move-number' class='move-number'></div>                    <div id='nav-slider' class='nav-slider'>                        <div id='nav-slider-thumb' class='nav-slider-thumb'></div>                    </div>                    <div id='variations-container' class='variations-container'>                        <div id='variations-label' class='variations-label'>"+t["variations"]+":</div>                        <div id='variations' class='variations'></div>                    </div>                </div>                <div id='tools-container' class='tools-container'"+(this.prefs.showTools?"":" style='display: none'")+">                    <div id='tools-label' class='tools-label'>"+t["tool"]+":</div>                    <select id='tools-select' class='tools-select'>                        <option value='play'>"+t["play"]+"</option>                        <option value='add_b'>"+t["add_b"]+"</option>                        <option value='add_w'>"+t["add_w"]+"</option>                        "+(this.searchUrl?("<option value='region'>"+t["region"]+"</option>"):"")+"                        <option value='tr'>"+t["triangle"]+"</option>                        <option value='sq'>"+t["square"]+"</option>                        <option value='cr'>"+t["circle"]+"</option>                        <option value='x'>"+t["x"]+"</option>                        <option value='letter'>"+t["letter"]+"</option>                        <option value='number'>"+t["number"]+"</option>                        <option value='dim'>"+t["dim"]+"</option>                    </select>                    <select id='search-algo' class='search-algo'>                        <option value='corner'>"+t["search corner"]+"</option>                        <option value='center'>"+t["search center"]+"</option>                    </select>                    <input type='button' id='search-button' class='search-button' value='"+t["search"]+"'>                </div>                <div id='comments' class='comments'></div>                <div id='search-container' class='search-container'>                    <div id='search-close' class='search-close'>close search</div>                    <p class='search-count'><span id='search-count'></span>&nbsp;matches found.</p>                    <div id='search-results-container' class='search-results-container'>                        <div class='search-result'>                            <span class='pw'><b>White</b></span>                            <span class='pb'><b>Black</b></span>                            <span class='re'><b>Result</b></span>                            <span class='dt'><b>Date</b></span>                            <div class='clear'></div>                        </div>                        <div id='search-results' class='search-results'></div>                    </div>                </div>                <div id='info' class='info'>                    <div id='info-players' class='players'>                        <div id='white' class='player white'>                            <div id='white-name' class='name'></div>                            <div id='white-captures' class='captures'></div>                            <div id='white-time' class='time'></div>                        </div>                        <div id='black' class='player black'>                            <div id='black-name' class='name'></div>                            <div id='black-captures' class='captures'></div>                            <div id='black-time' class='time'></div>                        </div>                    </div>                    <div id='info-game' class='game'></div>                </div>                <div id='options' class='options'>                    "+(this.saveUrl?"<a id='option-save' class='option-save' href='#' title='Save this game'>Save</a>":"")+"                    "+(this.downloadUrl?"<a id='option-download' class='option-download' href='#' title='Download this game as SGF'>Download SGF</a>":"")+"                </div>                <div id='preferences' class='preferences'>                    <div><input type='checkbox'> Show variations on board</div>                    <div><input type='checkbox'> Mark current move</div>                </div>                <div id='footer' class='footer'></div>            ";
+var _e3="                <div id='board-container' class='board-container with-coords'></div>                <div id='controls-container' class='controls-container'>                    <ul id='controls' class='controls'>                        <li id='control-first' class='control first'>First</li>                        <li id='control-back' class='control back'>Back</li>                        <li id='control-forward' class='control forward'>Forward</li>                        <li id='control-last' class='control last'>Last</li>                        <li id='control-pass' class='control pass'>Pass</li>                    </ul>                    <div id='move-number' class='move-number"+(this.permalinkable?" permalink":"")+"'></div>                    <div id='nav-slider' class='nav-slider'>                        <div id='nav-slider-thumb' class='nav-slider-thumb'></div>                    </div>                    <div id='variations-container' class='variations-container'>                        <div id='variations-label' class='variations-label'>"+t["variations"]+":</div>                        <div id='variations' class='variations'></div>                    </div>                    <div class='controls-stop'></div>                </div>                <div id='tools-container' class='tools-container'"+(this.prefs.showTools?"":" style='display: none'")+">                    <div id='tools-label' class='tools-label'>"+t["tool"]+":</div>                    <select id='tools-select' class='tools-select'>                        <option value='play'>"+t["play"]+"</option>                        <option value='add_b'>"+t["add_b"]+"</option>                        <option value='add_w'>"+t["add_w"]+"</option>                        "+(this.searchUrl?("<option value='region'>"+t["region"]+"</option>"):"")+"                        <option value='tr'>"+t["triangle"]+"</option>                        <option value='sq'>"+t["square"]+"</option>                        <option value='cr'>"+t["circle"]+"</option>                        <option value='x'>"+t["x"]+"</option>                        <option value='letter'>"+t["letter"]+"</option>                        <option value='number'>"+t["number"]+"</option>                        <option value='dim'>"+t["dim"]+"</option>                    </select>                    <select id='search-algo' class='search-algo'>                        <option value='corner'>"+t["search corner"]+"</option>                        <option value='center'>"+t["search center"]+"</option>                    </select>                    <input type='button' id='search-button' class='search-button' value='"+t["search"]+"'>                </div>                <div id='comments' class='comments'></div>                <div id='search-container' class='search-container'>                    <div id='search-close' class='search-close'>close search</div>                    <p class='search-count'><span id='search-count'></span>&nbsp;matches found.</p>                    <div id='search-results-container' class='search-results-container'>                        <div class='search-result'>                            <span class='pw'><b>White</b></span>                            <span class='pb'><b>Black</b></span>                            <span class='re'><b>Result</b></span>                            <span class='dt'><b>Date</b></span>                            <div class='clear'></div>                        </div>                        <div id='search-results' class='search-results'></div>                    </div>                </div>                <div id='info' class='info'>                    <div id='info-players' class='players'>                        <div id='white' class='player white'>                            <div id='white-name' class='name'></div>                            <div id='white-captures' class='captures'></div>                            <div id='white-time' class='time'></div>                        </div>                        <div id='black' class='player black'>                            <div id='black-name' class='name'></div>                            <div id='black-captures' class='captures'></div>                            <div id='black-time' class='time'></div>                        </div>                    </div>                    <div id='info-game' class='game'></div>                </div>                <div id='options' class='options'>                    "+(this.saveUrl?"<a id='option-save' class='option-save' href='#' title='Save this game'>Save</a>":"")+"                    "+(this.downloadUrl?"<a id='option-download' class='option-download' href='#' title='Download this game as SGF'>Download SGF</a>":"")+"                </div>                <div id='preferences' class='preferences'>                    <div><input type='checkbox'> Show variations on board</div>                    <div><input type='checkbox'> Mark current move</div>                </div>                <div id='footer' class='footer'></div>            ";
 _e3=_e3.replace(/ id='([^']+)'/g," id='$1-"+this.uniq+"'");
 this.dom.player.innerHTML=_e3;
 var re=/ id='([^']+)-\d+'/g;
@@ -3912,34 +3914,45 @@ this.croaked=true;
 
 (function(){
 var _1=window.eidogoConfig||{};
-var _2=(_1.playerPath||"player").replace(/\/$/);
+var _2=document.getElementsByTagName("script");
+var _3;
+[].forEach.call(_2,function(_4){
+if(/(all\.compressed\.js|eidogo\.js)/.test(_4.src)){
+_3=_4.src.replace(/\/js\/[^\/]+$/,"");
+}
+});
+var _5=(_1.playerPath||_3||"player").replace(/\/$/);
 if(!_1.skipCss){
-eidogo.util.addStyleSheet(_2+"/css/player.css");
-var _3=false;
-if(_3){
-eidogo.util.addStyleSheet(_2+"/css/player-ie6.css");
+eidogo.util.addStyleSheet(_5+"/css/player.css");
+var _6=false;
+if(_6){
+eidogo.util.addStyleSheet(_5+"/css/player-ie6.css");
+}
+_1.theme=_1.theme||"compact";
+if(_1.theme&&_1.theme!="standard"){
+eidogo.util.addStyleSheet(_5+"/css/player-"+_1.theme+".css");
 }
 }
 eidogo.util.addEvent(window,"load",function(){
 eidogo.autoPlayers=[];
-var _4=eidogo.util.byClass("eidogo-player-auto");
-[].forEach.call(_4,function(el){
-var _6={container:el,disableShortcuts:true};
-for(var _7 in _1){
-_6[_7]=_1[_7];
+var _7=eidogo.util.byClass("eidogo-player-auto");
+[].forEach.call(_7,function(el){
+var _9={container:el,disableShortcuts:true};
+for(var _a in _1){
+_9[_a]=_1[_a];
 }
-var _8=el.getAttribute("sgf");
-if(_8){
-_6.sgfUrl=_8;
+var _b=el.getAttribute("sgf");
+if(_b){
+_9.sgfUrl=_b;
 }else{
 if(el.innerHTML){
-_6.sgf=el.innerHTML;
+_9.sgf=el.innerHTML;
 }
 }
 el.innerHTML="";
 eidogo.util.show(el);
-var _9=new eidogo.Player(_6);
-eidogo.autoPlayers.push(_9);
+var _c=new eidogo.Player(_9);
+eidogo.autoPlayers.push(_c);
 });
 });
 })();

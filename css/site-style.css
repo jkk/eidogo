@@ -74,11 +74,11 @@ pre, code {
     margin: 0;
 }
 #player-container {
-	clear: both;
-	zoom: 1;
-	width: 760px;
-	min-height: 300px;
-	position: relative;
+  clear: both;
+    zoom: 1;
+    width: 760px;
+    min-height: 300px;
+    position: relative;
     background: #fff;
 }
 #links {

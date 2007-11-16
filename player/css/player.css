@@ -1,11 +1,6 @@
 .eidogo-player-auto {
     text-indent: -9999px;
     font-size: 0;
-    background: #ccc;
-    width: 750px;
-    min-height: 421px;
-    height: auto !important;
-    height: 421px;
 }
 .eidogo-player {
 	width: 750px;
@@ -89,8 +84,10 @@
 	top: 12px;
 	left: 210px;
 	color: #8aa;
-	text-decoration: underline;
-	cursor: pointer;
+}
+.eidogo-player .permalink {
+      text-decoration: underline;
+      cursor: pointer;
 }
 .eidogo-player .nav-slider {
 	clear: both;
@@ -143,6 +140,9 @@
 	color: #244;
 	background: #688;
 	cursor: default;
+}
+.eidogo-player .controls-stop {
+    display: none;
 }
 .eidogo-player .tools-container {
     float: right;
@@ -296,7 +296,6 @@
     float: left;
 	width: 371px;
 	height: 371px;
-	background: #555;
 	padding: 25px;
 	background: #654;
 	user-select: none;
@@ -371,7 +370,6 @@
 	-khtml-user-select: none;
 	-moz-user-select: none;
 	z-index: 3;
-	background: none;
 }
 .eidogo-player .board .point.marker.current {
 	background-position: 0 -79px;

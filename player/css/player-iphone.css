@@ -104,7 +104,7 @@
 }
 .eidogo-player .variations-container {
 	width: 386px;
-    min-height: 20px;
+    min-height: 27px;
 	padding: 10px 5px 0px 5px;
 }
 .eidogo-player .variations-label {
@@ -133,12 +133,16 @@
 .eidogo-player .variation-nav.none {
 	font-weight: normal;
 	width: auto;
-	padding-right: 5px;
+    padding-right: 5px;
 	color: #244;
 	background: #688;
 	cursor: default;
 }
+.eidogo-player .controls-stop {
+    clear: both;
+}
 .eidogo-player .tools-container {
+    clear: both;
     background: #744;
     width: 411px;
     padding: 5px 5px 5px 5px;
@@ -343,6 +347,7 @@
 	user-select: none;
 	-khtml-user-select: none;
 	-moz-user-select: none;
+	background: none;
 }
 .eidogo-player .board .point.marker.variation {
 	color: #831;
@@ -380,6 +385,9 @@
 .eidogo-player .board .point.marker.territory-black {
     background-position: 0 -226px;
 }
+.eidogo-player .board .point.marker.dim {
+	background-image: url(../images/dim.png);
+}
 .eidogo-player .board-hover-move {
     position: absolute;
     width: 19px;
@@ -391,10 +399,10 @@
     display: none;
 }
 .eidogo-player .board-hover-move-b {
-    background-image: url(../images/b.gif);
+    background-image: url(../images/b.png);
 }
 .eidogo-player .board-hover-move-w {
-    background-image: url(../images/w.gif);
+    background-image: url(../images/w.png);
 }
 .eidogo-player .info {
 	width: 421px;
