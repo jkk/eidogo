@@ -2420,6 +2420,8 @@ this.pointHeight=0;
 this.margin=0;
 var _26=this.renderStone({x:0,y:0},"black");
 this.pointWidth=this.pointHeight=_26.offsetWidth;
+this.renderStone({x:0,y:0},"white");
+this.renderMarker({x:0,y:0},"current");
 this.clear();
 this.margin=(this.domNode.offsetWidth-(this.boardSize*this.pointWidth))/2;
 },clear:function(){
@@ -3911,10 +3913,12 @@ this.croaked=true;
 (function(){
 var _1=window.eidogoConfig||{};
 var _2=(_1.playerPath||"player").replace(/\/$/);
+if(!_1.skipCss){
 eidogo.util.addStyleSheet(_2+"/css/player.css");
 var _3=false;
 if(_3){
 eidogo.util.addStyleSheet(_2+"/css/player-ie6.css");
+}
 }
 eidogo.util.addEvent(window,"load",function(){
 eidogo.autoPlayers=[];

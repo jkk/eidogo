@@ -36,66 +36,52 @@
 	padding-left: 2px;
 }
 .eidogo-player .controls .control {
-	margin: 5px 0 0px 3px;
+	margin: 5px 0 5px 3px;
 	user-select: none;
 	-khtml-user-select: none;
 	-moz-user-select: none;
 	cursor: default;
-}
-.eidogo-player .controls .back {
 	width: 44px;
 	height: 19px;
-	background: url(../images/back_off.gif);
 	float: left;
+	background: url(../images/buttons.gif) no-repeat top left;
+}
+.eidogo-player .controls .back {
+    background-position: 0 -30px;
 }
 .eidogo-player .controls .back-on {
-	background: url(../images/back_on.gif);
+    background-position: 0 -79px;
 	cursor: pointer;
 }
 .eidogo-player .controls .forward {
-	width: 44px;
-	height: 19px;
-	background: url(../images/forward_off.gif);
-	float: left;
+    background-position: 0 -226px;
 }
 .eidogo-player .controls .forward-on {
-	background: url(../images/forward_on.gif);
+    background-position: 0 -275px;
 	cursor: pointer;
 }
 .eidogo-player .controls .first {
-	width: 44px;
-	height: 19px;
-	background: url(../images/first_off.gif);
-	float: left;
-	margin-bottom: 5px;
+    background-position: 0 -128px;
 }
 .eidogo-player .controls .first-on {
-	background: url(../images/first_on.gif);
+    background-position: 0 -177px;
 	cursor: pointer;
 }
 .eidogo-player .controls .last {
-	width: 44px;
-	height: 19px;
-	background: url(../images/last_off.gif);
-	cursor: default;
-	float: left;
-	margin-bottom: 5px;
+    background-position: 0 -324px;
 }
 .eidogo-player .controls .last-on {
-	background: url(../images/last_on.gif);
+    background-position: 0 -373px;
 	cursor: pointer;
 }
 .eidogo-player .controls .pass {
 	float: right;
-	width: 44px;
-	height: 19px;
-	background: url(../images/pass_off.gif);
+    background-position: 0 -422px;
 	margin-right: 5px;
-	display: inline;
 	cursor: pointer;
 }
 .eidogo-player .controls .pass-on {
-	background: url(../images/pass_on.gif);
+    background-position: 0 -471px;
 	cursor: pointer;
 }
 .eidogo-player .move-number {
@@ -352,11 +338,11 @@
 .eidogo-player .board .point.stone.white {
 	background: url(../images/w.png);
 }
-.eidogo-player .board .point.marker.current {
-	background: url(../images/current.gif);
-}
 .eidogo-player .board .point.marker {
 	z-index: 2;
+	width: 19px;
+	height: 19px;
+	background: url(../images/markers.gif) no-repeat top left;
 }
 .eidogo-player .board .point.marker.label {
 	color: #f00;
@@ -369,6 +355,7 @@
 	user-select: none;
 	-khtml-user-select: none;
 	-moz-user-select: none;
+	background: none;
 }
 .eidogo-player .board .point.marker.variation {
 	color: #831;
@@ -384,27 +371,31 @@
 	-khtml-user-select: none;
 	-moz-user-select: none;
 	z-index: 3;
+	background: none;
+}
+.eidogo-player .board .point.marker.current {
+	background-position: 0 -79px;
 }
 .eidogo-player .board .point.marker.triangle {
-	background: url(../images/triangle.gif);
+	background-position: 0 -324px;
 }
 .eidogo-player .board .point.marker.square {
-	background: url(../images/square.gif);
+	background-position: 0 -177px;
 }
 .eidogo-player .board .point.marker.circle {
-	background: url(../images/circle.gif);
+	background-position: 0 -30px;
 }
 .eidogo-player .board .point.marker.ex {
-	background: url(../images/ex.gif);
+	background-position: 0 -128px;
 }
 .eidogo-player .board .point.marker.territory-white {
-	background: url(../images/territory-white.gif);
+    background-position: 0 -275px;
 }
 .eidogo-player .board .point.marker.territory-black {
-	background: url(../images/territory-black.gif);
+    background-position: 0 -226px;
 }
 .eidogo-player .board .point.marker.dim {
-	background: url(../images/dim.png);
+	background-image: url(../images/dim.png);
 }
 .eidogo-player .board-hover-move {
     position: absolute;
@@ -448,13 +439,15 @@
 	border-top: 1px solid #999;
     height: 11px;
 	padding: 4px 3px 3px 20px;
-	background: #555 url(../images/territory-white.gif) no-repeat;
+	background: #555 url(../images/markers.gif) no-repeat top left;
+    background-position: 0 -275px;
 }
 .eidogo-player .info .players .player.black .name {
 	border-top: 1px solid #999;
     height: 11px;
 	padding: 4px 3px 3px 20px;
-	background: #555 url(../images/territory-black.gif) no-repeat;
+	background: #555 url(../images/markers.gif) no-repeat top left;
+    background-position: 0 -226px;
 }
 .eidogo-player .info .players .player .captures {
     float: left;

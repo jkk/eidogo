@@ -12,7 +12,7 @@ body {
     margin: 0 auto;
 }
 #header {
-    background: #eee url(images/header_bg.png) repeat-x;
+    background: #eee url(../images/header_bg.png) repeat-x;
     padding: 5px 0 0 0;
 }
 #content {
@@ -20,7 +20,7 @@ body {
 }
 #text-content {
     background: #eee;
-    background: #eee url(images/content_bg.png) repeat-x;
+    background: #eee url(../images/content_bg.png) repeat-x;
     padding: 0 20px 20px 20px;
     border: 3px solid #444;
 }

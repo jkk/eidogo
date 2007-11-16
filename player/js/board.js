@@ -199,6 +199,8 @@ eidogo.BoardRendererHtml.prototype = {
         this.margin = 0;
         var stone = this.renderStone({x:0,y:0}, "black");
         this.pointWidth = this.pointHeight = stone.offsetWidth;
+        this.renderStone({x:0,y:0}, "white"); // just for image caching
+        this.renderMarker({x:0,y:0}, "current"); // just for image caching
         this.clear();
         this.margin = (this.domNode.offsetWidth - (this.boardSize * this.pointWidth)) / 2;
     },

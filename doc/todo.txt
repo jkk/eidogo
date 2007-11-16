@@ -1,5 +1,6 @@
 planned for 1.0
 - change show prefs to hide prefs (show by default), add hideComments
+- auto-detect player path
 - finish i18n (+ copy to player/i18n/en.js)
 - hyperlink title
 - add source SGF for Kin's site
