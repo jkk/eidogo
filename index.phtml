@@ -99,7 +99,7 @@ var player;
                 progressiveLoad:    true,
                 markNext:           true,
                 showPlayerInfo:     false,
-                showSave:           false
+                showOptions:        false
             });
             return;
         }
@@ -164,6 +164,7 @@ var player;
         if (target.nodeName.toUpperCase() != "A" || target.href.indexOf("#") == -1) return true;
         var hash = target.href.replace(/^.*#/, "");
         addHistory(hash);
+        player.closeSearch();
         loadState(hash);
         eidogo.util.stopEvent(evt);
     });

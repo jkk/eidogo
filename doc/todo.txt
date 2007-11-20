@@ -2,27 +2,27 @@ planned for 1.0
 - announce on senseis, godiscussions
 
 planned for after 1.0
-- accurate nav slider after new moves played
-- make failed game load non-fatal
 - edit game info
 - show more search results
-- score tool, score estimate?
 - show continuations for pattern search
-- variation tree/hierarchy navigation
+- score tool, score estimate?
+- tree navigation
+- accurate nav slider after new moves played
+- make failed game load non-fatal
 - game archive browsing/searching
 - brief help text (keyboard shortcuts, etc)?
 - decouple player and board renderer (click events)
 - make tools selection prettier
-- canvas renderer: dojo.gfx or similar? (non-regular-sized boards)
 - KJD permalinks that only require one JSON request
 - exhaustive FF[4] SGF support
 - checkboxes for preferences
 
 maybe
 - improve overall speed (rendering, capturing, history, etc)
+- canvas renderer: dojo.gfx or similar?
+- non-regular-sized boards
 - subclass Array and leave no trace (each player has own iframe?)
 - fix safari 2 history
-- native iPhone
+- native iPhone app
 - IGS client
 - more robust SGF parser
-- remove core language modifications
