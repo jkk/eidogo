@@ -1,8 +1,8 @@
 /**
- * EidoGo -- Web-based SGF Replayer
- * Copyright (c) 2006, Justin Kramer <jkkramer@gmail.com>
- * Code licensed under the BSD license:
- * http://www.opensource.org/licenses/bsd-license.php
+ * EidoGo -- Web-based SGF Editor
+ * Copyright (c) 2007, Justin Kramer <jkkramer@gmail.com>
+ * Code licensed under AGPLv3:
+ * http://www.fsf.org/licensing/licenses/agpl-3.0.html
  */
 
 /**

@@ -112,13 +112,13 @@ var player;
         }
         if (gameName == "search") {
             if (loadPath) {
-                loadGame({showSave: false});
+                loadGame({showOptions: false});
                 player.loadSearch.apply(player, rest);
             } else {
                 loadGame({
-                    gameName:   "search",
-                    showSave:   false,
-                    loadPath:   [0,0]
+                    gameName:    "search",
+                    showOptions: false,
+                    loadPath:    [0,0]
                 });
             }
             return;

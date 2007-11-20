@@ -15,7 +15,6 @@ planned for after 1.0
 - make tools selection prettier
 - KJD permalinks that only require one JSON request
 - exhaustive FF[4] SGF support
-- checkboxes for preferences
 
 maybe
 - improve overall speed (rendering, capturing, history, etc)

@@ -57,11 +57,12 @@ h2 {
 	font-size: 18px;
 	margin: 15px 0 10px 0;
 	padding: 0;
-	color: #944;
+	color: #833;
 }
 h3 {
     font-size: 14px;
     margin: 10px 0 10px 0;
+    color: #333;
 }
 p {
 	margin: 10px 0 10px 0;
@@ -74,8 +75,14 @@ ol {
 pre, code {
 	font-weight: normal;
 	font-style: normal;
-    padding: 10px 5px;
+    font-family: monaco, monospace;
+    font-size: 11px;
+    color: #622;
     margin: 0;
+}
+pre {
+    padding: 10px;
+    background: #ddd;
 }
 #player-container {
   clear: both;

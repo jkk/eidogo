@@ -1,8 +1,8 @@
 /**
- * EidoGo -- Web-based SGF Replayer
- * Copyright (c) 2006, Justin Kramer <jkkramer@gmail.com>
- * Code licensed under the BSD license:
- * http://www.opensource.org/licenses/bsd-license.php
+ * EidoGo -- Web-based SGF Editor
+ * Copyright (c) 2007, Justin Kramer <jkkramer@gmail.com>
+ * Code licensed under AGPLv3:
+ * http://www.fsf.org/licensing/licenses/agpl-3.0.html
  *
  * Initialize things for EidoGo to function: stylesheets, etc
  */
@@ -17,10 +17,13 @@
     var scriptPath = eidogo.util.getPlayerPath();    
     var path = (autoCfg.playerPath || scriptPath || 'player').replace(/\/$/);
     
+    var ua = navigator.userAgent.toLowerCase();
+    var uav = (ua.match(/.+(?:rv|it|ra|ie)[\/: ]([\d.]+)/) || [])[1];
+    var isIE = /msie/.test(ua) && !/opera/.test(ua);
+    
     if (!autoCfg.skipCss) {
         eidogo.util.addStyleSheet(path + '/css/player.css');
-        var isIE6 = false /*@cc_on || @_jscript_version < 5.7 @*/;
-        if (isIE6) {
+        if (isIE && parseInt(uav, 10) <= 6) {
             eidogo.util.addStyleSheet(path + '/css/player-ie6.css');
         }
     }

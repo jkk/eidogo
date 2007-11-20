@@ -1,13 +1,19 @@
-EidoGo was created to be a web-based joseki tutor based on Kogo's Joseki Dictionary. Serving in this capacity, its main advantages are that:
+!EidoGo is a web-based SGF editor and Go application. Its features include:
 
-1) it's web-based, so you can access it anywhere without downloading and installing anything; and
+  * Extensive SGF-editing capabilities
+  * Joseki tutoring
+  * Easy pattern searching
+  * GNU Go interface
+  * CSS-skinnable interface
+  * Web-friendly permanent links
 
-2) that it progressively loads branches from an extremely large tree of possible move sequences, instead of trying to load them all at once, which is very slow.
+The !EidoGo Player (SGF view and editor) is an independent piece and can be plugged easily into any webpage. It works in Firefox, Internet Explorer 6 and 7, Safari, and Opera.
 
-Since then, EidoGo has become more of a generic SGF replayer. It has recently undergone a complete rewrite to make it modular and portable. The old version was poorly written and buggy. The new version takes advantage of the newest client-side web development techniques such as semantic XHTML, DOM scripting, and AJAX. It can be plugged easily into any page and can read raw SGF data from a JavaScript variable or from a URL within the same domain.
+To get started quickly, download the Player and put the following markup in your webpage:
 
-As far as I know, there are no other fully-functional, modular web-based solutions. They are all proprietary, incomplete, or difficult to embed in your own site.
+{{{
+<script type="text/javascript" src="player/js/all.compressed.js"></script>
+<div class="eidogo-player-auto" sgf="path/to/sgf/file.sgf"></div>
+}}}
 
-Anyone is encouraged to use EidoGo on their own site. Bug reports, feature suggestions, and code contributions are all welcome.
-
-Justin Kramer <jkkramer@gmail.com>
+You can include multiple Players on a page. See the two example HTML files in the Player download for more options.

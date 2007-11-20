@@ -2,35 +2,41 @@
 
 <div id="text-content">
 
-<h2>Download</h2>
+<h2>Player Source Code</h2>
 
-<p>If you want to use the EidoGo SGF replayer on your own site, download the 'eidogo-player' zip from
-<a href="http://code.google.com/p/eidogo/downloads/list">Google Code
-download page</a>. See the included example.html file to get started.</p>
+<p>The EidoGo Player (SGF viewer and editor) is an independent piece and can be
+    plugged into any webpage. The basic Player is entirely client-side (browser-based)
+    and does not include the joseki tutor, pattern searching, or saving features.
+    To use these features, you must set up code server-side (see site source code below).</p>
 
-<p>If you end up using EidoGo on your site, <script type="text/javascript">document.write(
+<p>All source code is licensed under the <a href="http://www.fsf.org/licensing/licenses/agpl-3.0.html">AGPLv3</a>.</p>
+
+<h3>Quick Start</h3>
+
+<p>Download the Player from <a href="http://code.google.com/p/eidogo/downloads/list">Google Code
+download page</a> and put the following into your webpage:</p>
+
+<pre><code>&lt;script type=&quot;text/javascript&quot; src=&quot;player/js/all.compressed.js&quot;&gt;&lt;/script&gt;
+&lt;div class=&quot;eidogo-player-auto&quot; sgf=&quot;path/to/sgf/file.sgf&quot;&gt;&lt;/div&gt;
+</code></pre>
+
+<p><a href="/example.html">Here is an example of this in action.</a></p>
+
+<p>You can include multiple Players on a page. See the two example HTML files in the Player download for more options.</p>
+
+<p>If you use the EidoGo Player on your site, <script type="text/javascript">document.write(
 "<n uers=\"znvygb:wx\100gva\056ah\">yrg zr xabj<\057n>".replace(/[a-zA-Z]/g, function(c){return String.fromCharCode((c<="Z"?90:122)>=(c=c.charCodeAt(0)+13)?c:c-26);}));
 </script>!</p>
 
-<p>Note that the JavaScript
-files contained in the 'eidogo-player' zip are compressed for speedier delivery over the web.
-For the full, uncompressed source, see below.</p>
+<h2>Site Source Code</h2>
 
-<h2>Source Code</h2>
-
-<p>EidoGo is open source and licensed under the
-<a href="http://www.opensource.org/licenses/bsd-license.php">BSD license</a>. If you'd like to use the code
-under another license, such as the GPL, <script type="text/javascript">document.write(
-"<n uers=\"znvygb:wx\100gva\056ah\">yrg zr xabj<\057n>".replace(/[a-zA-Z]/g, function(c){return String.fromCharCode((c<="Z"?90:122)>=(c=c.charCodeAt(0)+13)?c:c-26);}));
-</script> and I'll probably tell you to go right ahead.</p>
-
-<p>If you want to get at the source code, you have a few options:</p>
+<p>The latest, cutting-edge source code for the entire EidoGo site, both client-side and server-side,
+    is available in a Subversion repository. You can get at it in two ways:</p>
 
 <ol>
-    <li><a href="http://code.google.com/p/eidogo/downloads/list">Download the 'eidogo-source' zip from Google Code</a></li>
-	<li><a href="http://eidogo.googlecode.com/svn/">Browse it on the web</a></li>
-	<li> Perform a checkout from the Subversion repository with the command:
-		<pre><code>svn co http://eidogo.googlecode.com/svn/trunk/ eidogo</pre></code></p>
+	<li><p><a href="http://eidogo.googlecode.com/svn/">Browse it on the web</a></p></li>
+	<li><p>Perform a checkout from the Subversion repository with the command:</p>
+		<pre><code>svn co http://eidogo.googlecode.com/svn/trunk/ eidogo</pre></code>
 </ol>
 
 <p>Code contributions welcome!</p>

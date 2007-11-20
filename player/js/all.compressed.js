@@ -2108,6 +2108,7 @@ return _2c;
 }};
 })();
 
+eidogo=window.eidogo||{};
 eidogo.i18n=eidogo.i18n||{"move":"Move","loading":"Loading","passed":"passed","resigned":"resigned","variations":"Variations","no variations":"none","tool":"Tool","play":"Play","region":"Select Region","add_b":"Black Stone","add_w":"White Stone","edit comment":"Edit Comment","done":"Done","triangle":"Triangle","square":"Square","circle":"Circle","x":"X","letter":"Letter","number":"Number","dim":"Dim","search":"Search","search corner":"Corner Search","search center":"Center Search","region info":"Click and drag to select a region.","two stones":"Please select at least two stones to search for.","two edges":"For corner searches, your selection must touch two adjacent edges of the board.","no search url":"No search URL provided.","close search":"close search","matches found":"matches found.","white":"White","white rank":"White rank","white team":"White team","black":"Black","black rank":"Black rank","black team":"Black team","captures":"captures","time left":"time left","you":"You","game":"Game","handicap":"Handicap","komi":"Komi","result":"Result","date":"Date","info":"Info","place":"Place","event":"Event","round":"Round","overtime":"Overtime","opening":"Openning","ruleset":"Ruleset","annotator":"Annotator","copyright":"Copyright","source":"Source","time limit":"Time limit","transcriber":"Transcriber","created with":"Created with","january":"January","february":"February","march":"March","april":"April","may":"May","june":"June","july":"July","august":"August","september":"September","october":"October","november":"November","december":"December","gw":"Good for White","vgw":"Very good for White","gb":"Good for Black","vgb":"Very good for Black","dm":"Even position","dmj":"Even position (joseki)","uc":"Unclear position","te":"Tesuji","bm":"Bad move","vbm":"Very bad move","do":"Doubtful move","it":"Interesting move","black to play":"Black to play","white to play":"White to play","ho":"Hotspot","dom error":"Error finding DOM container","error retrieving":"There was a problem retrieving the game data.","invalid data":"Received invalid game data","error board":"Error loading board container","unsaved changes":"There are unsaved changes in this game. You must save before you can permalink or download.","bad path":"Don't know how to get to path: ","gnugo thinking":"GNU Go is thinking..."};
 
 eidogo.gameTreeIdCounter=15000;
@@ -4131,33 +4132,35 @@ this.croaked=true;
 var _1=window.eidogoConfig||{};
 var _2=eidogo.util.getPlayerPath();
 var _3=(_1.playerPath||_2||"player").replace(/\/$/);
+var ua=navigator.userAgent.toLowerCase();
+var _5=(ua.match(/.+(?:rv|it|ra|ie)[\/: ]([\d.]+)/)||[])[1];
+var _6=/msie/.test(ua)&&!/opera/.test(ua);
 if(!_1.skipCss){
 eidogo.util.addStyleSheet(_3+"/css/player.css");
-var _4=false;
-if(_4){
+if(_6&&parseInt(_5,10)<=6){
 eidogo.util.addStyleSheet(_3+"/css/player-ie6.css");
 }
 }
 eidogo.util.addEvent(window,"load",function(){
 eidogo.autoPlayers=[];
-var _5=eidogo.util.byClass("eidogo-player-auto");
-[].forEach.call(_5,function(el){
-var _7={container:el,disableShortcuts:true,theme:"compact"};
-for(var _8 in _1){
-_7[_8]=_1[_8];
+var _7=eidogo.util.byClass("eidogo-player-auto");
+[].forEach.call(_7,function(el){
+var _9={container:el,disableShortcuts:true,theme:"compact"};
+for(var _a in _1){
+_9[_a]=_1[_a];
 }
-var _9=el.getAttribute("sgf");
-if(_9){
-_7.sgfUrl=_9;
+var _b=el.getAttribute("sgf");
+if(_b){
+_9.sgfUrl=_b;
 }else{
 if(el.innerHTML){
-_7.sgf=el.innerHTML;
+_9.sgf=el.innerHTML;
 }
 }
 el.innerHTML="";
 eidogo.util.show(el);
-var _a=new eidogo.Player(_7);
-eidogo.autoPlayers.push(_a);
+var _c=new eidogo.Player(_9);
+eidogo.autoPlayers.push(_c);
 });
 });
 })();
