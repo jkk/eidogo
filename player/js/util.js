@@ -65,8 +65,18 @@ eidogo.util = {
                 document.body.scrollTop);
         }
         if (!el._x) {
-            var elX = eidogo.util.getElX(el);
-            var elY = eidogo.util.getElY(el);
+            if (/Apple/.test(navigator.vendor)) {
+    	        // Safari 2 gives the wrong position
+    	        var node = el, elX = 0, elY = 0;
+    	        while (node) {
+    	            elX += node.offsetLeft;
+    	            elY += node.offsetTop;
+    	            node = node.offsetParent ? node.offsetParent : null;
+                }
+    	    } else {
+    	        var elX = eidogo.util.getElX(el);
+                var elY = eidogo.util.getElY(el);
+    	    }
             el._x = elX;
             el._y = elY;
         } else {

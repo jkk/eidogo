@@ -18,7 +18,7 @@ var player;
         },
         setPermalink: function() {
             if (!this.gameName || ['search', 'gnugo', 'url'].contains(this.gameName)) return;
-            var gn = (this.gameName ? this.gameName : "");
+            var gn = this.gameName || "";
             // use move-based path for KJD to future-proof permalinks
             var path = (gn == "kjd" ?
                 this.cursor.getPathMoves().join("") :

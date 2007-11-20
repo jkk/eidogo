@@ -2036,8 +2036,17 @@ e.pageX=e.clientX+(document.documentElement.scrollLeft||document.body.scrollLeft
 e.pageY=e.clientY+(document.documentElement.scrollTop||document.body.scrollTop);
 }
 if(!el._x){
+if(/Apple/.test(navigator.vendor)){
+var _19=el,elX=0,elY=0;
+while(_19){
+elX+=_19.offsetLeft;
+elY+=_19.offsetTop;
+_19=_19.offsetParent?_19.offsetParent:null;
+}
+}else{
 var elX=eidogo.util.getElX(el);
 var elY=eidogo.util.getElY(el);
+}
 el._x=elX;
 el._y=elY;
 }else{
@@ -2063,15 +2072,15 @@ return (t&&t.nodeName&&t.nodeName.toUpperCase()=="#TEXT")?t.parentNode:t;
 _1(el).addClass(cls);
 },removeClass:function(el,cls){
 _1(el).removeClass(cls);
-},show:function(el,_23){
-_23=_23||"block";
+},show:function(el,_24){
+_24=_24||"block";
 if(typeof el=="string"){
 el=eidogo.util.byId(el);
 }
 if(!el){
 return;
 }
-el.style.display=_23;
+el.style.display=_24;
 },hide:function(el){
 if(typeof el=="string"){
 el=eidogo.util.byId(el);
@@ -2080,31 +2089,31 @@ if(!el){
 return;
 }
 el.style.display="none";
-},getStyle:function(el,_26){
-return _1(el).css(_26);
+},getStyle:function(el,_27){
+return _1(el).css(_27);
 },getElX:function(el){
 return _1(el).offset().left;
 },getElY:function(el){
 return _1(el).offset().top;
-},addStyleSheet:function(_29){
+},addStyleSheet:function(_2a){
 if(document.createStyleSheet){
-document.createStyleSheet(_29);
+document.createStyleSheet(_2a);
 }else{
-var _2a=document.createElement("link");
-_2a.rel="stylesheet";
-_2a.type="text/css";
-_2a.href=_29;
-document.getElementsByTagName("head")[0].appendChild(_2a);
+var _2b=document.createElement("link");
+_2b.rel="stylesheet";
+_2b.type="text/css";
+_2b.href=_2a;
+document.getElementsByTagName("head")[0].appendChild(_2b);
 }
 },getPlayerPath:function(){
-var _2b=document.getElementsByTagName("script");
-var _2c;
-[].forEach.call(_2b,function(_2d){
-if(/(all\.compressed\.js|eidogo\.js)/.test(_2d.src)){
-_2c=_2d.src.replace(/\/js\/[^\/]+$/,"");
+var _2c=document.getElementsByTagName("script");
+var _2d;
+[].forEach.call(_2c,function(_2e){
+if(/(all\.compressed\.js|eidogo\.js)/.test(_2e.src)){
+_2d=_2e.src.replace(/\/js\/[^\/]+$/,"");
 }
 });
-return _2c;
+return _2d;
 }};
 })();
 
