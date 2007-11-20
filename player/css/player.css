@@ -16,6 +16,18 @@
 	padding: 0;
 	list-style: none;
 }
+.eidogo-player .shade {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    z-index: 9998;
+    opacity: 0.55;
+    filter: alpha(opacity=55);
+    display: none;
+}
 .eidogo-player .controls-container {
 	width: 325px;
 	float: right;
@@ -184,7 +196,7 @@
     font-size: 11px;
 }
 .eidogo-player .search-algo {
-    margin: 0 0 0 8px;
+    margin: 0 0 0 4px;
     display: none;
 }
 .eidogo-player .comment-pass, .eidogo-player .comment-resign {
@@ -196,6 +208,27 @@
 	color: #000;
 	font-weight: bold;
 	margin: 0 0 10px 0;
+}
+.eidogo-player .comment-info {
+    color: #443;
+    font-weight: bold;
+    margin: 0 0 10px 0;
+    padding: 5px;
+    background: #aa9;
+}
+.eidogo-player .comment-info dl {
+    padding-top: 5px;
+    font-weight: normal;
+}
+.eidogo-player .comment-info dt {
+    float: left;
+    clear: left;
+    width: 70px;
+    padding: 0 0 3px 0;
+}
+.eidogo-player .comment-info dd {
+    margin: 0 0 0 75px;
+    padding: 0 0 3px 0;
 }
 .eidogo-player .comments {
 	clear: right;
@@ -210,14 +243,44 @@
     border-left: 3px solid #998;
     border-top: 2px solid #998;
 }
+.eidogo-player .comments-edit {
+    display: none;
+    z-index: 9999;
+}
+.eidogo-player .comments-edit-ta {
+    clear: right;
+    float: right;
+    width: 312px;
+    height: 213px;
+    font-size: 11px;
+    font-family: arial, helvetica, sans-serif;
+    padding: 15px 0px 40px 10px;
+    margin: 0 5px 0 0;
+    background: #eee;
+    border-left: 3px solid #ccc;
+    border-top: 2px solid #ccc;
+    border-right: none;
+    border-bottom: 1px solid #999;
+}
+.eidogo-player .comments-edit-done {
+    clear: right;
+    float: right;
+    width: 311px;
+    height: 16px;
+    margin: 0 5px 0 0;
+    padding: 5px;
+    text-align: center;
+    background: #ccc url(../images/done_bg.png) repeat-x;
+    color: #222;
+    border: 2px solid #999;
+    border-top: 2px solid #fff;
+    border-left: 2px solid #fff;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 12px;
+}
 .eidogo-player .comments a {
     color: #008;
-}
-.eidogo-player .comment-info {
-    padding: 5px;
-    background: #bbf;
-    border: 1px solid #88b;
-    margin: 0 0 10px 0;
 }
 .eidogo-player .search-container {
 	clear: right;
@@ -511,6 +574,7 @@
     background: #181818;
     border: 1px solid #282828;
     text-align: center;
+    color: #fff;
 }
 .eidogo-loading {
 	position: absolute;
@@ -539,4 +603,123 @@
 }
 .eidogo-player .footer {
     clear: both;
+}
+/****************************************************************************
+ *  Compact Theme
+****************************************************************************/
+.eidogo-player.theme-compact {
+    width: 421px;
+    padding: 0;
+    background: #555;
+    border: 1px solid #555;
+}
+.eidogo-player.theme-compact .board.size19 {
+    background-image: url(../images/board-19-simple.gif) !important;
+}
+.eidogo-player.theme-compact .controls-container {
+    width: 421px;
+    border-top: 1px solid #244;
+    padding-top: 0;
+}
+.eidogo-player.theme-compact .move-number {
+    top: 9px;
+}
+.eidogo-player.theme-compact .nav-slider {
+    width: 411px;
+}
+.eidogo-player.theme-compact .variations-container {
+    display: none;
+}
+.eidogo-player.theme-compact .tools-container {
+    border-top: 1px solid #333;
+    width: 411px;
+    background: #644;
+    margin: 0;
+}
+.eidogo-player.theme-compact .comments {
+    margin: 0;
+    width: 401px;
+    height: 50px;
+    padding: 5px 10px;
+    border: none;
+    background: #ccb;
+    border-top: 3px solid #aa9;
+    overflow: auto;
+    float: none;
+}
+.eidogo-player.theme-compact .comment-info {
+    background: #bba;
+}
+.eidogo-player.theme-compact .comments-edit-ta {
+    margin: 0 !important;
+    width: 411px;
+    height: 50px;
+    padding: 5px 0 5px 10px;
+    border: none;
+    background: #eee;
+    border-top: 3px solid #ddd;
+    overflow: auto;
+    float: none;
+    font-size: 11px;
+    font-family: arial, helvetica, sans-serif;
+    border-bottom: 1px solid #999;
+}
+.eidogo-player.theme-compact .comments-edit-done {
+    float: none;
+    width: 411px;
+    height: 16px;
+    margin: 0 !important;
+    padding: 5px;
+    text-align: center;
+    background: #ccc url(../images/done_bg.png) repeat-x;
+    color: #222;
+    border: 1px solid #555;
+    border-top: 1px solid #fff !important;
+    position: relative;
+    left: -1px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 12px;
+}
+.eidogo-player.theme-compact .info {
+    width: 421px;
+    padding: 0;
+    margin: 0;
+}
+.eidogo-player.theme-compact .info .players {
+    padding: 0 !important;
+    margin: 0 auto;
+    width: 422px !important;
+    height: auto;
+}
+.eidogo-player.theme-compact .info .player {
+    padding-top: 0 !important;
+    width: 210px !important;
+}
+.eidogo-player.theme-compact .info .player .captures, .eidogo-player.theme-compact .info .player .time {
+    margin: 0 !important;
+}
+.eidogo-player.theme-compact .info .player .name {
+    border-top: 1px solid #222 !important;
+}
+.eidogo-player.theme-compact .options {
+    background: #333;
+    border-top: 1px solid #555;
+}
+.eidogo-player.theme-compact .options-stop {
+    clear: right;
+}
+.eidogo-player.theme-compact .options a {
+    float: right;
+    margin: 0;
+    padding: 2px;
+    border: none;
+    color: #aaa;
+    text-decoration: none;
+    background: #444;
+}
+.eidogo-loading.theme-compact {
+    background: none;
+    width: 0;
+    height: 0;
 }

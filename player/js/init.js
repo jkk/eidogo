@@ -14,16 +14,7 @@
 (function() {
     
     var autoCfg = window.eidogoConfig || {};
-
-    // auto-detect path of player folder
-    var scripts = document.getElementsByTagName('script');
-    var scriptPath;
-    [].forEach.call(scripts, function(script) {
-        if (/(all\.compressed\.js|eidogo\.js)/.test(script.src)) {
-            scriptPath = script.src.replace(/\/js\/[^\/]+$/, "");
-        }
-    });
-    
+    var scriptPath = eidogo.util.getPlayerPath();    
     var path = (autoCfg.playerPath || scriptPath || 'player').replace(/\/$/);
     
     if (!autoCfg.skipCss) {
@@ -31,10 +22,6 @@
         var isIE6 = false /*@cc_on || @_jscript_version < 5.7 @*/;
         if (isIE6) {
             eidogo.util.addStyleSheet(path + '/css/player-ie6.css');
-        }
-        autoCfg.theme = autoCfg.theme || "compact";
-        if (autoCfg.theme && autoCfg.theme != "standard") {
-            eidogo.util.addStyleSheet(path + '/css/player-' + autoCfg.theme + '.css');
         }
     }
     
@@ -45,7 +32,7 @@
         
         [].forEach.call(els, function(el) {
         
-            var cfg = {container: el, disableShortcuts: true};
+            var cfg = {container: el, disableShortcuts: true, theme: "compact"};
             for (var key in autoCfg) {
                 cfg[key] = autoCfg[key];
             }

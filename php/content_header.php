@@ -7,7 +7,7 @@ if ($extension == "css") {
 }
 
 if ($extension == "js") {
-	header("Content-type: text/javascript");
+	header("Content-type: text/javascript; charset=utf-8");
 }
 
 if ($extension == "js" || $extension == "css") {

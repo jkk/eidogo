@@ -1,15 +1,10 @@
 planned for 1.0
-- finish i18n (+ copy to player/i18n/en.js)
-- hyperlink title
-- accurate nav slider after new moves?
-- make tools selection prettier + fix FF/Leopard bug?
-- free CDN? eidogo.massivebit.com? releases.eidogo.com/1.0/js/all.compressed.js?
-- remove js from example
 - announce on senseis, godiscussions
 
 planned for after 1.0
-- download SGF default without server-side dependence
+- accurate nav slider after new moves played
 - make failed game load non-fatal
+- edit game info
 - show more search results
 - score tool, score estimate?
 - show continuations for pattern search
@@ -17,12 +12,15 @@ planned for after 1.0
 - game archive browsing/searching
 - brief help text (keyboard shortcuts, etc)?
 - decouple player and board renderer (click events)
+- make tools selection prettier
 - canvas renderer: dojo.gfx or similar? (non-regular-sized boards)
 - KJD permalinks that only require one JSON request
 - exhaustive FF[4] SGF support
 - checkboxes for preferences
 
 maybe
+- improve overall speed (rendering, capturing, history, etc)
+- subclass Array and leave no trace (each player has own iframe?)
 - fix safari 2 history
 - native iPhone
 - IGS client

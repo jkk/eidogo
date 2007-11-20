@@ -12,8 +12,9 @@
         theme:          "compact", // "standard" or "compact"
         showComments:   true,
         showPlayerInfo: false,
-        showGameInfo:   false, 
+        showGameInfo:   false,
         showTools:      false,
+        showOptions:    false,
         markCurrent:    true,
         markVariations: true,
         markNext:       false
@@ -23,32 +24,19 @@
     <!--
         Necessary script
     -->
-    <!-- <script type="text/javascript" src="player/js/all.compressed.js"></script> -->
+    <script type="text/javascript" src="player/js/all.compressed.js"></script>
     
-    <script type="text/javascript" src="player/js/jquery.js"></script>
-    <script type="text/javascript" src="player/js/jquery.dimensions.js"></script>
-    <script type="text/javascript" src="player/js/lang.js"></script>
-    <script type="text/javascript" src="player/js/eidogo.js"></script>
-    <script type="text/javascript" src="player/js/util.js"></script>
-    <script type="text/javascript" src="player/js/i18n.js"></script>
-    <script type="text/javascript" src="player/js/gametree.js"></script>
-    <script type="text/javascript" src="player/js/sgf.js"></script>
-    <script type="text/javascript" src="player/js/board.js"></script>
-    <script type="text/javascript" src="player/js/rules.js"></script>
-    <script type="text/javascript" src="player/js/player.js"></script>
-    <script type="text/javascript" src="player/js/init.js"></script>
-
 </head>
 <body>
 	
     <h1>EidoGo Player Simple Example</h1>
 
     <p>Example 1: Load an SGF from a URL within the same domain</p>
-    <div class="eidogo-player-auto" sgf="sgf/example.sgf"></div>
+    <div class="eidogo-player-auto" sgf="sgf/blood_vomit.sgf"></div>
 
     <p>Example 2: Load raw SGF data</p>
     <div class="eidogo-player-auto">
-        (;FF[4]PB[Hinaya Rippo]HA[5]PW[Honinbo Dosaku]KM[0]PC[Japan]RE[W+R]
+        (;FF[4]PB[Hinaya Rippo]HA[5]PW[Honinbo Dosaku]KM[0]RE[W+R]
         AB[dd][dp][jj][pd][pp];W[qf];B[mc];W[qn];B[ql];W[on];B[rp];W[cn]
         ;B[gq];W[cf];B[ch];W[ef];B[bd];W[cj];B[bf];W[ce];B[be];W[cg]
         ;B[bg];W[cd];B[cc];W[dc];B[ed];W[ec];B[fc];W[cb];B[bc];W[fd]

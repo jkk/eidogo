@@ -8,7 +8,9 @@
  * Dojo, Prototype, Mootools).
  */
  
-jQuery.noConflict();
+(function() {
+
+var jQuery = window.jQuery.noConflict(true);
 
 eidogo.util = {
 
@@ -117,12 +119,16 @@ eidogo.util = {
         el.style.display = "none";
     },
     
+    getStyle: function(el, prop) {
+        return jQuery(el).css(prop);
+    },
+    
     getElX: function(el) {
-        return jQuery(el).offsetLite({scroll:false}).left;
+        return jQuery(el).offset().left;
     },
     
     getElY: function(el) {
-        return jQuery(el).offsetLite({scroll:false}).top;
+        return jQuery(el).offset().top;
     },
     
     addStyleSheet: function(href) {
@@ -135,6 +141,19 @@ eidogo.util = {
             link.href = href;
             document.getElementsByTagName("head")[0].appendChild(link);
         }
+    },
+    
+    getPlayerPath: function() {
+        var scripts = document.getElementsByTagName('script');
+        var scriptPath;
+        [].forEach.call(scripts, function(script) {
+            if (/(all\.compressed\.js|eidogo\.js)/.test(script.src)) {
+                scriptPath = script.src.replace(/\/js\/[^\/]+$/, "");
+            }
+        });
+        return scriptPath;
     }
     
 };
+
+})();
