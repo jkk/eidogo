@@ -1717,8 +1717,8 @@ eidogo.Player.prototype = {
                 <div id='info-game' class='game'></div>\
             </div>\
             <div id='options' class='options'>\
-                " + (this.saveUrl ? "<a id='option-save' class='option-save' href='#' title='Save this game'>Save</a>" : "") + "\
-                " + (this.downloadUrl || isMoz ? "<a id='option-download' class='option-download' href='#' title='Download this game as SGF'>Download SGF</a>" : "") + "\
+                " + (this.saveUrl ? "<a id='option-save' class='option-save' href='#'>" + t['save to server'] + "</a>" : "") + "\
+                " + (this.downloadUrl || isMoz ? "<a id='option-download' class='option-download' href='#'>" + t['download sgf'] + "</a>" : "") + "\
                 <div class='options-stop'></div>\
             </div>\
             <div id='preferences' class='preferences'>\
