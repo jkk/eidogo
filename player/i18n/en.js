@@ -22,6 +22,7 @@ eidogo.i18n = eidogo.i18n || {
     'letter':           'Letter',
     'number':           'Number',
     'dim':              'Dim',
+    'score':            'Score', // as in score tool
     'search':           'Search',
     'search corner':    'Corner Search',
     'search center':    'Center Search',
@@ -33,6 +34,8 @@ eidogo.i18n = eidogo.i18n || {
     'matches found':    'matches found.', // as in, "12 matches found"
     'save to server':   'Save to Server',
     'download sgf':     'Download SGF',
+    'next game':        'Next Game',
+    'previous game':    'Previous Game',
 
     'white':            'White',
     'white rank':       'White rank',
