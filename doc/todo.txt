@@ -1,7 +1,10 @@
-planned for 1.0
-- announce on senseis, godiscussions
-
 planned for after 1.0
+- implement problem-solving options
+- background color for hyperlinked long labels
+- non-regular-sized boards
+- shrink-to-fit option
+- multiple games per sgf
+- copy/paste ascii diagrams (http://www.dse.nl/~toni/go/ascii2sgf/index_uk.htm)
 - edit game info
 - show more search results
 - show continuations for pattern search
@@ -19,7 +22,6 @@ planned for after 1.0
 maybe
 - improve overall speed (rendering, capturing, history, etc)
 - canvas renderer: dojo.gfx or similar?
-- non-regular-sized boards
 - subclass Array and leave no trace (each player has own iframe?)
 - fix safari 2 history
 - native iPhone app

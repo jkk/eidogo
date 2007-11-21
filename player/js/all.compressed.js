@@ -2444,7 +2444,14 @@ while(this.getChar()=="]"||this.getChar()=="\n"||this.getChar()=="\r"){
 this.nextChar();
 }
 }
+if(_6[_7]){
+if(!(_6[_7] instanceof Array)){
+_6[_7]=[_6[_7]];
+}
+_6[_7]=_6[_7].concat(_8);
+}else{
 _6[_7]=_8.length>1?_8:_8[0];
+}
 _7="";
 _8=[];
 i=0;
