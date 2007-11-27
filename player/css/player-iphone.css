@@ -205,6 +205,42 @@
     border-left: 3px solid #998;
     border-top: 2px solid #998;
 }
+.eidogo-player .comments-edit {
+    display: none;
+    z-index: 9999;
+}
+.eidogo-player .comments-edit-ta {
+    clear: right;
+    float: right;
+    width: 312px;
+    height: 213px;
+    font-size: 11px;
+    font-family: arial, helvetica, sans-serif;
+    padding: 15px 0px 40px 10px;
+    margin: 0 5px 0 0;
+    background: #eee;
+    border-left: 3px solid #ccc;
+    border-top: 2px solid #ccc;
+    border-right: none;
+    border-bottom: 1px solid #999;
+}
+.eidogo-player .comments-edit-done {
+    clear: right;
+    float: right;
+    width: 311px;
+    height: 16px;
+    margin: 0 5px 0 0;
+    padding: 5px;
+    text-align: center;
+    background: #ccc url(../images/done_bg.png) repeat-x;
+    color: #222;
+    border: 2px solid #999;
+    border-top: 2px solid #fff;
+    border-left: 2px solid #fff;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 12px;
+}
 .eidogo-player .comments a {
     color: #008;
 }

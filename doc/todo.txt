@@ -1,4 +1,5 @@
 planned for after 1.0
+- yield during load for more responsive ui
 - implement problem-solving options
 - background color for hyperlinked long labels
 - non-regular-sized boards

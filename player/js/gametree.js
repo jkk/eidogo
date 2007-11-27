@@ -37,9 +37,7 @@ eidogo.GameNode.prototype = {
         this.loadJson(properties);
     },
     setProperty: function(property, value) {
-        if (!this.reserved.contains(property)) {
-            this[property] = value;
-        }
+        this[property] = value;
     },
     pushProperty: function(property, value) {
         if (this.reserved.contains(property)) return;

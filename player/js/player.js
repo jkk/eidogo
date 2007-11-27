@@ -450,6 +450,8 @@ eidogo.Player.prototype = {
     remoteLoad: function(url, target, useSgfPath, loadPath, completeFn) {
         useSgfPath = useSgfPath == "undefined" ? true : useSgfPath;
         
+        completeFn = (typeof completeFn == "function") ? completeFn : null;
+        
         if (useSgfPath) {
             if (!target) {
                 this.gameName = url;
@@ -475,18 +477,19 @@ eidogo.Player.prototype = {
             // infer the kind of file we got
             if (first == '(') {
                 // SGF
-                var sgf = new eidogo.SgfParser(data);
-                this.load(sgf.tree, target);
+                var me = this;
+                var sgf = new eidogo.SgfParser(data, function() {
+                    // parsing is asychronous
+                    me.load(this.tree, target);
+                    completeFn && completeFn();
+                });
             } else if (first == '{') {
                 // JSON
                 data = eval("(" + data + ")");
                 this.load(data, target);
+                completeFn && completeFn();
             } else {
                 this.croak(t['invalid data']);
-            }
-            
-            if (typeof completeFn == "function") {
-                completeFn();
             }
         }
     

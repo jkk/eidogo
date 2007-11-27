@@ -11,39 +11,53 @@
  * @class Returns a JSON object of the form:
  *      { nodes: [], trees: [{nodes: [], trees:[]}, ...] }
  */
-eidogo.SgfParser = function(sgf) {
-    this.init(sgf);
+eidogo.SgfParser = function(sgf, completeFn) {
+    this.init(sgf, completeFn);
 }
 eidogo.SgfParser.prototype = {
     /**
      * @constructor
      * @param {String} sgf Raw SGF data to parse
      */
-    init: function(sgf) {
+    init: function(sgf, completeFn) {
+        completeFn = (typeof completeFn == "function") ? completeFn : null;
         this.sgf = sgf;
         this.index = 0;
-        this.tree = this.parseTree(null);
+        this.iters = 0;
+        this.pause = false;
+        this.tree = {nodes: [], trees: []};
+        this.parseTree(this.tree, completeFn);
     },
-    parseTree: function(parent) {
-        var tree = {};
-        tree.nodes = [];
-        tree.trees = [];
-        while (this.index < this.sgf.length) {
+    parseTree: function(target, completeFn) {
+        while (this.index < this.sgf.length && !this.pause) {
             var c = this.sgf.charAt(this.index);
             this.index++;
             switch (c) {
                 case ';':
-                    tree.nodes.push(this.parseNode());
+                    target.nodes.push(this.parseNode());
                     break;
                 case '(':
-                    tree.trees.push(this.parseTree(tree));
+                    target.trees.push({nodes: [], trees: []});
+                    this.parseTree(target.trees.last(), completeFn);
                     break;
                 case ')':
-                    return tree;
                     break;
             }
+            // yield to the UI thread now and then
+            this.iters++;
+            if (this.iters > 25 && !this.pause) {
+                this.iters = 0;
+                this.pause = true;
+                setTimeout(function() {
+                    this.pause = false;
+                    this.parseTree(target, completeFn);
+                }.bind(this), 0);
+                return;
+            }
         }
-        return tree;
+        if (this.index == this.sgf.length) {
+            completeFn && completeFn.call(this, target);
+        }
     },
     getChar: function() {
         return this.sgf.charAt(this.index);

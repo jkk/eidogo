@@ -48,10 +48,6 @@ eidogo.util = {
         jQuery(el).bind(eventType, {}, handler);
     },
     
-    onReady: function(fn) {
-        jQuery(fn);
-    },
-    
     onClick: function(el, handler, scope) {
         eidogo.util.addEvent(el, "click", handler, scope, true);
     },
@@ -65,18 +61,8 @@ eidogo.util = {
                 document.body.scrollTop);
         }
         if (!el._x) {
-            if (/Apple/.test(navigator.vendor)) {
-    	        // Safari 2 gives the wrong position
-    	        var node = el, elX = 0, elY = 0;
-    	        while (node) {
-    	            elX += node.offsetLeft;
-    	            elY += node.offsetTop;
-    	            node = node.offsetParent ? node.offsetParent : null;
-                }
-    	    } else {
-    	        var elX = eidogo.util.getElX(el);
-                var elY = eidogo.util.getElY(el);
-    	    }
+            var elXY = eidogo.util.getElXY(el),
+                elX = elXY[0], elY = elXY[1];
             el._x = elX;
             el._y = elY;
         } else {
@@ -134,12 +120,25 @@ eidogo.util = {
         return jQuery(el).css(prop);
     },
     
+    getElXY: function(el) {
+        if (el._x && el._y) return [el._x, el._y];
+        var node = el, elX = 0, elY = 0;
+        while (node) {
+            elX += node.offsetLeft;
+            elY += node.offsetTop;
+            node = node.offsetParent ? node.offsetParent : null;
+        }
+        el._x = elX;
+        el._y = elY;
+        return [elX, elY];
+    },
+    
     getElX: function(el) {
-        return jQuery(el).offset().left;
+        return this.getElXY(el)[0];
     },
     
     getElY: function(el) {
-        return jQuery(el).offset().top;
+        return this.getElXY(el)[1];
     },
     
     addStyleSheet: function(href) {
