@@ -23,41 +23,29 @@ eidogo.SgfParser.prototype = {
         completeFn = (typeof completeFn == "function") ? completeFn : null;
         this.sgf = sgf;
         this.index = 0;
-        this.iters = 0;
-        this.pause = false;
-        this.tree = {nodes: [], trees: []};
-        this.parseTree(this.tree, completeFn);
+        this.tree = this.parseTree(null);
+        completeFn && completeFn.call(this);
     },
-    parseTree: function(target, completeFn) {
-        while (this.index < this.sgf.length && !this.pause) {
+    parseTree: function(parent) {
+        var tree = {};
+        tree.nodes = [];
+        tree.trees = [];
+        while (this.index < this.sgf.length) {
             var c = this.sgf.charAt(this.index);
             this.index++;
             switch (c) {
                 case ';':
-                    target.nodes.push(this.parseNode());
+                    tree.nodes.push(this.parseNode());
                     break;
                 case '(':
-                    target.trees.push({nodes: [], trees: []});
-                    this.parseTree(target.trees.last(), completeFn);
+                    tree.trees.push(this.parseTree(tree));
                     break;
                 case ')':
+                    return tree;
                     break;
             }
-            // yield to the UI thread now and then
-            this.iters++;
-            if (this.iters > 25 && !this.pause) {
-                this.iters = 0;
-                this.pause = true;
-                setTimeout(function() {
-                    this.pause = false;
-                    this.parseTree(target, completeFn);
-                }.bind(this), 0);
-                return;
-            }
         }
-        if (this.index == this.sgf.length) {
-            completeFn && completeFn.call(this, target);
-        }
+        return tree;
     },
     getChar: function() {
         return this.sgf.charAt(this.index);
