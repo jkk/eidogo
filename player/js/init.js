@@ -31,10 +31,16 @@
     eidogo.util.addEvent(window, "load", function() {        
         
         eidogo.autoPlayers = [];
-        var els = eidogo.util.byClass("eidogo-player-auto");
-        
-        [].forEach.call(els, function(el) {
-        
+        var els = [];
+        var divs = document.getElementsByTagName('div');
+        var len = divs.length;
+        for (var i = 0; i < len; i++) {
+            if (eidogo.util.hasClass(divs[i], "eidogo-player-auto")) {
+                els.push(divs[i]);
+            }
+        }
+        var el;
+        for (var i = 0; el = els[i]; i++) {
             var cfg = {container: el, disableShortcuts: true, theme: "compact"};
             for (var key in autoCfg) {
                 cfg[key] = autoCfg[key];
@@ -49,7 +55,7 @@
             
             var player = new eidogo.Player(cfg);
             eidogo.autoPlayers.push(player);
-        });
+        }
         
     });
     

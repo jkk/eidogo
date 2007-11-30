@@ -254,7 +254,7 @@ eidogo.GameCursor.prototype = {
         var vars = this.node.parent.trees;
         var tree;
         for (var i = 0; tree = vars[i]; i++) {
-            moves[tree.nodes.first().getMove()] = i;
+            moves[tree.nodes[0].getMove()] = i;
         }
         return moves;
     },
@@ -270,7 +270,7 @@ eidogo.GameCursor.prototype = {
             } else {
                 this.node.parent.preferredTree = treeNum;
             }
-            this.node = this.node.parent.trees[treeNum].nodes.first();
+            this.node = this.node.parent.trees[treeNum].nodes[0];
         }
         return true;
     },

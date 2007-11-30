@@ -10,11 +10,19 @@
     font-family: arial, helvetica, sans-serif;
     font-size: 11px;
 	text-indent: 0;
+	line-height: 100%;
+	font-weight: normal;
+	color: #000;
+	text-align: left;
 }
 .eidogo-player ul, .eidogo-player ol, .eidogo-player dl, .eidogo-player dd, .eidogo-player dt {
 	margin: 0;
 	padding: 0;
 	list-style: none;
+}
+.eidogo-player input, .eidogo-player select {
+    background: #fff;
+    color: #000;
 }
 .eidogo-player .shade {
     position: absolute;
@@ -35,22 +43,26 @@
 	padding: 5px 0 0 0;
     background: #466;
     color: #8aa;
+    -webkit-user-select: none;
 }
 .eidogo-player .controls {
 	height: 30px;
 	text-indent: -9999px;
 	font-size: 0;
 	padding-left: 2px;
+	-webkit-user-select: none;
 }
 .eidogo-player .controls .control {
 	margin: 5px 0 5px 3px;
 	user-select: none;
 	-khtml-user-select: none;
+	-webkit-user-select: none;
 	-moz-user-select: none;
 	cursor: default;
 	width: 44px;
 	height: 19px;
 	float: left;
+	padding: 0;
 	background: url(../images/buttons.gif) no-repeat top left;
 }
 .eidogo-player .controls .back {

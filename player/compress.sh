@@ -13,7 +13,6 @@ RHINOC="java -jar custom_rhino.jar -c "
 
 rm $OUTFILE
 
-$RHINOC js/jquery.js >> $OUTFILE 2>&1
 $RHINOC js/lang.js >> $OUTFILE 2>&1
 $RHINOC js/eidogo.js >> $OUTFILE 2>&1
 $RHINOC js/util.js >> $OUTFILE 2>&1

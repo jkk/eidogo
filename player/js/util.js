@@ -4,35 +4,130 @@
  * Code licensed under AGPLv3:
  * http://www.fsf.org/licensing/licenses/agpl-3.0.html
  *
- * General-purpose utility functions. All references to external libraries are
- * in this file. Pretty much any modern JS library could be used (YUI, jQuery,
- * Dojo, Prototype, Mootools).
+ * General-purpose utility functions.
  */
  
 (function() {
 
-var jQuery = window.jQuery.noConflict(true);
-
 eidogo.util = {
 
     byId: function(id) {
-        return jQuery("#" + id)[0];
+        return document.getElementById(id);
     },
     
-    byClass: function(cls) {
-        return jQuery("." + cls);
-    },
-    
+    // Adapted from jQuery
     ajax: function(method, url, params, successFn, failureFn, scope, timeout) {
-        scope = scope || window;
-        jQuery.ajax({
-            type: method.toUpperCase(),
-            url: url,
-            data: params,
-            success: function(text) { successFn.call(scope, {responseText: text}) },
-            error: failureFn.bind(scope),
-            timeout: timeout
-        });
+        method = method.toUpperCase();
+        var xhr = window.ActiveXObject ?
+            new ActiveXObject("Microsoft.XMLHTTP") :
+            new XMLHttpRequest();
+        var qs = null;
+        if (params && typeof params == "object") {
+            var pairs = [];
+            for (var key in params) {
+                if (params[key] && params[key].constructor == Array) {
+                    for (var i = 0; i < params[key].length; i++) {
+                        pairs.push(encodeURIComponent(key) + "=" +
+                            encodeURIComponent(params[key]));
+                    }
+                } else {
+                    pairs.push(encodeURIComponent(key) + "=" +
+                        encodeURIComponent(params[key]));
+                }
+            }
+            qs = pairs.join("&").replace(/%20/g, "+");
+        }
+        if (qs && method == "GET" ) {
+            url += (url.match(/\?/) ? "&" : "?") + qs;
+            qs = null;
+        }
+        xhr.open(method, url, true);
+        if (qs) {
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        }
+        var requestDone = false;
+        var isSafari = /webkit/.test(navigator.userAgent.toLowerCase());
+        function httpSuccess(r) {
+            try {
+                return !r.status && location.protocol == "file:" ||
+                (r.status >= 200 && r.status < 300) || r.status == 304 ||
+                isSafari && r.status == undefined;
+            } catch(e) {}
+            return false;
+        };
+        function handleReadyState(isTimeout) {
+            if (!requestDone && xhr && (xhr.readyState == 4 || isTimeout == "timeout")) {
+                requestDone = true;
+                if (ival) {
+                    clearInterval(ival);
+                    ival = null;
+                }
+                var status = isTimeout == "timeout" && "timeout" ||
+                    !httpSuccess(xhr) && "error" ||
+                    "success";
+                if (status == "success")
+                    successFn.call(scope, xhr);
+                else
+                    failureFn.call(scope);
+                xhr = null;
+            }
+        }
+        var ival = setInterval(handleReadyState, 13); 
+        if (timeout)
+            setTimeout(function() {
+                if (xhr) {
+                    xhr.abort();
+                    if(!requestDone)
+                        handleReadyState("timeout");
+                }
+            }, timeout);
+        xhr.send(qs);
+        return xhr;
+    },
+    
+    // written by Dean Edwards, 2005
+    // with input from Tino Zijdel, Matthias Miller, Diego Perini
+    // http://dean.edwards.name/weblog/2005/10/add-event/
+    // modified for use with EidoGo
+    addEventHelper: function(element, type, handler) {
+        if (element.addEventListener) {
+            element.addEventListener(type, handler, false);
+        } else {
+            if (!eidogo.util.addEventId) eidogo.util.addEventId = 1;
+            // assign each event handler a unique ID
+            if (!handler.$$guid) handler.$$guid = eidogo.util.addEventId++;
+            // create a hash table of event types for the element
+            if (!element.events) element.events = {};
+            // create a hash table of event handlers for each element/event pair
+            var handlers = element.events[type];
+            if (!handlers) {
+                handlers = element.events[type] = {};
+                // store the existing event handler (if there is one)
+                if (element["on" + type]) {
+                    handlers[0] = element["on" + type];
+                }
+            }
+            // store the event handler in the hash table
+            handlers[handler.$$guid] = handler;
+            // assign a global event handler to do all the work
+            element["on" + type] = eidogo.util.handleEvent;
+        }
+    },
+
+    handleEvent: function(event) {
+        var returnValue = true;
+        // grab the event object (IE uses a global event object)
+        event = event || ((this.ownerDocument || this.document || this).parentWindow || window).event;
+        // get a reference to the hash table of event handlers
+        var handlers = this.events[event.type];
+        // execute each event handler
+        for (var i in handlers) {
+            this.$$handleEvent = handlers[i];
+            if (this.$$handleEvent(event) === false) {
+                returnValue = false;
+            }
+        }
+        return returnValue;
     },
     
     addEvent: function(el, eventType, handler, arg, override) {
@@ -45,7 +140,7 @@ eidogo.util = {
                 oldHandler(e, arg);
             }
         }
-        jQuery(el).bind(eventType, {}, handler);
+        eidogo.util.addEventHelper(el, eventType, handler);
     },
     
     onClick: function(el, handler, scope) {
@@ -54,7 +149,7 @@ eidogo.util = {
     
     getElClickXY: function(e, el) {
         // for IE
-	    if(!e.pageX) {
+        if(!e.pageX) {
             e.pageX = e.clientX + (document.documentElement.scrollLeft ||
                 document.body.scrollLeft);
             e.pageY = e.clientY + (document.documentElement.scrollTop ||
@@ -69,7 +164,7 @@ eidogo.util = {
             var elX = el._x;
             var elY = el._y;
         }
-		return [e.pageX - elX, e.pageY - elY];
+        return [e.pageX - elX, e.pageY - elY];
     },
     
     stopEvent: function(e) {
@@ -92,11 +187,31 @@ eidogo.util = {
     },
     
     addClass: function(el, cls) {
-        jQuery(el).addClass(cls);
+        if (!cls) return;
+        var ca = cls.split(/\s+/);
+        for (var i = 0; i < ca.length; i++) {
+            if (!eidogo.util.hasClass(el, ca[i]))
+                el.className += (el.className ? " " : "") + ca[i];
+        }
     },
-    
+
     removeClass: function(el, cls) {
-        jQuery(el).removeClass(cls);
+        var ca = el.className.split(/\s+/);
+        var nc = [];
+        for (var i = 0; i < ca.length; i++) {
+            if (ca[i] != cls)
+                nc.push(ca[i]);
+        }
+        el.className = nc.join(" ");
+    },
+
+    hasClass: function(el, cls) {
+        var ca = el.className.split(/\s+/);
+        for (var i = 0; i < ca.length; i++) {
+            if (ca[i] == cls)
+                return true;
+        }
+        return false;
     },
     
     show: function(el, display) {
@@ -114,10 +229,6 @@ eidogo.util = {
         }
         if (!el) return;
         el.style.display = "none";
-    },
-    
-    getStyle: function(el, prop) {
-        return jQuery(el).css(prop);
     },
     
     getElXY: function(el) {
@@ -156,11 +267,12 @@ eidogo.util = {
     getPlayerPath: function() {
         var scripts = document.getElementsByTagName('script');
         var scriptPath;
-        [].forEach.call(scripts, function(script) {
+        var script;
+        for (var i = 0; script = scripts[i]; i++) {
             if (/(all\.compressed\.js|eidogo\.js)/.test(script.src)) {
                 scriptPath = script.src.replace(/\/js\/[^\/]+$/, "");
             }
-        });
+        }
         return scriptPath;
     }
     

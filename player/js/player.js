@@ -65,6 +65,7 @@ eidogo.Player.prototype = {
         
         // pattern and game info search
         this.searchUrl = cfg.searchUrl;
+        this.showingSearch = false;
         
         // save to file
         this.saveUrl = cfg.saveUrl;
@@ -368,7 +369,7 @@ eidogo.Player.prototype = {
         (this.prefs.showGameInfo ? show : hide)(this.dom.infoGame);
         (this.prefs.showPlayerInfo ? show : hide)(this.dom.infoPlayers);  
         (this.prefs.showTools ? show : hide)(this.dom.toolsContainer);
-        if (eidogo.util.getStyle(this.dom.searchContainer, "display") == "none") {
+        if (!this.showingSearch) {
             (this.prefs.showComments ? show : hide)(this.dom.comments);
         }
         (this.prefs.showOptions ? show : hide)(this.dom.options);
@@ -1091,6 +1092,7 @@ eidogo.Player.prototype = {
             this.doneLoading();
             hide(this.dom.comments);
             show(this.dom.searchContainer);
+            this.showingSearch = true;
             if (req.responseText == "ERROR") {
                 this.croak(t['error retrieving']);
                 return;
@@ -1171,6 +1173,7 @@ eidogo.Player.prototype = {
     },
     
     closeSearch: function() {
+        this.showingSearch = false;
         hide(this.dom.searchContainer);
         show(this.dom.comments);
     },
