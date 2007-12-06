@@ -1937,6 +1937,9 @@ this.dom.blackName.innerHTML="";
 var _b6=this.gameTree.trees.first().nodes.first();
 var dl=document.createElement("dl");
 for(var _b8 in this.infoLabels){
+if(_b6[_b8] instanceof Array){
+_b6[_b8]=_b6[_b8][0];
+}
 if(_b6[_b8]){
 if(_b8=="PW"){
 this.dom.whiteName.innerHTML=_b6[_b8]+(_b6["WR"]?", "+_b6["WR"]:"");

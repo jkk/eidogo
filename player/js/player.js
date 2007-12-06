@@ -1340,6 +1340,9 @@ eidogo.Player.prototype = {
         var gameInfo = this.gameTree.trees.first().nodes.first();
         var dl = document.createElement('dl');
         for (var propName in this.infoLabels) {
+            if (gameInfo[propName] instanceof Array) {
+                gameInfo[propName] = gameInfo[propName][0];
+            }
             if (gameInfo[propName]) {
                 if (propName == "PW") {
                     this.dom.whiteName.innerHTML = gameInfo[propName] +

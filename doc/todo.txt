@@ -1,5 +1,6 @@
 planned for after 1.0
-- yield during load for more responsive ui
+- change permalink on close search
+- fix errant move on end of example.html > example.sgf
 - implement problem-solving options
 - background color for hyperlinked long labels
 - non-regular-sized boards
@@ -17,6 +18,7 @@ planned for after 1.0
 - brief help text (keyboard shortcuts, etc)?
 - decouple player and board renderer (click events)
 - make tools selection prettier
+- yield during load for more responsive ui
 - KJD permalinks that only require one JSON request
 - exhaustive FF[4] SGF support
 
