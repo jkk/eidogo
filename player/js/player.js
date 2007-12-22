@@ -24,14 +24,23 @@ var t = eidogo.i18n,
     playerPath = eidogo.util.getPlayerPath(),
     ua = navigator.userAgent.toLowerCase(),
     isMoz = /mozilla/.test(ua) && !/(compatible|webkit)/.test(ua);
-        
+
+// Keep track of all the player instances we've created
+eidogo.players = eidogo.players || {};
+
+// Allow function calls to particular Player instances (for board rendering etc)
+eidogo.delegate = function(pid, fn /*, args*/) {
+    var player = eidogo.players[pid];
+    player[fn].call(player, Array.from(arguments).slice(2));
+}
+
 /**
  * @class Player is the overarching control structure that allows you to
  * load and replay games. It's a "player" in the sense of a DVD player, not
  * a person who plays a game.
  */
-eidogo.Player = function(cfg) {
-    this.init(cfg);
+eidogo.Player = function() {
+    this.init.apply(this, arguments);
 }
 eidogo.Player.prototype = {
     
@@ -57,8 +66,11 @@ eidogo.Player.prototype = {
             return;
         }
     
-        // so we can have more than one player on a page
+        // unique id, so we can have more than one player on a page
         this.uniq = (new Date()).getTime();
+        
+        // store for later
+        eidogo.players[this.uniq] = this;
         
         // URL path to SGF files
         this.sgfPath = cfg.sgfPath;
@@ -384,7 +396,7 @@ eidogo.Player.prototype = {
         if (this.board && this.board.renderer && this.board.boardSize == size) return;
         try {
             this.dom.boardContainer.innerHTML = "";
-            var renderer = new eidogo.BoardRendererHtml(this.dom.boardContainer, size);
+            var renderer = new eidogo.BoardRendererHtml(this.dom.boardContainer, size, this);
             this.board = new eidogo.Board(renderer, size);
         } catch (e) {
             if (e == "No DOM container") {
@@ -399,16 +411,7 @@ eidogo.Player.prototype = {
             addClass(this.dom.boardContainer, "with-coords");
         }
     
-        // add the search region selection box for later use
-        this.board.renderer.domNode.appendChild(this.dom.searchRegion);
-    
         this.rules = new eidogo.Rules(this.board);  
-    
-        var domBoard = this.board.renderer.domNode;
-        
-        addEvent(domBoard, "mousemove", this.handleBoardHover, this, true);
-        addEvent(domBoard, "mousedown", this.handleBoardMouseDown, this, true);
-        addEvent(domBoard, "mouseup", this.handleBoardMouseUp, this, true);
     },
 
     /**
@@ -775,27 +778,8 @@ eidogo.Player.prototype = {
         this.createMove('tt');
     },
 
-    /**
-     *  Gets the board coordinates (0-18) for a mouse event
-    **/
-    getXY: function(e) {
-        var clickXY = getElClickXY(e, this.board.renderer.domNode);
-        
-        var m = this.board.renderer.margin;
-        var pw = this.board.renderer.pointWidth;
-        var ph = this.board.renderer.pointHeight;
-        
-        var x = Math.round((clickXY[0] - m - (pw / 2)) / pw);
-        var y = Math.round((clickXY[1] - m - (ph / 2)) / ph);
-    
-        return [x, y];
-    },
-
-    handleBoardMouseDown: function(e) {
+    handleBoardMouseDown: function(x, y, e) {
         if (this.domLoading) return;
-        var xy = this.getXY(e);
-        var x = xy[0];
-        var y = xy[1];
         if (!this.boundsCheck(x, y, [0, this.board.boardSize-1])) return;
         this.mouseDown = true;
         this.mouseDownX = x;
@@ -808,12 +792,9 @@ eidogo.Player.prototype = {
         }
     },
 
-    handleBoardHover: function(e) {
+    handleBoardHover: function(x, y, e) {
         if (this.domLoading) return;
         if (this.mouseDown || this.regionBegun) {
-            var xy = this.getXY(e);
-            var x = xy[0];
-            var y = xy[1];
             if (!this.boundsCheck(x, y, [0, this.board.boardSize-1])) return;
             if (this.searchUrl && !this.regionBegun && (x != this.mouseDownX || y != this.mouseDownY)) {
                 // click and drag: implicit region select
@@ -831,14 +812,10 @@ eidogo.Player.prototype = {
         }
     },
 
-    handleBoardMouseUp: function(e) {
+    handleBoardMouseUp: function(x, y, e) {
         if (this.domLoading) return;
         
         this.mouseDown = false;
-    
-        var xy = this.getXY(e);
-        var x = xy[0];
-        var y = xy[1];
     
         var coord = this.pointToSgfCoord({x: x, y: y});
     
@@ -964,15 +941,11 @@ eidogo.Player.prototype = {
 
     showRegion: function() {
         var bounds = this.getRegionBounds();
-        this.dom.searchRegion.style.top = (this.board.renderer.margin +
-            this.board.renderer.pointHeight * bounds[0]) + "px";
-        this.dom.searchRegion.style.left = (this.board.renderer.margin +
-            this.board.renderer.pointWidth * bounds[1]) + "px";
-        this.dom.searchRegion.style.width = this.board.renderer.pointWidth *
-            bounds[2] + "px";
-        this.dom.searchRegion.style.height = this.board.renderer.pointHeight *
-            bounds[3] + "px";
-        show(this.dom.searchRegion);
+        this.board.renderer.showRegion(bounds);
+    },
+    
+    hideRegion: function() {
+        this.board.renderer.hideRegion();
     },
     
     loadSearch: function(q, dim, p, a) {
@@ -1395,7 +1368,7 @@ eidogo.Player.prototype = {
         } else {
             cursor = "default";
             this.regionBegun = false;
-            hide(this.dom.searchRegion);
+            this.hideRegion();
             hide(this.dom.searchButton);
             hide(this.dom.searchAlgo);
         }
@@ -1650,7 +1623,7 @@ eidogo.Player.prototype = {
         this.dom.container.appendChild(this.dom.player);
     
         var domHtml = "\
-            <div id='board-container' class='board-container with-coords'></div>\
+            <div id='board-container' class='board-container'></div>\
             <div id='controls-container' class='controls-container'>\
                 <ul id='controls' class='controls'>\
                     <li id='control-first' class='control first'>First</li>\
@@ -1759,11 +1732,6 @@ eidogo.Player.prototype = {
             });
             this.dom[jsName] = byId(id);
         }
-        
-        // this has to be inserted after the board is created
-        this.dom.searchRegion = document.createElement('div');
-        this.dom.searchRegion.id = "search-region-" + this.uniq;
-        this.dom.searchRegion.className = "search-region";
         
         // for speedup
         this.dom.navSlider._width = this.dom.navSlider.offsetWidth;

@@ -12,8 +12,8 @@
  * We can theoretically have any kind of renderer. The board state is
  * independent of its visual presentation.
  */
-eidogo.Board = function(renderer, boardSize) {
-    this.init(renderer, boardSize);
+eidogo.Board = function() {
+    this.init.apply(this, arguments);
 };
 eidogo.Board.prototype = {
     WHITE: 1,
@@ -170,24 +170,28 @@ eidogo.Board.prototype = {
 /**
  * @class An HTML/DOM-based board renderer.
  */
-eidogo.BoardRendererHtml = function(domNode, boardSize) {
-    this.init(domNode, boardSize);
+eidogo.BoardRendererHtml = function() {
+    this.init.apply(this, arguments);
 }
 eidogo.BoardRendererHtml.prototype = {
     /**
      * @constructor
      * @param {HTMLElement} domContainer Where to put the board
      */
-    init: function(domContainer, boardSize) {
+    init: function(domContainer, boardSize, player) {
         if (!domContainer) {
             throw "No DOM container";
             return;
         }
         this.boardSize = boardSize || 19;
+        var domGutter = document.createElement('div');
+        domGutter.className = "board-gutter with-coords";
+        domContainer.appendChild(domGutter);
         var domBoard = document.createElement('div');
         domBoard.className = "board size" + this.boardSize;
-        domContainer.appendChild(domBoard);
+        domGutter.appendChild(domBoard);
         this.domNode = domBoard;
+        this.player = player;
         this.uniq = domContainer.id + "-";
         this.renderCache = {
             stones: [].setLength(this.boardSize, 0).addDimension(this.boardSize, 0),
@@ -203,6 +207,54 @@ eidogo.BoardRendererHtml.prototype = {
         this.renderMarker({x:0,y:0}, "current"); // just for image caching
         this.clear();
         this.margin = (this.domNode.offsetWidth - (this.boardSize * this.pointWidth)) / 2;
+        
+        // add the search region selection box for later use
+        this.dom = {};
+        this.dom.searchRegion = document.createElement('div');
+        this.dom.searchRegion.id = this.uniq + "search-region";
+        this.dom.searchRegion.className = "search-region";
+        this.domNode.appendChild(this.dom.searchRegion);
+        
+        eidogo.util.addEvent(this.domNode, "mousemove", this.handleHover, this, true);
+        eidogo.util.addEvent(this.domNode, "mousedown", this.handleMouseDown, this, true);
+        eidogo.util.addEvent(this.domNode, "mouseup", this.handleMouseUp, this, true);
+    },
+    handleHover: function(e) {
+        var xy = this.getXY(e);
+        this.player.handleBoardHover(xy[0], xy[1]);
+    },
+    handleMouseDown: function(e) {
+        var xy = this.getXY(e);
+        this.player.handleBoardMouseDown(xy[0], xy[1]);
+    },
+    handleMouseUp: function(e) {
+        var xy = this.getXY(e);
+        this.player.handleBoardMouseUp(xy[0], xy[1]);
+    },
+    showRegion: function(bounds) {
+        this.dom.searchRegion.style.top = (this.margin + this.pointHeight * bounds[0]) + "px";
+        this.dom.searchRegion.style.left = (this.margin + this.pointWidth * bounds[1]) + "px";
+        this.dom.searchRegion.style.width = this.pointWidth * bounds[2] + "px";
+        this.dom.searchRegion.style.height = this.pointHeight * bounds[3] + "px";
+        eidogo.util.show(this.dom.searchRegion);
+    },
+    hideRegion: function() {
+        eidogo.util.hide(this.dom.searchRegion);  
+    },
+    /**
+     *  Gets the board coordinates (0-18) for a mouse event
+    **/
+    getXY: function(e) {
+        var clickXY = eidogo.util.getElClickXY(e, this.domNode);
+        
+        var m = this.margin;
+        var pw = this.pointWidth;
+        var ph = this.pointHeight;
+        
+        var x = Math.round((clickXY[0] - m - (pw / 2)) / pw);
+        var y = Math.round((clickXY[1] - m - (ph / 2)) / ph);
+    
+        return [x, y];
     },
     clear: function() {
         this.domNode.innerHTML = "";

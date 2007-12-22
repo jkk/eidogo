@@ -1,4 +1,5 @@
 planned for after 1.0
+- unit tests???
 - change permalink on close search
 - fix errant move on end of example.html > example.sgf
 - implement problem-solving options

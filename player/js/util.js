@@ -168,6 +168,7 @@ eidogo.util = {
     },
     
     stopEvent: function(e) {
+        if (!e) return;
         if (e.stopPropagation) {
             e.stopPropagation();
         } else {

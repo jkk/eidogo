@@ -369,7 +369,15 @@
 }
 .eidogo-player .board-container {
     float: left;
-	width: 371px;
+	width: 421px;
+	height: 421px;
+	background: #654;
+	user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+}
+.eidogo-player .board-gutter {
+    width: 371px;
 	height: 371px;
 	padding: 25px;
 	background: #654;
@@ -377,7 +385,7 @@
 	-khtml-user-select: none;
 	-moz-user-select: none;
 }
-.eidogo-player .board-container.with-coords {
+.eidogo-player .board-gutter.with-coords {
     background: #654 url(../images/board-bg-coords.png) no-repeat 5px 5px;
 }
 .eidogo-player .board.size9 {
