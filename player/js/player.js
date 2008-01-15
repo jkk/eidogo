@@ -184,6 +184,9 @@ eidogo.Player.prototype = {
         // initialize per-game settings
         this.reset(cfg);
         
+        // custom renderer?
+        this.renderer = cfg.renderer || "html";
+        
         // set up the elements we'll use
         this.constructDom();
         
@@ -400,7 +403,10 @@ eidogo.Player.prototype = {
         if (this.board && this.board.renderer && this.board.boardSize == size) return;
         try {
             this.dom.boardContainer.innerHTML = "";
-            var renderer = new eidogo.BoardRendererHtml(this.dom.boardContainer, size, this);
+            var rendererProto;
+            if (this.renderer == "flash") rendererProto = eidogo.BoardRendererFlash;
+            else rendererProto = eidogo.BoardRendererHtml;
+            var renderer = new rendererProto(this.dom.boardContainer, size, this);
             this.board = new eidogo.Board(renderer, size);
         } catch (e) {
             if (e == "No DOM container") {
