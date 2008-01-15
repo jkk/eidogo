@@ -1,7 +1,4 @@
 planned for after 1.0
-- change permalink on close search
-- implement problem-solving options
-- background color for hyperlinked long labels
 - non-regular-sized boards
 - shrink-to-fit option
 - multiple games per sgf
@@ -14,7 +11,6 @@ planned for after 1.0
 - make failed game load non-fatal
 - game archive browsing/searching
 - brief help text (keyboard shortcuts, etc)?
-- decouple player and board renderer (click events)
 - make tools selection prettier
 - yield during load for more responsive ui
 - KJD permalinks that only require one JSON request
@@ -22,8 +18,9 @@ planned for after 1.0
 
 maybe
 - improve overall speed (rendering, capturing, history, etc)
-- canvas renderer: dojo.gfx or similar?
+- full-featured flash renderer
 - subclass Array and leave no trace (each player has own iframe?)
+- shortcuts only when Player has focus
 - fix safari 2 history
 - native iPhone app
 - IGS client

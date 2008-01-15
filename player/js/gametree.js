@@ -250,11 +250,12 @@ eidogo.GameCursor.prototype = {
         if (this.node.nextSibling && this.node.nextSibling.getMove()) {
             // null indicates a sibling move rather than a var tree number
             moves[this.node.nextSibling.getMove()] = null; 
-        }
-        var vars = this.node.parent.trees;
-        var tree;
-        for (var i = 0; tree = vars[i]; i++) {
-            moves[tree.nodes[0].getMove()] = i;
+        } else {
+            var vars = this.node.parent.trees;
+            var tree;
+            for (var i = 0; tree = vars[i]; i++) {
+                moves[tree.nodes[0].getMove()] = i;
+            }
         }
         return moves;
     },

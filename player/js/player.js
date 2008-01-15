@@ -268,8 +268,15 @@ eidogo.Player.prototype = {
         // so we know when permalinks and downloads are unreliable
         this.unsavedChanges = false;
         
+        // whether we're currently searching or editing
         this.searching = false;
         this.editingComment = false;
+        this.goingBack = false;
+        
+        // problem-solving mode: respond when the user plays a move
+        this.problemMode = typeof cfg.problemMode != "undefined" ?
+            cfg.problemMode : false;
+        this.problemColor = cfg.problemColor || "W";
     
         // user-changeable preferences
         this.prefs = {};
@@ -560,6 +567,13 @@ eidogo.Player.prototype = {
         };
         ajax('post', this.scoreEstUrl, params, success, failure, this, 45000);
     },
+    
+    /**
+     * Respond to a move made in problem-solving mode
+    **/
+    playProblemResponse: function(noRender) {
+        this.variation(null, noRender);
+    },
 
     /**
      * Navigates to a location within the gameTree. Takes progressive loading
@@ -637,7 +651,7 @@ eidogo.Player.prototype = {
     **/
     resetCursor: function(noRender, firstGame) {
         this.board.reset();
-        this.currentColor = "B";
+        this.currentColor = (this.problemMode ? this.problemColor : "B");
         this.moveNumber = 0;
         if (firstGame) {
             this.cursor.node = this.gameTree.trees.first().nodes.first();
@@ -704,7 +718,7 @@ eidogo.Player.prototype = {
         }
     
         if (this.moveNumber < 1) {
-            this.currentColor = "B";
+            this.currentColor = (this.problemMode ? this.problemColor : "B");
         }
     
         // execute handlers for the appropriate properties
@@ -741,6 +755,13 @@ eidogo.Player.prototype = {
                 this.cursor.node.parent
             );
         }
+        
+        // play a reponse in problem-solving mode, unless we just navigated backwards
+        if (this.problemMode && this.currentColor && this.currentColor != this.problemColor && !this.goingBack) {
+            this.playProblemResponse(noRender);
+        }
+        
+        this.goingBack = false;
     },
 
     /**
@@ -780,6 +801,7 @@ eidogo.Player.prototype = {
             this.moveNumber--;
             if (this.moveNumber < 0) this.moveNumber = 0;
             this.board.revert(1);
+            this.goingBack = true;
             this.refresh(noRender);
             this.resetLastLabels();
         }

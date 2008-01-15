@@ -2,11 +2,13 @@
     "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-    <title>EidoGo Flash Example</title>
+    <title>EidoGo Problem Example</title>
 
     <script type="text/javascript">
     eidogoConfig = {
-        renderer: "flash"
+        problemMode:    true,
+        markVariations: false,
+        showGameInfo:   false
     };
     </script>
     
@@ -17,10 +19,8 @@
 	
     <h1>EidoGo Player Simple Example</h1>
 
-    <p>Example of Flash board renderer</p>
-    <div class="eidogo-player-auto">
-        (;FF[4]KM[0]SZ[9])
-    </div>
+    <p>Example of problem-solving mode</p>
+    <div class="eidogo-player-auto" sgf="sgf/problem.sgf"></div>
 
 </body>
 </html>

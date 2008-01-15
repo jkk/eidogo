@@ -155,7 +155,7 @@
     font-size: 13px;
     cursor: default;
 }
-.eidogo-player .search-button {
+.eidogo-player .search-button, .eidogo-player .score-est-button {
     margin: 0 0 0 5px;
     color: #800;
     font-size: 11px;
@@ -391,8 +391,8 @@
 	font-size: 12px;
 	font-weight: bold;
 	margin: 1px;
-	padding: 2px 0 1px 5px;
-	width: 12px;
+	padding: 2px 5px 1px 5px;
+	width: auto;
 	height: 14px;
 	cursor: pointer;
 	user-select: none;
