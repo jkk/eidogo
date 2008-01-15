@@ -219,18 +219,6 @@ eidogo.BoardRendererHtml.prototype = {
         eidogo.util.addEvent(this.domNode, "mousedown", this.handleMouseDown, this, true);
         eidogo.util.addEvent(this.domNode, "mouseup", this.handleMouseUp, this, true);
     },
-    handleHover: function(e) {
-        var xy = this.getXY(e);
-        this.player.handleBoardHover(xy[0], xy[1]);
-    },
-    handleMouseDown: function(e) {
-        var xy = this.getXY(e);
-        this.player.handleBoardMouseDown(xy[0], xy[1]);
-    },
-    handleMouseUp: function(e) {
-        var xy = this.getXY(e);
-        this.player.handleBoardMouseUp(xy[0], xy[1]);
-    },
     showRegion: function(bounds) {
         this.dom.searchRegion.style.top = (this.margin + this.pointHeight * bounds[0]) + "px";
         this.dom.searchRegion.style.left = (this.margin + this.pointWidth * bounds[1]) + "px";
@@ -240,21 +228,6 @@ eidogo.BoardRendererHtml.prototype = {
     },
     hideRegion: function() {
         eidogo.util.hide(this.dom.searchRegion);  
-    },
-    /**
-     *  Gets the board coordinates (0-18) for a mouse event
-    **/
-    getXY: function(e) {
-        var clickXY = eidogo.util.getElClickXY(e, this.domNode);
-        
-        var m = this.margin;
-        var pw = this.pointWidth;
-        var ph = this.pointHeight;
-        
-        var x = Math.round((clickXY[0] - m - (pw / 2)) / pw);
-        var y = Math.round((clickXY[1] - m - (ph / 2)) / ph);
-    
-        return [x, y];
     },
     clear: function() {
         this.domNode.innerHTML = "";
@@ -319,11 +292,122 @@ eidogo.BoardRendererHtml.prototype = {
             return div;
         }
         return null;
+    },
+    setCursor: function(cursor) {
+        this.domNode.style.cursor = cursor;
+    },
+    handleHover: function(e) {
+        var xy = this.getXY(e);
+        this.player.handleBoardHover(xy[0], xy[1]);
+    },
+    handleMouseDown: function(e) {
+        var xy = this.getXY(e);
+        this.player.handleBoardMouseDown(xy[0], xy[1]);
+    },
+    handleMouseUp: function(e) {
+        var xy = this.getXY(e);
+        this.player.handleBoardMouseUp(xy[0], xy[1]);
+    },
+    /**
+     *  Gets the board coordinates (0-18) for a mouse event
+    **/
+    getXY: function(e) {
+        var clickXY = eidogo.util.getElClickXY(e, this.domNode);
+        
+        var m = this.margin;
+        var pw = this.pointWidth;
+        var ph = this.pointHeight;
+        
+        var x = Math.round((clickXY[0] - m - (pw / 2)) / pw);
+        var y = Math.round((clickXY[1] - m - (ph / 2)) / ph);
+    
+        return [x, y];
     }
 }
 
 /**
- * @class heh
+ * Flash board renderer
+**/
+eidogo.BoardRendererFlash = function() {
+    this.init.apply(this, arguments);
+}
+eidogo.BoardRendererFlash.prototype = {
+    /**
+     * @constructor
+     * @param {HTMLElement} domContainer Where to put the board
+     */
+    init: function(domContainer, boardSize, player) {
+        if (!domContainer) {
+            throw "No DOM container";
+            return;
+        }
+        this.ready = false;
+        this.swf = null;
+        this.unrendered = [];
+        var swfId = domContainer.id + "-board";
+        var so = new SWFObject(eidogo.playerPath + "/swf/board.swf", swfId,
+            "421", "421", "8", "#665544");
+        so.addParam("allowScriptAccess", "sameDomain");
+        so.write(domContainer);
+        var elapsed = 0;
+        var initBoard = function() {
+            swf = eidogo.util.byId(swfId);
+            if (!swf || !swf.init) {
+                if (elapsed > 2000) {            
+                    throw "Error initializing board";
+                    return;
+                }
+                setTimeout(arguments.callee.bind(this), 10);
+                elapsed += 10;
+                return;
+            }
+            this.swf = swf;
+            this.swf.init(player.uniq, boardSize);
+            this.ready = true;
+        }.bind(this);
+        initBoard();
+    },
+    showRegion: function(bounds) {
+    },
+    hideRegion: function() {
+    },
+    clear: function() {
+        if (!this.swf) return;
+        this.swf.clear();
+    },
+    renderStone: function(pt, color) {
+        if (!this.swf) {
+            this.unrendered.push(['stone', pt, color]);
+            return;
+        }
+        for (var i = 0; i < this.unrendered.length; i++) {
+            if (this.unrendered[i][0] == "stone") {
+                this.swf.renderStone(this.unrendered[i][1], this.unrendered[i][2]);
+            }
+        }
+        this.unrendered = [];
+        this.swf.renderStone(pt, color);
+    },
+    renderMarker: function(pt, type) {
+        if (!type) return;
+        if (!this.swf) {
+            this.unrendered.push(['marker', pt, type]);
+            return;
+        }
+        for (var i = 0; i < this.unrendered.length; i++) {
+            if (this.unrendered[i][0] == "marker") {
+                this.swf.renderMarker(this.unrendered[i][1], this.unrendered[i][2]);
+            }
+        }
+        this.unrendered = [];
+        this.swf.renderMarker(pt, type);
+    },
+    setCursor: function(cursor) {
+    }
+}
+
+/**
+ * @class ASCII board renderer! Kinda broken.
  */
 eidogo.BoardRendererAscii = function(domNode, boardSize) {
     this.init(domNode, boardSize);

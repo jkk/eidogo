@@ -15,7 +15,7 @@
     
     var autoCfg = window.eidogoConfig || {};
     var scriptPath = eidogo.util.getPlayerPath();    
-    var path = (autoCfg.playerPath || scriptPath || 'player').replace(/\/$/);
+    var path = eidogo.playerPath = (autoCfg.playerPath || scriptPath || 'player').replace(/\/$/, "");
     
     var ua = navigator.userAgent.toLowerCase();
     var uav = (ua.match(/.+(?:rv|it|ra|ie)[\/: ]([\d.]+)/) || [])[1];

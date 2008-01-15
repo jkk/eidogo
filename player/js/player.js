@@ -31,7 +31,7 @@ eidogo.players = eidogo.players || {};
 // Allow function calls to particular Player instances (for board rendering etc)
 eidogo.delegate = function(pid, fn /*, args*/) {
     var player = eidogo.players[pid];
-    player[fn].call(player, Array.from(arguments).slice(2));
+    player[fn].apply(player, Array.from(arguments).slice(2));
 }
 
 /**
@@ -1372,7 +1372,7 @@ eidogo.Player.prototype = {
             hide(this.dom.searchButton);
             hide(this.dom.searchAlgo);
         }
-        this.board.renderer.domNode.style.cursor = cursor;
+        this.board.renderer.setCursor(cursor);
         this.mode = tool;
         this.dom.toolsSelect.value = tool;
     },
