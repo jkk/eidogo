@@ -331,6 +331,13 @@
 	-khtml-user-select: none;
 	-moz-user-select: none;
 }
+.eidogo-player .board-container.shrunk, .eidogo-player .board-container.shrunk .board-gutter {
+    width: auto;
+    height: auto;
+    padding: 0px !important;
+    margin: 0px !important;
+    background: none;
+}
 .eidogo-player .board-container.with-coords {
     background: #654 url(../images/board-bg-coords.png) no-repeat 5px 5px;
 }

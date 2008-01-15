@@ -6,7 +6,7 @@
  *
  * This file contains the meat of EidoGo.
  */
- 
+
 (function() {
 
 // shortcuts (local only to this file)
@@ -21,9 +21,8 @@ var t = eidogo.i18n,
     removeClass = eidogo.util.removeClass,
     show = eidogo.util.show,
     hide = eidogo.util.hide,
-    playerPath = eidogo.util.getPlayerPath(),
-    ua = navigator.userAgent.toLowerCase(),
-    isMoz = /mozilla/.test(ua) && !/(compatible|webkit)/.test(ua);
+    isMoz = eidogo.browser.moz,
+    playerPath = eidogo.util.getPlayerPath();
 
 // Keep track of all the player instances we've created
 eidogo.players = eidogo.players || {};
@@ -187,6 +186,16 @@ eidogo.Player.prototype = {
         // custom renderer?
         this.renderer = cfg.renderer || "html";
         
+        // crop settings
+        this.cropParams = null;
+        this.shrinkToFit = cfg.shrinkToFit;
+        if (this.shrinkToFit || cfg.cropWidth || cfg.cropHeight) {
+            this.cropParams = {};
+            this.cropParams.width = cfg.cropWidth;
+            this.cropParams.height = cfg.cropHeight;
+            this.cropParams.corner = cfg.cropCorner;
+        }
+        
         // set up the elements we'll use
         this.constructDom();
         
@@ -217,7 +226,6 @@ eidogo.Player.prototype = {
      * Resets settings that can change per game
     **/
     reset: function(cfg) {
-        
         this.gameName = "";
         
         // gameTree here is actually more like a Collection as described in the
@@ -274,8 +282,7 @@ eidogo.Player.prototype = {
         this.goingBack = false;
         
         // problem-solving mode: respond when the user plays a move
-        this.problemMode = typeof cfg.problemMode != "undefined" ?
-            cfg.problemMode : false;
+        this.problemMode = cfg.problemMode;
         this.problemColor = cfg.problemColor || "W";
     
         // user-changeable preferences
@@ -372,6 +379,7 @@ eidogo.Player.prototype = {
         var size = gameRoot.SZ;
         if (!this.board) {
             // first time
+            if (this.shrinkToFit) this.calcShrinkToFit();
             this.createBoard(size || 19);
             this.rules = new eidogo.Rules(this.board);
         }
@@ -413,7 +421,7 @@ eidogo.Player.prototype = {
             var rendererProto;
             if (this.renderer == "flash") rendererProto = eidogo.BoardRendererFlash;
             else rendererProto = eidogo.BoardRendererHtml;
-            var renderer = new rendererProto(this.dom.boardContainer, size, this);
+            var renderer = new rendererProto(this.dom.boardContainer, size, this, this.cropParams);
             this.board = new eidogo.Board(renderer, size);
         } catch (e) {
             if (e == "No DOM container") {
@@ -421,6 +429,16 @@ eidogo.Player.prototype = {
                 return;
             }
         }
+    },
+    
+    /**
+     * Calculates the crop area to use based on the widest distance between
+     * stones and markers in this game.
+    **/
+    calcShrinkToFit: function() {
+        this.cropParams.width = 12;
+        this.cropParams.height = 8;
+        this.cropParams.corner = "sw";
     },
 
     /**
@@ -1517,7 +1535,7 @@ eidogo.Player.prototype = {
                 info += this.getGameDescription(true);
             if (!this.prefs.showGameInfo)
                 info += this.dom.infoGame.innerHTML;
-            if (info.length)    
+            if (info.length && this.theme != "problem")
                 this.prependComment(info, "comment-info");
         }
         
@@ -1972,7 +1990,7 @@ eidogo.Player.prototype = {
         this.domLoading = document.createElement('div');
         this.domLoading.id = "eidogo-loading-" + this.uniq;
         this.domLoading.className = "eidogo-loading" +
-            (this.theme ? " theme-compact" : "");
+            (this.theme ? " theme-" + this.theme : "");
         this.domLoading.innerHTML = msg;
         this.dom.player.appendChild(this.domLoading);
     },

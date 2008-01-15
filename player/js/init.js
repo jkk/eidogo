@@ -17,13 +17,9 @@
     var scriptPath = eidogo.util.getPlayerPath();    
     var path = eidogo.playerPath = (autoCfg.playerPath || scriptPath || 'player').replace(/\/$/, "");
     
-    var ua = navigator.userAgent.toLowerCase();
-    var uav = (ua.match(/.+(?:rv|it|ra|ie)[\/: ]([\d.]+)/) || [])[1];
-    var isIE = /msie/.test(ua) && !/opera/.test(ua);
-    
     if (!autoCfg.skipCss) {
         eidogo.util.addStyleSheet(path + '/css/player.css');
-        if (isIE && parseInt(uav, 10) <= 6) {
+        if (eidogo.browser.ie && parseInt(eidogo.browser.ver, 10) <= 6) {
             eidogo.util.addStyleSheet(path + '/css/player-ie6.css');
         }
     }

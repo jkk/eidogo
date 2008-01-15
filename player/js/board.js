@@ -178,7 +178,7 @@ eidogo.BoardRendererHtml.prototype = {
      * @constructor
      * @param {HTMLElement} domContainer Where to put the board
      */
-    init: function(domContainer, boardSize, player) {
+    init: function(domContainer, boardSize, player, crop) {
         if (!domContainer) {
             throw "No DOM container";
             return;
@@ -190,8 +190,11 @@ eidogo.BoardRendererHtml.prototype = {
         domContainer.appendChild(domGutter);
         var domBoard = document.createElement('div');
         domBoard.className = "board size" + this.boardSize;
+        domBoard.style.position = (crop && eidogo.browser.ie ? "static" : "relative");
         domGutter.appendChild(domBoard);
         this.domNode = domBoard;
+        this.domGutter = domGutter;
+        this.domContainer = domContainer;
         this.player = player;
         this.uniq = domContainer.id + "-";
         this.renderCache = {
@@ -208,6 +211,22 @@ eidogo.BoardRendererHtml.prototype = {
         this.renderMarker({x:0,y:0}, "current"); // just for image caching
         this.clear();
         this.margin = (this.domNode.offsetWidth - (this.boardSize * this.pointWidth)) / 2;
+        
+        // needed to accommodate IE's broken layout engine
+        this.scrollX = 0;
+        this.scrollY = 0;
+        
+        if (crop) {
+            this.crop(crop);
+            if (eidogo.browser.ie) {
+                var parent = this.domNode.parentNode;
+                while (parent && parent.tagName && !/^body|html$/i.test(parent.tagName)) {
+                    this.scrollX += parent.scrollLeft;
+                    this.scrollY += parent.scrollTop;
+                    parent = parent.parentNode;
+                }
+            }
+        }
         
         // add the search region selection box for later use
         this.dom = {};
@@ -242,8 +261,10 @@ eidogo.BoardRendererHtml.prototype = {
             var div = document.createElement("div");
             div.id = this.uniq + "stone-" + pt.x + "-" + pt.y;
             div.className = "point stone " + color;
-            div.style.left = (pt.x * this.pointWidth + this.margin) + "px";
-            div.style.top = (pt.y * this.pointHeight + this.margin) + "px";
+            try {
+                div.style.left = (pt.x * this.pointWidth + this.margin - this.scrollX) + "px";
+                div.style.top = (pt.y * this.pointHeight + this.margin - this.scrollY) + "px";
+            } catch (e) {}
             this.domNode.appendChild(div);
             return div;
         }
@@ -286,8 +307,10 @@ eidogo.BoardRendererHtml.prototype = {
             var div = document.createElement("div");
             div.id = this.uniq + "marker-" + pt.x + "-" + pt.y;
             div.className = "point marker " + type;
-            div.style.left = (pt.x * this.pointWidth + this.margin) + "px";
-            div.style.top = (pt.y * this.pointHeight + this.margin) + "px";
+            try {
+                div.style.left = (pt.x * this.pointWidth + this.margin - this.scrollX) + "px";
+                div.style.top = (pt.y * this.pointHeight + this.margin - this.scrollY) + "px";
+            } catch (e) {}
             div.appendChild(document.createTextNode(text));
             this.domNode.appendChild(div);
             return div;
@@ -323,6 +346,17 @@ eidogo.BoardRendererHtml.prototype = {
         var y = Math.round((clickXY[1] - m - (ph / 2)) / ph);
     
         return [x, y];
+    },
+    crop: function(crop) {
+        eidogo.util.addClass(this.domContainer, "shrunk");
+        this.domGutter.style.overflow = "hidden";
+        var width = crop.width * this.pointWidth + this.margin;
+        var height = crop.height * this.pointHeight + this.margin;
+        this.domGutter.style.width = width + "px";
+        this.domGutter.style.height = height + "px";
+        this.player.dom.player.style.width = width + "px";
+        this.domGutter.scrollTop = (crop.corner == "se" || crop.corner == "sw" ? "1000" : "0");
+        this.domGutter.scrollLeft = (crop.corner == "se" || crop.corner == "ne" ? "1000" : "0");
     }
 }
 
@@ -337,7 +371,7 @@ eidogo.BoardRendererFlash.prototype = {
      * @constructor
      * @param {HTMLElement} domContainer Where to put the board
      */
-    init: function(domContainer, boardSize, player) {
+    init: function(domContainer, boardSize, player, crop) {
         if (!domContainer) {
             throw "No DOM container";
             return;
@@ -404,6 +438,8 @@ eidogo.BoardRendererFlash.prototype = {
         this.swf.renderMarker(pt, type);
     },
     setCursor: function(cursor) {
+    },
+    crop: function() {
     }
 }
 
