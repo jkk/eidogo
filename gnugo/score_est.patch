@@ -1,0 +1,70 @@
+Index: interface/play_solo.c
+===================================================================
+RCS file: /sources/gnugo/gnugo/interface/play_solo.c,v
+retrieving revision 1.46
+diff -u -r1.46 play_solo.c
+--- interface/play_solo.c	24 Oct 2007 01:56:04 -0000	1.46
++++ interface/play_solo.c	15 Jan 2008 07:22:14 -0000
+@@ -32,6 +32,8 @@
+ 
+ #include "liberty.h" /* to get to the stats */
+ 
++#include "influence.h"
++
+ #include "sgftree.h"
+ #include "random.h"
+ #include "gg_utils.h"
+@@ -190,7 +192,7 @@
+   int move;
+   float move_value;
+   char *tempc = NULL;
+-  char text[250];
++  char text[4096];
+   char winner;
+   int next;
+   int pass = 0;
+@@ -198,6 +200,11 @@
+   float score;
+   SGFTree local_tree;
+   SGFTree *score_tree = tree;
++  signed char safe_stones[BOARDMAX];
++  float strength[BOARDMAX];
++  int ii;
++  struct influence_data move_influence;
++  char coord[3];
+   
+   /* Default scoring method is ESTIMATE since it's fastest. */
+   method = ESTIMATE;
+@@ -274,7 +281,31 @@
+   }
+   fputs(text, stdout);
+   sgftreeAddComment(score_tree, text);
+-
++  
++  /* Find points of territory for white */
++  set_strength_data(WHITE, safe_stones, strength);
++  compute_influence(EMPTY, safe_stones, strength, &move_influence,
++        		    NO_MOVE, "White territory estimate");
++  for (ii = BOARDMIN; ii < BOARDMAX; ii++)
++    if (ON_BOARD(ii))
++      if (move_influence.territory_value[ii] > 0.5) {
++        sprintf(coord, "%c%c", J(ii)+'a', I(ii)+'a');
++        sgfAddProperty(sgftreeNodeCheck(score_tree), "TW", coord);
++        printf("TW:%s ", coord);
++      }
++  
++  /* ...and for black */
++  set_strength_data(BLACK, safe_stones, strength);
++  compute_influence(EMPTY, safe_stones, strength, &move_influence,
++        		    NO_MOVE, "Black territory estimate");
++  for (ii = BOARDMIN; ii < BOARDMAX; ii++)
++    if (ON_BOARD(ii))
++      if (move_influence.territory_value[ii] < -0.5) {
++        sprintf(coord, "%c%c", J(ii)+'a', I(ii)+'a');
++        sgfAddProperty(sgftreeNodeCheck(score_tree), "TB", coord);
++        printf("TB:%s ", coord);
++      }
++  
+   /* For the finish and aftermath methods we compare the score with
+    * what's stored in the game record.
+    *
