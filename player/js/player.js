@@ -531,7 +531,8 @@ eidogo.Player.prototype = {
     },
     
     /**
-     * Use GNU Go to estimate the score
+     * Use GNU Go to estimate the score.
+     * Thanks to Sorin Gherman for the idea and for getting this started!
     **/
     fetchScoreEstimate: function() {
         this.nowLoading(t['gnugo thinking']);
