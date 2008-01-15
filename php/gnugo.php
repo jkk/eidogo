@@ -1,18 +1,27 @@
 <?php
 
 if ($_SERVER['HTTP_HOST'] == "eidogo.com") {
-    define("PATH_GNUGO", "/usr/games/gnugo");
+    define("PATH_GNUGO", "/var/www/eidogo.com/gnugo/interface/gnugo");
 } else {
-    define("PATH_GNUGO", "/opt/local/bin/gnugo");
+    define("PATH_GNUGO", "/Users/tin/Sites/eidogo/gnugo/gnugo/interface/gnugo");
 }
 
 $sgf = $_REQUEST['sgf'];
-$color = $_REQUEST['color'] == "W" ? "W" : "B";
+$color = $_REQUEST['move'] == "W" ? "W" : "B";
 $size = (int)$_REQUEST['size']; // needed for coordinate conversion
+$komi = (float)($_REQUEST['komi'] ? $_REQUEST['komi'] : 0);
+$mn = (int)$_REQUEST['mn'];
 
 // give gnugo our current game state
 $sgf_file = tempnam("/tmp", "eidogo");
 file_put_contents($sgf_file, $sgf);
+
+if ($_REQUEST['move'] == "est") {
+    $result= shell_exec(PATH_GNUGO . " --score --komi $komi --infile $sgf_file --until $mn");
+    unlink($sgf_file);
+    echo $result;
+    exit;
+}
 
 // tell gnugo to generate a move
 $command_file = tempnam("/tmp", "eidogo");

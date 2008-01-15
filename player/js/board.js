@@ -185,7 +185,8 @@ eidogo.BoardRendererHtml.prototype = {
         }
         this.boardSize = boardSize || 19;
         var domGutter = document.createElement('div');
-        domGutter.className = "board-gutter with-coords";
+        domGutter.className = "board-gutter" + (this.boardSize == 19 ?
+                " with-coords" : "");
         domContainer.appendChild(domGutter);
         var domBoard = document.createElement('div');
         domBoard.className = "board size" + this.boardSize;

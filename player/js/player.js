@@ -85,6 +85,9 @@ eidogo.Player.prototype = {
         // url to handle downloads
         this.downloadUrl = cfg.downloadUrl;
         
+        // score est
+        this.scoreEstUrl = cfg.scoreEstUrl;
+        
         // Allow outside scripts to hook into Player events. Format:
         //      hookName:   hookHandler
         // Available hooks:
@@ -230,7 +233,7 @@ eidogo.Player.prototype = {
         // gnugo/computer opponent
         this.opponentUrl = null;
         this.opponentColor = null;
-    
+        
         // these are populated after load
         this.board = null;
         this.rules = null;
@@ -360,6 +363,7 @@ eidogo.Player.prototype = {
         if (!this.board) {
             // first time
             this.createBoard(size || 19);
+            this.rules = new eidogo.Rules(this.board);
         }
         this.unsavedChanges = false;
         this.resetCursor(true);
@@ -404,14 +408,6 @@ eidogo.Player.prototype = {
                 return;
             }
         }
-    
-        if (size != 19) {
-            removeClass(this.dom.boardContainer, "with-coords");
-        } else {
-            addClass(this.dom.boardContainer, "with-coords");
-        }
-    
-        this.rules = new eidogo.Rules(this.board);  
     },
 
     /**
@@ -526,6 +522,36 @@ eidogo.Player.prototype = {
         };
         
         ajax('post', this.opponentUrl, params, success, failure, this, 45000);  
+    },
+    
+    /**
+     * Use GNU Go to estimate the score
+    **/
+    fetchScoreEstimate: function() {
+        this.nowLoading(t['gnugo thinking']);
+        var success = function(req) {
+            this.doneLoading();
+            var result = req.responseText.split("\n");
+            var prop, props = result[1].split(" ");
+            for (var i = 0; i < props.length; i++) {
+                prop = props[i].split(":");
+                if (prop[1]) this.addMarker(prop[1], prop[0]);
+            }
+            this.board.render();
+            this.prependComment(result[0]);
+        }
+        var failure = function(req) {
+            this.croak(t['error retrieving']);
+        }
+        var info = this.gameTree.trees.first().nodes.first();
+        var params = {
+            sgf: this.gameTree.trees[0].toSgf(),
+            move: 'est',
+            size: info.SZ,
+            komi: info.KM,
+            mn: this.moveNumber + 1
+        };
+        ajax('post', this.scoreEstUrl, params, success, failure, this, 45000);
     },
 
     /**
@@ -1349,6 +1375,7 @@ eidogo.Player.prototype = {
 
     selectTool: function(tool) {
         var cursor;
+        hide(this.dom.scoreEst);
         if (tool == "region") {
             cursor = "crosshair";
         } else if (tool == "comment") {
@@ -1371,6 +1398,7 @@ eidogo.Player.prototype = {
             this.hideRegion();
             hide(this.dom.searchButton);
             hide(this.dom.searchAlgo);
+            if (this.searchUrl) show(this.dom.scoreEst, "inline");
         }
         this.board.renderer.setCursor(cursor);
         this.mode = tool;
@@ -1493,7 +1521,7 @@ eidogo.Player.prototype = {
         } else if (coord == "resign") {
             this.prependComment((color == this.board.WHITE ?
                 t['white'] : t['black']) + " " + t['resigned'], "comment-resign");
-        } else {
+        } else if (coord && coord != "tt") {
             this.board.addStone(pt, color);
             this.rules.apply(pt, color);
             if (this.prefs.markCurrent && !noRender) {
@@ -1658,11 +1686,12 @@ eidogo.Player.prototype = {
                     <option value='number'>" + t['number'] + "</option>\
                     <option value='dim'>" + t['dim'] + "</option>\
                 </select>\
+                <input type='button' id='score-est' class='score-est-button' value='" + t['score est'] + "' />\
                 <select id='search-algo' class='search-algo'>\
                     <option value='corner'>" + t['search corner'] + "</option>\
                     <option value='center'>" + t['search center'] + "</option>\
                 </select>\
-                <input type='button' id='search-button' class='search-button' value='" + t['search'] + "'>\
+                <input type='button' id='search-button' class='search-button' value='" + t['search'] + "' />\
             </div>\
             <div id='comments' class='comments'></div>\
             <div id='comments-edit' class='comments-edit'>\
@@ -1744,6 +1773,7 @@ eidogo.Player.prototype = {
          ['controlForward',   'forward'],
          ['controlLast',      'last'],
          ['controlPass',      'pass'],
+         ['scoreEst',         'fetchScoreEstimate'],
          ['searchButton',     'searchRegion'],
          ['searchResults',    'loadSearchResult'],
          ['searchClose',      'closeSearch'],

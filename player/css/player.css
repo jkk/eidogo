@@ -182,7 +182,7 @@
     color: #a88;
     cursor: default;
 }
-.eidogo-player .search-button {
+.eidogo-player .search-button, .eidogo-player .score-est-button {
     margin: 0 0 0 5px;
     color: #800;
     font-size: 11px;

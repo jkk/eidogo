@@ -620,7 +620,7 @@ return _47;
 })();
 
 eidogo=window.eidogo||{};
-eidogo.i18n=eidogo.i18n||{"move":"Move","loading":"Loading","passed":"passed","resigned":"resigned","variations":"Variations","no variations":"none","tool":"Tool","play":"Play","region":"Select Region","add_b":"Black Stone","add_w":"White Stone","edit comment":"Edit Comment","done":"Done","triangle":"Triangle","square":"Square","circle":"Circle","x":"X","letter":"Letter","number":"Number","dim":"Dim","score":"Score","search":"Search","search corner":"Corner Search","search center":"Center Search","region info":"Click and drag to select a region.","two stones":"Please select at least two stones to search for.","two edges":"For corner searches, your selection must touch two adjacent edges of the board.","no search url":"No search URL provided.","close search":"close search","matches found":"matches found.","save to server":"Save to Server","download sgf":"Download SGF","next game":"Next Game","previous game":"Previous Game","white":"White","white rank":"White rank","white team":"White team","black":"Black","black rank":"Black rank","black team":"Black team","captures":"captures","time left":"time left","you":"You","game":"Game","handicap":"Handicap","komi":"Komi","result":"Result","date":"Date","info":"Info","place":"Place","event":"Event","round":"Round","overtime":"Overtime","opening":"Openning","ruleset":"Ruleset","annotator":"Annotator","copyright":"Copyright","source":"Source","time limit":"Time limit","transcriber":"Transcriber","created with":"Created with","january":"January","february":"February","march":"March","april":"April","may":"May","june":"June","july":"July","august":"August","september":"September","october":"October","november":"November","december":"December","gw":"Good for White","vgw":"Very good for White","gb":"Good for Black","vgb":"Very good for Black","dm":"Even position","dmj":"Even position (joseki)","uc":"Unclear position","te":"Tesuji","bm":"Bad move","vbm":"Very bad move","do":"Doubtful move","it":"Interesting move","black to play":"Black to play","white to play":"White to play","ho":"Hotspot","dom error":"Error finding DOM container","error retrieving":"There was a problem retrieving the game data.","invalid data":"Received invalid game data","error board":"Error loading board container","unsaved changes":"There are unsaved changes in this game. You must save before you can permalink or download.","bad path":"Don't know how to get to path: ","gnugo thinking":"GNU Go is thinking..."};
+eidogo.i18n=eidogo.i18n||{"move":"Move","loading":"Loading","passed":"passed","resigned":"resigned","variations":"Variations","no variations":"none","tool":"Tool","play":"Play","region":"Select Region","add_b":"Black Stone","add_w":"White Stone","edit comment":"Edit Comment","done":"Done","triangle":"Triangle","square":"Square","circle":"Circle","x":"X","letter":"Letter","number":"Number","dim":"Dim","score":"Score","score est":"Score Estimate","search":"Search","search corner":"Corner Search","search center":"Center Search","region info":"Click and drag to select a region.","two stones":"Please select at least two stones to search for.","two edges":"For corner searches, your selection must touch two adjacent edges of the board.","no search url":"No search URL provided.","close search":"close search","matches found":"matches found.","save to server":"Save to Server","download sgf":"Download SGF","next game":"Next Game","previous game":"Previous Game","white":"White","white rank":"White rank","white team":"White team","black":"Black","black rank":"Black rank","black team":"Black team","captures":"captures","time left":"time left","you":"You","game":"Game","handicap":"Handicap","komi":"Komi","result":"Result","date":"Date","info":"Info","place":"Place","event":"Event","round":"Round","overtime":"Overtime","opening":"Openning","ruleset":"Ruleset","annotator":"Annotator","copyright":"Copyright","source":"Source","time limit":"Time limit","transcriber":"Transcriber","created with":"Created with","january":"January","february":"February","march":"March","april":"April","may":"May","june":"June","july":"July","august":"August","september":"September","october":"October","november":"November","december":"December","gw":"Good for White","vgw":"Very good for White","gb":"Good for Black","vgb":"Very good for Black","dm":"Even position","dmj":"Even position (joseki)","uc":"Unclear position","te":"Tesuji","bm":"Bad move","vbm":"Very bad move","do":"Doubtful move","it":"Interesting move","black to play":"Black to play","white to play":"White to play","ho":"Hotspot","dom error":"Error finding DOM container","error retrieving":"There was a problem retrieving the game data.","invalid data":"Received invalid game data","error board":"Error loading board container","unsaved changes":"There are unsaved changes in this game. You must save before you can permalink or download.","bad path":"Don't know how to get to path: ","gnugo thinking":"GNU Go is thinking..."};
 
 eidogo.gameTreeIdCounter=15000;
 eidogo.gameNodeIdCounter=15000;
@@ -1087,7 +1087,7 @@ return;
 }
 this.boardSize=_20||19;
 var _22=document.createElement("div");
-_22.className="board-gutter with-coords";
+_22.className="board-gutter"+(this.boardSize==19?" with-coords":"");
 _1f.appendChild(_22);
 var _23=document.createElement("div");
 _23.className="board size"+this.boardSize;
@@ -1392,6 +1392,7 @@ this.searchUrl=cfg.searchUrl;
 this.showingSearch=false;
 this.saveUrl=cfg.saveUrl;
 this.downloadUrl=cfg.downloadUrl;
+this.scoreEstUrl=cfg.scoreEstUrl;
 this.hooks=cfg.hooks||{};
 this.permalinkable=!!this.hooks.setPermalink;
 this.propertyHandlers={W:this.playMove,B:this.playMove,KO:this.playMove,MN:this.setMoveNumber,AW:this.addStone,AB:this.addStone,AE:this.addStone,CR:this.addMarker,LB:this.addMarker,TR:this.addMarker,MA:this.addMarker,SQ:this.addMarker,TW:this.addMarker,TB:this.addMarker,DD:this.addMarker,PL:this.setColor,C:this.showComments,N:this.showAnnotation,GB:this.showAnnotation,GW:this.showAnnotation,DM:this.showAnnotation,HO:this.showAnnotation,UC:this.showAnnotation,V:this.showAnnotation,BM:this.showAnnotation,DO:this.showAnnotation,IT:this.showAnnotation,TE:this.showAnnotation,BL:this.showTime,OB:this.showTime,WL:this.showTime,OW:this.showTime};
@@ -1500,6 +1501,7 @@ var _1e=_1d.trees.first().nodes.first();
 var _1f=_1e.SZ;
 if(!this.board){
 this.createBoard(_1f||19);
+this.rules=new eidogo.Rules(this.board);
 }
 this.unsavedChanges=false;
 this.resetCursor(true);
@@ -1538,12 +1540,6 @@ this.croak(t["error board"]);
 return;
 }
 }
-if(_21!=19){
-_9(this.dom.boardContainer,"with-coords");
-}else{
-_8(this.dom.boardContainer,"with-coords");
-}
-this.rules=new eidogo.Rules(this.board);
 },load:function(_23,_24){
 if(!_24){
 _24=new eidogo.GameTree();
@@ -1615,45 +1611,66 @@ this.croak(t["error retrieving"]);
 };
 var _37={sgf:this.gameTree.trees[0].toSgf(),move:this.currentColor,size:this.gameTree.trees.first().nodes.first().SZ};
 _3("post",this.opponentUrl,_37,_33,_35,this,45000);
-},goTo:function(_38,_39){
-_39=typeof _39!="undefined"?_39:true;
-var _3a;
-var _3b;
-if(_38 instanceof Array){
-if(!_38.length){
+},fetchScoreEstimate:function(){
+this.nowLoading(t["gnugo thinking"]);
+var _38=function(req){
+this.doneLoading();
+var _3a=req.responseText.split("\n");
+var _3b,_3c=_3a[1].split(" ");
+for(var i=0;i<_3c.length;i++){
+_3b=_3c[i].split(":");
+if(_3b[1]){
+this.addMarker(_3b[1],_3b[0]);
+}
+}
+this.board.render();
+this.prependComment(_3a[0]);
+};
+var _3e=function(req){
+this.croak(t["error retrieving"]);
+};
+var _40=this.gameTree.trees.first().nodes.first();
+var _41={sgf:this.gameTree.trees[0].toSgf(),move:"est",size:_40.SZ,komi:_40.KM,mn:this.moveNumber+1};
+_3("post",this.scoreEstUrl,_41,_38,_3e,this,45000);
+},goTo:function(_42,_43){
+_43=typeof _43!="undefined"?_43:true;
+var _44;
+var _45;
+if(_42 instanceof Array){
+if(!_42.length){
 return;
 }
-if(_39){
+if(_43){
 this.resetCursor(true);
 }
-while(_38.length){
-_3a=_38[0];
-if(isNaN(parseInt(_3a,10))){
-_3b=this.getVariations(true);
-if(!_3b.length||_3b[0].move==null){
+while(_42.length){
+_44=_42[0];
+if(isNaN(parseInt(_44,10))){
+_45=this.getVariations(true);
+if(!_45.length||_45[0].move==null){
 this.variation(null,true);
 if(this.progressiveLoads){
-this.loadPath.push(_3a);
+this.loadPath.push(_44);
 return;
 }
 }
-for(var i=0;i<_3b.length;i++){
-if(_3b[i].move==_3a){
-this.variation(_3b[i].treeNum,true);
+for(var i=0;i<_45.length;i++){
+if(_45[i].move==_44){
+this.variation(_45[i].treeNum,true);
 break;
 }
 }
-_38.shift();
+_42.shift();
 }else{
-_3a=parseInt(_38.shift(),10);
-if(_38.length==0){
-for(var i=0;i<_3a;i++){
+_44=parseInt(_42.shift(),10);
+if(_42.length==0){
+for(var i=0;i<_44;i++){
 this.variation(null,true);
 }
 }else{
-if(_38.length){
-this.variation(_3a,true);
-if(_38.length!=1){
+if(_42.length){
+this.variation(_44,true);
+if(_42.length!=1){
 while(this.cursor.nextNode()){
 this.execNode(true,true);
 }
@@ -1667,31 +1684,31 @@ return;
 }
 this.refresh();
 }else{
-if(!isNaN(parseInt(_38,10))){
-var _3d=parseInt(_38,10);
-if(_39){
+if(!isNaN(parseInt(_42,10))){
+var _47=parseInt(_42,10);
+if(_43){
 this.resetCursor(true);
-_3d++;
+_47++;
 }
-for(var i=0;i<_3d;i++){
+for(var i=0;i<_47;i++){
 this.variation(null,true);
 }
 this.refresh();
 }else{
-alert(t["bad path"]+" "+_38);
+alert(t["bad path"]+" "+_42);
 }
 }
-},resetCursor:function(_3e,_3f){
+},resetCursor:function(_48,_49){
 this.board.reset();
 this.currentColor="B";
 this.moveNumber=0;
-if(_3f){
+if(_49){
 this.cursor.node=this.gameTree.trees.first().nodes.first();
 }else{
 this.cursor.node=this.gameTree.nodes.first();
 }
-this.refresh(_3e);
-},refresh:function(_40){
+this.refresh(_48);
+},refresh:function(_4a){
 if(this.progressiveLoads){
 var me=this;
 setTimeout(function(){
@@ -1704,10 +1721,10 @@ if(this.moveNumber<0){
 this.moveNumber=0;
 }
 this.board.revert(1);
-this.execNode(_40);
-},variation:function(_42,_43){
-if(this.cursor.next(_42)){
-this.execNode(_43);
+this.execNode(_4a);
+},variation:function(_4c,_4d){
+if(this.cursor.next(_4c)){
+this.execNode(_4d);
 this.resetLastLabels();
 if(this.progressiveLoads){
 return false;
@@ -1715,28 +1732,28 @@ return false;
 return true;
 }
 return false;
-},execNode:function(_44,_45){
-if(!_45&&this.progressiveLoads){
+},execNode:function(_4e,_4f){
+if(!_4f&&this.progressiveLoads){
 var me=this;
 setTimeout(function(){
-me.execNode.call(me,_44);
+me.execNode.call(me,_4e);
 },10);
 return;
 }
-if(!_44){
+if(!_4e){
 this.dom.comments.innerHTML="";
 this.board.clearMarkers();
 }
 if(this.moveNumber<1){
 this.currentColor="B";
 }
-var _47=this.cursor.node.getProperties();
-for(var _48 in _47){
-if(this.propertyHandlers[_48]){
-(this.propertyHandlers[_48]).apply(this,[this.cursor.node[_48],_48,_44]);
+var _51=this.cursor.node.getProperties();
+for(var _52 in _51){
+if(this.propertyHandlers[_52]){
+(this.propertyHandlers[_52]).apply(this,[this.cursor.node[_52],_52,_4e]);
 }
 }
-if(_44){
+if(_4e){
 this.board.commit();
 }else{
 if(this.opponentUrl&&this.opponentColor==this.currentColor&&this.moveNumber==this.totalMoves){
@@ -1747,40 +1764,40 @@ this.updateControls();
 this.board.commit();
 this.board.render();
 }
-if(!_45&&this.progressiveUrl&&!this.cursor.node.parent.cached){
+if(!_4f&&this.progressiveUrl&&!this.cursor.node.parent.cached){
 this.nowLoading();
 this.progressiveLoads++;
 this.remoteLoad(this.progressiveUrl+"?id="+this.cursor.node.parent.id,this.cursor.node.parent);
 }
 },findVariations:function(){
 this.variations=this.getVariations(this.prefs.markNext);
-},getVariations:function(_49){
-var _4a=[];
+},getVariations:function(_53){
+var _54=[];
 if(!this.cursor.node){
-return _4a;
+return _54;
 }
-if(_49&&this.cursor.node.nextSibling!=null){
-_4a.push({move:this.cursor.node.nextSibling.getMove(),treeNum:null});
+if(_53&&this.cursor.node.nextSibling!=null){
+_54.push({move:this.cursor.node.nextSibling.getMove(),treeNum:null});
 }
 if(this.cursor.node.nextSibling==null&&this.cursor.node.parent&&this.cursor.node.parent.trees.length){
-var _4b=this.cursor.node.parent.trees;
-for(var i=0;i<_4b.length;i++){
-_4a.push({move:_4b[i].nodes.first().getMove(),treeNum:i});
+var _55=this.cursor.node.parent.trees;
+for(var i=0;i<_55.length;i++){
+_54.push({move:_55[i].nodes.first().getMove(),treeNum:i});
 }
 }
-return _4a;
-},back:function(e,obj,_4f){
+return _54;
+},back:function(e,obj,_59){
 if(this.cursor.previous()){
 this.moveNumber--;
 if(this.moveNumber<0){
 this.moveNumber=0;
 }
 this.board.revert(1);
-this.refresh(_4f);
+this.refresh(_59);
 this.resetLastLabels();
 }
-},forward:function(e,obj,_52){
-this.variation(null,_52);
+},forward:function(e,obj,_5c){
+this.variation(null,_5c);
 },first:function(){
 if(!this.cursor.hasPrevious()){
 return;
@@ -1845,11 +1862,11 @@ if(this.domLoading){
 return;
 }
 this.mouseDown=false;
-var _5d=this.pointToSgfCoord({x:x,y:y});
+var _67=this.pointToSgfCoord({x:x,y:y});
 if(this.mode=="play"){
 for(var i=0;i<this.variations.length;i++){
-var _5f=this.sgfCoordToPoint(this.variations[i].move);
-if(_5f.x==x&&_5f.y==y){
+var _69=this.sgfCoordToPoint(this.variations[i].move);
+if(_69.x==x&&_69.y==y){
 this.variation(this.variations[i].treeNum);
 _7(e);
 return;
@@ -1858,12 +1875,12 @@ return;
 if(!this.rules.check({x:x,y:y},this.currentColor)){
 return;
 }
-if(_5d){
-var _60=this.cursor.getNextMoves();
-if(_60&&_5d in _60){
-this.variation(_60[_5d]);
+if(_67){
+var _6a=this.cursor.getNextMoves();
+if(_6a&&_67 in _6a){
+this.variation(_6a[_67]);
 }else{
-this.createMove(_5d);
+this.createMove(_67);
 }
 }
 }else{
@@ -1884,48 +1901,48 @@ _a(this.dom.searchButton,"inline");
 _7(e);
 }
 }else{
-var _61;
-var _62=this.board.getStone({x:x,y:y});
+var _6b;
+var _6c=this.board.getStone({x:x,y:y});
 if(this.mode=="add_b"||this.mode=="add_w"){
 this.cursor.node.emptyPoint(this.pointToSgfCoord({x:x,y:y}));
-if(_62!=this.board.BLACK&&this.mode=="add_b"){
-_61="AB";
+if(_6c!=this.board.BLACK&&this.mode=="add_b"){
+_6b="AB";
 }else{
-if(_62!=this.board.WHITE&&this.mode=="add_w"){
-_61="AW";
+if(_6c!=this.board.WHITE&&this.mode=="add_w"){
+_6b="AW";
 }else{
-_61="AE";
+_6b="AE";
 }
 }
 }else{
 switch(this.mode){
 case "tr":
-_61="TR";
+_6b="TR";
 break;
 case "sq":
-_61="SQ";
+_6b="SQ";
 break;
 case "cr":
-_61="CR";
+_6b="CR";
 break;
 case "x":
-_61="MA";
+_6b="MA";
 break;
 case "dim":
-_61="DD";
+_6b="DD";
 break;
 case "number":
-_61="LB";
-_5d=_5d+":"+this.labelLastNumber;
+_6b="LB";
+_67=_67+":"+this.labelLastNumber;
 this.labelLastNumber++;
 break;
 case "letter":
-_61="LB";
-_5d=_5d+":"+this.labelLastLetter;
+_6b="LB";
+_67=_67+":"+this.labelLastLetter;
 this.labelLastLetter=String.fromCharCode(this.labelLastLetter.charCodeAt(0)+1);
 }
 }
-this.cursor.node.pushProperty(_61,_5d);
+this.cursor.node.pushProperty(_6b,_67);
 this.refresh();
 }
 }
@@ -1940,12 +1957,12 @@ _a(this.dom.searchAlgo,"inline");
 _a(this.dom.searchButton,"inline");
 }
 return true;
-},boundsCheck:function(x,y,_66){
-if(_66.length==2){
-_66[3]=_66[2]=_66[1];
-_66[1]=_66[0];
+},boundsCheck:function(x,y,_70){
+if(_70.length==2){
+_70[3]=_70[2]=_70[1];
+_70[1]=_70[0];
 }
-return (x>=_66[0]&&y>=_66[1]&&x<=_66[2]&&y<=_66[3]);
+return (x>=_70[0]&&y>=_70[1]&&x<=_70[2]&&y<=_70[3]);
 },getRegionBounds:function(){
 var l=this.regionLeft;
 var w=this.regionRight-this.regionLeft;
@@ -1961,13 +1978,13 @@ h=-h+1;
 }
 return [t,l,w,h];
 },showRegion:function(){
-var _6b=this.getRegionBounds();
-this.board.renderer.showRegion(_6b);
+var _75=this.getRegionBounds();
+this.board.renderer.showRegion(_75);
 },hideRegion:function(){
 this.board.renderer.hideRegion();
 },loadSearch:function(q,dim,p,a){
-var _70={nodes:[],trees:[{nodes:[{SZ:this.board.boardSize}],trees:[]}]};
-this.load(_70);
+var _7a={nodes:[],trees:[{nodes:[{SZ:this.board.boardSize}],trees:[]}]};
+this.load(_7a);
 a=a||"corner";
 this.dom.searchAlgo.value=a;
 p=this.uncompressPattern(p);
@@ -2039,45 +2056,45 @@ _b(this.dom.searchContainer);
 this.prependComment(t["no search url"]);
 return;
 }
-var _7b=this.dom.searchAlgo.value;
-var _7c=this.getRegionBounds();
-var _7d=this.board.getRegion(_7c[0],_7c[1],_7c[2],_7c[3]);
-var _7e=_7d.join("").replace(new RegExp(this.board.EMPTY,"g"),".").replace(new RegExp(this.board.BLACK,"g"),"x").replace(new RegExp(this.board.WHITE,"g"),"o");
-var _7f=/^\.*$/.test(_7e);
-var _80=/^\.*O\.*$/.test(_7e);
-var _81=/^\.*X\.*$/.test(_7e);
-if(_7f||_80||_81){
+var _85=this.dom.searchAlgo.value;
+var _86=this.getRegionBounds();
+var _87=this.board.getRegion(_86[0],_86[1],_86[2],_86[3]);
+var _88=_87.join("").replace(new RegExp(this.board.EMPTY,"g"),".").replace(new RegExp(this.board.BLACK,"g"),"x").replace(new RegExp(this.board.WHITE,"g"),"o");
+var _89=/^\.*$/.test(_88);
+var _8a=/^\.*O\.*$/.test(_88);
+var _8b=/^\.*X\.*$/.test(_88);
+if(_89||_8a||_8b){
 this.searching=false;
 _a(this.dom.comments);
 _b(this.dom.searchContainer);
 this.prependComment(t["two stones"]);
 return;
 }
-var _82=[];
-if(_7c[0]==0){
-_82.push("n");
+var _8c=[];
+if(_86[0]==0){
+_8c.push("n");
 }
-if(_7c[1]==0){
-_82.push("w");
+if(_86[1]==0){
+_8c.push("w");
 }
-if(_7c[0]+_7c[3]==this.board.boardSize){
-_82.push("s");
+if(_86[0]+_86[3]==this.board.boardSize){
+_8c.push("s");
 }
-if(_7c[1]+_7c[2]==this.board.boardSize){
-_82.push("e");
+if(_86[1]+_86[2]==this.board.boardSize){
+_8c.push("e");
 }
-if(_7b=="corner"&&!(_82.length==2&&((_82.contains("n")&&_82.contains("e"))||(_82.contains("n")&&_82.contains("w"))||(_82.contains("s")&&_82.contains("e"))||(_82.contains("s")&&_82.contains("w"))))){
+if(_85=="corner"&&!(_8c.length==2&&((_8c.contains("n")&&_8c.contains("e"))||(_8c.contains("n")&&_8c.contains("w"))||(_8c.contains("s")&&_8c.contains("e"))||(_8c.contains("s")&&_8c.contains("w"))))){
 this.searching=false;
 _a(this.dom.comments);
 _b(this.dom.searchContainer);
 this.prependComment(t["two edges"]);
 return;
 }
-var _83=(_82.contains("n")?"n":"s");
-_83+=(_82.contains("w")?"w":"e");
+var _8d=(_8c.contains("n")?"n":"s");
+_8d+=(_8c.contains("w")?"w":"e");
 this.showComments("");
 this.gameName="search";
-var _84=function(req){
+var _8e=function(req){
 this.searching=false;
 this.doneLoading();
 _b(this.dom.comments);
@@ -2093,45 +2110,45 @@ this.dom.searchCount.innerHTML="No";
 return;
 }
 }
-var _86=eval("("+req.responseText+")");
-var _87;
-var _88="";
+var _90=eval("("+req.responseText+")");
+var _91;
+var _92="";
 var odd;
-for(var i=0;_87=_86[i];i++){
+for(var i=0;_91=_90[i];i++){
 odd=odd?false:true;
-_88+="<a class='search-result"+(odd?" odd":"")+"' href='#'>                    <span class='id'>"+_87.id+"</span>                    <span class='mv'>"+_87.mv+"</span>                    <span class='pw'>"+_87.pw+" "+_87.wr+"</span>                    <span class='pb'>"+_87.pb+" "+_87.br+"</span>                    <span class='re'>"+_87.re+"</span>                    <span class='dt'>"+_87.dt+"</span>                    <div class='clear'>&nbsp;</div>                    </a>";
+_92+="<a class='search-result"+(odd?" odd":"")+"' href='#'>                    <span class='id'>"+_91.id+"</span>                    <span class='mv'>"+_91.mv+"</span>                    <span class='pw'>"+_91.pw+" "+_91.wr+"</span>                    <span class='pb'>"+_91.pb+" "+_91.br+"</span>                    <span class='re'>"+_91.re+"</span>                    <span class='dt'>"+_91.dt+"</span>                    <div class='clear'>&nbsp;</div>                    </a>";
 }
 _a(this.dom.searchResultsContainer);
-this.dom.searchResults.innerHTML=_88;
-this.dom.searchCount.innerHTML=_86.length;
+this.dom.searchResults.innerHTML=_92;
+this.dom.searchCount.innerHTML=_90.length;
 };
-var _8b=function(req){
+var _95=function(req){
 this.croak(t["error retrieving"]);
 };
-var _8d={q:_83,w:_7c[2],h:_7c[3],p:_7e,a:_7b,t:(new Date()).getTime()};
+var _97={q:_8d,w:_86[2],h:_86[3],p:_88,a:_85,t:(new Date()).getTime()};
 this.progressiveLoad=false;
 this.progressiveUrl=null;
 this.prefs.markNext=false;
 this.prefs.showPlayerInfo=true;
-this.hook("searchRegion",_8d);
+this.hook("searchRegion",_97);
 this.nowLoading();
-_3("get",this.searchUrl,_8d,_84,_8b,this,45000);
+_3("get",this.searchUrl,_97,_8e,_95,this,45000);
 },loadSearchResult:function(e){
 this.nowLoading();
-var _8f=e.target||e.srcElement;
-if(_8f.nodeName=="SPAN"){
-_8f=_8f.parentNode;
+var _99=e.target||e.srcElement;
+if(_99.nodeName=="SPAN"){
+_99=_99.parentNode;
 }
-if(_8f.nodeName=="A"){
-var _90;
+if(_99.nodeName=="A"){
+var _9a;
 var id;
 var mv;
-for(var i=0;_90=_8f.childNodes[i];i++){
-if(_90.className=="id"){
-id=_90.innerHTML;
+for(var i=0;_9a=_99.childNodes[i];i++){
+if(_9a.className=="id"){
+id=_9a.innerHTML;
 }
-if(_90.className=="mv"){
-mv=parseInt(_90.innerHTML,10);
+if(_9a.className=="mv"){
+mv=parseInt(_9a.innerHTML,10);
 }
 }
 }
@@ -2146,13 +2163,13 @@ _7(e);
 this.showingSearch=false;
 _b(this.dom.searchContainer);
 _a(this.dom.comments);
-},compressPattern:function(_94){
+},compressPattern:function(_9e){
 var c=null;
 var pc="";
 var n=1;
 var ret="";
-for(var i=0;i<_94.length;i++){
-c=_94.charAt(i);
+for(var i=0;i<_9e.length;i++){
+c=_9e.charAt(i);
 if(c==pc){
 n++;
 }else{
@@ -2163,13 +2180,13 @@ pc=c;
 }
 ret=ret+pc+(n>1?n:"");
 return ret;
-},uncompressPattern:function(_9a){
+},uncompressPattern:function(_a4){
 var c=null;
 var s=null;
 var n="";
 var ret="";
-for(var i=0;i<_9a.length;i++){
-c=_9a.charAt(i);
+for(var i=0;i<_a4.length;i++){
+c=_a4.charAt(i);
 if(c=="."||c=="x"||c=="o"){
 if(s!=null){
 n=parseInt(n,10);
@@ -2190,20 +2207,20 @@ for(var j=0;j<n;j++){
 ret+=s;
 }
 return ret;
-},createMove:function(_a1){
-var _a2={};
-_a2[this.currentColor]=_a1;
-_a2["MN"]=(++this.moveNumber).toString();
-var _a3=new eidogo.GameNode(_a2);
+},createMove:function(_ab){
+var _ac={};
+_ac[this.currentColor]=_ab;
+_ac["MN"]=(++this.moveNumber).toString();
+var _ad=new eidogo.GameNode(_ac);
 this.totalMoves++;
 if(this.cursor.hasNext()){
 if(this.cursor.node.nextSibling){
 this.cursor.node.parent.createVariationTree(this.cursor.node.getPosition());
 }
-this.cursor.node.parent.appendTree(new eidogo.GameTree({nodes:[_a3],trees:[]}));
+this.cursor.node.parent.appendTree(new eidogo.GameTree({nodes:[_ad],trees:[]}));
 this.variation(this.cursor.node.parent.trees.length-1);
 }else{
-this.cursor.node.parent.appendNode(_a3);
+this.cursor.node.parent.appendNode(_ad);
 this.variation();
 }
 this.unsavedChanges=true;
@@ -2211,29 +2228,29 @@ this.unsavedChanges=true;
 if(this.editingComment){
 return true;
 }
-var _a5=e.keyCode||e.charCode;
-if(!_a5||e.ctrlKey||e.altKey||e.metaKey){
+var _af=e.keyCode||e.charCode;
+if(!_af||e.ctrlKey||e.altKey||e.metaKey){
 return true;
 }
-var _a6=String.fromCharCode(_a5).toLowerCase();
+var _b0=String.fromCharCode(_af).toLowerCase();
 for(var i=0;i<this.variations.length;i++){
-var _a8=this.sgfCoordToPoint(this.variations[i].move);
-var _a9=""+(i+1);
-if(_a8.x!=null&&this.board.getMarker(_a8)!=this.board.EMPTY&&typeof this.board.getMarker(_a8)=="string"){
-_a9=this.board.getMarker(_a8).toLowerCase();
+var _b2=this.sgfCoordToPoint(this.variations[i].move);
+var _b3=""+(i+1);
+if(_b2.x!=null&&this.board.getMarker(_b2)!=this.board.EMPTY&&typeof this.board.getMarker(_b2)=="string"){
+_b3=this.board.getMarker(_b2).toLowerCase();
 }
-_a9=_a9.replace(/^var:/,"");
-if(_a6==_a9.charAt(0)){
+_b3=_b3.replace(/^var:/,"");
+if(_b0==_b3.charAt(0)){
 this.variation(this.variations[i].treeNum);
 _7(e);
 return;
 }
 }
-if(_a5==112||_a5==27){
+if(_af==112||_af==27){
 this.selectTool("play");
 }
-var _aa=true;
-switch(_a5){
+var _b4=true;
+switch(_af){
 case 32:
 if(e.shiftKey){
 this.back();
@@ -2243,9 +2260,9 @@ this.forward();
 break;
 case 39:
 if(e.shiftKey){
-var _ab=this.totalMoves-this.moveNumber;
-var _ac=(_ab>9?9:_ab-1);
-for(var i=0;i<_ac;i++){
+var _b5=this.totalMoves-this.moveNumber;
+var _b6=(_b5>9?9:_b5-1);
+for(var i=0;i<_b6;i++){
 this.forward(null,null,true);
 }
 }
@@ -2253,8 +2270,8 @@ this.forward();
 break;
 case 37:
 if(e.shiftKey){
-var _ac=(this.moveNumber>9?9:this.moveNumber-1);
-for(var i=0;i<_ac;i++){
+var _b6=(this.moveNumber>9?9:this.moveNumber-1);
+for(var i=0;i<_b6;i++){
 this.back(null,null,true);
 }
 }
@@ -2270,56 +2287,57 @@ case 192:
 this.pass();
 break;
 default:
-_aa=false;
+_b4=false;
 break;
 }
-if(_aa){
+if(_b4){
 _7(e);
 }
 },showInfo:function(){
 this.dom.infoGame.innerHTML="";
 this.dom.whiteName.innerHTML="";
 this.dom.blackName.innerHTML="";
-var _ad=this.gameTree.trees.first().nodes.first();
+var _b7=this.gameTree.trees.first().nodes.first();
 var dl=document.createElement("dl");
-for(var _af in this.infoLabels){
-if(_ad[_af] instanceof Array){
-_ad[_af]=_ad[_af][0];
+for(var _b9 in this.infoLabels){
+if(_b7[_b9] instanceof Array){
+_b7[_b9]=_b7[_b9][0];
 }
-if(_ad[_af]){
-if(_af=="PW"){
-this.dom.whiteName.innerHTML=_ad[_af]+(_ad["WR"]?", "+_ad["WR"]:"");
+if(_b7[_b9]){
+if(_b9=="PW"){
+this.dom.whiteName.innerHTML=_b7[_b9]+(_b7["WR"]?", "+_b7["WR"]:"");
 continue;
 }else{
-if(_af=="PB"){
-this.dom.blackName.innerHTML=_ad[_af]+(_ad["BR"]?", "+_ad["BR"]:"");
+if(_b9=="PB"){
+this.dom.blackName.innerHTML=_b7[_b9]+(_b7["BR"]?", "+_b7["BR"]:"");
 continue;
 }
 }
-if(_af=="WR"||_af=="BR"){
+if(_b9=="WR"||_b9=="BR"){
 continue;
 }
-if(_af=="DT"){
-var _b0=_ad[_af].split(/[\.-]/);
-if(_b0.length==3){
-_ad[_af]=_b0[2].replace(/^0+/,"")+" "+this.months[_b0[1]-1]+" "+_b0[0];
+if(_b9=="DT"){
+var _ba=_b7[_b9].split(/[\.-]/);
+if(_ba.length==3){
+_b7[_b9]=_ba[2].replace(/^0+/,"")+" "+this.months[_ba[1]-1]+" "+_ba[0];
 }
 }
 var dt=document.createElement("dt");
-dt.innerHTML=this.infoLabels[_af]+":";
+dt.innerHTML=this.infoLabels[_b9]+":";
 var dd=document.createElement("dd");
-dd.innerHTML=_ad[_af];
+dd.innerHTML=_b7[_b9];
 dl.appendChild(dt);
 dl.appendChild(dd);
 }
 }
 this.dom.infoGame.appendChild(dl);
-},selectTool:function(_b3){
-var _b4;
-if(_b3=="region"){
-_b4="crosshair";
+},selectTool:function(_bd){
+var _be;
+_b(this.dom.scoreEst);
+if(_bd=="region"){
+_be="crosshair";
 }else{
-if(_b3=="comment"){
+if(_bd=="comment"){
 this.closeSearch();
 var ta=this.dom.commentsEdit;
 ta.style.position="absolute";
@@ -2334,22 +2352,25 @@ this.dom.commentsEditTa.value=this.cursor.node.C||"";
 this.dom.commentsEditTa.focus();
 this.editingComment=true;
 }else{
-_b4="default";
+_be="default";
 this.regionBegun=false;
 this.hideRegion();
 _b(this.dom.searchButton);
 _b(this.dom.searchAlgo);
+if(this.searchUrl){
+_a(this.dom.scoreEst,"inline");
 }
 }
-this.board.renderer.setCursor(_b4);
-this.mode=_b3;
-this.dom.toolsSelect.value=_b3;
+}
+this.board.renderer.setCursor(_be);
+this.mode=_bd;
+this.dom.toolsSelect.value=_bd;
 },finishEditComment:function(){
-var _b6=this.cursor.node.C;
-var _b7=this.dom.commentsEditTa.value;
-if(_b6!=_b7){
+var _c0=this.cursor.node.C;
+var _c1=this.dom.commentsEditTa.value;
+if(_c0!=_c1){
 this.unsavedChanges=true;
-this.cursor.node.C=_b7;
+this.cursor.node.C=_c1;
 }
 _b(this.dom.shade);
 _b(this.dom.commentsEdit);
@@ -2365,25 +2386,25 @@ this.dom.blackTime.innerHTML=t["time left"]+": <span>"+(this.timeB?this.timeB:"-
 _9(this.dom.controlPass,"pass-on");
 this.dom.variations.innerHTML="";
 for(var i=0;i<this.variations.length;i++){
-var _b9=i+1;
+var _c3=i+1;
 if(!this.variations[i].move||this.variations[i].move=="tt"){
 _8(this.dom.controlPass,"pass-on");
 }else{
-var _ba=this.sgfCoordToPoint(this.variations[i].move);
-if(this.board.getMarker(_ba)!=this.board.EMPTY){
-_b9=this.board.getMarker(_ba);
+var _c4=this.sgfCoordToPoint(this.variations[i].move);
+if(this.board.getMarker(_c4)!=this.board.EMPTY){
+_c3=this.board.getMarker(_c4);
 }
 if(this.prefs.markVariations){
-this.board.addMarker(_ba,"var:"+_b9);
+this.board.addMarker(_c4,"var:"+_c3);
 }
 }
-var _bb=document.createElement("div");
-_bb.className="variation-nav";
-_bb.innerHTML=_b9;
-_4(_bb,"click",function(e,arg){
+var _c5=document.createElement("div");
+_c5.className="variation-nav";
+_c5.innerHTML=_c3;
+_4(_c5,"click",function(e,arg){
 arg.me.variation(arg.treeNum);
 },{me:this,treeNum:this.variations[i].treeNum});
-this.dom.variations.appendChild(_bb);
+this.dom.variations.appendChild(_c5);
 }
 if(!this.variations.length){
 this.dom.variations.innerHTML="<div class='variation-nav none'>"+t["no variations"]+"</div>";
@@ -2401,117 +2422,119 @@ _8(this.dom.controlFirst,"first-on");
 }else{
 _9(this.dom.controlBack,"back-on");
 _9(this.dom.controlFirst,"first-on");
-var _be="";
+var _c8="";
 if(!this.prefs.showPlayerInfo){
-_be+=this.getGameDescription(true);
+_c8+=this.getGameDescription(true);
 }
 if(!this.prefs.showGameInfo){
-_be+=this.dom.infoGame.innerHTML;
+_c8+=this.dom.infoGame.innerHTML;
 }
-if(_be.length){
-this.prependComment(_be,"comment-info");
+if(_c8.length){
+this.prependComment(_c8,"comment-info");
 }
 }
 if(!this.progressiveLoad){
 this.updateNavSlider();
 }
-},setColor:function(_bf){
-this.prependComment(_bf=="B"?t["black to play"]:t["white to play"]);
-this.currentColor=_bf;
+},setColor:function(_c9){
+this.prependComment(_c9=="B"?t["black to play"]:t["white to play"]);
+this.currentColor=_c9;
 },setMoveNumber:function(num){
 this.moveNumber=num;
-},playMove:function(_c1,_c2,_c3){
-_c2=_c2||this.currentColor;
-this.currentColor=(_c2=="B"?"W":"B");
-_c2=_c2=="W"?this.board.WHITE:this.board.BLACK;
-var pt=this.sgfCoordToPoint(_c1);
+},playMove:function(_cb,_cc,_cd){
+_cc=_cc||this.currentColor;
+this.currentColor=(_cc=="B"?"W":"B");
+_cc=_cc=="W"?this.board.WHITE:this.board.BLACK;
+var pt=this.sgfCoordToPoint(_cb);
 if(!this.cursor.node["MN"]){
 this.moveNumber++;
 }
-if((!_c1||_c1=="tt"||_c1=="")&&!_c3){
-this.prependComment((_c2==this.board.WHITE?t["white"]:t["black"])+" "+t["passed"],"comment-pass");
+if((!_cb||_cb=="tt"||_cb=="")&&!_cd){
+this.prependComment((_cc==this.board.WHITE?t["white"]:t["black"])+" "+t["passed"],"comment-pass");
 }else{
-if(_c1=="resign"){
-this.prependComment((_c2==this.board.WHITE?t["white"]:t["black"])+" "+t["resigned"],"comment-resign");
+if(_cb=="resign"){
+this.prependComment((_cc==this.board.WHITE?t["white"]:t["black"])+" "+t["resigned"],"comment-resign");
 }else{
-this.board.addStone(pt,_c2);
-this.rules.apply(pt,_c2);
-if(this.prefs.markCurrent&&!_c3){
-this.addMarker(_c1,"current");
+if(_cb&&_cb!="tt"){
+this.board.addStone(pt,_cc);
+this.rules.apply(pt,_cc);
+if(this.prefs.markCurrent&&!_cd){
+this.addMarker(_cb,"current");
 }
 }
 }
-},addStone:function(_c5,_c6){
-if(!(_c5 instanceof Array)){
-_c5=[_c5];
 }
-_c5=this.expandCompressedPoints(_c5);
-for(var i=0;i<_c5.length;i++){
-this.board.addStone(this.sgfCoordToPoint(_c5[i]),_c6=="AW"?this.board.WHITE:_c6=="AB"?this.board.BLACK:this.board.EMPTY);
+},addStone:function(_cf,_d0){
+if(!(_cf instanceof Array)){
+_cf=[_cf];
 }
-},addMarker:function(_c8,_c9){
-if(!(_c8 instanceof Array)){
-_c8=[_c8];
+_cf=this.expandCompressedPoints(_cf);
+for(var i=0;i<_cf.length;i++){
+this.board.addStone(this.sgfCoordToPoint(_cf[i]),_d0=="AW"?this.board.WHITE:_d0=="AB"?this.board.BLACK:this.board.EMPTY);
 }
-_c8=this.expandCompressedPoints(_c8);
-var _ca;
-for(var i=0;i<_c8.length;i++){
-switch(_c9){
+},addMarker:function(_d2,_d3){
+if(!(_d2 instanceof Array)){
+_d2=[_d2];
+}
+_d2=this.expandCompressedPoints(_d2);
+var _d4;
+for(var i=0;i<_d2.length;i++){
+switch(_d3){
 case "TR":
-_ca="triangle";
+_d4="triangle";
 break;
 case "SQ":
-_ca="square";
+_d4="square";
 break;
 case "CR":
-_ca="circle";
+_d4="circle";
 break;
 case "MA":
-_ca="ex";
+_d4="ex";
 break;
 case "TW":
-_ca="territory-white";
+_d4="territory-white";
 break;
 case "TB":
-_ca="territory-black";
+_d4="territory-black";
 break;
 case "DD":
-_ca="dim";
+_d4="dim";
 break;
 case "LB":
-_ca=(_c8[i].split(":"))[1];
-_c8[i];
+_d4=(_d2[i].split(":"))[1];
+_d2[i];
 break;
 default:
-_ca=_c9;
+_d4=_d3;
 break;
 }
-this.board.addMarker(this.sgfCoordToPoint((_c8[i].split(":"))[0]),_ca);
+this.board.addMarker(this.sgfCoordToPoint((_d2[i].split(":"))[0]),_d4);
 }
-},showTime:function(_cc,_cd){
-var tp=(_cd=="BL"||_cd=="OB"?"timeB":"timeW");
-if(_cd=="BL"||_cd=="WL"){
-var _cf=Math.floor(_cc/60);
-var _d0=(_cc%60).toFixed(0);
-_d0=(_d0<10?"0":"")+_d0;
-this[tp]=_cf+":"+_d0;
+},showTime:function(_d6,_d7){
+var tp=(_d7=="BL"||_d7=="OB"?"timeB":"timeW");
+if(_d7=="BL"||_d7=="WL"){
+var _d9=Math.floor(_d6/60);
+var _da=(_d6%60).toFixed(0);
+_da=(_da<10?"0":"")+_da;
+this[tp]=_d9+":"+_da;
 }else{
-this[tp]+=" ("+_cc+")";
+this[tp]+=" ("+_d6+")";
 }
-},showAnnotation:function(_d1,_d2){
+},showAnnotation:function(_db,_dc){
 var msg;
-switch(_d2){
+switch(_dc){
 case "N":
-msg=_d1;
+msg=_db;
 break;
 case "GB":
-msg=(_d1>1?t["vgb"]:t["gb"]);
+msg=(_db>1?t["vgb"]:t["gb"]);
 break;
 case "GW":
-msg=(_d1>1?t["vgw"]:t["gw"]);
+msg=(_db>1?t["vgw"]:t["gw"]);
 break;
 case "DM":
-msg=(_d1>1?t["dmj"]:t["dm"]);
+msg=(_db>1?t["dmj"]:t["dm"]);
 break;
 case "UC":
 msg=t["uc"];
@@ -2520,7 +2543,7 @@ case "TE":
 msg=t["te"];
 break;
 case "BM":
-msg=(_d1>1?t["vbm"]:t["bm"]);
+msg=(_db>1?t["vbm"]:t["bm"]);
 break;
 case "DO":
 msg=t["do"];
@@ -2533,14 +2556,14 @@ msg=t["ho"];
 break;
 }
 this.prependComment(msg);
-},showComments:function(_d4,_d5,_d6){
-if(!_d4||_d6){
+},showComments:function(_de,_df,_e0){
+if(!_de||_e0){
 return;
 }
-this.dom.comments.innerHTML+=_d4.replace(/\n/g,"<br />");
-},prependComment:function(_d7,cls){
+this.dom.comments.innerHTML+=_de.replace(/\n/g,"<br />");
+},prependComment:function(_e1,cls){
 cls=cls||"comment-status";
-this.dom.comments.innerHTML="<div class='"+cls+"'>"+_d7+"</div>"+this.dom.comments.innerHTML;
+this.dom.comments.innerHTML="<div class='"+cls+"'>"+_e1+"</div>"+this.dom.comments.innerHTML;
 },downloadSgf:function(evt){
 _7(evt);
 if(this.downloadUrl){
@@ -2556,14 +2579,14 @@ location.href="data:text/plain,"+encodeURIComponent(this.gameTree.trees.first().
 }
 },save:function(evt){
 _7(evt);
-var _db=function(req){
+var _e5=function(req){
 this.hook("saved",[req.responseText]);
 };
-var _dd=function(req){
+var _e7=function(req){
 this.croak(t["error retrieving"]);
 };
 var sgf=this.gameTree.trees.first().toSgf();
-_3("POST",this.saveUrl,{sgf:sgf},_db,_dd,this,30000);
+_3("POST",this.saveUrl,{sgf:sgf},_e5,_e7,this,30000);
 },constructDom:function(){
 this.dom.player=document.createElement("div");
 this.dom.player.className="eidogo-player"+(this.theme?" theme-"+this.theme:"");
@@ -2571,25 +2594,25 @@ this.dom.player.id="player-"+this.uniq;
 this.dom.container.innerHTML="";
 eidogo.util.show(this.dom.container);
 this.dom.container.appendChild(this.dom.player);
-var _e0="            <div id='board-container' class='board-container'></div>            <div id='controls-container' class='controls-container'>                <ul id='controls' class='controls'>                    <li id='control-first' class='control first'>First</li>                    <li id='control-back' class='control back'>Back</li>                    <li id='control-forward' class='control forward'>Forward</li>                    <li id='control-last' class='control last'>Last</li>                    <li id='control-pass' class='control pass'>Pass</li>                </ul>                <div id='move-number' class='move-number"+(this.permalinkable?" permalink":"")+"'></div>                <div id='nav-slider' class='nav-slider'>                    <div id='nav-slider-thumb' class='nav-slider-thumb'></div>                </div>                <div id='variations-container' class='variations-container'>                    <div id='variations-label' class='variations-label'>"+t["variations"]+":</div>                    <div id='variations' class='variations'></div>                </div>                <div class='controls-stop'></div>            </div>            <div id='tools-container' class='tools-container'"+(this.prefs.showTools?"":" style='display: none'")+">                <div id='tools-label' class='tools-label'>"+t["tool"]+":</div>                <select id='tools-select' class='tools-select'>                    <option value='play'>"+t["play"]+"</option>                    <option value='add_b'>"+t["add_b"]+"</option>                    <option value='add_w'>"+t["add_w"]+"</option>                    "+(this.searchUrl?("<option value='region'>"+t["region"]+"</option>"):"")+"                    <option value='comment'>"+t["edit comment"]+"</option>                    <option value='tr'>"+t["triangle"]+"</option>                    <option value='sq'>"+t["square"]+"</option>                    <option value='cr'>"+t["circle"]+"</option>                    <option value='x'>"+t["x"]+"</option>                    <option value='letter'>"+t["letter"]+"</option>                    <option value='number'>"+t["number"]+"</option>                    <option value='dim'>"+t["dim"]+"</option>                </select>                <select id='search-algo' class='search-algo'>                    <option value='corner'>"+t["search corner"]+"</option>                    <option value='center'>"+t["search center"]+"</option>                </select>                <input type='button' id='search-button' class='search-button' value='"+t["search"]+"'>            </div>            <div id='comments' class='comments'></div>            <div id='comments-edit' class='comments-edit'>                <textarea id='comments-edit-ta' class='comments-edit-ta'></textarea>                <div id='comments-edit-done' class='comments-edit-done'>"+t["done"]+"</div>            </div>            <div id='search-container' class='search-container'>                <div id='search-close' class='search-close'>"+t["close search"]+"</div>                <p class='search-count'><span id='search-count'></span>&nbsp;"+t["matches found"]+"</p>                <div id='search-results-container' class='search-results-container'>                    <div class='search-result'>                        <span class='pw'><b>"+t["white"]+"</b></span>                        <span class='pb'><b>"+t["black"]+"</b></span>                        <span class='re'><b>"+t["result"]+"</b></span>                        <span class='dt'><b>"+t["date"]+"</b></span>                        <div class='clear'></div>                    </div>                    <div id='search-results' class='search-results'></div>                </div>            </div>            <div id='info' class='info'>                <div id='info-players' class='players'>                    <div id='white' class='player white'>                        <div id='white-name' class='name'></div>                        <div id='white-captures' class='captures'></div>                        <div id='white-time' class='time'></div>                    </div>                    <div id='black' class='player black'>                        <div id='black-name' class='name'></div>                        <div id='black-captures' class='captures'></div>                        <div id='black-time' class='time'></div>                    </div>                </div>                <div id='info-game' class='game'></div>            </div>            <div id='options' class='options'>                "+(this.saveUrl?"<a id='option-save' class='option-save' href='#'>"+t["save to server"]+"</a>":"")+"                "+(this.downloadUrl||_e?"<a id='option-download' class='option-download' href='#'>"+t["download sgf"]+"</a>":"")+"                <div class='options-stop'></div>            </div>            <div id='preferences' class='preferences'>                <div><input type='checkbox'> Show variations on board</div>                <div><input type='checkbox'> Mark current move</div>            </div>            <div id='footer' class='footer'></div>            <div id='shade' class='shade'></div>        ";
-_e0=_e0.replace(/ id='([^']+)'/g," id='$1-"+this.uniq+"'");
-this.dom.player.innerHTML=_e0;
+var _ea="            <div id='board-container' class='board-container'></div>            <div id='controls-container' class='controls-container'>                <ul id='controls' class='controls'>                    <li id='control-first' class='control first'>First</li>                    <li id='control-back' class='control back'>Back</li>                    <li id='control-forward' class='control forward'>Forward</li>                    <li id='control-last' class='control last'>Last</li>                    <li id='control-pass' class='control pass'>Pass</li>                </ul>                <div id='move-number' class='move-number"+(this.permalinkable?" permalink":"")+"'></div>                <div id='nav-slider' class='nav-slider'>                    <div id='nav-slider-thumb' class='nav-slider-thumb'></div>                </div>                <div id='variations-container' class='variations-container'>                    <div id='variations-label' class='variations-label'>"+t["variations"]+":</div>                    <div id='variations' class='variations'></div>                </div>                <div class='controls-stop'></div>            </div>            <div id='tools-container' class='tools-container'"+(this.prefs.showTools?"":" style='display: none'")+">                <div id='tools-label' class='tools-label'>"+t["tool"]+":</div>                <select id='tools-select' class='tools-select'>                    <option value='play'>"+t["play"]+"</option>                    <option value='add_b'>"+t["add_b"]+"</option>                    <option value='add_w'>"+t["add_w"]+"</option>                    "+(this.searchUrl?("<option value='region'>"+t["region"]+"</option>"):"")+"                    <option value='comment'>"+t["edit comment"]+"</option>                    <option value='tr'>"+t["triangle"]+"</option>                    <option value='sq'>"+t["square"]+"</option>                    <option value='cr'>"+t["circle"]+"</option>                    <option value='x'>"+t["x"]+"</option>                    <option value='letter'>"+t["letter"]+"</option>                    <option value='number'>"+t["number"]+"</option>                    <option value='dim'>"+t["dim"]+"</option>                </select>                <input type='button' id='score-est' class='score-est-button' value='"+t["score est"]+"' />                <select id='search-algo' class='search-algo'>                    <option value='corner'>"+t["search corner"]+"</option>                    <option value='center'>"+t["search center"]+"</option>                </select>                <input type='button' id='search-button' class='search-button' value='"+t["search"]+"' />            </div>            <div id='comments' class='comments'></div>            <div id='comments-edit' class='comments-edit'>                <textarea id='comments-edit-ta' class='comments-edit-ta'></textarea>                <div id='comments-edit-done' class='comments-edit-done'>"+t["done"]+"</div>            </div>            <div id='search-container' class='search-container'>                <div id='search-close' class='search-close'>"+t["close search"]+"</div>                <p class='search-count'><span id='search-count'></span>&nbsp;"+t["matches found"]+"</p>                <div id='search-results-container' class='search-results-container'>                    <div class='search-result'>                        <span class='pw'><b>"+t["white"]+"</b></span>                        <span class='pb'><b>"+t["black"]+"</b></span>                        <span class='re'><b>"+t["result"]+"</b></span>                        <span class='dt'><b>"+t["date"]+"</b></span>                        <div class='clear'></div>                    </div>                    <div id='search-results' class='search-results'></div>                </div>            </div>            <div id='info' class='info'>                <div id='info-players' class='players'>                    <div id='white' class='player white'>                        <div id='white-name' class='name'></div>                        <div id='white-captures' class='captures'></div>                        <div id='white-time' class='time'></div>                    </div>                    <div id='black' class='player black'>                        <div id='black-name' class='name'></div>                        <div id='black-captures' class='captures'></div>                        <div id='black-time' class='time'></div>                    </div>                </div>                <div id='info-game' class='game'></div>            </div>            <div id='options' class='options'>                "+(this.saveUrl?"<a id='option-save' class='option-save' href='#'>"+t["save to server"]+"</a>":"")+"                "+(this.downloadUrl||_e?"<a id='option-download' class='option-download' href='#'>"+t["download sgf"]+"</a>":"")+"                <div class='options-stop'></div>            </div>            <div id='preferences' class='preferences'>                <div><input type='checkbox'> Show variations on board</div>                <div><input type='checkbox'> Mark current move</div>            </div>            <div id='footer' class='footer'></div>            <div id='shade' class='shade'></div>        ";
+_ea=_ea.replace(/ id='([^']+)'/g," id='$1-"+this.uniq+"'");
+this.dom.player.innerHTML=_ea;
 var re=/ id='([^']+)-\d+'/g;
-var _e2;
+var _ec;
 var id;
-var _e4;
-while(_e2=re.exec(_e0)){
-id=_e2[0].replace(/'/g,"").replace(/ id=/,"");
-_e4="";
-_e2[1].split("-").forEach(function(_e5,i){
-_e5=i?_e5.charAt(0).toUpperCase()+_e5.substring(1):_e5;
-_e4+=_e5;
+var _ee;
+while(_ec=re.exec(_ea)){
+id=_ec[0].replace(/'/g,"").replace(/ id=/,"");
+_ee="";
+_ec[1].split("-").forEach(function(_ef,i){
+_ef=i?_ef.charAt(0).toUpperCase()+_ef.substring(1):_ef;
+_ee+=_ef;
 });
-this.dom[_e4]=_2(id);
+this.dom[_ee]=_2(id);
 }
 this.dom.navSlider._width=this.dom.navSlider.offsetWidth;
 this.dom.navSliderThumb._width=this.dom.navSliderThumb.offsetWidth;
-[["moveNumber","setPermalink"],["controlFirst","first"],["controlBack","back"],["controlForward","forward"],["controlLast","last"],["controlPass","pass"],["searchButton","searchRegion"],["searchResults","loadSearchResult"],["searchClose","closeSearch"],["optionDownload","downloadSgf"],["optionSave","save"],["commentsEditDone","finishEditComment"]].forEach(function(eh){
+[["moveNumber","setPermalink"],["controlFirst","first"],["controlBack","back"],["controlForward","forward"],["controlLast","last"],["controlPass","pass"],["scoreEst","fetchScoreEstimate"],["searchButton","searchRegion"],["searchResults","loadSearchResult"],["searchClose","closeSearch"],["optionDownload","downloadSgf"],["optionSave","save"],["commentsEditDone","finishEditComment"]].forEach(function(eh){
 if(this.dom[eh[0]]){
 _5(this.dom[eh[0]],this[eh[1]],this);
 }
@@ -2603,109 +2626,109 @@ _b(this.dom.navSliderThumb);
 return;
 }
 this.dom.navSlider.style.cursor="pointer";
-var _e9=false;
-var _ea=null;
+var _f3=false;
+var _f4=null;
 _4(this.dom.navSlider,"mousedown",function(e){
-_e9=true;
+_f3=true;
 _7(e);
 },this,true);
 _4(document,"mousemove",function(e){
-if(!_e9){
+if(!_f3){
 return;
 }
 var xy=_6(e,this.dom.navSlider);
-clearTimeout(_ea);
-_ea=setTimeout(function(){
+clearTimeout(_f4);
+_f4=setTimeout(function(){
 this.updateNavSlider(xy[0]);
 }.bind(this),10);
 _7(e);
 },this,true);
 _4(document,"mouseup",function(e){
-if(!_e9){
+if(!_f3){
 return true;
 }
-_e9=false;
+_f3=false;
 var xy=_6(e,this.dom.navSlider);
 this.updateNavSlider(xy[0]);
 return true;
 },this,true);
-},updateNavSlider:function(_f0){
-var _f1=this.dom.navSlider._width-this.dom.navSliderThumb._width;
-var _f2=this.totalMoves;
-var _f3=!!_f0;
-_f0=_f0||(this.moveNumber/_f2*_f1);
-_f0=_f0>_f1?_f1:_f0;
-_f0=_f0<0?0:_f0;
-var _f4=parseInt(_f0/_f1*_f2,10);
-if(_f3){
+},updateNavSlider:function(_fa){
+var _fb=this.dom.navSlider._width-this.dom.navSliderThumb._width;
+var _fc=this.totalMoves;
+var _fd=!!_fa;
+_fa=_fa||(this.moveNumber/_fc*_fb);
+_fa=_fa>_fb?_fb:_fa;
+_fa=_fa<0?0:_fa;
+var _fe=parseInt(_fa/_fb*_fc,10);
+if(_fd){
 this.nowLoading();
-var _f5=_f4-this.cursor.node.getPosition();
-for(var i=0;i<Math.abs(_f5);i++){
-if(_f5>0){
+var _ff=_fe-this.cursor.node.getPosition();
+for(var i=0;i<Math.abs(_ff);i++){
+if(_ff>0){
 this.variation(null,true);
 }else{
-if(_f5<0){
+if(_ff<0){
 this.cursor.previous();
 this.moveNumber--;
 }
 }
 }
-if(_f5<0){
+if(_ff<0){
 if(this.moveNumber<0){
 this.moveNumber=0;
 }
-this.board.revert(Math.abs(_f5));
+this.board.revert(Math.abs(_ff));
 }
 this.doneLoading();
 this.refresh();
 }
-_f0=parseInt(_f4/_f2*_f1,10)||0;
-this.dom.navSliderThumb.style.left=_f0+"px";
+_fa=parseInt(_fe/_fc*_fb,10)||0;
+this.dom.navSliderThumb.style.left=_fa+"px";
 },resetLastLabels:function(){
 this.labelLastNumber=1;
 this.labelLastLetter="A";
-},getGameDescription:function(_f7){
-var _f8=this.gameTree.trees.first().nodes.first();
-var _f9=(_f7?"":_f8.GN||this.gameName);
-if(_f8.PW&&_f8.PB){
-var wr=_f8.WR?" "+_f8.WR:"";
-var br=_f8.BR?" "+_f8.BR:"";
-_f9+=(_f9.length?" - ":"")+_f8.PW+wr+" vs "+_f8.PB+br;
+},getGameDescription:function(_101){
+var root=this.gameTree.trees.first().nodes.first();
+var desc=(_101?"":root.GN||this.gameName);
+if(root.PW&&root.PB){
+var wr=root.WR?" "+root.WR:"";
+var br=root.BR?" "+root.BR:"";
+desc+=(desc.length?" - ":"")+root.PW+wr+" vs "+root.PB+br;
 }
-return _f9;
-},sgfCoordToPoint:function(_fc){
-if(!_fc||_fc=="tt"){
+return desc;
+},sgfCoordToPoint:function(_106){
+if(!_106||_106=="tt"){
 return {x:null,y:null};
 }
-var _fd={a:0,b:1,c:2,d:3,e:4,f:5,g:6,h:7,i:8,j:9,k:10,l:11,m:12,n:13,o:14,p:15,q:16,r:17,s:18};
-return {x:_fd[_fc.charAt(0)],y:_fd[_fc.charAt(1)]};
+var _107={a:0,b:1,c:2,d:3,e:4,f:5,g:6,h:7,i:8,j:9,k:10,l:11,m:12,n:13,o:14,p:15,q:16,r:17,s:18};
+return {x:_107[_106.charAt(0)],y:_107[_106.charAt(1)]};
 },pointToSgfCoord:function(pt){
 if(!pt||!this.boundsCheck(pt.x,pt.y,[0,this.board.boardSize-1])){
 return null;
 }
 var pts={0:"a",1:"b",2:"c",3:"d",4:"e",5:"f",6:"g",7:"h",8:"i",9:"j",10:"k",11:"l",12:"m",13:"n",14:"o",15:"p",16:"q",17:"r",18:"s"};
 return pts[pt.x]+pts[pt.y];
-},expandCompressedPoints:function(_100){
-var _101;
+},expandCompressedPoints:function(_10a){
+var _10b;
 var ul,lr;
 var x,y;
-var _106=[];
+var _110=[];
 var hits=[];
-for(var i=0;i<_100.length;i++){
-_101=_100[i].split(/:/);
-if(_101.length>1){
-ul=this.sgfCoordToPoint(_101[0]);
-lr=this.sgfCoordToPoint(_101[1]);
+for(var i=0;i<_10a.length;i++){
+_10b=_10a[i].split(/:/);
+if(_10b.length>1){
+ul=this.sgfCoordToPoint(_10b[0]);
+lr=this.sgfCoordToPoint(_10b[1]);
 for(x=ul.x;x<=lr.x;x++){
 for(y=ul.y;y<=lr.y;y++){
-_106.push(this.pointToSgfCoord({x:x,y:y}));
+_110.push(this.pointToSgfCoord({x:x,y:y}));
 }
 }
 hits.push(i);
 }
 }
-_100=_100.concat(_106);
-return _100;
+_10a=_10a.concat(_110);
+return _10a;
 },setPermalink:function(){
 if(!this.permalinkable){
 return true;

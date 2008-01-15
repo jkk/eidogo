@@ -23,6 +23,7 @@ eidogo.i18n = eidogo.i18n || {
     'number':           'Number',
     'dim':              'Dim',
     'score':            'Score', // as in score tool
+    'score est':        'Score Estimate',
     'search':           'Search',
     'search corner':    'Corner Search',
     'search center':    'Center Search',

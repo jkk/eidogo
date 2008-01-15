@@ -1,7 +1,5 @@
 planned for after 1.0
-- unit tests???
 - change permalink on close search
-- fix errant move on end of example.html > example.sgf
 - implement problem-solving options
 - background color for hyperlinked long labels
 - non-regular-sized boards
@@ -11,7 +9,6 @@ planned for after 1.0
 - edit game info
 - show more search results
 - show continuations for pattern search
-- score tool, score estimate?
 - tree navigation
 - accurate nav slider after new moves played
 - make failed game load non-fatal
