@@ -193,7 +193,9 @@ eidogo.Player.prototype = {
             this.cropParams = {};
             this.cropParams.width = cfg.cropWidth;
             this.cropParams.height = cfg.cropHeight;
-            this.cropParams.corner = cfg.cropCorner;
+            this.cropParams.left = cfg.cropLeft;
+            this.cropParams.top = cfg.cropTop;
+            this.cropParams.padding = cfg.cropPadding || 1;
         }
         
         // set up the elements we'll use
@@ -377,9 +379,9 @@ eidogo.Player.prototype = {
         this.handleDisplayPrefs();
         var gameRoot = target.trees.first().nodes.first();
         var size = gameRoot.SZ;
+        if (this.shrinkToFit) this.calcShrinkToFit(size || 19);
         if (!this.board) {
             // first time
-            if (this.shrinkToFit) this.calcShrinkToFit();
             this.createBoard(size || 19);
             this.rules = new eidogo.Rules(this.board);
         }
@@ -433,12 +435,57 @@ eidogo.Player.prototype = {
     
     /**
      * Calculates the crop area to use based on the widest distance between
-     * stones and markers in this game.
+     * stones and markers in this game. We're conservative with respect to
+     * checking markers.
     **/
-    calcShrinkToFit: function() {
-        this.cropParams.width = 12;
-        this.cropParams.height = 8;
-        this.cropParams.corner = "sw";
+    calcShrinkToFit: function(size) {
+        // leftmost, topmost, rightmost, bottommost
+        var l = null, t = null, r = null, b = null;
+        var points = {};
+        var me = this;
+        // find all points occupied by stones or labels
+        var traverse = function(tree) {
+            var i, j, node, coord, len = tree.nodes.length;
+            for (i = 0; i < len; i++) {
+                for (prop in tree.nodes[i]) {
+                    if (/^(W|B|AW|AB|LB)$/.test(prop)) {
+                        coord = tree.nodes[i][prop];
+                        if (!(coord instanceof Array)) coord = [coord];
+                        if (prop != 'LB') coord = me.expandCompressedPoints(coord);
+                        else coord = [coord[0].split(/:/)[0]];
+                        for (j = 0; j < coord.length; j++)
+                            points[coord[j]] = "";
+                    }
+                }
+            }
+            len = tree.trees.length;
+            for (i = 0; i < len; i++) {
+                traverse(tree.trees[i]);
+            }
+        }
+        traverse(this.gameTree.trees[0]);
+        // nab the outermost points
+        for (var key in points) {
+            var pt = this.sgfCoordToPoint(key);
+            if (l == null || pt.x < l) l = pt.x;
+            if (r == null || pt.x > r) r = pt.x;
+            if (t == null || pt.y < t) t = pt.y;
+            if (b == null || pt.y > b) b = pt.y;
+        }
+        this.cropParams.width = r - l + 1;
+        this.cropParams.height = b - t + 1;
+        this.cropParams.left = l;
+        this.cropParams.top = t;
+        // add padding
+        var pad = this.cropParams.padding;
+        for (var lpad = pad; l - lpad < 0; lpad--) {};
+        if (lpad) { this.cropParams.width += lpad; this.cropParams.left -= lpad; }
+        for (var tpad = pad; t - tpad < 0; tpad--) {};
+        if (tpad) { this.cropParams.height += tpad; this.cropParams.top -= tpad; }
+        for (var rpad = pad; r + rpad > size; rpad--) {};
+        if (rpad) { this.cropParams.width += rpad; }
+        for (var bpad = pad; b + bpad > size; bpad--) {};
+        if (bpad) { this.cropParams.height += bpad; }
     },
 
     /**
@@ -467,6 +514,11 @@ eidogo.Player.prototype = {
             }
         } else {
             this.refresh();
+        }
+        
+        // find out which color to play as for problem mode
+        if (!target.parent && this.problemMode) {
+            this.currentColor = this.problemColor = this.cursor.getNextColor();
         }
     },
 
@@ -590,7 +642,15 @@ eidogo.Player.prototype = {
      * Respond to a move made in problem-solving mode
     **/
     playProblemResponse: function(noRender) {
-        this.variation(null, noRender);
+        // short delay before playing
+        setTimeout(function() {
+            this.variation(null, noRender);
+            if (!this.cursor.hasNext()) {
+                // not sure if it's safe to say "WRONG" -- that would work for
+                // goproblems.com SGFs but I don't know about others
+                this.prependComment("End of variation");
+            }
+        }.bind(this), 200);
     },
 
     /**

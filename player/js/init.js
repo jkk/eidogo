@@ -14,6 +14,13 @@
 (function() {
     
     var autoCfg = window.eidogoConfig || {};
+    var problemCfg = {
+        theme:          "problem",
+        problemMode:    true,
+        markVariations: false,
+        markNext:       false,
+        shrinkToFit:    true
+    };
     var scriptPath = eidogo.util.getPlayerPath();    
     var path = eidogo.playerPath = (autoCfg.playerPath || scriptPath || 'player').replace(/\/$/, "");
     
@@ -31,15 +38,22 @@
         var divs = document.getElementsByTagName('div');
         var len = divs.length;
         for (var i = 0; i < len; i++) {
-            if (eidogo.util.hasClass(divs[i], "eidogo-player-auto")) {
+            if (eidogo.util.hasClass(divs[i], "eidogo-player-auto") ||
+                eidogo.util.hasClass(divs[i], "eidogo-player-problem")) {
                 els.push(divs[i]);
             }
         }
         var el;
         for (var i = 0; el = els[i]; i++) {
             var cfg = {container: el, disableShortcuts: true, theme: "compact"};
-            for (var key in autoCfg) {
-                cfg[key] = autoCfg[key];
+            if (eidogo.util.hasClass(el, "eidogo-player-problem")) {
+                for (var key in problemCfg) {
+                    cfg[key] = problemCfg[key];
+                }
+            } else {
+                for (var key in autoCfg) {
+                    cfg[key] = autoCfg[key];
+                }
             }
             
             var sgfUrl = el.getAttribute('sgf');

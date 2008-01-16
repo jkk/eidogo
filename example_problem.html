@@ -4,15 +4,6 @@
 <head>
     <title>EidoGo Problem Example</title>
 
-    <script type="text/javascript">
-    eidogoConfig = {
-        theme:          "problem",
-        problemMode:    true,
-        markVariations: false,
-        shrinkToFit:    true
-    };
-    </script>
-    
     <script type="text/javascript" src="player/js/all.compressed.js"></script>
     
 </head>
@@ -21,7 +12,17 @@
     <h1>EidoGo Player Problem Example</h1>
 
     <p>Example of problem-solving mode</p>
-    <div class="eidogo-player-auto" sgf="sgf/problem.sgf"></div>
+    <div class="eidogo-player-problem">
+        (;GM[1]FF[4]CA[UTF-8]AP[CGoban:3]ST[2]RU[Japanese]SZ[19]KM[0.00]
+        AW[jk]AB[ii][hj][kj][il][kl]PL[W];W[jj];B[ki];W[ik];B[hl];W[ji];B[jh]
+        ;W[ih];B[kk];W[hi];B[ij];W[hk])
+    </div>
+    
+    <p>Another problem:</p>
+    <div class="eidogo-player-problem" sgf="sgf/problem2.sgf"></div>
+    
+    <p>Regular player on the same page:</p>
+    <div class="eidogo-player-auto" sgf="sgf/blood_vomit.sgf"></div>
     
     <p>Followup text</p>
 

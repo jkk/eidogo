@@ -259,6 +259,18 @@ eidogo.GameCursor.prototype = {
         }
         return moves;
     },
+    getNextColor: function() {
+        if (!this.hasNext()) return null;
+        if (this.node.nextSibling && (this.node.nextSibling.W || this.node.nextSibling.B))
+            return this.node.nextSibling.W ? "W" : "B";
+        var vars = this.node.parent.trees;
+        var tree;
+        for (var i = 0; tree = vars[i]; i++) {
+            if (tree.nodes[0].W || tree.nodes[0].B)
+                return tree.nodes[0].W ? "W" : "B";
+        }
+        return null;
+    },
     next: function(treeNum) {
         if (!this.hasNext()) return false;
         if ((typeof treeNum == "undefined" || treeNum == null)

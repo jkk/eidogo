@@ -355,8 +355,8 @@ eidogo.BoardRendererHtml.prototype = {
         this.domGutter.style.width = width + "px";
         this.domGutter.style.height = height + "px";
         this.player.dom.player.style.width = width + "px";
-        this.domGutter.scrollTop = (crop.corner == "se" || crop.corner == "sw" ? "1000" : "0");
-        this.domGutter.scrollLeft = (crop.corner == "se" || crop.corner == "ne" ? "1000" : "0");
+        this.domGutter.scrollLeft = crop.left * this.pointWidth;
+        this.domGutter.scrollTop = crop.top * this.pointHeight;
     }
 }
 

@@ -768,8 +768,11 @@
 .eidogo-player.theme-problem .board-container {
     width: auto;
     height: auto;
-    min-height: 150px;
+    min-height: 50px;
     background: #555;
+}
+.eidogo-player.theme-problem .board.size19 {
+    background-image: url(../images/board-19-simple.gif) !important;
 }
 .eidogo-player.theme-problem .controls-container {
     float: none;
