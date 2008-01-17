@@ -37,6 +37,7 @@ eidogo.i18n = eidogo.i18n || {
     'download sgf':     'Download SGF',
     'next game':        'Next Game',
     'previous game':    'Previous Game',
+    'end of variation': 'End of variation',
 
     'white':            'White',
     'white rank':       'White rank',

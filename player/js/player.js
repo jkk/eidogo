@@ -412,8 +412,7 @@ eidogo.Player.prototype = {
     },
 
     /**
-     * Create our board, tie it to a Rules instance, and add appropriate event
-     * handlers. This can be called multiple times.
+     * Create our board. This can be called multiple times.
     **/
     createBoard: function(size) {
         size = size || 19;
@@ -436,7 +435,7 @@ eidogo.Player.prototype = {
     /**
      * Calculates the crop area to use based on the widest distance between
      * stones and markers in this game. We're conservative with respect to
-     * checking markers.
+     * checking markers: only labels.
     **/
     calcShrinkToFit: function(size) {
         // leftmost, topmost, rightmost, bottommost
@@ -445,7 +444,7 @@ eidogo.Player.prototype = {
         var me = this;
         // find all points occupied by stones or labels
         var traverse = function(tree) {
-            var i, j, node, coord, len = tree.nodes.length;
+            var i, j, prop, node, coord, len = tree.nodes.length;
             for (i = 0; i < len; i++) {
                 for (prop in tree.nodes[i]) {
                     if (/^(W|B|AW|AB|LB)$/.test(prop)) {
@@ -648,7 +647,7 @@ eidogo.Player.prototype = {
             if (!this.cursor.hasNext()) {
                 // not sure if it's safe to say "WRONG" -- that would work for
                 // goproblems.com SGFs but I don't know about others
-                this.prependComment("End of variation");
+                this.prependComment(t['end of variation']);
             }
         }.bind(this), 200);
     },
@@ -911,6 +910,12 @@ eidogo.Player.prototype = {
         this.createMove('tt');
     },
 
+    /**
+     * Handle a mouse-down event on a particular point. This function gets
+     * called by the board renderer, which handles the actual browser event
+     * attachment (or Flash event handling, or whatever) and passes along
+     * the appropriate board coordinate.
+    **/
     handleBoardMouseDown: function(x, y, e) {
         if (this.domLoading) return;
         if (!this.boundsCheck(x, y, [0, this.board.boardSize-1])) return;
@@ -925,6 +930,9 @@ eidogo.Player.prototype = {
         }
     },
 
+    /**
+     * Called by the board renderer upon hover, with appropriate coordinate
+    **/
     handleBoardHover: function(x, y, e) {
         if (this.domLoading) return;
         if (this.mouseDown || this.regionBegun) {
@@ -945,6 +953,9 @@ eidogo.Player.prototype = {
         }
     },
 
+    /**
+     * Called by the board renderer upon mouse up, with appropriate coordinate
+    **/
     handleBoardMouseUp: function(x, y, e) {
         if (this.domLoading) return;
         
@@ -1034,6 +1045,9 @@ eidogo.Player.prototype = {
         }
     },
     
+    /**
+     * This prevents region selection from getting stuck in drag mode
+    **/
     handleDocMouseUp: function(evt) {
         if (this.domLoading) return true;
         if (this.mode == "region" && this.regionBegun && !this.regionClickSelect) {
@@ -1046,6 +1060,10 @@ eidogo.Player.prototype = {
         return true;
     },
     
+    /**
+     * Check whether a point falls within a given region (left, top, right,
+     * bottom)
+    **/
     boundsCheck: function(x, y, region) {
         if (region.length == 2) {
             region[3] = region[2] = region[1];
@@ -1055,6 +1073,10 @@ eidogo.Player.prototype = {
             x <= region[2] && y <= region[3]);
     },
 
+    /**
+     * Return a top-left-width-height array based on the left-top-right-bottom
+     * selection region
+    **/
     getRegionBounds: function() {
         // top, left, width, height
         var l = this.regionLeft;
@@ -1072,15 +1094,25 @@ eidogo.Player.prototype = {
         return [t, l, w, h];
     },
 
+    /**
+     * Tell the board renderer to show the search region
+    **/
     showRegion: function() {
         var bounds = this.getRegionBounds();
         this.board.renderer.showRegion(bounds);
     },
     
+    /**
+     * Tell the board renderer to hide the search region
+    **/
     hideRegion: function() {
         this.board.renderer.hideRegion();
     },
     
+    /**
+     * Set up a board position to represent a search pattern, then start
+     * the search
+    **/
     loadSearch: function(q, dim, p, a) {
         var blankGame = {nodes: [], trees: [{nodes: [{SZ: this.board.boardSize}], trees: []}]};
         this.load(blankGame);
@@ -1137,6 +1169,10 @@ eidogo.Player.prototype = {
         this.searchRegion();
     },
     
+    /**
+     * Call out to our external handler to perform a pattern search. Also
+     * prevent meaningless or overly-simple searches.
+    **/
     searchRegion: function() {
         if (this.searching) return;
         this.searching = true;
@@ -1250,6 +1286,10 @@ eidogo.Player.prototype = {
         ajax('get', this.searchUrl, params, success, failure, this, 45000);     
     },
     
+    /**
+     * Load a particular search result. This gets called via the HTML
+     * output by the external search handler.
+    **/
     loadSearchResult: function(e) {
         this.nowLoading();
         var target = e.target || e.srcElement;
@@ -1278,6 +1318,9 @@ eidogo.Player.prototype = {
         stopEvent(e);
     },
     
+    /**
+     * Close the search pane
+    **/
     closeSearch: function() {
         this.showingSearch = false;
         hide(this.dom.searchContainer);
@@ -1362,6 +1405,9 @@ eidogo.Player.prototype = {
         this.unsavedChanges = true;
     },
 
+    /**
+     * Keyboard shortcut handling
+    **/
     handleKeypress: function(e) {
         if (this.editingComment) return true;
         var charCode = e.keyCode || e.charCode;
@@ -1439,6 +1485,9 @@ eidogo.Player.prototype = {
         }
     },
 
+    /**
+     * Parse and display the game's info
+    **/
     showInfo: function() {
         this.dom.infoGame.innerHTML = "";
         this.dom.whiteName.innerHTML = "";
@@ -1480,25 +1529,16 @@ eidogo.Player.prototype = {
         this.dom.infoGame.appendChild(dl);
     },
 
+    /**
+     * Handle tool switching
+    **/
     selectTool: function(tool) {
         var cursor;
         hide(this.dom.scoreEst);
         if (tool == "region") {
             cursor = "crosshair";
         } else if (tool == "comment") {
-            this.closeSearch();
-            var ta = this.dom.commentsEdit;
-            ta.style.position = "absolute";
-            ta.style.top = this.dom.comments.offsetTop + "px";
-            ta.style.left = this.dom.comments.offsetLeft + "px";
-            show(this.dom.shade);
-            this.dom.comments.innerHTML = "";
-            this.dom.player.appendChild(ta);
-            show(ta);
-            show(this.dom.commentsEditDone);
-            this.dom.commentsEditTa.value = this.cursor.node.C || "";
-            this.dom.commentsEditTa.focus();
-            this.editingComment = true;
+            this.startEditComment();
         } else {
             cursor = "default";
             this.regionBegun = false;
@@ -1510,6 +1550,22 @@ eidogo.Player.prototype = {
         this.board.renderer.setCursor(cursor);
         this.mode = tool;
         this.dom.toolsSelect.value = tool;
+    },
+    
+    startEditComment: function() {
+        this.closeSearch();
+        var ta = this.dom.commentsEdit;
+        ta.style.position = "absolute";
+        ta.style.top = this.dom.comments.offsetTop + "px";
+        ta.style.left = this.dom.comments.offsetLeft + "px";
+        show(this.dom.shade);
+        this.dom.comments.innerHTML = "";
+        this.dom.player.appendChild(ta);
+        show(ta);
+        show(this.dom.commentsEditDone);
+        this.dom.commentsEditTa.value = this.cursor.node.C || "";
+        this.dom.commentsEditTa.focus();
+        this.editingComment = true;  
     },
     
     finishEditComment: function() {
@@ -1526,16 +1582,22 @@ eidogo.Player.prototype = {
         this.refresh();
     },
 
+    /**
+     * Update all our UI elements to reflect the current game state
+    **/
     updateControls: function() {
+        // move number
         this.dom.moveNumber.innerHTML = (this.moveNumber ?
             (t['move'] + " " + this.moveNumber) :
             (this.permalinkable ? "permalink" : ""));
     
+        // captures
         this.dom.whiteCaptures.innerHTML = t['captures'] +
             ": <span>" + this.board.captures.W + "</span>";
         this.dom.blackCaptures.innerHTML = t['captures'] +
             ": <span>" + this.board.captures.B + "</span>";
     
+        // time
         this.dom.whiteTime.innerHTML = t['time left'] + ": <span>" +
             (this.timeW ? this.timeW : "--") + "</span>";
         this.dom.blackTime.innerHTML = t['time left'] + ": <span>" +
@@ -1614,6 +1676,10 @@ eidogo.Player.prototype = {
         this.moveNumber = num;
     },
 
+    /**
+     * Play a move on the board and apply rules to it. This is different from
+     * merely adding a stone.
+    **/
     playMove: function(coord, color, noRender) {
         color = color || this.currentColor;
         this.currentColor = (color == "B" ? "W" : "B");
@@ -1688,6 +1754,9 @@ eidogo.Player.prototype = {
         }
     },
 
+    /**
+     * Good move, bad move, etc
+    **/
     showAnnotation: function(value, type) {
         var msg;
         switch (type) {
@@ -1710,12 +1779,18 @@ eidogo.Player.prototype = {
         this.dom.comments.innerHTML += comments.replace(/\n/g, "<br />");
     },
 
+    /**
+     * For special notices
+    **/
     prependComment: function(content, cls) {
         cls = cls || "comment-status";
         this.dom.comments.innerHTML = "<div class='" + cls + "'>" +
             content + "</div>" + this.dom.comments.innerHTML;
     },
     
+    /**
+     * Redirect to a download handler or attempt to display data inline
+    **/
     downloadSgf: function(evt) {
         stopEvent(evt);
         if (this.downloadUrl) {
@@ -1730,6 +1805,9 @@ eidogo.Player.prototype = {
         }
     },
     
+    /**
+     * Send SGF data to a file-saving handler
+    **/
     save: function(evt) {
         stopEvent(evt);
         var success = function(req) {

@@ -6,10 +6,12 @@
 
 <p>The EidoGo Player (SGF viewer and editor) is an independent piece and can be
     plugged into any webpage. The basic Player is entirely client-side (browser-based)
-    and does not include the joseki tutor, pattern searching, or saving features.
+    and does not include the joseki tutor, pattern searching, GNU Go, or saving features.
     To use these features, you must set up code server-side (see site source code below).</p>
 
-<p>All source code is licensed under the <a href="http://www.fsf.org/licensing/licenses/agpl-3.0.html">AGPLv3</a>.</p>
+<p>All source code is licensed under the <a href="http://www.fsf.org/licensing/licenses/agpl-3.0.html">AGPLv3</a>.
+    In short, this means if you modify the source code, you must allow everyone to see and use those changes
+    &mdash; share and share alike!</p>
 
 <h3>Quick Start</h3>
 
@@ -22,7 +24,14 @@ download page</a> and put the following into your webpage:</p>
 
 <p><a href="/example.html">Here is an example of this in action.</a></p>
 
-<p>You can include multiple Players on a page. See the two example HTML files in the Player download for more options.</p>
+<div style="float: right; margin-left: 20px" class="eidogo-player-problem" sgf="sgf/problem.sgf"></div>
+
+<p>You can also use the problem-solving mode (example on right):</p>
+
+<pre style='width: 75%'><code>&lt;div class=&quot;eidogo-player-problem&quot; sgf=&quot;path/to/sgf/file.sgf&quot;&gt;&lt;/div&gt;
+</code></pre>
+
+<p>You can include multiple Players on a page. See the example HTML files in the Player download for more options.</p>
 
 <p>If you use the EidoGo Player on your site, <script type="text/javascript">document.write(
 "<n uers=\"znvygb:wx\100gva\056ah\">yrg zr xabj<\057n>".replace(/[a-zA-Z]/g, function(c){return String.fromCharCode((c<="Z"?90:122)>=(c=c.charCodeAt(0)+13)?c:c-26);}));
