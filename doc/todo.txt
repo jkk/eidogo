@@ -1,5 +1,4 @@
 planned for after 1.0
-- unsaved changes
 - link directly to a node within a progressive-loading tree (use MPTT?)
 - wiki-like SGF editing
 - link each kogo's position with pro game search

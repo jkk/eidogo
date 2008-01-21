@@ -1,0 +1,11 @@
+Version 1.1
+    Features
+        * Problem mode, crop/shrink-to-fit option
+        * Score estimate (server-side)
+        * Decoupled Player from BoardRenderer, which opens the door for
+          alternative kinds of board renderers, like Flash
+        * Proof-of-concept Flash board renderer
+    Bug fixes
+        * Messed up or missing coordinates display
+        * Pass causing errant stone to be placed on board when skipping ahead
+        * Error for multiple game info properties within same node
