@@ -2122,7 +2122,7 @@ eidogo.Player.prototype = {
     },
 
     nowLoading: function(msg) {
-        if (this.croaked) return;
+        if (this.croaked || this.problemMode) return;
         msg = msg || t['loading'] + "...";
         if (byId('eidogo-loading-' + this.uniq)) return;
         this.domLoading = document.createElement('div');

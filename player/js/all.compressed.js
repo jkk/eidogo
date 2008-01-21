@@ -2648,7 +2648,7 @@ return;
 }
 this.hook("setPermalink");
 },nowLoading:function(msg){
-if(this.croaked){
+if(this.croaked||this.problemMode){
 return;
 }
 msg=msg||t["loading"]+"...";

@@ -786,6 +786,7 @@
 }
 .eidogo-player.theme-problem .control {
     margin: 0;
+    padding: 0;
 }
 .eidogo-player.theme-problem .comments {
     float: none;
@@ -799,6 +800,6 @@
 .eidogo-player.theme-problem .controls .forward, 
 .eidogo-player.theme-problem .controls .last, .eidogo-player.theme-problem .controls .pass,
 .eidogo-player.theme-problem .variations-container, .eidogo-player.theme-problem .nav-slider,
-.eidogo-player.theme-problem .move-number,  .eidogo-loading.theme-problem {
+.eidogo-player.theme-problem .move-number {
     display: none;
 }
