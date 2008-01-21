@@ -128,11 +128,14 @@ eidogo.Board.prototype = {
         var stones = this.makeBoardArray(null);
         var markers = this.makeBoardArray(null);
         var color, type;
+        var len;
         if (!complete && this.cache.last()) {
+            var lastCache = this.cache.last();
+            len = this.stones.length;
             // render only points that have changed since the last render
-            for (var i = 0; i < this.stones.length; i++) {
-                if (this.cache.last().stones[i] != this.lastRender.stones[i]) {
-                    stones[i] = this.cache.last().stones[i];
+            for (var i = 0; i < len; i++) {
+                if (lastCache.stones[i] != this.lastRender.stones[i]) {
+                    stones[i] = lastCache.stones[i];
                 }
             }
             markers = this.markers;
@@ -145,6 +148,10 @@ eidogo.Board.prototype = {
         for (var x = 0; x < this.boardSize; x++) {
             for (var y = 0; y < this.boardSize; y++) {
                 offset = y * this.boardSize + x;
+                if (markers[offset] != null) {
+                    this.renderer.renderMarker({x: x, y: y}, markers[offset]);
+                    this.lastRender.markers[offset] = markers[offset];
+                }
                 if (stones[offset] == null) {
                     continue;
                 } else if (stones[offset] == this.EMPTY) {
@@ -154,14 +161,6 @@ eidogo.Board.prototype = {
                 }
                 this.renderer.renderStone({x: x, y: y}, color);
                 this.lastRender.stones[offset] = stones[offset];
-            }
-        }
-        for (var x = 0; x < this.boardSize; x++) {
-            for (var y = 0; y < this.boardSize; y++) {
-                offset = y * this.boardSize + x;
-                if (markers[offset] == null) continue;
-                this.renderer.renderMarker({x: x, y: y}, markers[offset]);
-                this.lastRender.markers[offset] = markers[offset];
             }
         }
     }

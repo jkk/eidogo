@@ -1,4 +1,8 @@
 planned for after 1.0
+- unsaved changes
+- link directly to a node within a progressive-loading tree (use MPTT?)
+- wiki-like SGF editing
+- link each kogo's position with pro game search
 - accurate nav slider after new moves played (base on nextSibling)
 - copy/paste ascii diagrams (http://www.dse.nl/~toni/go/ascii2sgf/index_uk.htm)
 - edit game info

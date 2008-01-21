@@ -9,7 +9,8 @@
 
 /**
  * Search for DIV elements with the class 'eidogo-player-auto' and insert a
- * Player into each.
+ * Player into each. Also handle problem-mode Players with
+ * 'eidogo-player-problem'
 **/
 (function() {
     
