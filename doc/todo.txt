@@ -1,11 +1,15 @@
 planned for after 1.0
+- remove marker tool
+- custom label
 - link directly to a node within a progressive-loading tree (use MPTT?)
 - wiki-like SGF editing
 - link each kogo's position with pro game search
+- delete orphan branches when moves are removed from the board
 - accurate nav slider after new moves played (base on nextSibling)
 - copy/paste ascii diagrams (http://www.dse.nl/~toni/go/ascii2sgf/index_uk.htm)
 - edit game info
 - show more search results
+- sibling-style variations
 - tree navigation
 - multiple games per sgf
 - make failed game load non-fatal

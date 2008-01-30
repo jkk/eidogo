@@ -2115,7 +2115,7 @@ eidogo.Player.prototype = {
     setPermalink: function() {
         if (!this.permalinkable) return true;
         if (this.unsavedChanges) {
-            alert(eidogo.i18n['unsaved changes']);
+            alert(t['unsaved changes']);
             return;
         }
         this.hook("setPermalink");
