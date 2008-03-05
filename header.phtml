@@ -2,7 +2,7 @@
     "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<title>EidoGo - Go Games, Pattern Search, Joseki Tutor, SGF Editor</title>
+<title>EidoGo - <?php if ($title) echo $title; else echo "Go Games, Pattern Search, Joseki Tutor, SGF Editor"; ?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
 <link rel="stylesheet" href="css/site-style.css" type="text/css">
@@ -46,7 +46,7 @@ eidogoConfig = {skipCss: true};
         <ul id="links">
             <li><a href="/#kjd">Joseki Tutor</a></li>
             <li><a href="/#search">Pattern Search</a></li>
-            <li><a href="tourney">Tourney Games</a></li>
+            <li><a href="tourney">Games</a></li>
             <li><a href="upload">Upload</a></li>
             <li><a href="/#gnugo" style='padding-right: 4px'>GNU Go</a></li>
             <li><a href="/#gnugo-9" style='padding-left: 4px; padding-right: 4px'>9x9</a></li>

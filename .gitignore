@@ -19,8 +19,10 @@ sgf/kjd*.sql
 sgf/dev/*
 sgf/downloaded/*
 sgf/games/*.sgf
+sgf/problems/*
 sgf/saved/*.sgf
 sgf/titles/*.sgf
 svn/*
+titles/titles.html
 titles/titles.db
 

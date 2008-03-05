@@ -118,7 +118,29 @@ pre {
 #links li a:hover {
     background: #ccc;
 }
+#subnav ul {
+    margin: 0;
+    padding: 0;
+    height: 30px;
+}
+#subnav li {
+    list-style-type: none;
+    float: left;
+    padding: 0 8px 0 8px;
+    border-left: 1px solid #aaa;
+}
+#subnav li:first-child {
+    padding: 0 8px 0 0;
+    border-left: none;
+}
+#subnav li.active {
+    font-weight: bold;
+}
+#subnav li a {
+    color: #833;
+}
 #tourney-games {
+    clear: both;
     margin: 0 0 10px 0;
     border-bottom: 1px solid #bbb;
     padding: 0;
@@ -145,4 +167,15 @@ pre {
 #tourney-games tr.odd:hover, #tourney-games tr.even:hover {
     background: #bbe;
     text-decoration: underline;
+}
+#games-search {
+    clear: both;
+    margin: 0 0 20px 0;
+    padding: 0 10px;
+    border: 1px solid #bbb;
+    background: #eee;
+}
+#games-search input[name=q] {
+    font-family: arial, helvetica, sans-serif;
+    font-size: 13px;
 }
