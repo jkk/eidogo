@@ -1,4 +1,8 @@
-Version 1.1
+Version 1.2 -
+    Features
+        * Game archive, search
+
+Version 1.1 - Jan 21 2008
     Features
         * Problem mode, crop/shrink-to-fit option
         * Score estimate (server-side)
