@@ -23,7 +23,7 @@ eidogo.SgfParser.prototype = {
         completeFn = (typeof completeFn == "function") ? completeFn : null;
         this.sgf = sgf;
         this.index = 0;
-        this.root = {children: []};
+        this.root = {_children: []};
         this.parseTree(this.root);
         completeFn && completeFn.call(this);
     },
@@ -45,9 +45,9 @@ eidogo.SgfParser.prototype = {
         }
     },
     parseNode: function(parent) {
-        var node = {children: []};
+        var node = {_children: []};
         if (parent)
-            parent.children.push(node);
+            parent._children.push(node);
         else
             this.root = node;
         this.parseProperties(node);

@@ -325,7 +325,7 @@ eidogo.Player.prototype = {
         
             // raw SGF data
             var sgf = new eidogo.SgfParser(cfg.sgf);
-            this.load(sgf.tree);
+            this.load(sgf.root);
     
         } else if (typeof cfg.sgf == "object") {
     
@@ -352,13 +352,13 @@ eidogo.Player.prototype = {
     
             // start from scratch
             var boardSize = cfg.boardSize || "19";
-            var blankGame = {nodes: [], trees: [{nodes: [{SZ: boardSize}], trees: []}]};
+            var blankGame = {children: [{SZ: boardSize, children: []}]};
         
             // AI opponent (e.g. GNU Go)
             if (cfg.opponentUrl) {
                 this.opponentUrl = cfg.opponentUrl;
                 this.opponentColor = cfg.opponentColor == "B" ? cfg.opponentColor : "W";
-                var root = blankGame.trees.first().nodes.first();
+                var root = blankGame.children[0];
                 root.PW = t['you'];
                 root.PB = "GNU Go"
                 this.gameName = "gnugo";
@@ -370,6 +370,101 @@ eidogo.Player.prototype = {
             completeFn();
         }
     },
+    
+    /**
+     * Loads game data into a given target. If no target is given, creates
+     * a new gameTree and initializes the game.
+    **/
+    load: function(data, target) {
+        if (!target) {
+            // load from scratch
+            target = new eidogo.GameNode();
+            this.gameTree = target;
+        }
+        target.loadJson(data);
+        target.cached = true;
+        this.doneLoading();
+        if (!target.parent) {
+            this.initGame(target);
+        } else {
+            this.progressiveLoads--;
+        }
+        
+        if (this.loadPath.length) {
+            this.goTo(this.loadPath, false);
+            if (!this.progressiveLoad) {
+                this.loadPath = [0,0];
+            }
+        } else {
+            this.refresh();
+        }
+        
+        // find out which color to play as for problem mode
+        if (!target.parent && this.problemMode) {
+            this.currentColor = this.problemColor = this.cursor.getNextColor();
+        }
+    },
+
+    /**
+     * Load game data given as raw SGF or JSON from a URL within the same
+     * domain.
+     * @param {string} url URL to load game data from
+     * @param {GameTree} target inserts data into this tree if given
+     * @param {boolean} useSgfPath if true, prepends sgfPath to url
+     * @param {Array} loadPath gameTree path to load
+    **/
+    remoteLoad: function(url, target, useSgfPath, loadPath, completeFn) {
+        useSgfPath = useSgfPath == "undefined" ? true : useSgfPath;
+        
+        completeFn = (typeof completeFn == "function") ? completeFn : null;
+        
+        if (useSgfPath) {
+            if (!target) {
+                this.gameName = url;
+            }
+            // if we're using sgfPath, assume url does not include .sgf extension
+            url = this.sgfPath + url + ".sgf";
+        }
+        
+        if (loadPath) {
+            this.loadPath = loadPath;
+        }
+        
+        var success = function(req) {
+            var data = req.responseText;
+        
+            // trim leading space
+            var first = data.charAt(0);
+            var i = 1;
+            while (i < data.length && (first == " " || first == "\r" || first == "\n")) {
+                first = data.charAt(i++);
+            }
+            
+            // infer the kind of file we got
+            if (first == '(') {
+                // SGF
+                var me = this;
+                var sgf = new eidogo.SgfParser(data, function() {
+                    // parsing is asychronous
+                    me.load(this.root, target);
+                    completeFn && completeFn();
+                });
+            } else if (first == '{') {
+                // JSON
+                data = eval("(" + data + ")");
+                this.load(data, target);
+                completeFn && completeFn();
+            } else {
+                this.croak(t['invalid data']);
+            }
+        }
+    
+        var failure = function(req) {
+            this.croak(t['error retrieving']);
+        }
+        
+        ajax('get', url, null, success, failure, this, 30000);
+    },
 
     /**
      * Sets up a new game for playing. Can be called repeatedly (e.g., for
@@ -377,7 +472,7 @@ eidogo.Player.prototype = {
     **/
     initGame: function(target) {
         this.handleDisplayPrefs();
-        var gameRoot = target.trees.first().nodes.first();
+        var gameRoot = target.children[0];
         var size = gameRoot.SZ;
         if (this.shrinkToFit) this.calcShrinkToFit(size || 19);
         if (!this.board) {
@@ -485,101 +580,6 @@ eidogo.Player.prototype = {
         if (rpad) { this.cropParams.width += rpad; }
         for (var bpad = pad; b + bpad > size; bpad--) {};
         if (bpad) { this.cropParams.height += bpad; }
-    },
-
-    /**
-     * Loads game data into a given target. If no target is given, creates
-     * a new gameTree and initializes the game.
-    **/
-    load: function(data, target) {
-        if (!target) {
-            // load from scratch
-            target = new eidogo.GameTree();
-            this.gameTree = target;
-        }
-        target.loadJson(data);
-        target.cached = true;
-        this.doneLoading();
-        if (!target.parent) {
-            this.initGame(target);
-        } else {
-            this.progressiveLoads--;
-        }
-        
-        if (this.loadPath.length) {
-            this.goTo(this.loadPath, false);
-            if (!this.progressiveLoad) {
-                this.loadPath = [0,0];
-            }
-        } else {
-            this.refresh();
-        }
-        
-        // find out which color to play as for problem mode
-        if (!target.parent && this.problemMode) {
-            this.currentColor = this.problemColor = this.cursor.getNextColor();
-        }
-    },
-
-    /**
-     * Load game data given as raw SGF or JSON from a URL within the same
-     * domain.
-     * @param {string} url URL to load game data from
-     * @param {GameTree} target inserts data into this tree if given
-     * @param {boolean} useSgfPath if true, prepends sgfPath to url
-     * @param {Array} loadPath gameTree path to load
-    **/
-    remoteLoad: function(url, target, useSgfPath, loadPath, completeFn) {
-        useSgfPath = useSgfPath == "undefined" ? true : useSgfPath;
-        
-        completeFn = (typeof completeFn == "function") ? completeFn : null;
-        
-        if (useSgfPath) {
-            if (!target) {
-                this.gameName = url;
-            }
-            // if we're using sgfPath, assume url does not include .sgf extension
-            url = this.sgfPath + url + ".sgf";
-        }
-        
-        if (loadPath) {
-            this.loadPath = loadPath;
-        }
-        
-        var success = function(req) {
-            var data = req.responseText;
-        
-            // trim leading space
-            var first = data.charAt(0);
-            var i = 1;
-            while (i < data.length && (first == " " || first == "\r" || first == "\n")) {
-                first = data.charAt(i++);
-            }
-            
-            // infer the kind of file we got
-            if (first == '(') {
-                // SGF
-                var me = this;
-                var sgf = new eidogo.SgfParser(data, function() {
-                    // parsing is asychronous
-                    me.load(this.tree, target);
-                    completeFn && completeFn();
-                });
-            } else if (first == '{') {
-                // JSON
-                data = eval("(" + data + ")");
-                this.load(data, target);
-                completeFn && completeFn();
-            } else {
-                this.croak(t['invalid data']);
-            }
-        }
-    
-        var failure = function(req) {
-            this.croak(t['error retrieving']);
-        }
-        
-        ajax('get', url, null, success, failure, this, 30000);
     },
 
     /**
@@ -731,9 +731,9 @@ eidogo.Player.prototype = {
         this.currentColor = (this.problemMode ? this.problemColor : "B");
         this.moveNumber = 0;
         if (firstGame) {
-            this.cursor.node = this.gameTree.trees.first().nodes.first();
+            this.cursor.node = this.gameRoot.children[0];
         } else {
-            this.cursor.node = this.gameTree.nodes.first();
+            this.cursor.node = this.gameRoot;
         }
         this.refresh(noRender);
     },
@@ -1385,7 +1385,7 @@ eidogo.Player.prototype = {
         var props = {};
         props[this.currentColor] = coord;
         props['MN'] = (++this.moveNumber).toString();
-        var varNode = new eidogo.GameNode(props);
+        var varNode = new eidogo.GameNode(null, props);
         this.totalMoves++;
         if (this.cursor.hasNext()) {
             // new variation tree

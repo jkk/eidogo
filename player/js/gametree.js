@@ -23,80 +23,87 @@ eidogo.GameNode = function(properties) {
     this.init(properties);
 };
 eidogo.GameNode.prototype = {
-    reserved: ['parent', 'nextSibling', 'previousSibling'],
     /**
      * @constructor
      * @param {Object} properties A JSON object to load into the node
      */
-    init: function(properties) {
-        properties = properties || {};
-        this.id = eidogo.gameNodeIdCounter++;
-        this.parent = null; // a tree, not a node
-        this.nextSibling = null;
-        this.previousSibling = null;
-        this.loadJson(properties);
+    init: function(parent, properties) {
+        this._id = eidogo.gameNodeIdCounter++;
+        this._parent = parent || null; // a tree, not a node
+        this._children = [];
+        if (properties)
+            this.loadJson(properties);
     },
-    setProperty: function(property, value) {
-        this[property] = value;
-    },
-    pushProperty: function(property, value) {
-        if (this.reserved.contains(property)) return;
-        if (this[property]) {
-            if (!(this[property] instanceof Array)) {
-                this[property] = [this[property]];
-            }
-            if (!this[property].contains(value)) {
-                this[property].push(value);
-            }
+    pushProperty: function(prop, value) {
+        if (this[prop]) {
+            if (!(this[prop] instanceof Array))
+                this[prop] = [this[prop]];
+            if (!this[prop].contains(value))
+                this[prop].push(value);
         } else {
-            this[property] = value;
+            this[prop] = value;
         }
     },
-    loadJson: function(jsonNode) {
-        for (var propName in jsonNode) {
-            this.setProperty(propName, jsonNode[propName]);
+    loadJson: function(data) {
+        var jsonStack = [data], gameStack = [this];
+        var jsonNode, gameNode;
+        var i, len;
+        while (jsonStack.length) {
+            jsonNode = jsonStack.pop();
+            gameNode = gameStack.pop();
+            gameNode.loadJsonNode(jsonNode);
+            len = (jsonNode._children ? jsonNode._children.length : 0);
+            for (i = 0; i < len; i++) {
+                jsonStack.push(jsonNode._children[i]);
+                if (!gameNode._children[i])
+                    gameNode._children[i] = new eidogo.GameNode(gameNode);
+                gameStack.push(gameNode._children[i]);
+            }
         }
+    },
+    loadJsonNode: function(data) {
+        for (var prop in data)
+            if (typeof data[prop] == "string")
+                this[prop] = data[prop];
     },
     getProperties: function() {
-        var properties = {};
-        for (var propName in this) {
-            if (propName != "reserved" && (typeof this[propName] == "string"
-                || this[propName] instanceof Array)) {
+        var properties = {}, propName, isReserved, isString, isArray;
+        for (propName in this) {
+            isPrivate = (propName.charAt(0) == "_");
+            isString = (typeof this[propName] == "string");
+            isArray = (this[propName] instanceof Array);
+            if (!isPrivate && (isString || isArray))
                 properties[propName] = this[propName];
-            }
         }
         return properties;
     },
     getMove: function() {
-        if (typeof this.W != "undefined") {
+        if (typeof this.W != "undefined")
             return this.W;
-        } else if (typeof this.B != "undefined") {
+        else if (typeof this.B != "undefined")
             return this.B;
-        }
         return null;
     },
     emptyPoint: function(coord) {
         var props = this.getProperties();
         for (var propName in props) {
             if (propName == "AW" || propName == "AB" || propName == "AE") {
-                if (!(this[propName] instanceof Array)) {
+                if (!(this[propName] instanceof Array))
                     this[propName] = [this[propName]];
-                }
                 this[propName] = this[propName].filter(function(v) { return v != coord});
-                if (!this[propName].length) {
+                if (!this[propName].length)
                     delete this[propName];
-                }
             } else if ((propName == "B" || propName == "W") && this[propName] == coord) {
                 delete this[propName];
             }
         }
     },
     getPosition: function() {
-        for (var i = 0; i < this.parent.nodes.length; i++) {
-            if (this.parent.nodes[i].id == this.id) {
+        alert('TO DO?');
+        return;
+        for (var i = 0; i < this.parent.nodes.length; i++)
+            if (this.parent.nodes[i].id == this.id)
                 return i;
-            }
-        }
         return null;
     }
 };
