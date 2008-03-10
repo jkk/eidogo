@@ -8,11 +8,11 @@
  */
 
 /**
- * @class Returns a JSON object of the form:
- *      { nodes: [], trees: [{nodes: [], trees:[]}, ...] }
+ * @class Returns an SGF-like JSON object of the form:
+ *      { PROP1: value,  PROP2: value, ..., _children: [...]}
  */
-eidogo.SgfParser = function(sgf, completeFn) {
-    this.init(sgf, completeFn);
+eidogo.SgfParser = function() {
+    this.init.apply(this, arguments);
 }
 eidogo.SgfParser.prototype = {
     /**

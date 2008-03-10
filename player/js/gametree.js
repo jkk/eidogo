@@ -4,7 +4,7 @@
  * Code licensed under AGPLv3:
  * http://www.fsf.org/licensing/licenses/agpl-3.0.html
  *
- * This file contains GameTree and related structures GameNode and GameCursor.
+ * This file contains GameNode and related structures such as GameCursor.
  */
 
 /**
@@ -12,15 +12,15 @@
  * multiple Player instantiations. Setting this to 15000 is kind of a hack
  * to avoid overlap with ids of as-yet-unloaded trees.
  */
-eidogo.gameTreeIdCounter = 15000;
 eidogo.gameNodeIdCounter = 15000;
 
 /**
- * @class GameNode holds the information for a specific node in the game tree,
- * such as moves, labels, game information, and variations.
+ * @class GameNode holds SGF-like data containing things like moves, labels
+ * game information, and so on. Each GameNode has children and (usually) a
+ * parent. The first child is the main line.
  */
-eidogo.GameNode = function(properties) {
-    this.init(properties);
+eidogo.GameNode = function() {
+    this.init.apply(this, arguments);
 };
 eidogo.GameNode.prototype = {
     /**
@@ -31,9 +31,15 @@ eidogo.GameNode.prototype = {
         this._id = eidogo.gameNodeIdCounter++;
         this._parent = parent || null; // a tree, not a node
         this._children = [];
+        this._preferredChild = 0;
         if (properties)
             this.loadJson(properties);
     },
+    /**
+     * Adds a property to this node without replacing existing values. If
+     * the given property already exists, it will make the value an array
+     * containing the given value and any existing values.
+    **/
     pushProperty: function(prop, value) {
         if (this[prop]) {
             if (!(this[prop] instanceof Array))
@@ -44,6 +50,10 @@ eidogo.GameNode.prototype = {
             this[prop] = value;
         }
     },
+    /**
+     * Loads SGF-like data given in JSON format. The data will consist of
+     * objects (nodes) with properties, with one special _children property.
+    **/
     loadJson: function(data) {
         var jsonStack = [data], gameStack = [this];
         var jsonNode, gameNode;
@@ -61,11 +71,29 @@ eidogo.GameNode.prototype = {
             }
         }
     },
+    /**
+     * Adds properties to the current node from a JSON object
+    **/
     loadJsonNode: function(data) {
-        for (var prop in data)
+        for (var prop in data) {
+            if (prop == "_id") {
+                eidogo.gameNodeIdCounter = Math.max(data[prop], eidogo.gameNodeIdCounter);
+                data[prop] = data[prop].toString();
+            }
             if (typeof data[prop] == "string")
                 this[prop] = data[prop];
+        }
     },
+    /**
+     * Add a new child (variation)
+    **/
+    appendChild: function(node) {
+        node._parent = this;
+        this._children.push(node);
+    },
+    /**
+     * Returns all the properties for this node
+    **/
     getProperties: function() {
         var properties = {}, propName, isReserved, isString, isArray;
         for (propName in this) {
@@ -77,6 +105,9 @@ eidogo.GameNode.prototype = {
         }
         return properties;
     },
+    /**
+     * Get the current black or white move as a raw SGF coordinate
+    **/
     getMove: function() {
         if (typeof this.W != "undefined")
             return this.W;
@@ -84,6 +115,9 @@ eidogo.GameNode.prototype = {
             return this.B;
         return null;
     },
+    /**
+     * Empty the current node of any black or white stones (played or added)
+    **/
     emptyPoint: function(coord) {
         var props = this.getProperties();
         for (var propName in props) {
@@ -98,8 +132,11 @@ eidogo.GameNode.prototype = {
             }
         }
     },
+    /**
+     * Returns the node's position relative to parent tree (deprecated??)
+    **/
     getPosition: function() {
-        alert('TO DO?');
+        alert('TODO: getPosition');
         return;
         for (var i = 0; i < this.parent.nodes.length; i++)
             if (this.parent.nodes[i].id == this.id)
@@ -115,88 +152,6 @@ eidogo.GameTree = function(jsonTree) {
     this.init(jsonTree);
 };
 eidogo.GameTree.prototype = {
-    /**
-     * @constructor
-     * @param {Object} jsonTree A JSON object to load into the tree
-     */
-    init: function(jsonTree) {
-        this.id = eidogo.gameTreeIdCounter++;
-        this.nodes = [];
-        this.trees = [];
-        this.parent = null;
-        this.preferredTree = 0;
-        if (typeof jsonTree != "undefined") {
-            this.loadJson(jsonTree);
-        }
-        if (!this.nodes.length) {
-            // must have at least one node
-            this.appendNode(new eidogo.GameNode());
-        }
-    },
-    appendNode: function(node) {
-        node.parent = this;
-        if (this.nodes.length) {
-            node.previousSibling = this.nodes.last();
-            node.previousSibling.nextSibling = node;
-        }
-        this.nodes.push(node);
-    },
-    appendTree: function(tree) {
-        tree.parent = this;
-        this.trees.push(tree);
-    },
-    // creates a variation tree at the given node position
-    createVariationTree: function(nodePos) {
-        var posNode = this.nodes[nodePos];
-        var preNodes = [];
-        var len = posNode.parent.nodes.length;
-        var i;
-        for (i = 0; i < len; i++) {
-            var n = posNode.parent.nodes[i];
-            preNodes.push(n);
-            if (n.id == posNode.id) {
-                n.nextSibling = null;
-                break;
-            }
-        }
-        var mainlineTree = new eidogo.GameTree();
-        i++;
-        posNode.parent.nodes[i].previousSibling = null;
-        var postNodes = [];
-        for (; i < len; i++) {
-            var n = posNode.parent.nodes[i];
-            n.parent = mainlineTree;
-            postNodes.push(n);
-        }                   
-        mainlineTree.nodes = postNodes;
-        mainlineTree.trees = posNode.parent.trees;
-        posNode.parent.nodes = preNodes;
-        posNode.parent.trees = [];
-        posNode.parent.appendTree(mainlineTree);
-    },
-    loadJson: function(jsonTree) {
-        for (var i = 0; i < jsonTree.nodes.length; i++) {
-            this.appendNode(new eidogo.GameNode(jsonTree.nodes[i]));
-        }
-        for (var i = 0; i < jsonTree.trees.length; i++) {
-            this.appendTree(new eidogo.GameTree(jsonTree.trees[i]));
-        }
-        if (jsonTree.id) {
-            // overwrite default id
-            this.id = jsonTree.id;
-            // so we never have overlap, even for nodes created later
-            eidogo.gameTreeIdCounter = Math.max(this.id, eidogo.gameTreeIdCounter);
-        }
-    },
-    getPosition: function() {
-        if (!this.parent) return null;
-        for (var i = 0; i < this.parent.trees.length; i++) {
-            if (this.parent.trees[i].id == this.id) {
-                return i;
-            }
-        }
-        return null;
-    },
     toSgf: function() {
         function treeToSgf(tree) {
             var sgf = "(";
@@ -232,8 +187,8 @@ eidogo.GameTree.prototype = {
 /**
  * @class GameCursor is used to navigate among the nodes of a game tree.
  */
-eidogo.GameCursor = function(node) {
-    this.init(node);
+eidogo.GameCursor = function() {
+    this.init.apply(this, arguments);
 }
 eidogo.GameCursor.prototype = {
     /**
@@ -243,78 +198,45 @@ eidogo.GameCursor.prototype = {
     init: function(node) {
         this.node = node;
     },
-    nextNode: function() {
-        if (this.node.nextSibling != null) {
-            this.node = this.node.nextSibling;
-            return true;
-        } else {
-            return false;
-        }
-    },
-    getNextMoves: function() {
-        if (!this.hasNext()) return null;
-        var moves = {};
-        if (this.node.nextSibling && this.node.nextSibling.getMove()) {
-            // null indicates a sibling move rather than a var tree number
-            moves[this.node.nextSibling.getMove()] = null; 
-        } else {
-            var vars = this.node.parent.trees;
-            var tree;
-            for (var i = 0; tree = vars[i]; i++) {
-                moves[tree.nodes[0].getMove()] = i;
-            }
-        }
-        return moves;
-    },
-    getNextColor: function() {
-        if (!this.hasNext()) return null;
-        if (this.node.nextSibling && (this.node.nextSibling.W || this.node.nextSibling.B))
-            return this.node.nextSibling.W ? "W" : "B";
-        var vars = this.node.parent.trees;
-        var tree;
-        for (var i = 0; tree = vars[i]; i++) {
-            if (tree.nodes[0].W || tree.nodes[0].B)
-                return tree.nodes[0].W ? "W" : "B";
-        }
-        return null;
-    },
-    next: function(treeNum) {
+    next: function(varNum) {
         if (!this.hasNext()) return false;
-        if ((typeof treeNum == "undefined" || treeNum == null)
-            && this.node.nextSibling != null) {
-            this.node = this.node.nextSibling;
-        } else if (this.node.parent.trees.length) {
-            // remember the last line followed
-            if (typeof treeNum == "undefined" || treeNum == null) {
-                treeNum = this.node.parent.preferredTree;
-            } else {
-                this.node.parent.preferredTree = treeNum;
-            }
-            this.node = this.node.parent.trees[treeNum].nodes[0];
-        }
+        varNum = (typeof varNum == "undefined" || varNum == null ?
+            this.node._preferredChild : varNum);
+        this.node._preferredChild = varNum;
+        this.node = this.node._children[varNum];
         return true;
     },
     previous: function() {
         if (!this.hasPrevious()) return false;
-        if (this.node.previousSibling != null) {
-            this.node = this.node.previousSibling;
-        } else {
-            // ascend one level
-            this.node = this.node.parent.parent.nodes.last();
-        }
+        this.node = this.node._parent;
         return true;
     },
     hasNext: function() {
-        return this.node && (this.node.nextSibling != null ||
-            (this.node.parent && this.node.parent.trees.length));
+        return this.node && this.node._children.length;
     },
     hasPrevious: function() {
-        return this.node && ((this.node.parent.parent
-            && this.node.parent.parent.nodes.length
-            && this.node.parent.parent.parent) ||
-            (this.node.previousSibling != null));
+        // Checking _parent of _parent is to prevent returning to root
+        return this.node && this.node._parent && this.node._parent._parent;
+    },
+    getNextMoves: function() {
+        if (!this.hasNext()) return null;
+        var moves = {};
+        var i, node;
+        for (i = 0; node = this.node._children[i]; i++)
+            moves[node.getMove()] = i;
+        return moves;
+    },
+    getNextColor: function() {
+        if (!this.hasNext()) return null;
+        var i, node;
+        for (var i = 0; node = this.node._children[i]; i++)
+            if (node.W || node.B)
+                return node.W ? "W" : "B";
+        return null;
     },
     getPath: function() {
+        alert('TODO: getPath');
+        return;
         var path = [];
         var cur = new eidogo.GameCursor(this.node);
         var treeId = prevId = cur.node.parent.id;
