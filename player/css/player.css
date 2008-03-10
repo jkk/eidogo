@@ -605,8 +605,8 @@
 }
 .eidogo-loading {
 	position: absolute;
-	width: 150px;
-	height: 40px;
+	width: 16px;
+	height: 16px;
 	top: 62px;
 	left: 730px;
 	padding: 0px 0 0 0px;

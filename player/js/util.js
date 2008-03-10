@@ -231,7 +231,8 @@ eidogo.util = {
     },
     
     getElXY: function(el, noScroll) {
-        if (el._x && el._y) return [el._x, el._y];
+        // TODO: improve caching?
+        // if (el._x && el._y) return [el._x, el._y];
         var node = el, elX = 0, elY = 0, parent = el.parentNode, sx = 0, sy = 0;
         while (node) {
             elX += node.offsetLeft;
@@ -245,8 +246,8 @@ eidogo.util = {
             elY -= parent.scrollTop;
             parent = parent.parentNode;
         }
-        el._x = elX;
-        el._y = elY;
+        // el._x = elX;
+        // el._y = elY;
         return [elX, elY, sx, sy];
     },
     
