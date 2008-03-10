@@ -470,7 +470,7 @@ eidogo.Player.prototype = {
     **/
     initGame: function(target) {
         this.handleDisplayPrefs();
-        var gameRoot = target._children[0];
+        var gameRoot = target._children[0] || new eidogo.GameNode();
         var size = gameRoot.SZ;
         if (this.shrinkToFit) this.calcShrinkToFit(size || 19);
         if (!this.board) {
@@ -598,7 +598,7 @@ eidogo.Player.prototype = {
             this.croak(t['error retrieving']);
         } 
         var params = {
-            sgf: this.gameRoot._children[0].toSgf(),
+            sgf: this.gameRoot._children[0].toSgf(), // TODO: use this.cursor.getGameTreeRoot
             move: this.currentColor,
             size: this.gameRoot._children[0].SZ
         };
@@ -702,16 +702,20 @@ eidogo.Player.prototype = {
         }
         
         // Path of branch indexes and final move number
+        var first = true;
         while (path.length) {
             position = parseInt(path.shift(), 10);
             if (!path.length) {
                 for (var i = 0; i < position; i++)
                     this.variation(0, true);
             } else if (path.length) {
-                while (this.cursor.node._children.length == 1)
-                    this.variation(0, true);
+                if (!first)
+                    while (this.cursor.node._children.length == 1)
+                        this.variation(0, true);
                 this.variation(position, true);
             }
+            first = false;
+            this.refresh();
         }
         this.refresh();
     },
@@ -815,12 +819,12 @@ eidogo.Player.prototype = {
         }
         
         // progressive loading?
-        if (!ignoreProgressive && this.progressiveUrl && !this.cursor.node.parent._cached) {
+        if (!ignoreProgressive && this.progressiveUrl && !this.cursor.node._cached) {
             this.nowLoading();
             this.progressiveLoads++;
             this.remoteLoad(
-                this.progressiveUrl + "?id=" + this.cursor.node.parent.id,
-                this.cursor.node.parent
+                this.progressiveUrl + "?id=" + this.cursor.node._id,
+                this.cursor.node
             );
         }
         
@@ -1456,6 +1460,7 @@ eidogo.Player.prototype = {
         this.dom.whiteName.innerHTML = "";
         this.dom.blackName.innerHTML = "";
         var gameInfo = this.gameRoot._children[0];
+        if (!gameInfo) return;
         var dl = document.createElement('dl');
         for (var propName in this.infoLabels) {
             if (gameInfo[propName] instanceof Array) {
@@ -2015,6 +2020,7 @@ eidogo.Player.prototype = {
     
     getGameDescription: function(excludeGameName) {
         var root = this.gameRoot._children[0];
+        if (!root) return;
         var desc = (excludeGameName ? "" : root.GN || this.gameName);
         if (root.PW && root.PB) {
             var wr = root.WR ? " " + root.WR : "";

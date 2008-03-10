@@ -138,11 +138,11 @@ eidogo.GameNode.prototype = {
      * Returns the node's position relative to parent tree (deprecated??)
     **/
     getPosition: function() {
-        alert('TODO: getPosition');
-        return;
-        for (var i = 0; i < this.parent.nodes.length; i++)
-            if (this.parent.nodes[i].id == this.id)
+        var siblings = this._parent._children;
+        for (var i = 0; i < siblings.length; i++)
+            if (siblings[i]._id == this._id) {
                 return i;
+            }
         return null;
     }
 };
@@ -237,20 +237,31 @@ eidogo.GameCursor.prototype = {
         return null;
     },
     getPath: function() {
-        alert('TODO: getPath');
-        return;
         var path = [];
         var cur = new eidogo.GameCursor(this.node);
-        var treeId = prevId = cur.node.parent.id;
-        path.push(cur.node.getPosition());
-        path.push(cur.node.parent.getPosition());
-        while (cur.previous()) {
-            treeId = cur.node.parent.id;
-            if (prevId != treeId) {
-                path.push(cur.node.parent.getPosition());
-                prevId = treeId;
-            }
+        var mn = 0;
+        var prev = cur.node;
+        cur.previous();
+        while (cur.hasPrevious() && cur.node._children.length == 1) {
+            prev = cur.node;
+            cur.previous();
+            mn++;
         }
+        path.push(mn);
+        path.push(prev.getPosition());
+        var lastId = null;
+        do {
+            prev = cur.node;
+            cur.previous();
+            while (cur.hasPrevious() && cur.node._children.length == 1) {
+                prev = cur.node;
+                cur.previous();
+            }
+            path.push(prev.getPosition());
+            lastId = prev._id;
+        } while (cur.previous());
+        if (lastId != cur.node._id)
+            path.push(cur.node.getPosition());
         return path.reverse();
     },
     getPathMoves: function() {
@@ -262,5 +273,10 @@ eidogo.GameCursor.prototype = {
             if (move) path.push(move);
         }
         return path.reverse();
+    },
+    getGameTreeRoot: function() {
+        var cur = new eidogo.GameCursor(this.node);
+        while (cur.previous()) {};
+        return cur.node;
     }
 };
