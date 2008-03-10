@@ -708,7 +708,6 @@ eidogo.Player.prototype = {
                 this.variation(position, true);
             }
             first = false;
-            this.refresh();
         }
         this.refresh();
     },
