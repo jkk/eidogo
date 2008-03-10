@@ -53,6 +53,7 @@ eidogo.GameNode.prototype = {
     /**
      * Loads SGF-like data given in JSON format. The data will consist of
      * objects (nodes) with properties, with one special _children property.
+     * We use a stack instead of recursion to avoid recursion limits.
     **/
     loadJson: function(data) {
         var jsonStack = [data], gameStack = [this];
@@ -106,6 +107,22 @@ eidogo.GameNode.prototype = {
                 properties[propName] = this[propName];
         }
         return properties;
+    },
+    /**
+     * Applies a function to this node and all its children, recursively
+     * (although we use a stack instead of actual recursion)
+    **/
+    walk: function(fn) {
+        var stack = [this];
+        var node;
+        var i, len;
+        while (stack.length) {
+            node = stack.pop();
+            fn(node);
+            len = (node._children ? node._children.length : 0);
+            for (i = 0; i < len; i++)
+                stack.push(node._children[i]);
+        }
     },
     /**
      * Get the current black or white move as a raw SGF coordinate
@@ -274,8 +291,11 @@ eidogo.GameCursor.prototype = {
         }
         return path.reverse();
     },
-    getGameTreeRoot: function() {
+    getGameRoot: function() {
         var cur = new eidogo.GameCursor(this.node);
+        // If we're on the tree root, return the first game
+        if (!this.node._parent && this.node._children.length)
+            return this.node._children[0];
         while (cur.previous()) {};
         return cur.node;
     }

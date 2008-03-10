@@ -230,10 +230,10 @@ eidogo.Player.prototype = {
     reset: function(cfg) {
         this.gameName = "";
         
-        // See http://www.red-bean.com/sgf/sgf4.html
-        // Right now we only really support a single game at a time -- i.e.,
-        // gameRoot._children[0]. I might change this in the future.
-        this.gameRoot = new eidogo.GameNode();
+        // Multiple games can be contained in gameTreeRoot. We default
+        // to the first (gameTreeRoot._children[0])
+        // See http://www.red-bean.com/sgf/sgf4.html 
+        this.gameTreeRoot = new eidogo.GameNode();
         this.cursor = new eidogo.GameCursor();
     
         // used for Ajaxy dynamic branch loading
@@ -377,13 +377,16 @@ eidogo.Player.prototype = {
         if (!target) {
             // load from scratch
             target = new eidogo.GameNode();
-            this.gameRoot = target;
+            this.gameTreeRoot = target;
         }
         target.loadJson(data);
         target._cached = true;
         this.doneLoading();
         if (!target._parent) {
-            this.initGame(target);
+            // Loading into tree root; use the first game by default or
+            // other if specified
+            var gameIndex = this.loadPath.length ? parseInt(this.loadPath[0], 10) : 0;
+            this.initGame(target._children[gameIndex || 0]);
         } else {
             this.progressiveLoads--;
         }
@@ -468,11 +471,10 @@ eidogo.Player.prototype = {
      * Sets up a new game for playing. Can be called repeatedly (e.g., for
      * dynamically-loaded games).
     **/
-    initGame: function(target) {
+    initGame: function(gameRoot) {
         this.handleDisplayPrefs();
-        var gameRoot = target._children[0] || new eidogo.GameNode();
         var size = gameRoot.SZ;
-        if (this.shrinkToFit) this.calcShrinkToFit(size || 19);
+        if (this.shrinkToFit) this.calcShrinkToFit(gameRoot, size || 19);
         if (!this.board) {
             // first time
             this.createBoard(size || 19);
@@ -484,7 +486,7 @@ eidogo.Player.prototype = {
         var moveCursor = new eidogo.GameCursor(this.cursor.node);
         while (moveCursor.next()) { this.totalMoves++; }
         this.totalMoves--;
-        this.showInfo();
+        this.showInfo(gameRoot);
         this.enableNavSlider();
         this.selectTool("play");
         this.hook("initGame");
@@ -527,37 +529,28 @@ eidogo.Player.prototype = {
     
     /**
      * Calculates the crop area to use based on the widest distance between
-     * stones and markers in this game. We're conservative with respect to
-     * checking markers: only labels.
+     * stones and markers in the given game. We're conservative with respect
+     * to checking markers: only labels for now.
     **/
-    calcShrinkToFit: function(size) {
+    calcShrinkToFit: function(gameRoot, size) {
         // leftmost, topmost, rightmost, bottommost
         var l = null, t = null, r = null, b = null;
         var points = {};
         var me = this;
         // find all points occupied by stones or labels
-        alert('TODO: calcShrinktoFit');
-        return;
-        var traverse = function(branch) {
-            var i, j, prop, node, coord, len = tree.nodes.length;
-            for (i = 0; i < len; i++) {
-                for (prop in branch) {
-                    if (/^(W|B|AW|AB|LB)$/.test(prop)) {
-                        coord = branch[i][prop];
-                        if (!(coord instanceof Array)) coord = [coord];
-                        if (prop != 'LB') coord = me.expandCompressedPoints(coord);
-                        else coord = [coord[0].split(/:/)[0]];
-                        for (j = 0; j < coord.length; j++)
-                            points[coord[j]] = "";
-                    }
+        gameRoot.walk(function(node) {
+            var prop, i, coord;
+            for (prop in node) {
+                if (/^(W|B|AW|AB|LB)$/.test(prop)) {
+                    coord = node[prop];
+                    if (!(coord instanceof Array)) coord = [coord];
+                    if (prop != 'LB') coord = me.expandCompressedPoints(coord);
+                    else coord = [coord[0].split(/:/)[0]];
+                    for (i = 0; i < coord.length; i++)
+                        points[coord[i]] = "";
                 }
             }
-            len = branch._children.length;
-            for (i = 0; i < len; i++) {
-                traverse(branch._children[i]);
-            }
-        }
-        traverse(this.gameRoot._children[0]);
+        });
         // nab the outermost points
         for (var key in points) {
             var pt = this.sgfCoordToPoint(key);
@@ -596,13 +589,13 @@ eidogo.Player.prototype = {
         }
         var failure = function(req) {
             this.croak(t['error retrieving']);
-        } 
+        }
+        var root = this.cursor.getGameRoot();
         var params = {
-            sgf: this.gameRoot._children[0].toSgf(), // TODO: use this.cursor.getGameTreeRoot
+            sgf: root.toSgf(),
             move: this.currentColor,
-            size: this.gameRoot._children[0].SZ
+            size: root.SZ
         };
-        
         ajax('post', this.opponentUrl, params, success, failure, this, 45000);  
     },
     
@@ -626,7 +619,7 @@ eidogo.Player.prototype = {
         var failure = function(req) {
             this.croak(t['error retrieving']);
         }
-        var root = this.gameRoot._children[0]
+        var root = this.cursor.getGameRoot();
         var params = {
             sgf: root.toSgf(),
             move: 'est',
@@ -723,14 +716,14 @@ eidogo.Player.prototype = {
     /**
      * Resets the game cursor to the first node
     **/
-    resetCursor: function(noRender, firstGame) {
+    resetCursor: function(noRender, toGameRoot) {
         this.board.reset();
         this.currentColor = (this.problemMode ? this.problemColor : "B");
         this.moveNumber = 0;
-        if (firstGame) {
-            this.cursor.node = this.gameRoot._children[0];
+        if (toGameRoot) {
+            this.cursor.node = this.cursor.getGameRoot();
         } else {
-            this.cursor.node = this.gameRoot;
+            this.cursor.node = this.gameTreeRoot;
         }
         this.refresh(noRender);
     },
@@ -1455,12 +1448,11 @@ eidogo.Player.prototype = {
     /**
      * Parse and display the game's info
     **/
-    showInfo: function() {
+    showInfo: function(gameInfo) {
+        if (!gameInfo) return;
         this.dom.infoGame.innerHTML = "";
         this.dom.whiteName.innerHTML = "";
         this.dom.blackName.innerHTML = "";
-        var gameInfo = this.gameRoot._children[0];
-        if (!gameInfo) return;
         var dl = document.createElement('dl');
         for (var propName in this.infoLabels) {
             if (gameInfo[propName] instanceof Array) {
@@ -1769,7 +1761,7 @@ eidogo.Player.prototype = {
             location.href = this.downloadUrl + this.gameName;
         } else if (isMoz) {
             location.href = "data:text/plain," +
-                encodeURIComponent(this.gameRoot._children[0].toSgf());
+                encodeURIComponent(this.cursor.getGameRoot().toSgf());
         }
     },
     
@@ -1784,7 +1776,7 @@ eidogo.Player.prototype = {
         var failure = function(req) {
             this.croak(t['error retrieving']);
         }
-        var sgf = this.gameRoot._children[0].toSgf();
+        var sgf = this.cursor.getGameRoot().toSgf();
         ajax('POST', this.saveUrl, {sgf: sgf}, success, failure, this, 30000);
     },
 
@@ -2019,7 +2011,7 @@ eidogo.Player.prototype = {
     },
     
     getGameDescription: function(excludeGameName) {
-        var root = this.gameRoot._children[0];
+        var root = this.cursor.getGameRoot();
         if (!root) return;
         var desc = (excludeGameName ? "" : root.GN || this.gameName);
         if (root.PW && root.PB) {
