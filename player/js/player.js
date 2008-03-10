@@ -658,70 +658,62 @@ eidogo.Player.prototype = {
     **/
     goTo: function(path, fromStart) {
         fromStart = typeof fromStart != "undefined" ? fromStart : true;
-        alert("TODO: goTo");
+        if (fromStart)
+            this.resetCursor(true);
+        
+        // Move number
+        var steps = parseInt(path, 10);
+        if (!(path instanceof Array) && !isNaN(steps)) {
+            if (fromStart) steps++; // not zero-based
+            for (var i = 0; i < steps; i++)
+                this.variation(null, true);
+            this.refresh();
+            return;
+        }
+        
+        // Not a path?
+        if (!(path instanceof Array) || !path.length) {
+            alert(t['bad path'] + " " + path);
+            return;
+        }
+
         var position;
         var vars;
-        if (path instanceof Array) {
-            // Go to an absolute path.
-            if (!path.length) return;
-            if (fromStart) {
-                this.resetCursor(true);
-            }
+        
+        // Path of moves (SGF coords)
+        if (isNaN(parseInt(path[0], 10))) {
+            this.variation(0, true); // first game tree is assumed
             while (path.length) {
-                position = path[0];
-                if (isNaN(parseInt(position, 10))) {
-                    // move (coord) path item
-                    vars = this.getVariations(true);
-                    if (!vars.length || vars[0].move == null) {
-                        this.variation(null, true);
-                        if (this.progressiveLoads) {
-                            this.loadPath.push(position);
-                            return;
-                        }
-                    }
-                    for (var i = 0; i < vars.length; i++) {
-                        if (vars[i].move == position) {
-                            this.variation(vars[i].varNum, true);
-                            break;
-                        }
-                    }
-                    path.shift();
-                } else {
-                    // node integer position
-                    position = parseInt(path.shift(), 10);
-                    if (path.length == 0) {
-                        // node position
-                        for (var i = 0; i < position; i++) {
-                            this.variation(null, true);
-                        }
-                    } else if (path.length) {
-                        // tree position
-                        this.variation(position, true);
-                        if (path.length != 1) {
-                            // go to the end of the line for each tree we pass
-                            while (this.cursor.nextNode()) {
-                                this.execNode(true, true);
-                            }
-                        }
+                position = path.shift();
+                vars = this.getVariations(true);
+                for (var i = 0; i < vars.length; i++) {
+                    if (vars[i].move == position) {
+                        this.variation(vars[i].varNum, true);
+                        break;
                     }
                 }
-                if (this.progressiveLoads) return;
+                if (this.progressiveLoads) {
+                    this.loadPath.push(position);
+                    return;
+                }
             }
             this.refresh();
-        } else if (!isNaN(parseInt(path, 10))) {
-            // Go to a move number.
-            var steps = parseInt(path, 10);
-            if (fromStart) {
-                this.resetCursor(true);
-                steps++;
-            }
-            for (var i = 0; i < steps; i++) {
-                this.variation(null, true);
-            }
-            this.refresh();
-        } else {
-            alert(t['bad path'] + " " + path);
+            return;
         }
+        
+        // Path of branch indexes and final move number
+        while (path.length) {
+            position = parseInt(path.shift(), 10);
+            if (!path.length) {
+                for (var i = 0; i < position; i++)
+                    this.variation(0, true);
+            } else if (path.length) {
+                while (this.cursor.node._children.length == 1)
+                    this.variation(0, true);
+                this.variation(position, true);
+            }
+        }
+        this.refresh();
     },
 
     /**

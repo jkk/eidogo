@@ -77,10 +77,12 @@ eidogo.GameNode.prototype = {
     loadJsonNode: function(data) {
         for (var prop in data) {
             if (prop == "_id") {
-                eidogo.gameNodeIdCounter = Math.max(data[prop], eidogo.gameNodeIdCounter);
-                data[prop] = data[prop].toString();
+                this[prop] = data[prop].toString();
+                eidogo.gameNodeIdCounter = Math.max(eidogo.gameNodeIdCounter,
+                                                    parseInt(data[prop], 10));
+                continue;
             }
-            if (typeof data[prop] == "string")
+            if (prop.charAt(0) != "_")
                 this[prop] = data[prop];
         }
     },
