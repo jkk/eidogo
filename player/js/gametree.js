@@ -4,11 +4,11 @@
  * Code licensed under AGPLv3:
  * http://www.fsf.org/licensing/licenses/agpl-3.0.html
  *
- * This file contains GameNode and related structures such as GameCursor.
+ * This file contains GameNode and GameCursor.
  */
 
 /**
- * For uniquely identifying trees and nodes. Should work even if we have
+ * For uniquely identifying nodes. Should work even if we have
  * multiple Player instantiations. Setting this to 15000 is kind of a hack
  * to avoid overlap with ids of as-yet-unloaded trees.
  */
@@ -25,7 +25,8 @@ eidogo.GameNode = function() {
 eidogo.GameNode.prototype = {
     /**
      * @constructor
-     * @param {Object} properties A JSON object to load into the node
+     * @param {GameNode} parent Parent of the node
+     * @param {Object} properties SGF-like JSON object to load into the node
      */
     init: function(parent, properties) {
         this._id = eidogo.gameNodeIdCounter++;
@@ -51,7 +52,7 @@ eidogo.GameNode.prototype = {
         }
     },
     /**
-     * Loads SGF-like data given in JSON format. The data will consist of
+     * Loads SGF-like data given in JSON format. The data should consist of
      * objects (nodes) with properties, with one special _children property.
      * We use a stack instead of recursion to avoid recursion limits.
     **/
@@ -161,45 +162,46 @@ eidogo.GameNode.prototype = {
                 return i;
             }
         return null;
-    }
-};
-
-/**
- * @class GameTree holds all of the game's moves and variations
- */
-eidogo.GameTree = function(jsonTree) {
-    this.init(jsonTree);
-};
-eidogo.GameTree.prototype = {
+    },
+    /**
+     * Converts this node and all children to SGF
+    **/
     toSgf: function() {
-        function treeToSgf(tree) {
-            var sgf = "(";
-            for (var i = 0; i < tree.nodes.length; i++) {
-                sgf += nodeToSgf(tree.nodes[i]);
-            }
-            for (var i = 0; i < tree.trees.length; i++) {
-                sgf += treeToSgf(tree.trees[i]);
-            }
-            return sgf + ")";
-        }
-        function nodeToSgf(node) {
-            var sgf = ";";
-            var props = node.getProperties();
-            for (var key in props) {
-                var val;
+        var sgf = (this._parent ? "(" : "");
+        var node = this;
+        
+        function propsToSgf(props) {
+            if (!props) return "";
+            var sgf = ";", key, val;
+            for (key in props) {
                 if (props[key] instanceof Array) {
                     val = props[key].map(function (val) {
-                        return val.replace(/\]/, "\\]");
+                        return val.toString().replace(/\]/, "\\]");
                     }).join("][");
                 } else {
-                    val = props[key].replace(/\]/, "\\]");
+                    val = props[key].toString().replace(/\]/, "\\]");
                 }
-                
                 sgf += key + "[" + val  + "]";
             }
             return sgf;
         }
-        return treeToSgf(this);
+        
+        sgf += propsToSgf(node.getProperties());
+        
+        // Follow main line until we get to a node with multiple variations
+        while (node._children.length == 1) {
+            node = node._children[0];
+            sgf += propsToSgf(node.getProperties());
+        }
+        
+        // Variations
+        for (var i = 0; i < node._children.length; i++) {
+            sgf += node._children[i].toSgf();
+        }
+        
+        sgf += (this._parent ? ")" : "");
+        
+        return sgf;
     }
 };
 
