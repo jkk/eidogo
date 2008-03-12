@@ -8,7 +8,13 @@ import os
 from socket import *
 from libkombilo import *
 
-gl = GameList(os.path.join(os.path.dirname(os.path.abspath(__file__)), 't1.db'))
+pwd = os.path.dirname(os.path.abspath(__file__))
+
+f = open(os.path.join(pwd, 'server.pid'), 'w')
+f.write("%d" % os.getpid())
+f.close()
+
+gl = GameList(os.path.join(pwd, 't1.db'))
 
 ss = socket(AF_INET, SOCK_STREAM)
 ss.bind(('', 6060))
