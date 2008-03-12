@@ -8,6 +8,7 @@ kombilo/build
 kombilo/cache
 kombilo/libkombilo.py
 kombilo/libkombilo_wrap.cxx
+kombilo/server.pid
 kombilo/t1.db
 kombilo/t1.db1
 kombilo/t1.db2
