@@ -30,7 +30,7 @@ eidogo.GameNode.prototype = {
      */
     init: function(parent, properties) {
         this._id = eidogo.gameNodeIdCounter++;
-        this._parent = parent || null; // a tree, not a node
+        this._parent = parent || null;
         this._children = [];
         this._preferredChild = 0;
         if (properties)
@@ -52,8 +52,11 @@ eidogo.GameNode.prototype = {
         }
     },
     /**
-     * Loads SGF-like data given in JSON format. The data should consist of
-     * objects (nodes) with properties, with one special _children property.
+     * Loads SGF-like data given in JSON format:
+     *      {PROP1: VALUE, PROP2: VALUE, _children: [...]}
+     * Node properties will be overwritten if they exist or created if they
+     * don't.
+     *
      * We use a stack instead of recursion to avoid recursion limits.
     **/
     loadJson: function(data) {
@@ -84,7 +87,7 @@ eidogo.GameNode.prototype = {
                                                     parseInt(data[prop], 10));
                 continue;
             }
-            if (prop.charAt(0) != "_")
+            if (prop.charAt(0) != "_" || prop == "_cached")
                 this[prop] = data[prop];
         }
     },
@@ -254,6 +257,12 @@ eidogo.GameCursor.prototype = {
             if (node.W || node.B)
                 return node.W ? "W" : "B";
         return null;
+    },
+    getNextNodeWithVariations: function() {
+        var node = this.node;
+        while (node._children.length == 1)
+            node = node._children[0];
+        return node;
     },
     getPath: function() {
         var path = [];

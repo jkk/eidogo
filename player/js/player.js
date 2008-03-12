@@ -230,10 +230,10 @@ eidogo.Player.prototype = {
     reset: function(cfg) {
         this.gameName = "";
         
-        // Multiple games can be contained in gameTreeRoot. We default
-        // to the first (gameTreeRoot._children[0])
+        // Multiple games can be contained in collectionRoot. We default
+        // to the first (collectionRoot._children[0])
         // See http://www.red-bean.com/sgf/sgf4.html 
-        this.gameTreeRoot = new eidogo.GameNode();
+        this.collectionRoot = new eidogo.GameNode();
         this.cursor = new eidogo.GameCursor();
     
         // used for Ajaxy dynamic branch loading
@@ -377,7 +377,7 @@ eidogo.Player.prototype = {
         if (!target) {
             // load from scratch
             target = new eidogo.GameNode();
-            this.gameTreeRoot = target;
+            this.collectionRoot = target;
         }
         target.loadJson(data);
         target._cached = true;
@@ -722,7 +722,7 @@ eidogo.Player.prototype = {
         if (toGameRoot) {
             this.cursor.node = this.cursor.getGameRoot();
         } else {
-            this.cursor.node = this.gameTreeRoot;
+            this.cursor.node = this.collectionRoot;
         }
         this.refresh(noRender);
     },
@@ -811,13 +811,14 @@ eidogo.Player.prototype = {
         }
         
         // progressive loading?
-        if (!ignoreProgressive && this.progressiveUrl && !this.cursor.node._cached) {
+        var loadNode = this.cursor.node;
+        if (!ignoreProgressive && this.progressiveUrl && !loadNode._cached) {
+            // console.log(loadNode);
             this.nowLoading();
             this.progressiveLoads++;
             this.remoteLoad(
-                this.progressiveUrl + "?id=" + this.cursor.node._id,
-                this.cursor.node
-            );
+                this.progressiveUrl + "?id=" + loadNode._id,
+                loadNode);
         }
         
         // play a reponse in problem-solving mode, unless we just navigated backwards
@@ -1593,7 +1594,7 @@ eidogo.Player.prototype = {
             );
             this.dom.variations.appendChild(varNav);
         }
-        if (!this.variations.length) {
+        if (this.variations.length < 2) {
             this.dom.variations.innerHTML = "<div class='variation-nav none'>" +
                 t['no variations'] + "</div>";
         }

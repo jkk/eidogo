@@ -50,7 +50,7 @@ eidogo.SgfParser.prototype = {
             parent._children.push(node);
         else
             this.root = node;
-        this.parseProperties(node);
+        node = this.parseProperties(node);
         return node;
     },
     parseProperties: function(node) {
