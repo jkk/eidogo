@@ -1978,7 +1978,7 @@ eidogo.Player.prototype = {
         // assume we're just reflecting the board position
         if (offsetGiven) {
             this.nowLoading();
-            var delta = moveOffset - this.cursor.node.getPosition() ;
+            var delta = moveOffset - this.cursor.getMoveNumber();
             for (var i = 0; i < Math.abs(delta); i++) {
                 if (delta > 0) {
                     this.variation(null, true);

@@ -156,7 +156,7 @@ eidogo.GameNode.prototype = {
         }
     },
     /**
-     * Returns the node's position relative to parent tree (deprecated??)
+     * Returns the node's position in its parent's _children array
     **/
     getPosition: function() {
         var siblings = this._parent._children;
@@ -301,6 +301,15 @@ eidogo.GameCursor.prototype = {
             if (move) path.push(move);
         }
         return path.reverse();
+    },
+    getMoveNumber: function() {
+        var num = 0,
+            node = this.node;
+        while (node && (node.W || node.B)) {
+            num++;
+            node = node._parent;
+        }
+        return num;
     },
     getGameRoot: function() {
         var cur = new eidogo.GameCursor(this.node);
