@@ -87,7 +87,7 @@ eidogo.GameNode.prototype = {
                                                     parseInt(data[prop], 10));
                 continue;
             }
-            if (prop.charAt(0) != "_" || prop == "_cached")
+            if (prop.charAt(0) != "_")
                 this[prop] = data[prop];
         }
     },

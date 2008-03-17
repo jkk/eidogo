@@ -432,17 +432,10 @@ eidogo.Player.prototype = {
         }
         
         var success = function(req) {
-            var data = req.responseText;
+            var data = req.responseText.replace(/^( |\t|\r|\n)*/, "");
         
-            // trim leading space
-            var first = data.charAt(0);
-            var i = 1;
-            while (i < data.length && (first == " " || first == "\r" || first == "\n")) {
-                first = data.charAt(i++);
-            }
-            
             // infer the kind of file we got
-            if (first == '(') {
+            if (data.charAt(0) == '(') {
                 // SGF
                 var me = this;
                 var sgf = new eidogo.SgfParser(data, function() {
@@ -450,7 +443,7 @@ eidogo.Player.prototype = {
                     me.load(this.root, target);
                     completeFn && completeFn();
                 });
-            } else if (first == '{') {
+            } else if (data.charAt(0) == '{') {
                 // JSON
                 data = eval("(" + data + ")");
                 this.load(data, target);
@@ -472,12 +465,13 @@ eidogo.Player.prototype = {
      * dynamically-loaded games).
     **/
     initGame: function(gameRoot) {
+        gameRoot = gameRoot || {};
         this.handleDisplayPrefs();
-        var size = gameRoot.SZ;
-        if (this.shrinkToFit) this.calcShrinkToFit(gameRoot, size || 19);
+        var size = gameRoot.SZ || 19;
+        if (this.shrinkToFit) this.calcShrinkToFit(gameRoot, size);
         if (!this.board) {
             // first time
-            this.createBoard(size || 19);
+            this.createBoard(size);
             this.rules = new eidogo.Rules(this.board);
         }
         this.unsavedChanges = false;
@@ -644,7 +638,7 @@ eidogo.Player.prototype = {
             }
         }.bind(this), 200);
     },
-
+    
     /**
      * Navigates to a location within the game. Takes progressive loading
      * into account.
@@ -810,23 +804,23 @@ eidogo.Player.prototype = {
             this.board.render();
         }
         
-        // progressive loading?
-        var loadNode = this.cursor.node;
-        if (!ignoreProgressive && this.progressiveUrl && !loadNode._cached) {
-            // console.log(loadNode);
-            this.nowLoading();
-            this.progressiveLoads++;
-            this.remoteLoad(
-                this.progressiveUrl + "?id=" + loadNode._id,
-                loadNode);
-        }
+        // progressive loading?        
+        if (!ignoreProgressive && this.progressiveUrl)
+            this.fetchProgressiveData();
         
         // play a reponse in problem-solving mode, unless we just navigated backwards
-        if (this.problemMode && this.currentColor && this.currentColor != this.problemColor && !this.goingBack) {
+        if (this.problemMode && this.currentColor && this.currentColor != this.problemColor && !this.goingBack)
             this.playProblemResponse(noRender);
-        }
         
         this.goingBack = false;
+    },
+    
+    fetchProgressiveData: function() {
+        var loadNode = this.cursor.node;
+        if (loadNode._cached) return;
+        this.nowLoading();
+        this.progressiveLoads++;
+        this.remoteLoad(this.progressiveUrl + "?id=" + loadNode._id, loadNode);
     },
 
     /**
@@ -1359,6 +1353,7 @@ eidogo.Player.prototype = {
         props[this.currentColor] = coord;
         props['MN'] = (++this.moveNumber).toString();
         var varNode = new eidogo.GameNode(null, props);
+        varNode._cached = true;
         this.totalMoves++;
         this.cursor.node.appendChild(varNode);
         this.variation(this.cursor.node._children.length-1);

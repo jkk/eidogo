@@ -1,15 +1,16 @@
 To use Kogo's Joseki Dictionary with progressive loading:
 
-0) Prerequisites: a web server with PHP and MySQL
+0) Prerequisites: a web server with Python, PHP and MySQL
 
 1) Download KJD from http://waterfire.us/joseki.htm
 2) Save the .sgf file as 'sgf/kjd.sgf'
 3) Set up a MySQL database and make note of the login info.
 4) Import php/kjd_structure.sql into the MySQL database.
-5) Remove the .default extension from the files
-     php/db.php.default
-6) Update db.php with the MySQL login information from step 3.
-7) Run kjd_insert.php, preferably from a shell, since it may
-   use a lot memory and take a while to process.
+5) Remove the .default extension from the files:
+        php/db.php.default
+        php/kjd_insert.py.default
+6) Update db.php and kjd_insert.py with the MySQL login information from
+   step 3.
+7) Run kjd_insert.py from a shell. It may take a few minutes.
 8) Point the Player cfg setting sgfUrl at php/kjd_progressive.php
    and set progressiveLoad to true.
