@@ -2016,15 +2016,14 @@ eidogo.Player.prototype = {
         var html = "",
             curId = this.cursor.node._id,
             nodeWidth = this.board.renderer.pointWidth + 5,
-            totalIndent = 0,
             path = [this.cursor.getGameRoot().getPosition()],
             player = this;
-        var traverse = function(node, startNum) {
+        var traverse = function(node, startNum, varNum) {
             var indent = 0,
                 offset = 0,
                 moveNum = startNum,
                 pathStr;
-            html += "<li><div>";
+            html += "<li" + (varNum == 0 ? " class='first'" : "") + "><div class='mainline'>";
             do {
                 pathStr = path.join(',') + "," + offset;
                 html += "<a href='#' id='navtree-node-" + pathStr  + "' class='" +
@@ -2037,28 +2036,30 @@ eidogo.Player.prototype = {
                 node = node._children[0];
                 indent++;
             } while (node);
-            if (node._children.length > 1) {
+            html += "</div>";
+            if (node._children.length > 1)
                 html += "<ul style='margin-left: " + (indent * nodeWidth) + "px'>";
-                totalIndent += indent * nodeWidth;
-            }
             for (var i = 0; i < node._children.length; i++) {
                 if (node._children.length > 1)
                     path.push(i);
-                traverse(node._children[i], moveNum);
+                traverse(node._children[i], moveNum, i);
                 if (node._children.length > 1)
                     path.pop();
             }
             if (node._children.length > 1)
                 html += "</ul>";
-            html += "</div></li>";
+            html += "</li>";
         }
-        traverse(this.cursor.getGameRoot(), 0);
-        this.dom.navTree.style.width = ((this.totalMoves+2) * nodeWidth + totalIndent) + "px";
-        this.dom.navTree.innerHTML = "<ul>" + html + "</ul>";
+        traverse(this.cursor.getGameRoot(), 0, 0);
+        this.dom.navTree.style.width = ((this.totalMoves+2) * nodeWidth) + "px";
+        this.dom.navTree.innerHTML = "<ul class='root'>" + html + "</ul>";
     },
     
     navTreeClick: function(e) {
         var target = e.target || e.srcElement;
+        if (target.nodeName.toLowerCase() == "li" && target.className == "first") {
+            target = target.parentNode.previousSibling.lastChild;
+        }
         if (!target || !target.id) return;
         var path = target.id.replace(/^navtree-node-/, "").split(",");
         this.goTo(path);
