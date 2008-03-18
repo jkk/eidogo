@@ -322,9 +322,6 @@ return;
 }
 el.style.display="none";
 },getElXY:function(el,_40){
-if(el._x&&el._y){
-return [el._x,el._y];
-}
 var _41=el,elX=0,elY=0,_44=el.parentNode,sx=0,sy=0;
 while(_41){
 elX+=_41.offsetLeft;
@@ -338,8 +335,6 @@ elX-=_44.scrollLeft;
 elY-=_44.scrollTop;
 _44=_44.parentNode;
 }
-el._x=elX;
-el._y=elY;
 return [elX,elY,sx,sy];
 },getElX:function(el){
 return this.getElXY(el)[0];
@@ -495,10 +490,10 @@ var sgf=";",key,val;
 for(key in _21){
 if(_21[key] instanceof Array){
 val=_21[key].map(function(val){
-return val.toString().replace(/\]/,"\\]");
+return val.toString().replace(/\]/g,"\\]");
 }).join("][");
 }else{
-val=_21[key].toString().replace(/\]/,"\\]");
+val=_21[key].toString().replace(/\]/g,"\\]");
 }
 sgf+=key+"["+val+"]";
 }
@@ -1074,44 +1069,35 @@ return false;
 }
 return true;
 },apply:function(pt,_6){
-var _7=this.doCaptures(pt,_6);
-if(_7<0){
-_6=-_6;
-_7=-_7;
+this.doCaptures(pt,_6);
+},doCaptures:function(pt,_8){
+var _9=0;
+_9+=this.doCapture({x:pt.x-1,y:pt.y},_8);
+_9+=this.doCapture({x:pt.x+1,y:pt.y},_8);
+_9+=this.doCapture({x:pt.x,y:pt.y-1},_8);
+_9+=this.doCapture({x:pt.x,y:pt.y+1},_8);
+_9-=this.doCapture(pt,-_8);
+if(_9<0){
+_8=-_8;
+_9=-_9;
 }
-_6=_6==this.board.WHITE?"W":"B";
-this.board.captures[_6]+=_7;
-},doCaptures:function(pt,_9){
-var _a=0;
-_a+=this.doCapture({x:pt.x-1,y:pt.y},_9);
-_a+=this.doCapture({x:pt.x+1,y:pt.y},_9);
-_a+=this.doCapture({x:pt.x,y:pt.y-1},_9);
-_a+=this.doCapture({x:pt.x,y:pt.y+1},_9);
-_a-=this.doCapture(pt,-_9);
-return _a;
-},doCapture:function(pt,_c){
-var x,y;
-var _f=this.board.boardSize;
-if(pt.x<0||pt.y<0||pt.x>=_f||pt.y>=_f){
-return 0;
-}
-if(this.board.getStone(pt)==_c){
-return 0;
-}
+_8=_8==this.board.WHITE?"W":"B";
+this.board.captures[_8]+=_9;
+},doCapture:function(pt,_b){
 this.pendingCaptures=[];
-if(this.doCaptureRecurse(pt,_c)){
+if(this.findCaptures(pt,_b)){
 return 0;
 }
-var _10=this.pendingCaptures.length;
+var _c=this.pendingCaptures.length;
 while(this.pendingCaptures.length){
 this.board.addStone(this.pendingCaptures.pop(),this.board.EMPTY);
 }
-return _10;
-},doCaptureRecurse:function(pt,_12){
+return _c;
+},findCaptures:function(pt,_e){
 if(pt.x<0||pt.y<0||pt.x>=this.board.boardSize||pt.y>=this.board.boardSize){
 return 0;
 }
-if(this.board.getStone(pt)==_12){
+if(this.board.getStone(pt)==_e){
 return 0;
 }
 if(this.board.getStone(pt)==this.board.EMPTY){
@@ -1123,16 +1109,16 @@ return 0;
 }
 }
 this.pendingCaptures.push(pt);
-if(this.doCaptureRecurse({x:pt.x-1,y:pt.y},_12)){
+if(this.findCaptures({x:pt.x-1,y:pt.y},_e)){
 return 1;
 }
-if(this.doCaptureRecurse({x:pt.x+1,y:pt.y},_12)){
+if(this.findCaptures({x:pt.x+1,y:pt.y},_e)){
 return 1;
 }
-if(this.doCaptureRecurse({x:pt.x,y:pt.y-1},_12)){
+if(this.findCaptures({x:pt.x,y:pt.y-1},_e)){
 return 1;
 }
-if(this.doCaptureRecurse({x:pt.x,y:pt.y+1},_12)){
+if(this.findCaptures({x:pt.x,y:pt.y+1},_e)){
 return 1;
 }
 return 0;

@@ -179,10 +179,10 @@ eidogo.GameNode.prototype = {
             for (key in props) {
                 if (props[key] instanceof Array) {
                     val = props[key].map(function (val) {
-                        return val.toString().replace(/\]/, "\\]");
+                        return val.toString().replace(/\]/g, "\\]");
                     }).join("][");
                 } else {
-                    val = props[key].toString().replace(/\]/, "\\]");
+                    val = props[key].toString().replace(/\]/g, "\\]");
                 }
                 sgf += key + "[" + val  + "]";
             }
