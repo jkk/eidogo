@@ -578,6 +578,61 @@
 .eidogo-player .info a {
     color: #fff;
 }
+.eidogo-player .nav-tree-container {
+    float: right;
+    width: 325px;
+    height: 100px;
+    padding: 5px 0 5px 0;
+    margin: 5px 0 5px 0;
+    overflow: auto;
+    background: #333;
+}
+.eidogo-player .nav-tree ul {
+    clear: left;
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+}
+.eidogo-player .nav-tree li {
+    clear: left;
+    padding: 0 0 0 24px;
+    height: 19px;
+    background: url(../images/navtree-elbow.gif) no-repeat;
+    zoom: 1;
+}
+.eidogo-player .nav-tree li div {
+    height: 19px;
+    background: url(../images/navtree-line.gif) repeat-x;
+}
+.eidogo-player .nav-tree a {
+    float: left;
+    margin: 0 5px 5px 0;
+    width: 19px;
+    height: 15px;
+    text-decoration: none;
+    font-size: 9px;
+    font-family: arial, helvetica, sans-serif;
+    text-align: center;
+    padding: 4px 0 0 0;
+    cursor: pointer;
+    zoom: 1;
+}
+.eidogo-player .nav-tree a.w {
+    background: url(../images/w.png);
+    color: #000;
+}
+.eidogo-player .nav-tree a.b {
+    background: url(../images/b.png);
+    color: #fff;
+}
+.eidogo-player .nav-tree a.x {
+    background: #444;
+    color: #ccc;
+}
+.eidogo-player .nav-tree a.current {
+    background: #822 !important;
+    color: #fff !important;
+}
 .eidogo-player .preferences {
 	clear: right;
 	float: right;
@@ -590,7 +645,9 @@
     display: none;
 }
 .eidogo-player .options {
+    clear: right;
     display: none;
+    float: right;
 }
 .eidogo-player .options a {
     float: left;

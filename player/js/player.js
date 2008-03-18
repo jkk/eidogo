@@ -1623,6 +1623,7 @@ eidogo.Player.prototype = {
         
         if (!this.progressiveLoad) {
             this.updateNavSlider();
+            this.updateNavTree();
         }
     },
 
@@ -1872,6 +1873,9 @@ eidogo.Player.prototype = {
                 </div>\
                 <div id='info-game' class='game'></div>\
             </div>\
+            <div id='nav-tree-container' class='nav-tree-container'>\
+                <div id='nav-tree' class='nav-tree'></div>\
+            </div>\
             <div id='options' class='options'>\
                 " + (this.saveUrl ? "<a id='option-save' class='option-save' href='#'>" + t['save to server'] + "</a>" : "") + "\
                 " + (this.downloadUrl || isMoz ? "<a id='option-download' class='option-download' href='#'>" + t['download sgf'] + "</a>" : "") + "\
@@ -1924,7 +1928,8 @@ eidogo.Player.prototype = {
          ['searchClose',      'closeSearch'],
          ['optionDownload',   'downloadSgf'],
          ['optionSave',       'save'],
-         ['commentsEditDone', 'finishEditComment']
+         ['commentsEditDone', 'finishEditComment'],
+         ['navTree',          'navTreeClick']
         ].forEach(function(eh) {
             if (this.dom[eh[0]]) onClick(this.dom[eh[0]], this[eh[1]], this);
         }.bind(this));
@@ -2003,6 +2008,60 @@ eidogo.Player.prototype = {
         // snap to move interval
         offset = parseInt(moveOffset / steps * width, 10) || 0;
         this.dom.navSliderThumb.style.left = offset + "px";
+    },
+    
+    updateNavTree: function() {
+        // if (!this.unsavedChanges && this.updatedNavTree) return;
+        // this.updatedNavTree = true;
+        // alert("hi");
+        var html = "",
+            curId = this.cursor.node._id,
+            nodeWidth = this.board.renderer.pointWidth + 5,
+            totalIndent = 0,
+            path = [this.cursor.getGameRoot().getPosition()],
+            player = this;
+        var traverse = function(node) {
+            var indent = 0,
+                num = 0,
+                pathStr;
+            html += "<li><div>";
+            do {
+                pathStr = path.join(',') + "," + num;
+                html += "<a href='#' id='navtree-node-" + pathStr  + "' class='" +
+                    (typeof node.W != "undefined" ? 'w' : (typeof node.B != "undefined" ? 'b' : 'x')) +
+                    (node._id == curId ? " current" : "") +
+                    "'>" + (num) + "</a>";
+                num++;
+                if (node._children.length != 1) break;
+                node = node._children[0];
+                indent++;
+            } while (node);
+            if (node._children.length > 1) {
+                html += "<ul style='margin-left: " + (indent * nodeWidth) + "px'>";
+                totalIndent += indent * nodeWidth;
+            }
+            for (var i = 0; i < node._children.length; i++) {
+                if (node._children.length > 1)
+                    path.push(i);
+                traverse(node._children[i]);
+                if (node._children.length > 1)
+                    path.pop();
+            }
+            if (node._children.length > 1)
+                html += "</ul>";
+            html += "</div></li>";
+        }
+        traverse(this.cursor.getGameRoot());
+        this.dom.navTree.style.width = ((this.totalMoves+2) * nodeWidth + totalIndent) + "px";
+        this.dom.navTree.innerHTML = "<ul>" + html + "</ul>";
+    },
+    
+    navTreeClick: function(e) {
+        var target = e.target || e.srcElement;
+        if (!target || !target.id) return;
+        var path = target.id.replace(/^navtree-node-/, "").split(",");
+        this.goTo(path);
+        stopEvent(e);
     },
 
     resetLastLabels: function() {
