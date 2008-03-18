@@ -2013,25 +2013,26 @@ eidogo.Player.prototype = {
     updateNavTree: function() {
         // if (!this.unsavedChanges && this.updatedNavTree) return;
         // this.updatedNavTree = true;
-        // alert("hi");
         var html = "",
             curId = this.cursor.node._id,
             nodeWidth = this.board.renderer.pointWidth + 5,
             totalIndent = 0,
             path = [this.cursor.getGameRoot().getPosition()],
             player = this;
-        var traverse = function(node) {
+        var traverse = function(node, startNum) {
             var indent = 0,
-                num = 0,
+                offset = 0,
+                moveNum = startNum,
                 pathStr;
             html += "<li><div>";
             do {
-                pathStr = path.join(',') + "," + num;
+                pathStr = path.join(',') + "," + offset;
                 html += "<a href='#' id='navtree-node-" + pathStr  + "' class='" +
                     (typeof node.W != "undefined" ? 'w' : (typeof node.B != "undefined" ? 'b' : 'x')) +
                     (node._id == curId ? " current" : "") +
-                    "'>" + (num) + "</a>";
-                num++;
+                    "'>" + (moveNum) + "</a>";
+                offset++;
+                moveNum++;
                 if (node._children.length != 1) break;
                 node = node._children[0];
                 indent++;
@@ -2043,7 +2044,7 @@ eidogo.Player.prototype = {
             for (var i = 0; i < node._children.length; i++) {
                 if (node._children.length > 1)
                     path.push(i);
-                traverse(node._children[i]);
+                traverse(node._children[i], moveNum);
                 if (node._children.length > 1)
                     path.pop();
             }
@@ -2051,7 +2052,7 @@ eidogo.Player.prototype = {
                 html += "</ul>";
             html += "</div></li>";
         }
-        traverse(this.cursor.getGameRoot());
+        traverse(this.cursor.getGameRoot(), 0);
         this.dom.navTree.style.width = ((this.totalMoves+2) * nodeWidth + totalIndent) + "px";
         this.dom.navTree.innerHTML = "<ul>" + html + "</ul>";
     },
