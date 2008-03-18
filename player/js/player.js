@@ -276,6 +276,9 @@ eidogo.Player.prototype = {
         // so we know when permalinks and downloads are unreliable
         this.unsavedChanges = false;
         
+        // to know when to update the nav tree
+        this.updatedNavTree = false;
+        
         // whether we're currently searching or editing
         this.searching = false;
         this.editingComment = false;
@@ -498,6 +501,7 @@ eidogo.Player.prototype = {
             (this.prefs.showComments ? show : hide)(this.dom.comments);
         }
         (this.prefs.showOptions ? show : hide)(this.dom.options);
+        (this.progressiveLoad ? hide : show)(this.dom.navTreeContainer);
     },
 
     /**
@@ -1361,8 +1365,8 @@ eidogo.Player.prototype = {
         varNode._cached = true;
         this.totalMoves++;
         this.cursor.node.appendChild(varNode);
-        this.variation(this.cursor.node._children.length-1);
         this.unsavedChanges = true;
+        this.variation(this.cursor.node._children.length-1);
     },
 
     /**
@@ -1942,7 +1946,7 @@ eidogo.Player.prototype = {
     enableNavSlider: function() {
         // don't use slider for progressively-loaded games
         if (this.progressiveLoad) {
-            hide(this.dom.navSliderThumb);
+            hide(this.dom.navSliderThumb); 
             return;
         }
     
@@ -2011,8 +2015,11 @@ eidogo.Player.prototype = {
     },
     
     updateNavTree: function() {
-        // if (!this.unsavedChanges && this.updatedNavTree) return;
-        // this.updatedNavTree = true;
+        if (!this.unsavedChanges && this.updatedNavTree) {
+            this.showNavTreeCurrent();
+            return;
+        }
+        this.updatedNavTree = true;
         var html = "",
             curId = this.cursor.node._id,
             nodeWidth = this.board.renderer.pointWidth + 5,
@@ -2025,14 +2032,17 @@ eidogo.Player.prototype = {
                 pathStr;
             html += "<li" + (varNum == 0 ? " class='first'" : "") + "><div class='mainline'>";
             do {
-                pathStr = path.join(',') + "," + offset;
+                pathStr = path.join('-') + "-" + offset;
                 html += "<a href='#' id='navtree-node-" + pathStr  + "' class='" +
                     (typeof node.W != "undefined" ? 'w' : (typeof node.B != "undefined" ? 'b' : 'x')) +
-                    (node._id == curId ? " current" : "") +
                     "'>" + (moveNum) + "</a>";
-                offset++;
+                
                 moveNum++;
                 if (node._children.length != 1) break;
+                if (node._parent._parent == null)
+                    path.push(node.getPosition());
+                else
+                    offset++;
                 node = node._children[0];
                 indent++;
             } while (node);
@@ -2053,16 +2063,28 @@ eidogo.Player.prototype = {
         traverse(this.cursor.getGameRoot(), 0, 0);
         this.dom.navTree.style.width = ((this.totalMoves+2) * nodeWidth) + "px";
         this.dom.navTree.innerHTML = "<ul class='root'>" + html + "</ul>";
+        setTimeout(function() {
+            this.showNavTreeCurrent();
+        }.bind(this), 0);
+    },
+    
+    showNavTreeCurrent: function() {
+        var current = byId("navtree-node-" + this.cursor.getPath().join("-"));
+        if (!current) return;
+        if (this.prevNavTreeCurrent)
+            this.prevNavTreeCurrent.className = this.prevNavTreeCurrentClass;
+        this.prevNavTreeCurrent = current;
+        this.prevNavTreeCurrentClass = current.className;
+        current.className = "current";
     },
     
     navTreeClick: function(e) {
         var target = e.target || e.srcElement;
-        if (target.nodeName.toLowerCase() == "li" && target.className == "first") {
+        if (target.nodeName.toLowerCase() == "li" && target.className == "first")
             target = target.parentNode.previousSibling.lastChild;
-        }
         if (!target || !target.id) return;
-        var path = target.id.replace(/^navtree-node-/, "").split(",");
-        this.goTo(path);
+        var path = target.id.replace(/^navtree-node-/, "").split("-");
+        this.goTo(path, true);
         stopEvent(e);
     },
 

@@ -586,6 +586,7 @@
     margin: 5px 0 5px 0;
     overflow: auto;
     background: #333;
+    display: none;
 }
 .eidogo-player .nav-tree ul {
     clear: left;
