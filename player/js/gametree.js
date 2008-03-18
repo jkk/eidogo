@@ -159,6 +159,7 @@ eidogo.GameNode.prototype = {
      * Returns the node's position in its parent's _children array
     **/
     getPosition: function() {
+        if (!this._parent) return null;
         var siblings = this._parent._children;
         for (var i = 0; i < siblings.length; i++)
             if (siblings[i]._id == this._id) {
@@ -267,29 +268,20 @@ eidogo.GameCursor.prototype = {
     getPath: function() {
         var path = [];
         var cur = new eidogo.GameCursor(this.node);
-        var mn = 0;
-        var prev = cur.node;
-        cur.previous();
-        while (cur.hasPrevious() && cur.node._children.length == 1) {
-            prev = cur.node;
-            cur.previous();
-            mn++;
-        }
-        path.push(mn);
-        path.push(prev.getPosition());
-        var lastId = null;
+        var mn = (cur.node._parent && cur.node._parent._parent ? -1 : null);
+        var prev;
         do {
             prev = cur.node;
             cur.previous();
-            while (cur.hasPrevious() && cur.node._children.length == 1) {
-                prev = cur.node;
-                cur.previous();
-            }
-            path.push(prev.getPosition());
-            lastId = prev._id;
+            if (mn != null) mn++;
+        } while (cur.hasPrevious() && cur.node._children.length == 1);
+        if (mn != null)
+            path.push(mn);
+        path.push(prev.getPosition());
+        do {
+            if (cur.node._children.length > 1 || cur.node._parent._parent == null)
+                path.push(cur.node.getPosition());
         } while (cur.previous());
-        if (lastId != cur.node._id)
-            path.push(cur.node.getPosition());
         return path.reverse();
     },
     getPathMoves: function() {

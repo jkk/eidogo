@@ -578,6 +578,77 @@
 .eidogo-player .info a {
     color: #fff;
 }
+.eidogo-player .nav-tree-container {
+    float: right;
+    width: 325px;
+    height: 100px;
+    padding: 5px 0 5px 0;
+    margin: 5px 0 5px 0;
+    overflow: auto;
+    background: #333;
+    display: none;
+    position: relative;
+}
+.eidogo-player .nav-tree ul {
+    clear: left;
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+    background: url(../images/navtree-left.gif) no-repeat;
+    background-position: 0 24px;
+    position: relative;
+    top: -24px;
+}
+.eidogo-player .nav-tree ul.root {
+    position: static;
+    top: 0;
+    padding-left: 5px;
+}
+.eidogo-player .nav-tree ul.root > li {
+    padding-left: 0;
+}
+.eidogo-player .nav-tree li {
+    position: relative;
+    clear: left;
+    padding: 0 0 0 24px;
+    height: 19px;
+    background: url(../images/navtree-elbow.gif) no-repeat;
+}
+.eidogo-player .nav-tree li.first {
+    background: none;
+    cursor: pointer;
+}
+.eidogo-player .nav-tree li div.mainline {
+    height: 19px;
+}
+.eidogo-player .nav-tree a {
+    float: left;
+    margin: 0 5px 5px 0;
+    width: 19px;
+    height: 15px;
+    text-decoration: none;
+    font-size: 9px;
+    font-family: arial, helvetica, sans-serif;
+    text-align: center;
+    padding: 4px 0 0 0;
+    cursor: pointer;
+}
+.eidogo-player .nav-tree a.w {
+    background: url(../images/w.png);
+    color: #000;
+}
+.eidogo-player .nav-tree a.b {
+    background: url(../images/b.png);
+    color: #fff;
+}
+.eidogo-player .nav-tree a.x {
+    background: #444;
+    color: #ccc;
+}
+.eidogo-player .nav-tree a.current {
+    background: #822 !important;
+    color: #fff !important;
+}
 .eidogo-player .preferences {
 	clear: right;
 	float: right;
@@ -590,7 +661,10 @@
     display: none;
 }
 .eidogo-player .options {
+    width: 329px;
+    clear: right;
     display: none;
+    float: right;
 }
 .eidogo-player .options a {
     float: left;

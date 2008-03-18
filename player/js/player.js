@@ -276,6 +276,9 @@ eidogo.Player.prototype = {
         // so we know when permalinks and downloads are unreliable
         this.unsavedChanges = false;
         
+        // to know when to update the nav tree
+        this.updatedNavTree = false;
+        
         // whether we're currently searching or editing
         this.searching = false;
         this.editingComment = false;
@@ -299,6 +302,11 @@ eidogo.Player.prototype = {
         this.prefs.showComments = typeof cfg.showComments != "undefined" ?
             !!cfg.showComments : true;
         this.prefs.showOptions = !!cfg.showOptions;
+        this.prefs.showNavTree = !this.progressiveLoad && typeof cfg.showNavTree != "undefined" ?
+            !!cfg.showNavTree : false;
+        // Firefox and Safari 3 only for now
+        if (this.prefs.showNavTree && !(eidogo.browser.moz || eidogo.browser.safari3))
+            this.prefs.showNavTree = false;
     },
     
     /**
@@ -498,6 +506,7 @@ eidogo.Player.prototype = {
             (this.prefs.showComments ? show : hide)(this.dom.comments);
         }
         (this.prefs.showOptions ? show : hide)(this.dom.options);
+        (this.prefs.showNavTree ? show : hide)(this.dom.navTreeContainer);
     },
 
     /**
@@ -696,7 +705,7 @@ eidogo.Player.prototype = {
                 for (var i = 0; i < position; i++)
                     this.variation(0, true);
             } else if (path.length) {
-                if (!first)
+                if (!first && this.cursor.node._parent._parent)
                     while (this.cursor.node._children.length == 1)
                         this.variation(0, true);
                 this.variation(position, true);
@@ -820,6 +829,7 @@ eidogo.Player.prototype = {
         if (loadNode._cached) return;
         this.nowLoading();
         this.progressiveLoads++;
+        this.updatedNavTree = false;
         this.remoteLoad(this.progressiveUrl + "?id=" + loadNode._id, loadNode);
     },
 
@@ -1361,8 +1371,8 @@ eidogo.Player.prototype = {
         varNode._cached = true;
         this.totalMoves++;
         this.cursor.node.appendChild(varNode);
-        this.variation(this.cursor.node._children.length-1);
         this.unsavedChanges = true;
+        this.variation(this.cursor.node._children.length-1);
     },
 
     /**
@@ -1621,9 +1631,10 @@ eidogo.Player.prototype = {
                 this.prependComment(info, "comment-info");
         }
         
-        if (!this.progressiveLoad) {
+        if (!this.progressiveLoad)
             this.updateNavSlider();
-        }
+        if (this.prefs.showNavTree)
+            this.updateNavTree();
     },
 
     setColor: function(color) {
@@ -1872,6 +1883,9 @@ eidogo.Player.prototype = {
                 </div>\
                 <div id='info-game' class='game'></div>\
             </div>\
+            <div id='nav-tree-container' class='nav-tree-container'>\
+                <div id='nav-tree' class='nav-tree'></div>\
+            </div>\
             <div id='options' class='options'>\
                 " + (this.saveUrl ? "<a id='option-save' class='option-save' href='#'>" + t['save to server'] + "</a>" : "") + "\
                 " + (this.downloadUrl || isMoz ? "<a id='option-download' class='option-download' href='#'>" + t['download sgf'] + "</a>" : "") + "\
@@ -1924,7 +1938,8 @@ eidogo.Player.prototype = {
          ['searchClose',      'closeSearch'],
          ['optionDownload',   'downloadSgf'],
          ['optionSave',       'save'],
-         ['commentsEditDone', 'finishEditComment']
+         ['commentsEditDone', 'finishEditComment'],
+         ['navTree',          'navTreeClick']
         ].forEach(function(eh) {
             if (this.dom[eh[0]]) onClick(this.dom[eh[0]], this[eh[1]], this);
         }.bind(this));
@@ -1937,7 +1952,7 @@ eidogo.Player.prototype = {
     enableNavSlider: function() {
         // don't use slider for progressively-loaded games
         if (this.progressiveLoad) {
-            hide(this.dom.navSliderThumb);
+            hide(this.dom.navSliderThumb); 
             return;
         }
     
@@ -2003,6 +2018,82 @@ eidogo.Player.prototype = {
         // snap to move interval
         offset = parseInt(moveOffset / steps * width, 10) || 0;
         this.dom.navSliderThumb.style.left = offset + "px";
+    },
+    
+    updateNavTree: function() {
+        if (!this.prefs.showNavTree)
+            return;
+        if (!this.unsavedChanges && this.updatedNavTree) {
+            this.showNavTreeCurrent();
+            return;
+        }
+        this.updatedNavTree = true;
+        var html = "",
+            curId = this.cursor.node._id,
+            nodeWidth = this.board.renderer.pointWidth + 5,
+            path = [this.cursor.getGameRoot().getPosition()],
+            player = this;
+        var traverse = function(node, startNum, varNum) {
+            var indent = 0,
+                offset = 0,
+                moveNum = startNum,
+                pathStr;
+            html += "<li" + (varNum == 0 ? " class='first'" : "") + "><div class='mainline'>";
+            do {
+                pathStr = path.join('-') + "-" + offset;
+                html += "<a href='#' id='navtree-node-" + pathStr  + "' class='" +
+                    (typeof node.W != "undefined" ? 'w' : (typeof node.B != "undefined" ? 'b' : 'x')) +
+                    "'>" + (moveNum) + "</a>";
+                
+                moveNum++;
+                if (node._children.length != 1) break;
+                if (node._parent._parent == null)
+                    path.push(node.getPosition());
+                else
+                    offset++;
+                node = node._children[0];
+                indent++;
+            } while (node);
+            html += "</div>";
+            if (node._children.length > 1)
+                html += "<ul style='margin-left: " + (indent * nodeWidth) + "px'>";
+            for (var i = 0; i < node._children.length; i++) {
+                if (node._children.length > 1)
+                    path.push(i);
+                traverse(node._children[i], moveNum, i);
+                if (node._children.length > 1)
+                    path.pop();
+            }
+            if (node._children.length > 1)
+                html += "</ul>";
+            html += "</li>";
+        }
+        traverse(this.cursor.getGameRoot(), 0, 0);
+        this.dom.navTree.style.width = ((this.totalMoves+2) * nodeWidth) + "px";
+        this.dom.navTree.innerHTML = "<ul class='root'>" + html + "</ul>";
+        setTimeout(function() {
+            this.showNavTreeCurrent();
+        }.bind(this), 0);
+    },
+    
+    showNavTreeCurrent: function() {
+        var current = byId("navtree-node-" + this.cursor.getPath().join("-"));
+        if (!current) return;
+        if (this.prevNavTreeCurrent)
+            this.prevNavTreeCurrent.className = this.prevNavTreeCurrentClass;
+        this.prevNavTreeCurrent = current;
+        this.prevNavTreeCurrentClass = current.className;
+        current.className = "current";
+    },
+    
+    navTreeClick: function(e) {
+        var target = e.target || e.srcElement;
+        if (target.nodeName.toLowerCase() == "li" && target.className == "first")
+            target = target.parentNode.previousSibling.lastChild;
+        if (!target || !target.id) return;
+        var path = target.id.replace(/^navtree-node-/, "").split("-");
+        this.goTo(path, true);
+        stopEvent(e);
     },
 
     resetLastLabels: function() {
