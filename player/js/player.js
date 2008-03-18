@@ -482,7 +482,7 @@ eidogo.Player.prototype = {
         this.totalMoves--;
         this.showInfo(gameRoot);
         this.enableNavSlider();
-        this.selectTool("play");
+        this.selectTool(this.mode == "view" ? "view" : "play");
         this.hook("initGame");
     },
     
@@ -930,8 +930,8 @@ eidogo.Player.prototype = {
     
         var coord = this.pointToSgfCoord({x: x, y: y});
     
-        if (this.mode == "play") {
-            // click on a variation?
+        // click on a variation?
+        if (this.mode == "view" || this.mode == "play") {
             for (var i = 0; i < this.variations.length; i++) {
                 var varPt = this.sgfCoordToPoint(this.variations[i].move);
                 if (varPt.x == x && varPt.y == y) {
@@ -940,6 +940,9 @@ eidogo.Player.prototype = {
                     return;
                 }
             }
+        }
+        
+        if (this.mode == "play") {
             // can't click there?
             if (!this.rules.check({x: x, y: y}, this.currentColor)) {
                 return;
@@ -1007,8 +1010,10 @@ eidogo.Player.prototype = {
                             this.labelLastLetter.charCodeAt(0)+1);
                 }    
             }
-            this.cursor.node.pushProperty(prop, coord);
-            this.refresh();
+            if (prop) {
+                this.cursor.node.pushProperty(prop, coord);
+                this.refresh();
+            }
         }
     },
     

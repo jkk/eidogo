@@ -1361,7 +1361,7 @@ this.totalMoves++;
 this.totalMoves--;
 this.showInfo(_2b);
 this.enableNavSlider();
-this.selectTool("play");
+this.selectTool(this.mode=="view"?"view":"play");
 this.hook("initGame");
 },handleDisplayPrefs:function(){
 (this.prefs.showGameInfo||this.prefs.showPlayerInfo?_a:_b)(this.dom.info);
@@ -1727,7 +1727,7 @@ return;
 }
 this.mouseDown=false;
 var _7a=this.pointToSgfCoord({x:x,y:y});
-if(this.mode=="play"){
+if(this.mode=="view"||this.mode=="play"){
 for(var i=0;i<this.variations.length;i++){
 var _7c=this.sgfCoordToPoint(this.variations[i].move);
 if(_7c.x==x&&_7c.y==y){
@@ -1736,6 +1736,8 @@ _7(e);
 return;
 }
 }
+}
+if(this.mode=="play"){
 if(!this.rules.check({x:x,y:y},this.currentColor)){
 return;
 }
@@ -1806,8 +1808,10 @@ _7a=_7a+":"+this.labelLastLetter;
 this.labelLastLetter=String.fromCharCode(this.labelLastLetter.charCodeAt(0)+1);
 }
 }
+if(_7e){
 this.cursor.node.pushProperty(_7e,_7a);
 this.refresh();
+}
 }
 }
 },handleDocMouseUp:function(evt){
