@@ -700,7 +700,7 @@ eidogo.Player.prototype = {
                 for (var i = 0; i < position; i++)
                     this.variation(0, true);
             } else if (path.length) {
-                if (!first)
+                if (!first && this.cursor.node._parent._parent)
                     while (this.cursor.node._children.length == 1)
                         this.variation(0, true);
                 this.variation(position, true);
