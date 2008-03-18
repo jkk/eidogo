@@ -587,6 +587,7 @@
     overflow: auto;
     background: #333;
     display: none;
+    position: relative;
 }
 .eidogo-player .nav-tree ul {
     clear: left;
@@ -660,6 +661,7 @@
     display: none;
 }
 .eidogo-player .options {
+    width: 329px;
     clear: right;
     display: none;
     float: right;

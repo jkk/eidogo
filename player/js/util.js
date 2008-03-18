@@ -13,7 +13,8 @@
 var ua = navigator.userAgent.toLowerCase();
 var uav = (ua.match(/.+(?:rv|it|ra|ie)[\/: ]([\d.]+)/) || [])[1];
 eidogo.browser = {ua: ua, ver: uav, ie: /msie/.test(ua) && !/opera/.test(ua),
-    moz: /mozilla/.test(ua) && !/(compatible|webkit)/.test(ua)};
+    moz: /mozilla/.test(ua) && !/(compatible|webkit)/.test(ua),
+    safari3: /webkit/.test(ua) && parseInt(uav, 10) >= 420};
 
 eidogo.util = {
 

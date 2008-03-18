@@ -302,6 +302,11 @@ eidogo.Player.prototype = {
         this.prefs.showComments = typeof cfg.showComments != "undefined" ?
             !!cfg.showComments : true;
         this.prefs.showOptions = !!cfg.showOptions;
+        this.prefs.showNavTree = !this.progressiveLoad && typeof cfg.showNavTree != "undefined" ?
+            !!cfg.showNavTree : false;
+        // Firefox and Safari 3 only for now
+        if (this.prefs.showNavTree && !(eidogo.browser.moz || eidogo.browser.safari3))
+            this.prefs.showNavTree = false;
     },
     
     /**
@@ -501,7 +506,7 @@ eidogo.Player.prototype = {
             (this.prefs.showComments ? show : hide)(this.dom.comments);
         }
         (this.prefs.showOptions ? show : hide)(this.dom.options);
-        (this.progressiveLoad ? hide : show)(this.dom.navTreeContainer);
+        (this.prefs.showNavTree ? show : hide)(this.dom.navTreeContainer);
     },
 
     /**
@@ -824,6 +829,7 @@ eidogo.Player.prototype = {
         if (loadNode._cached) return;
         this.nowLoading();
         this.progressiveLoads++;
+        this.updatedNavTree = false;
         this.remoteLoad(this.progressiveUrl + "?id=" + loadNode._id, loadNode);
     },
 
@@ -1625,10 +1631,10 @@ eidogo.Player.prototype = {
                 this.prependComment(info, "comment-info");
         }
         
-        if (!this.progressiveLoad) {
+        if (!this.progressiveLoad)
             this.updateNavSlider();
+        if (this.prefs.showNavTree)
             this.updateNavTree();
-        }
     },
 
     setColor: function(color) {
@@ -2015,6 +2021,8 @@ eidogo.Player.prototype = {
     },
     
     updateNavTree: function() {
+        if (!this.prefs.showNavTree)
+            return;
         if (!this.unsavedChanges && this.updatedNavTree) {
             this.showNavTreeCurrent();
             return;
