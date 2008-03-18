@@ -8,11 +8,11 @@
  */
 
 /**
- * @class Returns a JSON object of the form:
- *      { nodes: [], trees: [{nodes: [], trees:[]}, ...] }
+ * @class Returns an SGF-like JSON object of the form:
+ *      { PROP1: value,  PROP2: value, ..., _children: [...]}
  */
-eidogo.SgfParser = function(sgf, completeFn) {
-    this.init(sgf, completeFn);
+eidogo.SgfParser = function() {
+    this.init.apply(this, arguments);
 }
 eidogo.SgfParser.prototype = {
     /**
@@ -23,64 +23,63 @@ eidogo.SgfParser.prototype = {
         completeFn = (typeof completeFn == "function") ? completeFn : null;
         this.sgf = sgf;
         this.index = 0;
-        this.tree = this.parseTree(null);
+        this.root = {_children: []};
+        this.parseTree(this.root);
         completeFn && completeFn.call(this);
     },
-    parseTree: function(parent) {
-        var tree = {};
-        tree.nodes = [];
-        tree.trees = [];
+    parseTree: function(curnode) {
         while (this.index < this.sgf.length) {
-            var c = this.sgf.charAt(this.index);
+            var c = this.curChar();
             this.index++;
             switch (c) {
                 case ';':
-                    tree.nodes.push(this.parseNode());
+                    curnode = this.parseNode(curnode);
                     break;
                 case '(':
-                    tree.trees.push(this.parseTree(tree));
+                    this.parseTree(curnode);
                     break;
                 case ')':
-                    return tree;
+                    return;
                     break;
             }
         }
-        return tree;
     },
-    getChar: function() {
-        return this.sgf.charAt(this.index);
+    parseNode: function(parent) {
+        var node = {_children: []};
+        if (parent)
+            parent._children.push(node);
+        else
+            this.root = node;
+        node = this.parseProperties(node);
+        return node;
     },
-    nextChar: function() {
-        this.index++;
-    },
-    parseNode: function() {
-        var node = {};
+    parseProperties: function(node) {
         var key = "";
         var values = [];
         var i = 0;
         while (this.index < this.sgf.length) {
-            var c = this.getChar();
+            var c = this.curChar();
             if (c == ';' || c == '(' || c == ')') {
                 break;
             }
-            if (this.getChar() == '[') {
-                while (this.getChar() == '[') {
-                    this.nextChar();
+            if (this.curChar() == '[') {
+                while (this.curChar() == '[') {
+                    this.index++;
                     values[i] = "";
-                    while (this.getChar() != ']' && this.index < this.sgf.length) {
-                        if (this.getChar() == '\\') {
-                            this.nextChar();
+                    while (this.curChar() != ']' && this.index < this.sgf.length) {
+                        if (this.curChar() == '\\') {
+                            this.index++;
                             // not technically correct, but works in practice
-                            while (this.getChar() == "\r" || this.getChar() == "\n") {
-                                this.nextChar();
+                            while (this.curChar() == "\r" || this.curChar() == "\n") {
+                                this.index++;
                             }
                         }
-                        values[i] += this.getChar();
-                        this.nextChar();
+                        values[i] += this.curChar();
+                        this.index++;
                     }
                     i++;
-                    while (this.getChar() == ']' || this.getChar() == "\n" || this.getChar() == "\r") {
-                        this.nextChar();
+                    while (this.curChar() == ']' || this.curChar() == "\n" || this.curChar() == "\r") {
+                        this.index++;
                     }
                 }
                 if (node[key]) {
@@ -99,8 +98,11 @@ eidogo.SgfParser.prototype = {
             if (c != " " && c != "\n" && c != "\r" && c != "\t") {
                 key += c;
             }
-            this.nextChar();
+            this.index++;
         }
         return node;
+    },
+    curChar: function() {
+        return this.sgf.charAt(this.index);
     }
 };

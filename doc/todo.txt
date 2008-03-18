@@ -9,6 +9,7 @@ planned
 - accurate nav slider after new moves played (base on nextSibling)
 - copy/paste ascii diagrams (http://www.dse.nl/~toni/go/ascii2sgf/index_uk.htm)
 - edit game info
+- sibling style navigation
 - show more search results
 - sibling-style variations
 - tree navigation

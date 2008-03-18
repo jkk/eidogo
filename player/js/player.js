@@ -230,15 +230,13 @@ eidogo.Player.prototype = {
     reset: function(cfg) {
         this.gameName = "";
         
-        // gameTree here is actually more like a Collection as described in the
-        // EBNF definition in the SGF spec, http://www.red-bean.com/sgf/sgf4.html.
-        // Each element of gameTree.trees is actually a GameTree as defined in the
-        // spec. Right now we only really support a single game at a time -- i.e.,
-        // gameTree.trees[0]. I might change this in the future.
-        this.gameTree = new eidogo.GameTree();
+        // Multiple games can be contained in collectionRoot. We default
+        // to the first (collectionRoot._children[0])
+        // See http://www.red-bean.com/sgf/sgf4.html 
+        this.collectionRoot = new eidogo.GameNode();
         this.cursor = new eidogo.GameCursor();
     
-        // used for Ajaxy dynamic tree loading
+        // used for Ajaxy dynamic branch loading
         this.progressiveLoad = cfg.progressiveLoad ? true : false;
         this.progressiveLoads = null;
         this.progressiveUrl = null;
@@ -314,7 +312,7 @@ eidogo.Player.prototype = {
         // URL path to SGF files
         this.sgfPath = cfg.sgfPath || this.sgfPath;
     
-        // Load the first tree and first node by default.
+        // Load the first node of the first node by default
         this.loadPath = cfg.loadPath && cfg.loadPath.length > 1 ?
             cfg.loadPath : [0, 0];
     
@@ -325,7 +323,7 @@ eidogo.Player.prototype = {
         
             // raw SGF data
             var sgf = new eidogo.SgfParser(cfg.sgf);
-            this.load(sgf.tree);
+            this.load(sgf.root);
     
         } else if (typeof cfg.sgf == "object") {
     
@@ -352,13 +350,13 @@ eidogo.Player.prototype = {
     
             // start from scratch
             var boardSize = cfg.boardSize || "19";
-            var blankGame = {nodes: [], trees: [{nodes: [{SZ: boardSize}], trees: []}]};
+            var blankGame = {_children: [{SZ: boardSize, _children: []}]};
         
             // AI opponent (e.g. GNU Go)
             if (cfg.opponentUrl) {
                 this.opponentUrl = cfg.opponentUrl;
                 this.opponentColor = cfg.opponentColor == "B" ? cfg.opponentColor : "W";
-                var root = blankGame.trees.first().nodes.first();
+                var root = blankGame._children[0];
                 root.PW = t['you'];
                 root.PB = "GNU Go"
                 this.gameName = "gnugo";
@@ -370,19 +368,110 @@ eidogo.Player.prototype = {
             completeFn();
         }
     },
+    
+    /**
+     * Loads game data into a given target. If no target is given, creates
+     * a new gameRoot and initializes the game.
+    **/
+    load: function(data, target) {
+        if (!target) {
+            // load from scratch
+            target = new eidogo.GameNode();
+            this.collectionRoot = target;
+        }
+        target.loadJson(data);
+        target._cached = true;
+        this.doneLoading();
+        if (!target._parent) {
+            // Loading into tree root; use the first game by default or
+            // other if specified
+            var gameIndex = this.loadPath.length ? parseInt(this.loadPath[0], 10) : 0;
+            this.initGame(target._children[gameIndex || 0]);
+        } else {
+            this.progressiveLoads--;
+        }
+        
+        if (this.loadPath.length) {
+            this.goTo(this.loadPath, false);
+            if (!this.progressiveLoad) {
+                this.loadPath = [0,0];
+            }
+        } else {
+            this.refresh();
+        }
+        
+        // find out which color to play as for problem mode
+        if (!target._parent && this.problemMode) {
+            this.currentColor = this.problemColor = this.cursor.getNextColor();
+        }
+    },
+
+    /**
+     * Load game data given as raw SGF or JSON from a URL within the same
+     * domain.
+     * @param {string} url URL to load game data from
+     * @param {GameNode} target inserts data into this node if given
+     * @param {boolean} useSgfPath if true, prepends sgfPath to url
+     * @param {Array} loadPath GameNode path to load
+    **/
+    remoteLoad: function(url, target, useSgfPath, loadPath, completeFn) {
+        useSgfPath = useSgfPath == "undefined" ? true : useSgfPath;
+        
+        completeFn = (typeof completeFn == "function") ? completeFn : null;
+        
+        if (useSgfPath) {
+            if (!target) {
+                this.gameName = url;
+            }
+            // if we're using sgfPath, assume url does not include .sgf extension
+            url = this.sgfPath + url + ".sgf";
+        }
+        
+        if (loadPath) {
+            this.loadPath = loadPath;
+        }
+        
+        var success = function(req) {
+            var data = req.responseText.replace(/^( |\t|\r|\n)*/, "");
+        
+            // infer the kind of file we got
+            if (data.charAt(0) == '(') {
+                // SGF
+                var me = this;
+                var sgf = new eidogo.SgfParser(data, function() {
+                    // parsing is asychronous
+                    me.load(this.root, target);
+                    completeFn && completeFn();
+                });
+            } else if (data.charAt(0) == '{') {
+                // JSON
+                data = eval("(" + data + ")");
+                this.load(data, target);
+                completeFn && completeFn();
+            } else {
+                this.croak(t['invalid data']);
+            }
+        }
+    
+        var failure = function(req) {
+            this.croak(t['error retrieving']);
+        }
+        
+        ajax('get', url, null, success, failure, this, 30000);
+    },
 
     /**
      * Sets up a new game for playing. Can be called repeatedly (e.g., for
      * dynamically-loaded games).
     **/
-    initGame: function(target) {
+    initGame: function(gameRoot) {
+        gameRoot = gameRoot || {};
         this.handleDisplayPrefs();
-        var gameRoot = target.trees.first().nodes.first();
-        var size = gameRoot.SZ;
-        if (this.shrinkToFit) this.calcShrinkToFit(size || 19);
+        var size = gameRoot.SZ || 19;
+        if (this.shrinkToFit) this.calcShrinkToFit(gameRoot, size);
         if (!this.board) {
             // first time
-            this.createBoard(size || 19);
+            this.createBoard(size);
             this.rules = new eidogo.Rules(this.board);
         }
         this.unsavedChanges = false;
@@ -391,9 +480,9 @@ eidogo.Player.prototype = {
         var moveCursor = new eidogo.GameCursor(this.cursor.node);
         while (moveCursor.next()) { this.totalMoves++; }
         this.totalMoves--;
-        this.showInfo();
+        this.showInfo(gameRoot);
         this.enableNavSlider();
-        this.selectTool("play");
+        this.selectTool(this.mode == "view" ? "view" : "play");
         this.hook("initGame");
     },
     
@@ -434,35 +523,28 @@ eidogo.Player.prototype = {
     
     /**
      * Calculates the crop area to use based on the widest distance between
-     * stones and markers in this game. We're conservative with respect to
-     * checking markers: only labels.
+     * stones and markers in the given game. We're conservative with respect
+     * to checking markers: only labels for now.
     **/
-    calcShrinkToFit: function(size) {
+    calcShrinkToFit: function(gameRoot, size) {
         // leftmost, topmost, rightmost, bottommost
         var l = null, t = null, r = null, b = null;
         var points = {};
         var me = this;
         // find all points occupied by stones or labels
-        var traverse = function(tree) {
-            var i, j, prop, node, coord, len = tree.nodes.length;
-            for (i = 0; i < len; i++) {
-                for (prop in tree.nodes[i]) {
-                    if (/^(W|B|AW|AB|LB)$/.test(prop)) {
-                        coord = tree.nodes[i][prop];
-                        if (!(coord instanceof Array)) coord = [coord];
-                        if (prop != 'LB') coord = me.expandCompressedPoints(coord);
-                        else coord = [coord[0].split(/:/)[0]];
-                        for (j = 0; j < coord.length; j++)
-                            points[coord[j]] = "";
-                    }
+        gameRoot.walk(function(node) {
+            var prop, i, coord;
+            for (prop in node) {
+                if (/^(W|B|AW|AB|LB)$/.test(prop)) {
+                    coord = node[prop];
+                    if (!(coord instanceof Array)) coord = [coord];
+                    if (prop != 'LB') coord = me.expandCompressedPoints(coord);
+                    else coord = [coord[0].split(/:/)[0]];
+                    for (i = 0; i < coord.length; i++)
+                        points[coord[i]] = "";
                 }
             }
-            len = tree.trees.length;
-            for (i = 0; i < len; i++) {
-                traverse(tree.trees[i]);
-            }
-        }
-        traverse(this.gameTree.trees[0]);
+        });
         // nab the outermost points
         for (var key in points) {
             var pt = this.sgfCoordToPoint(key);
@@ -488,101 +570,6 @@ eidogo.Player.prototype = {
     },
 
     /**
-     * Loads game data into a given target. If no target is given, creates
-     * a new gameTree and initializes the game.
-    **/
-    load: function(data, target) {
-        if (!target) {
-            // load from scratch
-            target = new eidogo.GameTree();
-            this.gameTree = target;
-        }
-        target.loadJson(data);
-        target.cached = true;
-        this.doneLoading();
-        if (!target.parent) {
-            this.initGame(target);
-        } else {
-            this.progressiveLoads--;
-        }
-        
-        if (this.loadPath.length) {
-            this.goTo(this.loadPath, false);
-            if (!this.progressiveLoad) {
-                this.loadPath = [0,0];
-            }
-        } else {
-            this.refresh();
-        }
-        
-        // find out which color to play as for problem mode
-        if (!target.parent && this.problemMode) {
-            this.currentColor = this.problemColor = this.cursor.getNextColor();
-        }
-    },
-
-    /**
-     * Load game data given as raw SGF or JSON from a URL within the same
-     * domain.
-     * @param {string} url URL to load game data from
-     * @param {GameTree} target inserts data into this tree if given
-     * @param {boolean} useSgfPath if true, prepends sgfPath to url
-     * @param {Array} loadPath gameTree path to load
-    **/
-    remoteLoad: function(url, target, useSgfPath, loadPath, completeFn) {
-        useSgfPath = useSgfPath == "undefined" ? true : useSgfPath;
-        
-        completeFn = (typeof completeFn == "function") ? completeFn : null;
-        
-        if (useSgfPath) {
-            if (!target) {
-                this.gameName = url;
-            }
-            // if we're using sgfPath, assume url does not include .sgf extension
-            url = this.sgfPath + url + ".sgf";
-        }
-        
-        if (loadPath) {
-            this.loadPath = loadPath;
-        }
-        
-        var success = function(req) {
-            var data = req.responseText;
-        
-            // trim leading space
-            var first = data.charAt(0);
-            var i = 1;
-            while (i < data.length && (first == " " || first == "\r" || first == "\n")) {
-                first = data.charAt(i++);
-            }
-            
-            // infer the kind of file we got
-            if (first == '(') {
-                // SGF
-                var me = this;
-                var sgf = new eidogo.SgfParser(data, function() {
-                    // parsing is asychronous
-                    me.load(this.tree, target);
-                    completeFn && completeFn();
-                });
-            } else if (first == '{') {
-                // JSON
-                data = eval("(" + data + ")");
-                this.load(data, target);
-                completeFn && completeFn();
-            } else {
-                this.croak(t['invalid data']);
-            }
-        }
-    
-        var failure = function(req) {
-            this.croak(t['error retrieving']);
-        }
-        
-        ajax('get', url, null, success, failure, this, 30000);
-    },
-
-    /**
      * Fetches a move from an external opponent -- e.g., GnuGo. Provides
      * serialized game data as SGF, the color to move as, and the size of
      * the board. Expects the response to be the SGF coordinate of the
@@ -596,13 +583,13 @@ eidogo.Player.prototype = {
         }
         var failure = function(req) {
             this.croak(t['error retrieving']);
-        } 
+        }
+        var root = this.cursor.getGameRoot();
         var params = {
-            sgf: this.gameTree.trees[0].toSgf(),
+            sgf: root.toSgf(),
             move: this.currentColor,
-            size: this.gameTree.trees.first().nodes.first().SZ
+            size: root.SZ
         };
-        
         ajax('post', this.opponentUrl, params, success, failure, this, 45000);  
     },
     
@@ -626,12 +613,12 @@ eidogo.Player.prototype = {
         var failure = function(req) {
             this.croak(t['error retrieving']);
         }
-        var info = this.gameTree.trees.first().nodes.first();
+        var root = this.cursor.getGameRoot();
         var params = {
-            sgf: this.gameTree.trees[0].toSgf(),
+            sgf: root.toSgf(),
             move: 'est',
-            size: info.SZ,
-            komi: info.KM,
+            size: root.SZ,
+            komi: root.KM,
             mn: this.moveNumber + 1
         };
         ajax('post', this.scoreEstUrl, params, success, failure, this, 45000);
@@ -651,89 +638,85 @@ eidogo.Player.prototype = {
             }
         }.bind(this), 200);
     },
-
+    
     /**
-     * Navigates to a location within the gameTree. Takes progressive loading
+     * Navigates to a location within the game. Takes progressive loading
      * into account.
     **/
     goTo: function(path, fromStart) {
         fromStart = typeof fromStart != "undefined" ? fromStart : true;
+        if (fromStart)
+            this.resetCursor(true);
+        
+        // Move number
+        var steps = parseInt(path, 10);
+        if (!(path instanceof Array) && !isNaN(steps)) {
+            if (fromStart) steps++; // not zero-based
+            for (var i = 0; i < steps; i++)
+                this.variation(null, true);
+            this.refresh();
+            return;
+        }
+        
+        // Not a path?
+        if (!(path instanceof Array) || !path.length) {
+            alert(t['bad path'] + " " + path);
+            return;
+        }
+
         var position;
         var vars;
-        if (path instanceof Array) {
-            // Go to an absolute path.
-            if (!path.length) return;
-            if (fromStart) {
-                this.resetCursor(true);
-            }
+        
+        // Path of moves (SGF coords)
+        if (isNaN(parseInt(path[0], 10))) {
+            this.variation(0, true); // first game tree is assumed
             while (path.length) {
-                position = path[0];
-                if (isNaN(parseInt(position, 10))) {
-                    // move (coord) path item
-                    vars = this.getVariations(true);
-                    if (!vars.length || vars[0].move == null) {
-                        this.variation(null, true);
-                        if (this.progressiveLoads) {
-                            this.loadPath.push(position);
-                            return;
-                        }
-                    }
-                    for (var i = 0; i < vars.length; i++) {
-                        if (vars[i].move == position) {
-                            this.variation(vars[i].treeNum, true);
-                            break;
-                        }
-                    }
-                    path.shift();
-                } else {
-                    // tree/node integer position
-                    position = parseInt(path.shift(), 10);
-                    if (path.length == 0) {
-                        // node position
-                        for (var i = 0; i < position; i++) {
-                            this.variation(null, true);
-                        }
-                    } else if (path.length) {
-                        // tree position
-                        this.variation(position, true);
-                        if (path.length != 1) {
-                            // go to the end of the line for each tree we pass
-                            while (this.cursor.nextNode()) {
-                                this.execNode(true, true);
-                            }
-                        }
+                position = path.shift();
+                vars = this.getVariations(true);
+                for (var i = 0; i < vars.length; i++) {
+                    if (vars[i].move == position) {
+                        this.variation(vars[i].varNum, true);
+                        break;
                     }
                 }
-                if (this.progressiveLoads) return;
+                if (this.progressiveLoads) {
+                    this.loadPath.push(position);
+                    return;
+                }
             }
             this.refresh();
-        } else if (!isNaN(parseInt(path, 10))) {
-            // Go to a move number.
-            var steps = parseInt(path, 10);
-            if (fromStart) {
-                this.resetCursor(true);
-                steps++;
-            }
-            for (var i = 0; i < steps; i++) {
-                this.variation(null, true);
-            }
-            this.refresh();
-        } else {
-            alert(t['bad path'] + " " + path);
+            return;
         }
+        
+        // Path of branch indexes and final move number
+        var first = true;
+        while (path.length) {
+            position = parseInt(path.shift(), 10);
+            if (!path.length) {
+                for (var i = 0; i < position; i++)
+                    this.variation(0, true);
+            } else if (path.length) {
+                if (!first)
+                    while (this.cursor.node._children.length == 1)
+                        this.variation(0, true);
+                this.variation(position, true);
+            }
+            first = false;
+        }
+        this.refresh();
     },
 
     /**
      * Resets the game cursor to the first node
     **/
-    resetCursor: function(noRender, firstGame) {
+    resetCursor: function(noRender, toGameRoot) {
         this.board.reset();
         this.currentColor = (this.problemMode ? this.problemColor : "B");
         this.moveNumber = 0;
-        if (firstGame) {
-            this.cursor.node = this.gameTree.trees.first().nodes.first();
+        if (toGameRoot) {
+            this.cursor.node = this.cursor.getGameRoot();
         } else {
-            this.cursor.node = this.gameTree.nodes.first();
+            this.cursor.node = this.collectionRoot;
         }
         this.refresh(noRender);
     },
@@ -755,13 +738,12 @@ eidogo.Player.prototype = {
     },
 
     /**
-     * Handles going to both the next sibling and the next variation
-     * @param {Number} treeNum Position of the variation tree to follow
-     * within the current tree's array of trees
-     * @param {Boolean} noRender If true, don't render tthe board
+     * Handles going the next sibling or variation
+     * @param {Number} varNum Variation number to follow
+     * @param {Boolean} noRender If true, don't render the board
      */
-    variation: function(treeNum, noRender) {
-        if (this.cursor.next(treeNum)) {
+    variation: function(varNum, noRender) {
+        if (this.cursor.next(varNum)) {
             this.execNode(noRender);
             this.resetLastLabels();
             // Should we continue after loading finishes or just stop
@@ -778,8 +760,7 @@ eidogo.Player.prototype = {
      * gets updated.
      * @param {Boolean} noRender If true, don't render the board
      * @param {Boolean} ignoreProgressive Ignores progressive loading
-     *      considerations. Useful when executing to the end of a sibling
-     *      line when a variation load is still in progress.
+     *      considerations.
      */
     execNode: function(noRender, ignoreProgressive) {
         // don't execute a node while it's being loaded
@@ -823,52 +804,38 @@ eidogo.Player.prototype = {
             this.board.render();
         }
         
-        // progressive loading?
-        if (!ignoreProgressive && this.progressiveUrl && !this.cursor.node.parent.cached) {
-            this.nowLoading();
-            this.progressiveLoads++;
-            this.remoteLoad(
-                this.progressiveUrl + "?id=" + this.cursor.node.parent.id,
-                this.cursor.node.parent
-            );
-        }
+        // progressive loading?        
+        if (!ignoreProgressive && this.progressiveUrl)
+            this.fetchProgressiveData();
         
         // play a reponse in problem-solving mode, unless we just navigated backwards
-        if (this.problemMode && this.currentColor && this.currentColor != this.problemColor && !this.goingBack) {
+        if (this.problemMode && this.currentColor && this.currentColor != this.problemColor && !this.goingBack)
             this.playProblemResponse(noRender);
-        }
         
         this.goingBack = false;
     },
+    
+    fetchProgressiveData: function() {
+        var loadNode = this.cursor.node;
+        if (loadNode._cached) return;
+        this.nowLoading();
+        this.progressiveLoads++;
+        this.remoteLoad(this.progressiveUrl + "?id=" + loadNode._id, loadNode);
+    },
 
     /**
-     * Locates any variations within the current tree and makes note of their
-     * move and position in the tree array
+     * Locates any variations within the current node and makes note of their
+     * move and index position
      */
     findVariations: function() {
-        this.variations = this.getVariations(this.prefs.markNext);
+        this.variations = this.getVariations();
     },
     
-    getVariations: function(includeSibling) {
-        var vars = [];
-        if (!this.cursor.node) return vars;
-        if (includeSibling && this.cursor.node.nextSibling != null) {
-            // handle next sibling move as variation 1
-            vars.push({
-                move: this.cursor.node.nextSibling.getMove(),
-                treeNum: null
-            });
-        }
-        if (this.cursor.node.nextSibling == null
-            && this.cursor.node.parent
-            && this.cursor.node.parent.trees.length) {
-            var varTrees = this.cursor.node.parent.trees;
-            for (var i = 0; i < varTrees.length; i++) {
-                vars.push({
-                    move: varTrees[i].nodes.first().getMove(),
-                    treeNum: i
-                });
-            }
+    getVariations: function() {
+        var vars = [],
+            kids = this.cursor.node._children;
+        for (var i = 0; i < kids.length; i++) {
+            vars.push({move: kids[i].getMove(), varNum: i});
         }
         return vars;
     },
@@ -903,7 +870,7 @@ eidogo.Player.prototype = {
         if (!this.variations) return;
         for (var i = 0; i < this.variations.length; i++) {
             if (!this.variations[i].move || this.variations[i].move == "tt") {
-                this.variation(this.variations[i].treeNum);
+                this.variation(this.variations[i].varNum);
                 return;
             }
         }
@@ -963,16 +930,19 @@ eidogo.Player.prototype = {
     
         var coord = this.pointToSgfCoord({x: x, y: y});
     
-        if (this.mode == "play") {
-            // click on a variation?
+        // click on a variation?
+        if (this.mode == "view" || this.mode == "play") {
             for (var i = 0; i < this.variations.length; i++) {
                 var varPt = this.sgfCoordToPoint(this.variations[i].move);
                 if (varPt.x == x && varPt.y == y) {
-                    this.variation(this.variations[i].treeNum);
+                    this.variation(this.variations[i].varNum);
                     stopEvent(e);
                     return;
                 }
             }
+        }
+        
+        if (this.mode == "play") {
             // can't click there?
             if (!this.rules.check({x: x, y: y}, this.currentColor)) {
                 return;
@@ -1040,8 +1010,10 @@ eidogo.Player.prototype = {
                             this.labelLastLetter.charCodeAt(0)+1);
                 }    
             }
-            this.cursor.node.pushProperty(prop, coord);
-            this.refresh();
+            if (prop) {
+                this.cursor.node.pushProperty(prop, coord);
+                this.refresh();
+            }
         }
     },
     
@@ -1114,7 +1086,7 @@ eidogo.Player.prototype = {
      * the search
     **/
     loadSearch: function(q, dim, p, a) {
-        var blankGame = {nodes: [], trees: [{nodes: [{SZ: this.board.boardSize}], trees: []}]};
+        var blankGame = {_children: [{SZ: this.board.boardSize, _children: []}]};
         this.load(blankGame);
         a = a || "corner";
         this.dom.searchAlgo.value = a;
@@ -1385,23 +1357,11 @@ eidogo.Player.prototype = {
         var props = {};
         props[this.currentColor] = coord;
         props['MN'] = (++this.moveNumber).toString();
-        var varNode = new eidogo.GameNode(props);
+        var varNode = new eidogo.GameNode(null, props);
+        varNode._cached = true;
         this.totalMoves++;
-        if (this.cursor.hasNext()) {
-            // new variation tree
-            if (this.cursor.node.nextSibling) {
-                // No variation trees at this point; create a new one
-                this.cursor.node.parent.createVariationTree(
-                    this.cursor.node.getPosition());
-            }
-            this.cursor.node.parent.appendTree(new eidogo.GameTree(
-                {nodes: [varNode], trees: []}));
-            this.variation(this.cursor.node.parent.trees.length-1);
-        } else {
-            // at the end of the main line -- easy peasy
-            this.cursor.node.parent.appendNode(varNode);
-            this.variation();
-        }
+        this.cursor.node.appendChild(varNode);
+        this.variation(this.cursor.node._children.length-1);
         this.unsavedChanges = true;
     },
 
@@ -1427,7 +1387,7 @@ eidogo.Player.prototype = {
             }
             varLabel = varLabel.replace(/^var:/, "");
             if (charKey == varLabel.charAt(0)) {
-                this.variation(this.variations[i].treeNum);
+                this.variation(this.variations[i].varNum);
                 stopEvent(e);
                 return;
             }
@@ -1488,11 +1448,11 @@ eidogo.Player.prototype = {
     /**
      * Parse and display the game's info
     **/
-    showInfo: function() {
+    showInfo: function(gameInfo) {
+        if (!gameInfo) return;
         this.dom.infoGame.innerHTML = "";
         this.dom.whiteName.innerHTML = "";
         this.dom.blackName.innerHTML = "";
-        var gameInfo = this.gameTree.trees.first().nodes.first();
         var dl = document.createElement('dl');
         for (var propName in this.infoLabels) {
             if (gameInfo[propName] instanceof Array) {
@@ -1612,7 +1572,7 @@ eidogo.Player.prototype = {
             if (!this.variations[i].move || this.variations[i].move == "tt") {
                 // 'pass' variation
                 addClass(this.dom.controlPass, "pass-on");
-            } else {
+            } else if (this.prefs.markNext || this.variations.length > 1) {
                 // show clickable variation on the board
                 var varPt = this.sgfCoordToPoint(this.variations[i].move);
                 if (this.board.getMarker(varPt) != this.board.EMPTY) {
@@ -1629,12 +1589,12 @@ eidogo.Player.prototype = {
             addEvent(
                 varNav,
                 "click",
-                function(e, arg) { arg.me.variation(arg.treeNum); },
-                {me: this, treeNum: this.variations[i].treeNum}
+                function(e, arg) { arg.me.variation(arg.varNum); },
+                {me: this, varNum: this.variations[i].varNum}
             );
             this.dom.variations.appendChild(varNav);
         }
-        if (!this.variations.length) {
+        if (this.variations.length < 2) {
             this.dom.variations.innerHTML = "<div class='variation-nav none'>" +
                 t['no variations'] + "</div>";
         }
@@ -1801,7 +1761,7 @@ eidogo.Player.prototype = {
             location.href = this.downloadUrl + this.gameName;
         } else if (isMoz) {
             location.href = "data:text/plain," +
-                encodeURIComponent(this.gameTree.trees.first().toSgf());
+                encodeURIComponent(this.cursor.getGameRoot().toSgf());
         }
     },
     
@@ -1816,7 +1776,7 @@ eidogo.Player.prototype = {
         var failure = function(req) {
             this.croak(t['error retrieving']);
         }
-        var sgf = this.gameTree.trees.first().toSgf();
+        var sgf = this.cursor.getGameRoot().toSgf();
         ajax('POST', this.saveUrl, {sgf: sgf}, success, failure, this, 30000);
     },
 
@@ -2023,7 +1983,7 @@ eidogo.Player.prototype = {
         // assume we're just reflecting the board position
         if (offsetGiven) {
             this.nowLoading();
-            var delta = moveOffset - this.cursor.node.getPosition() ;
+            var delta = moveOffset - this.cursor.getMoveNumber();
             for (var i = 0; i < Math.abs(delta); i++) {
                 if (delta > 0) {
                     this.variation(null, true);
@@ -2051,7 +2011,8 @@ eidogo.Player.prototype = {
     },
     
     getGameDescription: function(excludeGameName) {
-        var root = this.gameTree.trees.first().nodes.first();
+        var root = this.cursor.getGameRoot();
+        if (!root) return;
         var desc = (excludeGameName ? "" : root.GN || this.gameName);
         if (root.PW && root.PB) {
             var wr = root.WR ? " " + root.WR : "";

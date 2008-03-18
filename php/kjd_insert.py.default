@@ -1,0 +1,124 @@
+import MySQLdb as mysql
+import simplejson
+
+class SgfNode:
+    def __init__(self, id, parent):
+        self.id = id
+        self.properties = {}
+        self.parent = parent
+        self.children = []
+        # DB prep fields
+        self.depth = 0
+        self.lt = 0
+        self.rt = 0
+        pass
+
+class SgfParser:
+    def __init__(self, sgf):
+        self.sgf = sgf
+        self.pos = 0
+        self.root = SgfNode(0, None)
+        self.nodecounter = 1
+        self.parse_tree(self.root)
+    
+    def parse_tree(self, r):
+        while (self.pos < len(self.sgf)):
+            c = self.sgf[self.pos]
+            self.pos += 1
+            if c == ';':
+                r = self.parse_node(r)
+            elif c == '(':
+                self.parse_tree(r)
+            elif c == ')':
+                return
+
+    def parse_node(self, parent):
+        node = SgfNode(self.nodecounter, parent)
+        self.nodecounter += 1
+        node = self.parse_properties(node)
+        cur = node
+        depth = 0
+        while 1:
+            cur = cur.parent
+            if not cur:
+                break
+            depth += 1
+        node.depth = depth
+        parent.children.append(node)
+        return node
+
+    def parse_properties(self, node):
+        prop = ''
+        vals = []
+        i = 0
+        while (self.pos < len(self.sgf)):
+            c = self.curc()
+            if c == ';' or c == '(' or c == ')':
+                break
+            if self.curc() == '[':
+                while self.curc() == '[':
+                    self.pos += 1
+                    vals.insert(i, '')
+                    while self.curc() != ']' and self.pos < len(self.sgf):
+                        if self.curc() == '\\':
+                            self.pos += 1
+                            while self.curc() == '\r' or self.curc() == '\n':
+                                self.pos +=1
+                        vals[i] += self.curc()
+                        self.pos += 1
+                    i += 1
+                    while self.curc() == ']' or self.curc() == '\r' or self.curc() == '\n':
+                        self.pos += 1
+                if node.properties.has_key(prop):
+                    if not (type(node.properties[prop]) is list):
+                        node.properties[prop] = [node.properties[prop]]
+                    node.properties[prop].extend(vals)
+                else:
+                    if (len(vals) > 1):
+                        node.properties[prop] = vals
+                    else:
+                        node.properties[prop] = vals[0]
+                prop = ''
+                vals = []
+                i = 0
+                continue    
+            if c != ' ' and c != '\n' and c != '\r' and c != '\t':
+                prop += c
+            self.pos += 1
+        return node
+        
+    def curc(self):
+        return self.sgf[self.pos]
+
+def compute_ltrt(node, lt):
+    rt = lt + 1
+    for child in node.children:
+        rt = compute_ltrt(child, rt)
+    node.lt = lt
+    node.rt = rt    
+    return rt + 1
+
+def db_populate(n, c):
+    if n.parent:
+        parent_id = n.parent.id
+    else:
+        parent_id = 0
+    c.execute("""insert into kjd (id, parent, properties, lt, rt, depth) values
+        (%s, %s, %s, %s, %s, %s)""",
+        (n.id, parent_id, simplejson.dumps(n.properties), n.lt, n.rt, n.depth))
+    print n.id
+    for child in n.children:
+        db_populate(child, c)
+
+if __name__ == "__main__":
+    file = open("../sgf/kjd.sgf")
+    sgf = file.read()
+    file.close()
+    
+    root = SgfParser(sgf).root
+    compute_ltrt(root, 1)
+    
+    db = mysql.connect(host="localhost", user="", passwd="", db="eidogo")
+    c = db.cursor()
+    db_populate(root, c)
+    c.execute("update kjd set parent=null where id=0")
