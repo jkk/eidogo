@@ -143,17 +143,26 @@ eidogo.GameNode.prototype = {
     **/
     emptyPoint: function(coord) {
         var props = this.getProperties();
+        var deleted = null;
         for (var propName in props) {
             if (propName == "AW" || propName == "AB" || propName == "AE") {
                 if (!(this[propName] instanceof Array))
                     this[propName] = [this[propName]];
-                this[propName] = this[propName].filter(function(v) { return v != coord});
+                this[propName] = this[propName].filter(function(val) {
+                    if (val == coord) {
+                        deleted = val;
+                        return false;
+                    }
+                    return true;
+                });
                 if (!this[propName].length)
                     delete this[propName];
             } else if ((propName == "B" || propName == "W") && this[propName] == coord) {
+                deleted = this[propName];
                 delete this[propName];
             }
         }
+        return deleted;
     },
     /**
      * Returns the node's position in its parent's _children array

@@ -952,6 +952,8 @@ eidogo.Player.prototype = {
             }
         }
         
+        if (this.mode == "view") return;
+        
         if (this.mode == "play") {
             // can't click there?
             if (!this.rules.check({x: x, y: y}, this.currentColor)) {
@@ -993,12 +995,14 @@ eidogo.Player.prototype = {
             var prop;
             var stone = this.board.getStone({x:x,y:y});
             if (this.mode == "add_b" || this.mode == "add_w") {
-                this.cursor.node.emptyPoint(this.pointToSgfCoord({x:x,y:y}));
+                // if a stone was placed previously, we add an empty point (AE);
+                // otherwise, we remove the stone property from the current node
+                var deleted = this.cursor.node.emptyPoint(this.pointToSgfCoord({x:x,y:y}));
                 if (stone != this.board.BLACK && this.mode == "add_b") {
                     prop = "AB";
                 } else if (stone != this.board.WHITE && this.mode == "add_w") {
                     prop = "AW";
-                } else {
+                } else if (this.board.getStone({x:x,y:y}) != this.board.EMPTY && !deleted) {
                     prop = "AE";
                 }
             } else {
@@ -1020,11 +1024,31 @@ eidogo.Player.prototype = {
                             this.labelLastLetter.charCodeAt(0)+1);
                 }    
             }
-            if (prop) {
+            if (prop)
                 this.cursor.node.pushProperty(prop, coord);
-                this.refresh();
-            }
+            this.unsavedChanges = true;
+            this.checkForEmptyNode();
+            this.refresh();
         }
+    },
+    
+    /**
+     * If there are no properties left in a node, ask whether to delete it
+    **/
+    checkForEmptyNode: function() {
+        if (!eidogo.util.numProperties(this.cursor.node.getProperties())
+            && this.cursor.node._children.length) {
+            var killNode = window.confirm("You've removed all properties " +
+                "from this position.\n\nDelete this position and all sub-positions?");
+            if (killNode) {
+                var id = this.cursor.node._id;
+                this.back();
+                this.cursor.node._children = this.cursor.node._children.filter(function(node) {
+                    return node._id != id;
+                });
+                this.prependComment("Position deleted");
+            }
+        }  
     },
     
     /**
@@ -1539,16 +1563,20 @@ eidogo.Player.prototype = {
     },
     
     finishEditComment: function() {
+        this.editingComment = false;
         var oldC = this.cursor.node.C;
         var newC = this.dom.commentsEditTa.value;
         if (oldC != newC) {
             this.unsavedChanges = true;
             this.cursor.node.C = newC;
         }
+        if (!this.cursor.node.C)
+            delete this.cursor.node.C;
         hide(this.dom.shade);
         hide(this.dom.commentsEdit);
         show(this.dom.comments);
         this.selectTool("play");
+        this.checkForEmptyNode();
         this.refresh();
     },
 
