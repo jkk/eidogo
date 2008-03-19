@@ -370,7 +370,7 @@ return _50;
 })();
 
 eidogo=window.eidogo||{};
-eidogo.i18n=eidogo.i18n||{"move":"Move","loading":"Loading","passed":"passed","resigned":"resigned","variations":"Variations","no variations":"none","tool":"Tool","play":"Play","region":"Select Region","add_b":"Black Stone","add_w":"White Stone","edit comment":"Edit Comment","done":"Done","triangle":"Triangle","square":"Square","circle":"Circle","x":"X","letter":"Letter","number":"Number","dim":"Dim","score":"Score","score est":"Score Estimate","search":"Search","search corner":"Corner Search","search center":"Center Search","region info":"Click and drag to select a region.","two stones":"Please select at least two stones to search for.","two edges":"For corner searches, your selection must touch two adjacent edges of the board.","no search url":"No search URL provided.","close search":"close search","matches found":"matches found.","save to server":"Save to Server","download sgf":"Download SGF","next game":"Next Game","previous game":"Previous Game","end of variation":"End of variation","white":"White","white rank":"White rank","white team":"White team","black":"Black","black rank":"Black rank","black team":"Black team","captures":"captures","time left":"time left","you":"You","game":"Game","handicap":"Handicap","komi":"Komi","result":"Result","date":"Date","info":"Info","place":"Place","event":"Event","round":"Round","overtime":"Overtime","opening":"Openning","ruleset":"Ruleset","annotator":"Annotator","copyright":"Copyright","source":"Source","time limit":"Time limit","transcriber":"Transcriber","created with":"Created with","january":"January","february":"February","march":"March","april":"April","may":"May","june":"June","july":"July","august":"August","september":"September","october":"October","november":"November","december":"December","gw":"Good for White","vgw":"Very good for White","gb":"Good for Black","vgb":"Very good for Black","dm":"Even position","dmj":"Even position (joseki)","uc":"Unclear position","te":"Tesuji","bm":"Bad move","vbm":"Very bad move","do":"Doubtful move","it":"Interesting move","black to play":"Black to play","white to play":"White to play","ho":"Hotspot","dom error":"Error finding DOM container","error retrieving":"There was a problem retrieving the game data.","invalid data":"Received invalid game data","error board":"Error loading board container","unsaved changes":"There are unsaved changes in this game. You must save before you can permalink or download.","bad path":"Don't know how to get to path: ","gnugo thinking":"GNU Go is thinking..."};
+eidogo.i18n=eidogo.i18n||{"move":"Move","loading":"Loading","passed":"passed","resigned":"resigned","variations":"Variations","no variations":"none","tool":"Tool","play":"Play","region":"Select Region","add_b":"Black Stone","add_w":"White Stone","edit comment":"Edit Comment","done":"Done","triangle":"Triangle","square":"Square","circle":"Circle","x":"X","letter":"Letter","number":"Number","dim":"Dim","clear":"Clear Marker","score":"Score","score est":"Score Estimate","search":"Search","search corner":"Corner Search","search center":"Center Search","region info":"Click and drag to select a region.","two stones":"Please select at least two stones to search for.","two edges":"For corner searches, your selection must touch two adjacent edges of the board.","no search url":"No search URL provided.","close search":"close search","matches found":"matches found.","save to server":"Save to Server","download sgf":"Download SGF","next game":"Next Game","previous game":"Previous Game","end of variation":"End of variation","white":"White","white rank":"White rank","white team":"White team","black":"Black","black rank":"Black rank","black team":"Black team","captures":"captures","time left":"time left","you":"You","game":"Game","handicap":"Handicap","komi":"Komi","result":"Result","date":"Date","info":"Info","place":"Place","event":"Event","round":"Round","overtime":"Overtime","opening":"Openning","ruleset":"Ruleset","annotator":"Annotator","copyright":"Copyright","source":"Source","time limit":"Time limit","transcriber":"Transcriber","created with":"Created with","january":"January","february":"February","march":"March","april":"April","may":"May","june":"June","july":"July","august":"August","september":"September","october":"October","november":"November","december":"December","gw":"Good for White","vgw":"Very good for White","gb":"Good for Black","vgb":"Very good for Black","dm":"Even position","dmj":"Even position (joseki)","uc":"Unclear position","te":"Tesuji","bm":"Bad move","vbm":"Very bad move","do":"Doubtful move","it":"Interesting move","black to play":"Black to play","white to play":"White to play","ho":"Hotspot","confirm delete":"You've removed all properties from this position.\n\nDelete this position and all sub-positions?","position deleted":"Position deleted","dom error":"Error finding DOM container","error retrieving":"There was a problem retrieving the game data.","invalid data":"Received invalid game data","error board":"Error loading board container","unsaved changes":"There are unsaved changes in this game. You must save before you can permalink or download.","bad path":"Don't know how to get to path: ","gnugo thinking":"GNU Go is thinking..."};
 
 eidogo.gameNodeIdCounter=15000;
 eidogo.GameNode=function(){
@@ -395,58 +395,85 @@ this[_3].push(_4);
 }else{
 this[_3]=_4;
 }
-},loadJson:function(_5){
-var _6=[_5],_7=[this];
-var _8,_9;
-var i,_b;
-while(_6.length){
-_8=_6.pop();
-_9=_7.pop();
-_9.loadJsonNode(_8);
-_b=(_8._children?_8._children.length:0);
-for(i=0;i<_b;i++){
-_6.push(_8._children[i]);
-if(!_9._children[i]){
-_9._children[i]=new eidogo.GameNode(_9);
+},hasPropertyValue:function(_5,_6){
+if(!this[_5]){
+return false;
 }
-_7.push(_9._children[i]);
+var _7=(this[_5] instanceof Array?this[_5]:[this[_5]]);
+return (_7.indexOf(_6)!=-1);
+},deletePropertyValue:function(_8,_9){
+var _a=(_9 instanceof RegExp)?function(v){
+return _9.test(v);
+}:function(v){
+return _9==v;
+};
+var _d=(_8 instanceof Array?_8:[_8]);
+for(var i=0;_8=_d[i];i++){
+if(this[_8] instanceof Array){
+this[_8]=this[_8].filter(function(v){
+return !_a(v);
+});
+if(!this[_8].length){
+delete this[_8];
+}
+}else{
+if(_a(this.prop)){
+delete this[_8];
 }
 }
-},loadJsonNode:function(_c){
-for(var _d in _c){
-if(_d=="_id"){
-this[_d]=_c[_d].toString();
-eidogo.gameNodeIdCounter=Math.max(eidogo.gameNodeIdCounter,parseInt(_c[_d],10));
+}
+},loadJson:function(_10){
+var _11=[_10],_12=[this];
+var _13,_14;
+var i,len;
+while(_11.length){
+_13=_11.pop();
+_14=_12.pop();
+_14.loadJsonNode(_13);
+len=(_13._children?_13._children.length:0);
+for(i=0;i<len;i++){
+_11.push(_13._children[i]);
+if(!_14._children[i]){
+_14._children[i]=new eidogo.GameNode(_14);
+}
+_12.push(_14._children[i]);
+}
+}
+},loadJsonNode:function(_17){
+for(var _18 in _17){
+if(_18=="_id"){
+this[_18]=_17[_18].toString();
+eidogo.gameNodeIdCounter=Math.max(eidogo.gameNodeIdCounter,parseInt(_17[_18],10));
 continue;
 }
-if(_d.charAt(0)!="_"){
-this[_d]=_c[_d];
+if(_18.charAt(0)!="_"){
+this[_18]=_17[_18];
 }
 }
-},appendChild:function(_e){
-_e._parent=this;
-this._children.push(_e);
+},appendChild:function(_19){
+_19._parent=this;
+this._children.push(_19);
 },getProperties:function(){
-var _f={},_10,_11,_12,_13;
-for(_10 in this){
-isPrivate=(_10.charAt(0)=="_");
-_12=(typeof this[_10]=="string");
-_13=(this[_10] instanceof Array);
-if(!isPrivate&&(_12||_13)){
-_f[_10]=this[_10];
+var _1a={},_1b,_1c,_1d,_1e;
+for(_1b in this){
+isPrivate=(_1b.charAt(0)=="_");
+_1d=(typeof this[_1b]=="string");
+_1e=(this[_1b] instanceof Array);
+if(!isPrivate&&(_1d||_1e)){
+_1a[_1b]=this[_1b];
 }
 }
-return _f;
+return _1a;
 },walk:function(fn){
-var _15=[this];
-var _16;
+var _20=[this];
+var _21;
 var i,len;
-while(_15.length){
-_16=_15.pop();
-fn(_16);
-len=(_16._children?_16._children.length:0);
+while(_20.length){
+_21=_20.pop();
+fn(_21);
+len=(_21._children?_21._children.length:0);
 for(i=0;i<len;i++){
-_15.push(_16._children[i]);
+_20.push(_21._children[i]);
 }
 }
 },getMove:function(){
@@ -458,70 +485,70 @@ return this.B;
 }
 }
 return null;
-},emptyPoint:function(_19){
-var _1a=this.getProperties();
-var _1b=null;
-for(var _1c in _1a){
-if(_1c=="AW"||_1c=="AB"||_1c=="AE"){
-if(!(this[_1c] instanceof Array)){
-this[_1c]=[this[_1c]];
+},emptyPoint:function(_24){
+var _25=this.getProperties();
+var _26=null;
+for(var _27 in _25){
+if(_27=="AW"||_27=="AB"||_27=="AE"){
+if(!(this[_27] instanceof Array)){
+this[_27]=[this[_27]];
 }
-this[_1c]=this[_1c].filter(function(val){
-if(val==_19){
-_1b=val;
+this[_27]=this[_27].filter(function(val){
+if(val==_24){
+_26=val;
 return false;
 }
 return true;
 });
-if(!this[_1c].length){
-delete this[_1c];
+if(!this[_27].length){
+delete this[_27];
 }
 }else{
-if((_1c=="B"||_1c=="W")&&this[_1c]==_19){
-_1b=this[_1c];
-delete this[_1c];
+if((_27=="B"||_27=="W")&&this[_27]==_24){
+_26=this[_27];
+delete this[_27];
 }
 }
 }
-return _1b;
+return _26;
 },getPosition:function(){
 if(!this._parent){
 return null;
 }
-var _1e=this._parent._children;
-for(var i=0;i<_1e.length;i++){
-if(_1e[i]._id==this._id){
+var _29=this._parent._children;
+for(var i=0;i<_29.length;i++){
+if(_29[i]._id==this._id){
 return i;
 }
 }
 return null;
 },toSgf:function(){
 var sgf=(this._parent?"(":"");
-var _21=this;
-function propsToSgf(_22){
-if(!_22){
+var _2c=this;
+function propsToSgf(_2d){
+if(!_2d){
 return "";
 }
 var sgf=";",key,val;
-for(key in _22){
-if(_22[key] instanceof Array){
-val=_22[key].map(function(val){
+for(key in _2d){
+if(_2d[key] instanceof Array){
+val=_2d[key].map(function(val){
 return val.toString().replace(/\]/g,"\\]");
 }).join("][");
 }else{
-val=_22[key].toString().replace(/\]/g,"\\]");
+val=_2d[key].toString().replace(/\]/g,"\\]");
 }
 sgf+=key+"["+val+"]";
 }
 return sgf;
 }
-sgf+=propsToSgf(_21.getProperties());
-while(_21._children.length==1){
-_21=_21._children[0];
-sgf+=propsToSgf(_21.getProperties());
+sgf+=propsToSgf(_2c.getProperties());
+while(_2c._children.length==1){
+_2c=_2c._children[0];
+sgf+=propsToSgf(_2c.getProperties());
 }
-for(var i=0;i<_21._children.length;i++){
-sgf+=_21._children[i].toSgf();
+for(var i=0;i<_2c._children.length;i++){
+sgf+=_2c._children[i].toSgf();
 }
 sgf+=(this._parent?")":"");
 return sgf;
@@ -529,15 +556,15 @@ return sgf;
 eidogo.GameCursor=function(){
 this.init.apply(this,arguments);
 };
-eidogo.GameCursor.prototype={init:function(_28){
-this.node=_28;
-},next:function(_29){
+eidogo.GameCursor.prototype={init:function(_33){
+this.node=_33;
+},next:function(_34){
 if(!this.hasNext()){
 return false;
 }
-_29=(typeof _29=="undefined"||_29==null?this.node._preferredChild:_29);
-this.node._preferredChild=_29;
-this.node=this.node._children[_29];
+_34=(typeof _34=="undefined"||_34==null?this.node._preferredChild:_34);
+this.node._preferredChild=_34;
+this.node=this.node._children[_34];
 return true;
 },previous:function(){
 if(!this.hasPrevious()){
@@ -553,67 +580,67 @@ return this.node&&this.node._parent&&this.node._parent._parent;
 if(!this.hasNext()){
 return null;
 }
-var _2a={};
-var i,_2c;
-for(i=0;_2c=this.node._children[i];i++){
-_2a[_2c.getMove()]=i;
+var _35={};
+var i,_37;
+for(i=0;_37=this.node._children[i];i++){
+_35[_37.getMove()]=i;
 }
-return _2a;
+return _35;
 },getNextColor:function(){
 if(!this.hasNext()){
 return null;
 }
-var i,_2e;
-for(var i=0;_2e=this.node._children[i];i++){
-if(_2e.W||_2e.B){
-return _2e.W?"W":"B";
+var i,_39;
+for(var i=0;_39=this.node._children[i];i++){
+if(_39.W||_39.B){
+return _39.W?"W":"B";
 }
 }
 return null;
 },getNextNodeWithVariations:function(){
-var _2f=this.node;
-while(_2f._children.length==1){
-_2f=_2f._children[0];
+var _3a=this.node;
+while(_3a._children.length==1){
+_3a=_3a._children[0];
 }
-return _2f;
+return _3a;
 },getPath:function(){
-var _30=[];
+var _3b=[];
 var cur=new eidogo.GameCursor(this.node);
 var mn=(cur.node._parent&&cur.node._parent._parent?-1:null);
-var _33;
+var _3e;
 do{
-_33=cur.node;
+_3e=cur.node;
 cur.previous();
 if(mn!=null){
 mn++;
 }
 }while(cur.hasPrevious()&&cur.node._children.length==1);
 if(mn!=null){
-_30.push(mn);
+_3b.push(mn);
 }
-_30.push(_33.getPosition());
+_3b.push(_3e.getPosition());
 do{
 if(cur.node._children.length>1||cur.node._parent._parent==null){
-_30.push(cur.node.getPosition());
+_3b.push(cur.node.getPosition());
 }
 }while(cur.previous());
-return _30.reverse();
+return _3b.reverse();
 },getPathMoves:function(){
-var _34=[];
+var _3f=[];
 var cur=new eidogo.GameCursor(this.node);
-_34.push(cur.node.getMove());
+_3f.push(cur.node.getMove());
 while(cur.previous()){
-var _36=cur.node.getMove();
-if(_36){
-_34.push(_36);
+var _41=cur.node.getMove();
+if(_41){
+_3f.push(_41);
 }
 }
-return _34.reverse();
+return _3f.reverse();
 },getMoveNumber:function(){
-var num=0,_38=this.node;
-while(_38&&(_38.W||_38.B)){
+var num=0,_43=this.node;
+while(_43&&(_43.W||_43.B)){
 num++;
-_38=_38._parent;
+_43=_43._parent;
 }
 return num;
 },getGameRoot:function(){
@@ -1814,24 +1841,34 @@ case "letter":
 _7e="LB";
 _7a=_7a+":"+this.labelLastLetter;
 this.labelLastLetter=String.fromCharCode(this.labelLastLetter.charCodeAt(0)+1);
+break;
+case "clear":
+this.cursor.node.deletePropertyValue(["TR","SQ","CR","MA","DD","LB"],new RegExp("^"+_7a));
+break;
+}
+if(this.cursor.node.hasPropertyValue(_7e,_7a)){
+this.cursor.node.deletePropertyValue(_7e,_7a);
+_7e=null;
 }
 }
 if(_7e){
 this.cursor.node.pushProperty(_7e,_7a);
 }
 this.unsavedChanges=true;
+this.checkForEmptyNode();
+this.refresh();
+}
+}
+},checkForEmptyNode:function(){
 if(!eidogo.util.numProperties(this.cursor.node.getProperties())&&this.cursor.node._children.length){
-var _81=window.confirm("You've removed all properties "+"from this position.\n\nDelete this position and all sub-positions?");
+var _81=window.confirm(t["confirm delete"]);
 if(_81){
 var id=this.cursor.node._id;
 this.back();
 this.cursor.node._children=this.cursor.node._children.filter(function(_83){
 return _83._id!=id;
 });
-this.prependComment("Position deleted");
-}
-}
-this.refresh();
+this.prependComment(t["position deleted"]);
 }
 }
 },handleDocMouseUp:function(evt){
@@ -2251,16 +2288,21 @@ this.dom.commentsEditTa.value=this.cursor.node.C||"";
 this.dom.commentsEditTa.focus();
 this.editingComment=true;
 },finishEditComment:function(){
+this.editingComment=false;
 var _d7=this.cursor.node.C;
 var _d8=this.dom.commentsEditTa.value;
 if(_d7!=_d8){
 this.unsavedChanges=true;
 this.cursor.node.C=_d8;
 }
+if(!this.cursor.node.C){
+delete this.cursor.node.C;
+}
 _b(this.dom.shade);
 _b(this.dom.commentsEdit);
 _a(this.dom.comments);
 this.selectTool("play");
+this.checkForEmptyNode();
 this.refresh();
 },updateControls:function(){
 this.dom.moveNumber.innerHTML=(this.moveNumber?(t["move"]+" "+this.moveNumber):(this.permalinkable?"permalink":""));
@@ -2484,7 +2526,7 @@ this.dom.player.id="player-"+this.uniq;
 this.dom.container.innerHTML="";
 eidogo.util.show(this.dom.container);
 this.dom.container.appendChild(this.dom.player);
-var _101="            <div id='board-container' class='board-container'></div>            <div id='controls-container' class='controls-container'>                <ul id='controls' class='controls'>                    <li id='control-first' class='control first'>First</li>                    <li id='control-back' class='control back'>Back</li>                    <li id='control-forward' class='control forward'>Forward</li>                    <li id='control-last' class='control last'>Last</li>                    <li id='control-pass' class='control pass'>Pass</li>                </ul>                <div id='move-number' class='move-number"+(this.permalinkable?" permalink":"")+"'></div>                <div id='nav-slider' class='nav-slider'>                    <div id='nav-slider-thumb' class='nav-slider-thumb'></div>                </div>                <div id='variations-container' class='variations-container'>                    <div id='variations-label' class='variations-label'>"+t["variations"]+":</div>                    <div id='variations' class='variations'></div>                </div>                <div class='controls-stop'></div>            </div>            <div id='tools-container' class='tools-container'"+(this.prefs.showTools?"":" style='display: none'")+">                <div id='tools-label' class='tools-label'>"+t["tool"]+":</div>                <select id='tools-select' class='tools-select'>                    <option value='play'>"+t["play"]+"</option>                    <option value='add_b'>"+t["add_b"]+"</option>                    <option value='add_w'>"+t["add_w"]+"</option>                    "+(this.searchUrl?("<option value='region'>"+t["region"]+"</option>"):"")+"                    <option value='comment'>"+t["edit comment"]+"</option>                    <option value='tr'>"+t["triangle"]+"</option>                    <option value='sq'>"+t["square"]+"</option>                    <option value='cr'>"+t["circle"]+"</option>                    <option value='x'>"+t["x"]+"</option>                    <option value='letter'>"+t["letter"]+"</option>                    <option value='number'>"+t["number"]+"</option>                    <option value='dim'>"+t["dim"]+"</option>                </select>                <input type='button' id='score-est' class='score-est-button' value='"+t["score est"]+"' />                <select id='search-algo' class='search-algo'>                    <option value='corner'>"+t["search corner"]+"</option>                    <option value='center'>"+t["search center"]+"</option>                </select>                <input type='button' id='search-button' class='search-button' value='"+t["search"]+"' />            </div>            <div id='comments' class='comments'></div>            <div id='comments-edit' class='comments-edit'>                <textarea id='comments-edit-ta' class='comments-edit-ta'></textarea>                <div id='comments-edit-done' class='comments-edit-done'>"+t["done"]+"</div>            </div>            <div id='search-container' class='search-container'>                <div id='search-close' class='search-close'>"+t["close search"]+"</div>                <p class='search-count'><span id='search-count'></span>&nbsp;"+t["matches found"]+"</p>                <div id='search-results-container' class='search-results-container'>                    <div class='search-result'>                        <span class='pw'><b>"+t["white"]+"</b></span>                        <span class='pb'><b>"+t["black"]+"</b></span>                        <span class='re'><b>"+t["result"]+"</b></span>                        <span class='dt'><b>"+t["date"]+"</b></span>                        <div class='clear'></div>                    </div>                    <div id='search-results' class='search-results'></div>                </div>            </div>            <div id='info' class='info'>                <div id='info-players' class='players'>                    <div id='white' class='player white'>                        <div id='white-name' class='name'></div>                        <div id='white-captures' class='captures'></div>                        <div id='white-time' class='time'></div>                    </div>                    <div id='black' class='player black'>                        <div id='black-name' class='name'></div>                        <div id='black-captures' class='captures'></div>                        <div id='black-time' class='time'></div>                    </div>                </div>                <div id='info-game' class='game'></div>            </div>            <div id='nav-tree-container' class='nav-tree-container'>                <div id='nav-tree' class='nav-tree'></div>            </div>            <div id='options' class='options'>                "+(this.saveUrl?"<a id='option-save' class='option-save' href='#'>"+t["save to server"]+"</a>":"")+"                "+(this.downloadUrl||_c?"<a id='option-download' class='option-download' href='#'>"+t["download sgf"]+"</a>":"")+"                <div class='options-stop'></div>            </div>            <div id='preferences' class='preferences'>                <div><input type='checkbox'> Show variations on board</div>                <div><input type='checkbox'> Mark current move</div>            </div>            <div id='footer' class='footer'></div>            <div id='shade' class='shade'></div>        ";
+var _101="            <div id='board-container' class='board-container'></div>            <div id='controls-container' class='controls-container'>                <ul id='controls' class='controls'>                    <li id='control-first' class='control first'>First</li>                    <li id='control-back' class='control back'>Back</li>                    <li id='control-forward' class='control forward'>Forward</li>                    <li id='control-last' class='control last'>Last</li>                    <li id='control-pass' class='control pass'>Pass</li>                </ul>                <div id='move-number' class='move-number"+(this.permalinkable?" permalink":"")+"'></div>                <div id='nav-slider' class='nav-slider'>                    <div id='nav-slider-thumb' class='nav-slider-thumb'></div>                </div>                <div id='variations-container' class='variations-container'>                    <div id='variations-label' class='variations-label'>"+t["variations"]+":</div>                    <div id='variations' class='variations'></div>                </div>                <div class='controls-stop'></div>            </div>            <div id='tools-container' class='tools-container'"+(this.prefs.showTools?"":" style='display: none'")+">                <div id='tools-label' class='tools-label'>"+t["tool"]+":</div>                <select id='tools-select' class='tools-select'>                    <option value='play'>"+t["play"]+"</option>                    <option value='add_b'>"+t["add_b"]+"</option>                    <option value='add_w'>"+t["add_w"]+"</option>                    "+(this.searchUrl?("<option value='region'>"+t["region"]+"</option>"):"")+"                    <option value='comment'>"+t["edit comment"]+"</option>                    <option value='tr'>"+t["triangle"]+"</option>                    <option value='sq'>"+t["square"]+"</option>                    <option value='cr'>"+t["circle"]+"</option>                    <option value='x'>"+t["x"]+"</option>                    <option value='letter'>"+t["letter"]+"</option>                    <option value='number'>"+t["number"]+"</option>                    <option value='dim'>"+t["dim"]+"</option>                    <option value='clear'>"+t["clear"]+"</option>                </select>                <input type='button' id='score-est' class='score-est-button' value='"+t["score est"]+"' />                <select id='search-algo' class='search-algo'>                    <option value='corner'>"+t["search corner"]+"</option>                    <option value='center'>"+t["search center"]+"</option>                </select>                <input type='button' id='search-button' class='search-button' value='"+t["search"]+"' />            </div>            <div id='comments' class='comments'></div>            <div id='comments-edit' class='comments-edit'>                <textarea id='comments-edit-ta' class='comments-edit-ta'></textarea>                <div id='comments-edit-done' class='comments-edit-done'>"+t["done"]+"</div>            </div>            <div id='search-container' class='search-container'>                <div id='search-close' class='search-close'>"+t["close search"]+"</div>                <p class='search-count'><span id='search-count'></span>&nbsp;"+t["matches found"]+"</p>                <div id='search-results-container' class='search-results-container'>                    <div class='search-result'>                        <span class='pw'><b>"+t["white"]+"</b></span>                        <span class='pb'><b>"+t["black"]+"</b></span>                        <span class='re'><b>"+t["result"]+"</b></span>                        <span class='dt'><b>"+t["date"]+"</b></span>                        <div class='clear'></div>                    </div>                    <div id='search-results' class='search-results'></div>                </div>            </div>            <div id='info' class='info'>                <div id='info-players' class='players'>                    <div id='white' class='player white'>                        <div id='white-name' class='name'></div>                        <div id='white-captures' class='captures'></div>                        <div id='white-time' class='time'></div>                    </div>                    <div id='black' class='player black'>                        <div id='black-name' class='name'></div>                        <div id='black-captures' class='captures'></div>                        <div id='black-time' class='time'></div>                    </div>                </div>                <div id='info-game' class='game'></div>            </div>            <div id='nav-tree-container' class='nav-tree-container'>                <div id='nav-tree' class='nav-tree'></div>            </div>            <div id='options' class='options'>                "+(this.saveUrl?"<a id='option-save' class='option-save' href='#'>"+t["save to server"]+"</a>":"")+"                "+(this.downloadUrl||_c?"<a id='option-download' class='option-download' href='#'>"+t["download sgf"]+"</a>":"")+"                <div class='options-stop'></div>            </div>            <div id='preferences' class='preferences'>                <div><input type='checkbox'> Show variations on board</div>                <div><input type='checkbox'> Mark current move</div>            </div>            <div id='footer' class='footer'></div>            <div id='shade' class='shade'></div>        ";
 _101=_101.replace(/ id='([^']+)'/g," id='$1-"+this.uniq+"'");
 this.dom.player.innerHTML=_101;
 var re=/ id='([^']+)-\d+'/g;

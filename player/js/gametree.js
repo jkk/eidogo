@@ -52,6 +52,34 @@ eidogo.GameNode.prototype = {
         }
     },
     /**
+     * Check whether this node contains the given property with the given
+     * value
+    **/
+    hasPropertyValue: function(prop, value) {
+        if (!this[prop]) return false;
+        var values = (this[prop] instanceof Array ? this[prop] : [this[prop]]);
+        return (values.indexOf(value) != -1);
+    },
+    /**
+     * Removes a value from property or properties. If the value is the only
+     * one for the property, removes the property also. Value can be a RegExp
+     * or a string
+    **/
+    deletePropertyValue: function(prop, value) {
+        var test = (value instanceof RegExp) ?
+            function(v) { return value.test(v); } :
+            function(v) { return value == v; };
+        var props = (prop instanceof Array ? prop : [prop]);
+        for (var i = 0; prop = props[i]; i++) {
+            if (this[prop] instanceof Array) {
+                this[prop] = this[prop].filter(function(v) { return !test(v); });
+                if (!this[prop].length) delete this[prop];
+            } else if (test(this.prop)) {
+                delete this[prop];
+            }
+        }
+    },
+    /**
      * Loads SGF-like data given in JSON format:
      *      {PROP1: VALUE, PROP2: VALUE, _children: [...]}
      * Node properties will be overwritten if they exist or created if they

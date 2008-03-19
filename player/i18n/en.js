@@ -22,6 +22,7 @@ eidogo.i18n = eidogo.i18n || {
     'letter':           'Letter',
     'number':           'Number',
     'dim':              'Dim',
+    'clear':            'Clear Marker',
     'score':            'Score', // as in score tool
     'score est':        'Score Estimate',
     'search':           'Search',
@@ -99,6 +100,9 @@ eidogo.i18n = eidogo.i18n || {
     'black to play':    'Black to play',
     'white to play':    'White to play',
     'ho':               'Hotspot',
+    
+    'confirm delete':   'You\'ve removed all properties from this position.\n\nDelete this position and all sub-positions?',
+    'position deleted': 'Position deleted',
 
     'dom error':        'Error finding DOM container',
     'error retrieving': 'There was a problem retrieving the game data.',

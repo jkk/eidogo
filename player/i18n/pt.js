@@ -22,6 +22,7 @@ eidogo.i18n = eidogo.i18n || {
     'letter':           'letra',
     'number':           'número',
     'dim':              'Sombrear',
+    'clear':            'Clear Marker',
     'score':            'Pontuação', // as in score tool
     'score est':        'Estimar pontuação',
     'search':           'Procurar',
@@ -99,6 +100,9 @@ eidogo.i18n = eidogo.i18n || {
     'black to play':    'Preto a jogar',
     'white to play':    'Branco a jogar',
     'ho':               'Hotspot',
+    
+    'confirm delete':   'You\'ve removed all properties from this position.\n\nDelete this position and all sub-positions?',
+    'position deleted': 'Position deleted',
 
     'dom error':        'Erro no documento',
     'error retrieving': 'Houve um erro ao receber os dados da partida.',

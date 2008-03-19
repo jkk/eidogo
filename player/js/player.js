@@ -1022,7 +1022,16 @@ eidogo.Player.prototype = {
                         coord = coord + ":" + this.labelLastLetter;
                         this.labelLastLetter = String.fromCharCode(
                             this.labelLastLetter.charCodeAt(0)+1);
-                }    
+                        break;
+                    case "clear":
+                        this.cursor.node.deletePropertyValue(
+                            ['TR', 'SQ', 'CR', 'MA', 'DD', 'LB'], new RegExp("^" + coord));
+                        break;
+                }
+                if (this.cursor.node.hasPropertyValue(prop, coord)) {
+                    this.cursor.node.deletePropertyValue(prop, coord);
+                    prop = null;
+                }
             }
             if (prop)
                 this.cursor.node.pushProperty(prop, coord);
@@ -1038,15 +1047,14 @@ eidogo.Player.prototype = {
     checkForEmptyNode: function() {
         if (!eidogo.util.numProperties(this.cursor.node.getProperties())
             && this.cursor.node._children.length) {
-            var killNode = window.confirm("You've removed all properties " +
-                "from this position.\n\nDelete this position and all sub-positions?");
+            var killNode = window.confirm(t['confirm delete']);
             if (killNode) {
                 var id = this.cursor.node._id;
                 this.back();
                 this.cursor.node._children = this.cursor.node._children.filter(function(node) {
                     return node._id != id;
                 });
-                this.prependComment("Position deleted");
+                this.prependComment(t['position deleted']);
             }
         }  
     },
@@ -1869,6 +1877,7 @@ eidogo.Player.prototype = {
                     <option value='letter'>" + t['letter'] + "</option>\
                     <option value='number'>" + t['number'] + "</option>\
                     <option value='dim'>" + t['dim'] + "</option>\
+                    <option value='clear'>" + t['clear'] + "</option>\
                 </select>\
                 <input type='button' id='score-est' class='score-est-button' value='" + t['score est'] + "' />\
                 <select id='search-algo' class='search-algo'>\
