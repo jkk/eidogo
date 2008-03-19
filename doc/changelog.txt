@@ -2,6 +2,8 @@ Version 1.2 -
     Features
         * Game archive, search
         * View-only mode
+        * Clear marker tool
+        * Prompt to delete move when all properties are removed
         * Spanish, Portuguese translations
         * Refactored internal game tree structures to support future features
           like collaborative editing

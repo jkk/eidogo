@@ -1,5 +1,7 @@
 <?php include("header.phtml"); ?>
 
+<div id="options"></div>
+
 <script type="text/javascript" src="js/rsh.compressed.js"></script>
 
 <div id="player-container"></div>
@@ -56,6 +58,7 @@ var player;
             showPlayerInfo:     true,
             showOptions:        true,
             showTools:          true,
+            showNavTree:        false,
             problemMode:        false
         };
         for (var key in params) {
@@ -84,6 +87,7 @@ var player;
         var gameName = hashParts[0] || "";
         var loadPath = hashParts[1] ? hashParts[1].split(",") : null;
         var rest = hashParts.slice(1);
+        eidogo.util.hide("options");
         if (!gameName || gameName == "kjd") {
             if (loadPath) {
                 var s = loadPath[0];
@@ -126,6 +130,11 @@ var player;
             return;
         }
         if (gameName.indexOf("gnugo") === 0) {
+            eidogo.util.byId("options").innerHTML = 'GNU Go:\
+                <a href="/#gnugo">19x19</a> |\
+                <a href="/#gnugo-9">9x9</a> |\
+                <a href="/#gnugo-13">13x13</a>';
+            eidogo.util.show("options");
             var params = {
                 gameName:       "",
                 opponentUrl:    "php/gnugo.php",
@@ -137,6 +146,13 @@ var player;
             }
             loadGame(params);
             return;
+        }
+        if (gameName.indexOf("blank") === 0) {
+            eidogo.util.byId("options").innerHTML = 'Blank Board:\
+                <a href="/#blank">19x19</a> |\
+                <a href="/#blank-9">9x9</a> |\
+                <a href="/#blank-13">13x13</a>';
+            eidogo.util.show("options");
         }
         loadGame({
             gameName:   gameName,
@@ -158,7 +174,6 @@ var player;
         toJSON: function(o) { return ''; },
         fromJSON: function(s) { return {}; }
     });
-    
 
     // ajaxify our links
     eidogo.util.addEvent(document, "click", function(evt) {

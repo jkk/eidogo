@@ -118,6 +118,18 @@ pre {
 #links li a:hover {
     background: #ccc;
 }
+#options {
+    display: none;
+    background: #444;
+    padding: 5px 5px 5px 15px;
+    color: #999;
+    border: 5px solid #222;
+    border-bottom: none;
+}
+#options a {
+    color: #ccc;
+    margin: 0 5px 0 5px;
+}
 #subnav ul {
     margin: 0;
     padding: 0;
