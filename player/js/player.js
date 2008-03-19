@@ -476,6 +476,9 @@ eidogo.Player.prototype = {
         gameRoot = gameRoot || {};
         this.handleDisplayPrefs();
         var size = gameRoot.SZ || 19;
+        // Only three sizes supported for now
+        if (size != 9 && size != 13 && size != 19)
+            size = 19;
         if (this.shrinkToFit) this.calcShrinkToFit(gameRoot, size);
         if (!this.board) {
             // first time

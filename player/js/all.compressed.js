@@ -1372,6 +1372,9 @@ _3("get",url,null,_24,_29,this,30000);
 _2b=_2b||{};
 this.handleDisplayPrefs();
 var _2c=_2b.SZ||19;
+if(_2c!=9&&_2c!=13&&_2c!=19){
+_2c=19;
+}
 if(this.shrinkToFit){
 this.calcShrinkToFit(_2b,_2c);
 }
