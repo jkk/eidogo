@@ -9,3 +9,4 @@ CREATE TABLE `kjd` (
   PRIMARY KEY  (`id`),
   KEY `lt` (`lt`,`rt`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+alter table kjd add index parent (parent);
