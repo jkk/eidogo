@@ -9,10 +9,10 @@
 
 /**
  * For uniquely identifying nodes. Should work even if we have
- * multiple Player instantiations. Setting this to 15000 is kind of a hack
+ * multiple Player instantiations. Setting this to 100000 is kind of a hack
  * to avoid overlap with ids of as-yet-unloaded trees.
  */
-eidogo.gameNodeIdCounter = 15000;
+eidogo.gameNodeIdCounter = 100000;
 
 /**
  * @class GameNode holds SGF-like data containing things like moves, labels

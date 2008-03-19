@@ -1,4 +1,5 @@
 planned
+- fix clear marker tool for IE
 - edit game info
 - multiple games per sgf
 - link directly to a node within a progressive-loading tree (use MPTT?)
