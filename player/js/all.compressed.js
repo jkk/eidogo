@@ -1,4 +1,7 @@
 Array.prototype.contains=function(_1){
+if(Array.prototype.indexOf){
+return this.indexOf(_1)!=-1;
+}
 for(var i in this){
 if(this[i]==_1){
 return true;
@@ -400,7 +403,7 @@ if(!this[_5]){
 return false;
 }
 var _7=(this[_5] instanceof Array?this[_5]:[this[_5]]);
-return (_7.indexOf(_6)!=-1);
+return _7.contains(_6);
 },deletePropertyValue:function(_8,_9){
 var _a=(_9 instanceof RegExp)?function(v){
 return _9.test(v);

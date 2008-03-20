@@ -942,7 +942,7 @@ eidogo.Player.prototype = {
         this.mouseDown = false;
     
         var coord = this.pointToSgfCoord({x: x, y: y});
-    
+        
         // click on a variation?
         if (this.mode == "view" || this.mode == "play") {
             for (var i = 0; i < this.variations.length; i++) {

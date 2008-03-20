@@ -7,11 +7,11 @@
  * Supplements to core language objects (Array, Function)
  */
 Array.prototype.contains = function(needle) {
-    for (var i in this) {
-        if (this[i] == needle) {
+    if (Array.prototype.indexOf)
+        return this.indexOf(needle) != -1;
+    for (var i in this)
+        if (this[i] == needle)
             return true;
-        }
-    }
     return false;
 }
 Array.prototype.setLength = function(len, val) {

@@ -58,7 +58,7 @@ eidogo.GameNode.prototype = {
     hasPropertyValue: function(prop, value) {
         if (!this[prop]) return false;
         var values = (this[prop] instanceof Array ? this[prop] : [this[prop]]);
-        return (values.indexOf(value) != -1);
+        return values.contains(value);
     },
     /**
      * Removes a value from property or properties. If the value is the only
