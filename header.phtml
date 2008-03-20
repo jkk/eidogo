@@ -5,7 +5,7 @@
 <title>EidoGo - <?php if ($title) echo $title; else echo "Go Games, Pattern Search, Joseki Tutor, SGF Editor"; ?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-<link rel="stylesheet" href="css/site-style.css" type="text/css">
+<link rel="stylesheet" href="css/site-style.css?<?=date("Ymd", filectime("css/site-style.css"))?>" type="text/css">
 
 <?php if (strpos(strtolower($_SERVER['HTTP_USER_AGENT']), "iphone") !== false) { ?>
 <link rel="stylesheet" href="css/site-style-iphone.css" type="text/css" media="only screen and (max-device-width: 480px)">
@@ -16,7 +16,7 @@ eidogoConfig = {skipCss: true};
 </script>
 <?php } ?>
 
-<script type="text/javascript" src="player/js/all.compressed.js"></script>
+<script type="text/javascript" src="player/js/all.compressed.js?<?=date("Ymd", filectime("player/js/all.compressed.js"))?>"></script>
 
 <!-- <script type="text/javascript" src="player/js/lang.js"></script>
 <script type="text/javascript" src="player/js/eidogo.js"></script>
