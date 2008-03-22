@@ -4,12 +4,12 @@ Version 1.2 -
         * View-only mode
         * Clear marker tool
         * Prompt to delete move when all properties are removed
-        * Spanish, Portuguese translations
+        * French, Spanish, and Portuguese translations
         * Refactored internal game tree structures to support future features
-          like collaborative editing
+          such as collaborative editing
     Bugs
         * Broken KGS comments after saving to server
-        * Non-regular board sizes open as 19x9 instead of breaking
+        * Non-regular board sizes open as 19x19 instead of breaking
 
 Version 1.1 - Jan 21 2008
     Features

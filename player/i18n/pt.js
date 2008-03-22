@@ -14,6 +14,7 @@ eidogo.i18n = eidogo.i18n || {
     'add_b':            'adicionar_preta',
     'add_w':            'adicionar_branca',
     'edit comment':     'editar comentario',
+    'edit game info':   'Edit Game Info',
     'done':             'finalizado',
     'triangle':         'triângulo',
     'square':           'quadrado',

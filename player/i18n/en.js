@@ -14,6 +14,7 @@ eidogo.i18n = eidogo.i18n || {
     'add_b':            'Black Stone',
     'add_w':            'White Stone',
     'edit comment':     'Edit Comment',
+    'edit game info':   'Edit Game Info',
     'done':             'Done',
     'triangle':         'Triangle',
     'square':           'Square',

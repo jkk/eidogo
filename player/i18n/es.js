@@ -14,6 +14,7 @@ eidogo.i18n = eidogo.i18n || {
     'add_b':            'Piedra Negra',
     'add_w':            'Piedra Blanca',
     'edit comment':     'Editar Comentario',
+    'edit game info':   'Edit Game Info',
     'done':             'Finalizado',
     'triangle':         'Triángulo',
     'square':           'Cuadrado',
