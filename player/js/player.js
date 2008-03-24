@@ -724,7 +724,6 @@ eidogo.Player.prototype = {
     resetCursor: function(noRender, toGameRoot) {
         this.board.reset();
         this.currentColor = (this.problemMode ? this.problemColor : "B");
-        this.moveNumber = 0;
         if (toGameRoot) {
             this.cursor.node = this.cursor.getGameRoot();
         } else {
@@ -743,8 +742,6 @@ eidogo.Player.prototype = {
             setTimeout(function() { me.refresh.call(me); }, 10);
             return;
         }
-        this.moveNumber--;
-        if (this.moveNumber < 0) this.moveNumber = 0;
         this.board.revert(1);
         this.execNode(noRender);
     },
@@ -786,6 +783,8 @@ eidogo.Player.prototype = {
             this.dom.comments.innerHTML = "";
             this.board.clearMarkers();
         }
+        
+        this.moveNumber = this.cursor.getMoveNumber();
     
         if (this.moveNumber < 1) {
             this.currentColor = (this.problemMode ? this.problemColor : "B");
@@ -855,8 +854,6 @@ eidogo.Player.prototype = {
 
     back: function(e, obj, noRender) {
         if (this.cursor.previous()) {
-            this.moveNumber--;
-            if (this.moveNumber < 0) this.moveNumber = 0;
             this.board.revert(1);
             this.goingBack = true;
             this.refresh(noRender);
@@ -1401,7 +1398,6 @@ eidogo.Player.prototype = {
     createMove: function(coord) {
         var props = {};
         props[this.currentColor] = coord;
-        props['MN'] = (++this.moveNumber).toString();
         var varNode = new eidogo.GameNode(null, props);
         varNode._cached = true;
         this.totalMoves++;
@@ -1695,9 +1691,6 @@ eidogo.Player.prototype = {
         this.currentColor = (color == "B" ? "W" : "B");
         color = color == "W" ? this.board.WHITE : this.board.BLACK;
         var pt = this.sgfCoordToPoint(coord);
-        if (!this.cursor.node['MN']) {
-            this.moveNumber++;
-        }
         if ((!coord || coord == "tt" || coord == "") && !noRender) {
             this.prependComment((color == this.board.WHITE ?
                 t['white'] : t['black']) + " " + t['passed'], "comment-pass");
@@ -2044,11 +2037,9 @@ eidogo.Player.prototype = {
                     this.variation(null, true);
                 } else if (delta < 0) {
                     this.cursor.previous();
-                    this.moveNumber--;
                 }
             }
             if (delta < 0) {
-                if (this.moveNumber < 0) this.moveNumber = 0;
                 this.board.revert(Math.abs(delta));
             }
             this.doneLoading();

@@ -641,8 +641,10 @@ _3f.push(_41);
 return _3f.reverse();
 },getMoveNumber:function(){
 var num=0,_43=this.node;
-while(_43&&(_43.W||_43.B)){
+while(_43){
+if(_43.W||_43.B){
 num++;
+}
 _43=_43._parent;
 }
 return num;
@@ -1598,7 +1600,6 @@ this.refresh();
 },resetCursor:function(_5b,_5c){
 this.board.reset();
 this.currentColor=(this.problemMode?this.problemColor:"B");
-this.moveNumber=0;
 if(_5c){
 this.cursor.node=this.cursor.getGameRoot();
 }else{
@@ -1612,10 +1613,6 @@ setTimeout(function(){
 me.refresh.call(me);
 },10);
 return;
-}
-this.moveNumber--;
-if(this.moveNumber<0){
-this.moveNumber=0;
 }
 this.board.revert(1);
 this.execNode(_5d);
@@ -1641,6 +1638,7 @@ if(!_61){
 this.dom.comments.innerHTML="";
 this.board.clearMarkers();
 }
+this.moveNumber=this.cursor.getMoveNumber();
 if(this.moveNumber<1){
 this.currentColor=(this.problemMode?this.problemColor:"B");
 }
@@ -1687,10 +1685,6 @@ _67.push({move:_68[i].getMove(),varNum:i});
 return _67;
 },back:function(e,obj,_6c){
 if(this.cursor.previous()){
-this.moveNumber--;
-if(this.moveNumber<0){
-this.moveNumber=0;
-}
 this.board.revert(1);
 this.goingBack=true;
 this.refresh(_6c);
@@ -2141,7 +2135,6 @@ return ret;
 },createMove:function(_c2){
 var _c3={};
 _c3[this.currentColor]=_c2;
-_c3["MN"]=(++this.moveNumber).toString();
 var _c4=new eidogo.GameNode(null,_c3);
 _c4._cached=true;
 this.totalMoves++;
@@ -2384,9 +2377,6 @@ _e3=_e3||this.currentColor;
 this.currentColor=(_e3=="B"?"W":"B");
 _e3=_e3=="W"?this.board.WHITE:this.board.BLACK;
 var pt=this.sgfCoordToPoint(_e2);
-if(!this.cursor.node["MN"]){
-this.moveNumber++;
-}
 if((!_e2||_e2=="tt"||_e2=="")&&!_e4){
 this.prependComment((_e3==this.board.WHITE?t["white"]:t["black"])+" "+t["passed"],"comment-pass");
 }else{
@@ -2607,14 +2597,10 @@ this.variation(null,true);
 }else{
 if(_116<0){
 this.cursor.previous();
-this.moveNumber--;
 }
 }
 }
 if(_116<0){
-if(this.moveNumber<0){
-this.moveNumber=0;
-}
 this.board.revert(Math.abs(_116));
 }
 this.doneLoading();

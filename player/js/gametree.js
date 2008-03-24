@@ -334,8 +334,8 @@ eidogo.GameCursor.prototype = {
     getMoveNumber: function() {
         var num = 0,
             node = this.node;
-        while (node && (node.W || node.B)) {
-            num++;
+        while (node) {
+            if (node.W || node.B) num++;
             node = node._parent;
         }
         return num;
