@@ -782,9 +782,8 @@ eidogo.Player.prototype = {
         if (!noRender) {
             this.dom.comments.innerHTML = "";
             this.board.clearMarkers();
+            this.moveNumber = this.cursor.getMoveNumber();
         }
-        
-        this.moveNumber = this.cursor.getMoveNumber();
     
         if (this.moveNumber < 1) {
             this.currentColor = (this.problemMode ? this.problemColor : "B");
