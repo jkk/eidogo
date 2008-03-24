@@ -1036,8 +1036,9 @@ eidogo.Player.prototype = {
             if (prop)
                 this.cursor.node.pushProperty(prop, coord);
             this.unsavedChanges = true;
-            this.checkForEmptyNode();
+            var deleted = this.checkForEmptyNode();
             this.refresh();
+            if (deleted) this.prependComment(t['position deleted']);
         }
     },
     
@@ -1045,8 +1046,7 @@ eidogo.Player.prototype = {
      * If there are no properties left in a node, ask whether to delete it
     **/
     checkForEmptyNode: function() {
-        if (!eidogo.util.numProperties(this.cursor.node.getProperties())
-            && this.cursor.node._children.length) {
+        if (!eidogo.util.numProperties(this.cursor.node.getProperties())) {
             var killNode = window.confirm(t['confirm delete']);
             if (killNode) {
                 var id = this.cursor.node._id;
@@ -1054,9 +1054,10 @@ eidogo.Player.prototype = {
                 this.cursor.node._children = this.cursor.node._children.filter(function(node) {
                     return node._id != id;
                 });
-                this.prependComment(t['position deleted']);
+                return true;
             }
-        }  
+        }
+        return false;
     },
     
     /**
@@ -1583,8 +1584,9 @@ eidogo.Player.prototype = {
         hide(this.dom.commentsEdit);
         show(this.dom.comments);
         this.selectTool("play");
-        this.checkForEmptyNode();
+        var deleted = this.checkForEmptyNode();
         this.refresh();
+        if (deleted) this.prependComment(t['position deleted']);
     },
 
     /**
