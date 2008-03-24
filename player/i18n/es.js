@@ -14,7 +14,7 @@ eidogo.i18n = eidogo.i18n || {
     'add_b':            'Piedra Negra',
     'add_w':            'Piedra Blanca',
     'edit comment':     'Editar Comentario',
-    'edit game info':   'Edit Game Info',
+    'edit game info':   'Editar información de la partida',
     'done':             'Finalizado',
     'triangle':         'Triángulo',
     'square':           'Cuadrado',
@@ -23,7 +23,7 @@ eidogo.i18n = eidogo.i18n || {
     'letter':           'Letra',
     'number':           'Número',
     'dim':              'Sombrear',
-    'clear':            'Clear Marker',
+    'clear':            'Borrar marca',
     'score':            'Puntaje', // as in score tool
     'score est':        'Estimar puntaje',
     'search':           'Buscar',
@@ -102,8 +102,8 @@ eidogo.i18n = eidogo.i18n || {
     'white to play':    'Blanco juega',
     'ho':               'Hotspot',
     
-    'confirm delete':   'You\'ve removed all properties from this position.\n\nDelete this position and all sub-positions?',
-    'position deleted': 'Position deleted',
+    'confirm delete':   'Has borrado todas las propiedades de esta posición. ¿Borrar posición y todas sus variantes?',
+    'position deleted': 'Posición borrada',
 
     'dom error':        'Error al buscar contenedor DOM',
     'error retrieving': 'Hubo un problema al recibir los datos de la partida.',

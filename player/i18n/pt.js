@@ -14,7 +14,7 @@ eidogo.i18n = eidogo.i18n || {
     'add_b':            'adicionar_preta',
     'add_w':            'adicionar_branca',
     'edit comment':     'editar comentario',
-    'edit game info':   'Edit Game Info',
+    'edit game info':   'Editar informações do Jogo',
     'done':             'finalizado',
     'triangle':         'triângulo',
     'square':           'quadrado',
@@ -23,7 +23,7 @@ eidogo.i18n = eidogo.i18n || {
     'letter':           'letra',
     'number':           'número',
     'dim':              'Sombrear',
-    'clear':            'Clear Marker',
+    'clear':            'Remover marcador',
     'score':            'Pontuação', // as in score tool
     'score est':        'Estimar pontuação',
     'search':           'Procurar',
@@ -102,8 +102,8 @@ eidogo.i18n = eidogo.i18n || {
     'white to play':    'Branco a jogar',
     'ho':               'Hotspot',
     
-    'confirm delete':   'You\'ve removed all properties from this position.\n\nDelete this position and all sub-positions?',
-    'position deleted': 'Position deleted',
+    'confirm delete':   'Removeste todas as propriedades desta posição. Desejas mesmo apagar esta posição e todas as suas variações?',
+    'position deleted': 'Posição apagada',
 
     'dom error':        'Erro no documento',
     'error retrieving': 'Houve um erro ao receber os dados da partida.',
