@@ -281,7 +281,7 @@ eidogo.Player.prototype = {
         
         // whether we're currently searching or editing
         this.searching = false;
-        this.editingComment = false;
+        this.editingText = false;
         this.goingBack = false;
         
         // problem-solving mode: respond when the user plays a move
@@ -491,7 +491,7 @@ eidogo.Player.prototype = {
         var moveCursor = new eidogo.GameCursor(this.cursor.node);
         while (moveCursor.next()) { this.totalMoves++; }
         this.totalMoves--;
-        this.showInfo(gameRoot);
+        this.showGameInfo(gameRoot);
         this.enableNavSlider();
         this.selectTool(this.mode == "view" ? "view" : "play");
         this.hook("initGame");
@@ -778,6 +778,8 @@ eidogo.Player.prototype = {
             setTimeout(function() { me.execNode.call(me, noRender); }, 10);
             return;
         }
+        
+        if (!this.cursor.node) return;
     
         if (!noRender) {
             this.dom.comments.innerHTML = "";
@@ -951,7 +953,23 @@ eidogo.Player.prototype = {
             }
         }
         
-        if (this.mode == "view") return;
+        if (this.mode == "view") {
+            // Jump to any moved played at the clicked coordinate
+            var root = this.cursor.getGameRoot(),
+                path = [0, root.getPosition()],
+                mn = 0,
+                node = root._children[0];
+            while (node) {
+                if (node.getMove() == coord) {
+                    path.push(mn);
+                    this.goTo(path);
+                    break;
+                }
+                mn++;
+                node = node._children[0];
+            }
+            return;
+        }
         
         if (this.mode == "play") {
             // can't click there?
@@ -985,7 +1003,7 @@ eidogo.Player.prototype = {
                 this.regionRight = (x < 0 ? 0 :  (x >= this.board.boardSize) ?
                     x : x + (x > this.regionLeft ? 1 : 0));
                 this.showRegion();
-                show(this.dom.searchAlgo, "inline");
+                // show(this.dom.searchAlgo, "inline");
                 show(this.dom.searchButton, "inline");
                 stopEvent(e);
             }
@@ -1049,10 +1067,18 @@ eidogo.Player.prototype = {
             var killNode = window.confirm(t['confirm delete']);
             if (killNode) {
                 var id = this.cursor.node._id;
+                var index = 0;
                 this.back();
-                this.cursor.node._children = this.cursor.node._children.filter(function(node) {
-                    return node._id != id;
+                this.cursor.node._children = this.cursor.node._children.filter(function(node, i) {
+                    if (node._id == id) {
+                        index = i;
+                        return false;
+                    } else {
+                        return true;
+                    }
                 });
+                if (index && this.cursor.node._preferredChild == index)
+                    this.cursor.node._preferredChild--;
                 return true;
             }
         }
@@ -1068,7 +1094,7 @@ eidogo.Player.prototype = {
             // end of region selection
             this.mouseDown = false;
             this.regionBegun = false;
-            show(this.dom.searchAlgo, "inline");
+            // show(this.dom.searchAlgo, "inline");
             show(this.dom.searchButton, "inline");
         }
         return true;
@@ -1410,7 +1436,7 @@ eidogo.Player.prototype = {
      * Keyboard shortcut handling
     **/
     handleKeypress: function(e) {
-        if (this.editingComment) return true;
+        if (this.editingText) return true;
         var charCode = e.keyCode || e.charCode;
         if (!charCode || e.ctrlKey || e.altKey || e.metaKey) return true;
         var charKey = String.fromCharCode(charCode).toLowerCase();
@@ -1489,12 +1515,12 @@ eidogo.Player.prototype = {
     /**
      * Parse and display the game's info
     **/
-    showInfo: function(gameInfo) {
+    showGameInfo: function(gameInfo) {
         if (!gameInfo) return;
         this.dom.infoGame.innerHTML = "";
         this.dom.whiteName.innerHTML = "";
         this.dom.blackName.innerHTML = "";
-        var dl = document.createElement('dl');
+        var dl = document.createElement('dl'), val;
         for (var propName in this.infoLabels) {
             if (gameInfo[propName] instanceof Array) {
                 gameInfo[propName] = gameInfo[propName][0];
@@ -1512,17 +1538,18 @@ eidogo.Player.prototype = {
                 if (propName == "WR" || propName == "BR") {
                     continue;
                 }
+                val = gameInfo[propName];
                 if (propName == "DT") {
                     var dateParts = gameInfo[propName].split(/[\.-]/);
                     if (dateParts.length == 3) {
-                        gameInfo[propName] = dateParts[2].replace(/^0+/, "") + " "
+                        val = dateParts[2].replace(/^0+/, "") + " "
                             + this.months[dateParts[1]-1] + " " + dateParts[0];
                     }
                 }
                 var dt = document.createElement('dt');
                 dt.innerHTML = this.infoLabels[propName] + ':';
                 var dd = document.createElement('dd');
-                dd.innerHTML = gameInfo[propName];
+                dd.innerHTML = val;
                 dl.appendChild(dt);
                 dl.appendChild(dd);
             }
@@ -1540,6 +1567,8 @@ eidogo.Player.prototype = {
             cursor = "crosshair";
         } else if (tool == "comment") {
             this.startEditComment();
+        } else if (tool == "gameinfo") {
+            this.startEditGameInfo();
         } else {
             cursor = "default";
             this.regionBegun = false;
@@ -1555,22 +1584,21 @@ eidogo.Player.prototype = {
     
     startEditComment: function() {
         this.closeSearch();
-        var ta = this.dom.commentsEdit;
-        ta.style.position = "absolute";
-        ta.style.top = this.dom.comments.offsetTop + "px";
-        ta.style.left = this.dom.comments.offsetLeft + "px";
+        var div = this.dom.commentsEdit;
+        div.style.position = "absolute";
+        div.style.top = this.dom.comments.offsetTop + "px";
+        div.style.left = this.dom.comments.offsetLeft + "px";
         show(this.dom.shade);
         this.dom.comments.innerHTML = "";
-        this.dom.player.appendChild(ta);
-        show(ta);
+        show(div);
         show(this.dom.commentsEditDone);
         this.dom.commentsEditTa.value = this.cursor.node.C || "";
         this.dom.commentsEditTa.focus();
-        this.editingComment = true;  
+        this.editingText = true;  
     },
     
     finishEditComment: function() {
-        this.editingComment = false;
+        this.editingText = false;
         var oldC = this.cursor.node.C;
         var newC = this.dom.commentsEditTa.value;
         if (oldC != newC) {
@@ -1586,6 +1614,52 @@ eidogo.Player.prototype = {
         var deleted = this.checkForEmptyNode();
         this.refresh();
         if (deleted) this.prependComment(t['position deleted']);
+    },
+    
+    startEditGameInfo: function() {
+        this.closeSearch();
+        var div = this.dom.gameInfoEdit;
+        div.style.position = "absolute";
+        div.style.top = this.dom.comments.offsetTop + "px";
+        div.style.left = this.dom.comments.offsetLeft + "px";
+        show(this.dom.shade);
+        this.dom.comments.innerHTML = "";
+        show(div);
+        show(this.dom.gameInfoEditDone);
+        var root = this.cursor.getGameRoot();
+        var html = ['<table>'];
+        for (var prop in this.infoLabels) {
+            html.push('<tr><td>' + this.infoLabels[prop] + ':' + '</td><td>' +
+                '<input type="text" id="game-info-edit-field-' + prop + '"' +
+                    ' value="' + (root[prop] || "") + '">' +
+                '</td></tr>');
+        }
+        html.push('</table>');
+        this.dom.gameInfoEditForm.innerHTML = html.join('');
+        setTimeout(function() {
+            byId("game-info-edit-field-GN").focus();
+        }, 0);
+        this.editingText = true;
+    },
+    
+    finishEditGameInfo: function() {
+        this.editingText = false;
+        hide(this.dom.shade);
+        hide(this.dom.gameInfoEdit);
+        show(this.dom.comments);
+        var root = this.cursor.getGameRoot();
+        var newval = null;
+        for (var prop in this.infoLabels) {
+            newval = byId('game-info-edit-field-' + prop).value;
+            if ((root[prop] || "") != newval) {
+                root[prop] = newval;
+                this.unsavedChanges = true;
+            }
+        }
+        this.showGameInfo(root);
+        this.dom.gameInfoEditForm.innerHTML = "";
+        this.selectTool("play");
+        this.refresh();
     },
 
     /**
@@ -1862,19 +1936,21 @@ eidogo.Player.prototype = {
             <div id='tools-container' class='tools-container'" + (this.prefs.showTools ? "" : " style='display: none'") + ">\
                 <div id='tools-label' class='tools-label'>" + t['tool'] + ":</div>\
                 <select id='tools-select' class='tools-select'>\
-                    <option value='play'>" + t['play'] + "</option>\
-                    <option value='add_b'>" + t['add_b'] + "</option>\
-                    <option value='add_w'>" + t['add_w'] + "</option>\
-                    " + (this.searchUrl ? ("<option value='region'>" + t['region'] + "</option>") : "") +"\
-                    <option value='comment'>" + t['edit comment'] + "</option>\
-                    <option value='tr'>" + t['triangle'] + "</option>\
-                    <option value='sq'>" + t['square'] + "</option>\
-                    <option value='cr'>" + t['circle'] + "</option>\
-                    <option value='x'>" + t['x'] + "</option>\
-                    <option value='letter'>" + t['letter'] + "</option>\
-                    <option value='number'>" + t['number'] + "</option>\
-                    <option value='dim'>" + t['dim'] + "</option>\
-                    <option value='clear'>" + t['clear'] + "</option>\
+                    <option value='play'>&#9658; " + t['play'] + "</option>\
+                    <option value='view'>&#8594; " + t['view'] + "</option>\
+                    <option value='add_b'>&#9679; " + t['add_b'] + "</option>\
+                    <option value='add_w'>&#9675; " + t['add_w'] + "</option>\
+                    " + (this.searchUrl ? ("<option value='region'>&#9618; " + t['region'] + "</option>") : "") +"\
+                    <option value='comment'>&para; " + t['edit comment'] + "</option>\
+                    <option value='gameinfo'>&#8962; " + t['edit game info'] + "</option>\
+                    <option value='tr'>&#9650; " + t['triangle'] + "</option>\
+                    <option value='sq'>&#9632; " + t['square'] + "</option>\
+                    <option value='cr'>&#9679; " + t['circle'] + "</option>\
+                    <option value='x'>&times; " + t['x'] + "</option>\
+                    <option value='letter'>A " + t['letter'] + "</option>\
+                    <option value='number'>5 " + t['number'] + "</option>\
+                    <option value='dim'>&#9619; " + t['dim'] + "</option>\
+                    <option value='clear'>&#9617; " + t['clear'] + "</option>\
                 </select>\
                 <input type='button' id='score-est' class='score-est-button' value='" + t['score est'] + "' />\
                 <select id='search-algo' class='search-algo'>\
@@ -1887,6 +1963,10 @@ eidogo.Player.prototype = {
             <div id='comments-edit' class='comments-edit'>\
                 <textarea id='comments-edit-ta' class='comments-edit-ta'></textarea>\
                 <div id='comments-edit-done' class='comments-edit-done'>" + t['done'] + "</div>\
+            </div>\
+            <div id='game-info-edit' class='game-info-edit'>\
+                <div id='game-info-edit-form' class='game-info-edit-form'></div>\
+                <div id='game-info-edit-done' class='game-info-edit-done'>" + t['done'] + "</div>\
             </div>\
             <div id='search-container' class='search-container'>\
                 <div id='search-close' class='search-close'>" + t['close search'] + "</div>\
@@ -1973,6 +2053,7 @@ eidogo.Player.prototype = {
          ['optionDownload',   'downloadSgf'],
          ['optionSave',       'save'],
          ['commentsEditDone', 'finishEditComment'],
+         ['gameInfoEditDone', 'finishEditGameInfo'],
          ['navTree',          'navTreeClick']
         ].forEach(function(eh) {
             if (this.dom[eh[0]]) onClick(this.dom[eh[0]], this[eh[1]], this);

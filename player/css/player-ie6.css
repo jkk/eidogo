@@ -13,3 +13,6 @@
 .eidogo-player .nav-tree a.current {
     filter: none;
 }
+.eidogo-player .tools-select {
+    font-family: arial;
+}

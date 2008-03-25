@@ -9,6 +9,7 @@ eidogo.i18n = eidogo.i18n || {
     'no variations':    'aucune',
     
     'tool':             'Outil',
+    'view':             'Jump to Move',
     'play':             'Joue',
     'region':           'Selectionne Région',
     'add_b':            'Pierre Noire',

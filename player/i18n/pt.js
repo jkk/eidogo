@@ -9,6 +9,7 @@ eidogo.i18n = eidogo.i18n || {
     'no variations':    'nenhuma variação',
     
     'tool':             'ferramentas',
+    'view':             'Jump to Move',
     'play':             'Jogar',
     'region':           'Seleccionar Região',
     'add_b':            'adicionar_preta',

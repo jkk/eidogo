@@ -1,13 +1,11 @@
 planned
-- fix clear marker tool for IE
-- edit game info
-- multiple games per sgf
-- link directly to a node within a progressive-loading tree (use MPTT?)
-- wiki-like SGF editing
 - link each kogo's position with pro game search
 - show more search results
 - tree navigation for IE
+- multiple games per sgf
 - make failed game load non-fatal
+- link directly to a node within a progressive-loading tree (use MPTT?)
+- wiki-like SGF editing
 - show continuations for pattern search
 - accurate nav slider after new moves played (base on nextSibling)
 - custom label

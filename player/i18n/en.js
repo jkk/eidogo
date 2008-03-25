@@ -9,6 +9,7 @@ eidogo.i18n = eidogo.i18n || {
     'no variations':    'none',
     
     'tool':             'Tool',
+    'view':             'Jump to Move',
     'play':             'Play',
     'region':           'Select Region',
     'add_b':            'Black Stone',
