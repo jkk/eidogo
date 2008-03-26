@@ -7,6 +7,8 @@ Version 1.2 -
         * Prompt to delete move when all properties are removed
         * "Jump to move" tool
         * French, Spanish, and Portuguese translations
+        * New example using <iframe> that activates keyboard shortcuts only
+          when the Player has focus
         * Refactored internal game tree structures to support future features
           such as collaborative editing
     Bug fixes
