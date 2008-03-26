@@ -2192,13 +2192,6 @@ this.selectTool("play");
 }
 var _d1=true;
 switch(_cc){
-case 32:
-if(e.shiftKey){
-this.back();
-}else{
-this.forward();
-}
-break;
 case 39:
 if(e.shiftKey){
 var _d2=this.totalMoves-this.moveNumber;

@@ -1468,13 +1468,6 @@ eidogo.Player.prototype = {
     
         var stop = true;
         switch (charCode) {
-            case 32: // spacebar
-                if (e.shiftKey) {
-                    this.back();
-                } else {
-                    this.forward();
-                }
-                break;
             case 39: // right
                 if (e.shiftKey) {
                     var movesLeft = this.totalMoves - this.moveNumber;
