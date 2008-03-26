@@ -1,6 +1,7 @@
 Version 1.2 -
     Features
-        * Game archive, search
+        * Game archive, search (server-side)
+        * GNU Go handicap, color chooser (server-side)
         * View-only mode
         * Edit game info tool
         * Clear marker tool

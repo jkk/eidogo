@@ -130,6 +130,11 @@ pre {
     color: #ccc;
     margin: 0 5px 0 5px;
 }
+#options select {
+    font-family: arial, helvetica, sans-serif;
+    font-size: 11px;
+    padding: 0;
+}
 #subnav ul {
     margin: 0;
     padding: 0;

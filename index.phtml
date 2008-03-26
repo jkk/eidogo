@@ -133,17 +133,42 @@ var player;
             eidogo.util.byId("options").innerHTML = 'GNU Go:\
                 <a href="/#gnugo">19x19</a> |\
                 <a href="/#gnugo-9">9x9</a> |\
-                <a href="/#gnugo-13">13x13</a>';
+                <a href="/#gnugo-13">13x13</a>\
+                &nbsp;&nbsp; Your Color: <select id="human-color">\
+                    <option value="W">White</option>\
+                    <option value="B">Black</option>\
+                    </select>\
+                &nbsp;&nbsp; Handicap: <select id="handicap">\
+                    <option value="0">None</option>\
+                    <option value="1">1 stone</option>\
+                    <option value="2">2 stones</option>\
+                    <option value="3">3 stones</option>\
+                    <option value="4">4 stones</option>\
+                    <option value="5">5 stones</option>\
+                    <option value="6">6 stones</option>\
+                    <option value="7">7 stones</option>\
+                    <option value="8">8 stones</option>\
+                    <option value="9">9 stones</option>\
+                    </select>';
             eidogo.util.show("options");
             var params = {
                 gameName:       "",
                 opponentUrl:    "php/gnugo.php",
-                opponentColor:  "B"
+                opponentColor:  "B",
+                opponentLevel:  7,
+                handicap:       0
             };
             var parts = gameName.split("-");
             if (parts[1]) {
                 params.boardSize = parts[1];
             }
+            var changeHandler = function() {
+                params.opponentColor = eidogo.util.byId("human-color").value == "W" ? "B" : "W";
+                params.handicap = eidogo.util.byId("handicap").value;
+                loadGame(params);
+            }
+            eidogo.util.addEvent(eidogo.util.byId("human-color"), "change", changeHandler);
+            eidogo.util.addEvent(eidogo.util.byId("handicap"), "change", changeHandler);
             loadGame(params);
             return;
         }

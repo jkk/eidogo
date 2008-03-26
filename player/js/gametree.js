@@ -341,6 +341,7 @@ eidogo.GameCursor.prototype = {
         return num;
     },
     getGameRoot: function() {
+        if (!this.node) return null;
         var cur = new eidogo.GameCursor(this.node);
         // If we're on the tree root, return the first game
         if (!this.node._parent && this.node._children.length)

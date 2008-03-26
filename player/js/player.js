@@ -244,6 +244,7 @@ eidogo.Player.prototype = {
         // gnugo/computer opponent
         this.opponentUrl = null;
         this.opponentColor = null;
+        this.opponentLevel = null;
         
         // these are populated after load
         this.board = null;
@@ -358,16 +359,53 @@ eidogo.Player.prototype = {
     
             // start from scratch
             var boardSize = cfg.boardSize || "19";
-            var blankGame = {_children: [{SZ: boardSize, _children: []}]};
+            var komiMap = {19: 6.5, 13: 4.5, 9: 3.5};
+            var blankGame = {_children: [{
+                    SZ: boardSize,
+                    KM: cfg.komi || komiMap[boardSize] || 6.5,
+                    _children: []}]};
         
             // AI opponent (e.g. GNU Go)
             if (cfg.opponentUrl) {
+                this.gameName = "gnugo";
                 this.opponentUrl = cfg.opponentUrl;
                 this.opponentColor = cfg.opponentColor == "B" ? cfg.opponentColor : "W";
+                this.opponentLevel = cfg.opponentLevel || 7;
                 var root = blankGame._children[0];
-                root.PW = t['you'];
-                root.PB = "GNU Go"
-                this.gameName = "gnugo";
+                root.PW = this.opponentColor == "B" ? t['you'] : "GNU Go";
+                root.PB = this.opponentColor == "B" ? "GNU Go" : t['you'];
+                root.HA = parseInt(cfg.handicap, 10) || 0;
+                if (root.HA) {
+                    var handiCoords = {
+                        19: [['pd', 'dp'],
+                             ['pd', 'dp', 'pp'],
+                             ['pd', 'dp', 'pp', 'dd'],
+                             ['pd', 'dp', 'pp', 'dd', 'jj'],
+                             ['pd', 'dp', 'pp', 'dd', 'dj', 'pj'],
+                             ['pd', 'dp', 'pp', 'dd', 'dj', 'pj', 'jj'],
+                             ['pd', 'dp', 'pp', 'dd', 'dj', 'pj', 'jd', 'jp'],
+                             ['pd', 'dp', 'pp', 'dd', 'dj', 'pj', 'jd', 'jp', 'jj']],
+                        13: [['jd', 'dj'],
+                             ['jd', 'dj', 'jj'],
+                             ['jd', 'dj', 'jj', 'dd'],
+                             ['jd', 'dj', 'jj', 'dd', 'gg'],
+                             ['jd', 'dj', 'jj', 'dd', 'dg', 'jg'],
+                             ['jd', 'dj', 'jj', 'dd', 'dg', 'jg', 'gg'],
+                             ['jd', 'dj', 'jj', 'dd', 'dg', 'jg', 'gd', 'gj'],
+                             ['jd', 'dj', 'jj', 'dd', 'dg', 'jg', 'gd', 'gj', 'gg']],
+                        9: [['cg', 'gc'],
+                            ['cg', 'gc', 'gg'],
+                            ['cg', 'gc', 'gg', 'cc'],
+                            ['cg', 'gc', 'gg', 'cc', 'ee'],
+                            ['cg', 'gc', 'gg', 'cc', 'ce', 'ge'],
+                            ['cg', 'gc', 'gg', 'cc', 'ce', 'ge', 'ee'],
+                            ['cg', 'gc', 'gg', 'cc', 'ce', 'ge', 'ec', 'eg'],
+                            ['cg', 'gc', 'gg', 'cc', 'ce', 'ge', 'ec', 'eg', 'ee']]};
+                    root.KM = 0.5;
+                    if (root.HA > 1) {
+                        root.AB = handiCoords[boardSize][root.HA-2];
+                    }
+                }
             }
         
             this.load(blankGame);
@@ -600,7 +638,8 @@ eidogo.Player.prototype = {
         var params = {
             sgf: root.toSgf(),
             move: this.currentColor,
-            size: root.SZ
+            size: root.SZ,
+            level: this.opponentLevel
         };
         ajax('post', this.opponentUrl, params, success, failure, this, 45000);  
     },
@@ -723,13 +762,23 @@ eidogo.Player.prototype = {
     **/
     resetCursor: function(noRender, toGameRoot) {
         this.board.reset();
-        this.currentColor = (this.problemMode ? this.problemColor : "B");
+        this.resetCurrentColor();
         if (toGameRoot) {
             this.cursor.node = this.cursor.getGameRoot();
         } else {
             this.cursor.node = this.collectionRoot;
         }
         this.refresh(noRender);
+    },
+    
+    /**
+     * Resets the current color as appropriate
+    **/
+    resetCurrentColor: function() {
+        this.currentColor = (this.problemMode ? this.problemColor : "B");
+        var root = this.cursor.getGameRoot();
+        if (root && root.HA > 1)
+            this.currentColor = 'W';
     },
 
     /**
@@ -788,7 +837,7 @@ eidogo.Player.prototype = {
         }
     
         if (this.moveNumber < 1) {
-            this.currentColor = (this.problemMode ? this.problemColor : "B");
+            this.resetCurrentColor();
         }
     
         // execute handlers for the appropriate properties
