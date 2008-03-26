@@ -9,7 +9,7 @@ eidogo.i18n = eidogo.i18n || {
     'no variations':    'ninguna',
     
     'tool':             'Herramienta',
-    'view':             'Jump to Move',
+    'view':             'Saltar a jugada',
     'play':             'Jugar',
     'region':           'Seleccionar Región',
     'add_b':            'Piedra Negra',
