@@ -681,8 +681,8 @@ eidogo.Player.prototype = {
         var params = {
             sgf: root.toSgf(),
             move: 'est',
-            size: root.SZ,
-            komi: root.KM,
+            size: root.SZ || 19,
+            komi: root.KM || 0,
             mn: this.moveNumber + 1
         };
         ajax('post', this.scoreEstUrl, params, success, failure, this, 45000);
@@ -929,7 +929,7 @@ eidogo.Player.prototype = {
                         x = left + parseInt(cont.x, 10) + 1;
                         y = parseInt(cont.y, 10);
                         coord = this.pointToSgfCoord({x:x,y:y});
-                        contNode[this.currentColor] = coord;
+                        contNode[this.currentColor || "B"] = coord;
                         contBranch.LB.push(coord + ":" + cont.label);
                         if (percent)
                             contBranch.C += "<div class='continuation'>" +

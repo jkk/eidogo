@@ -708,11 +708,7 @@
 }
 #cont-search {
     display: block;
-    background: #ddc;
-    padding: 5px;
     margin: 0 0 10px 0;
-/*    border-bottom: 1px solid #889;*/
-/*    text-decoration: none;*/
 }
 #cont-search:hover {
     text-decoration: underline;
