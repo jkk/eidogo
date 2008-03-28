@@ -22,7 +22,7 @@ var player;
             if (!this.gameName || ['search', 'gnugo', 'url'].contains(this.gameName)) return;
             var gn = this.gameName || "";
             // use move-based path for KJD to future-proof permalinks
-            var path = (gn == "kjd" ?
+            var path = (gn == "kjd" || gn == "kombilo" ?
                 this.cursor.getPathMoves().join("") :
                 this.cursor.getPath().join(","));
             var hash = gn + (path ? ":" + path : "");
@@ -88,7 +88,11 @@ var player;
         var loadPath = hashParts[1] ? hashParts[1].split(",") : null;
         var rest = hashParts.slice(1);
         eidogo.util.hide("options");
-        if (!gameName || gameName == "kjd") {
+        if (!gameName || gameName == "kjd" || gameName == "kombilo") {
+            eidogo.util.byId("options").innerHTML = '<strong>Joseki Tutor:</strong>\
+                <a href="/#kjd">Kogo\'s Joseki Dictionary</a> |\
+                <a href="/#kombilo">Kombilo / Pro Game Database</a>';
+            eidogo.util.show("options");
             if (loadPath) {
                 var s = loadPath[0];
                 var coord;
@@ -99,10 +103,11 @@ var player;
                 }
             }
             loadGame({
-                gameName:           "kjd",
-                sgfUrl:             "backend/kjd_progressive.php",                
+                gameName:           gameName || "kjd",
+                progressiveUrl:     gameName == "kombilo" ? "backend/search.php" : "backend/kjd_progressive.php",
                 loadPath:           loadPath,
                 progressiveLoad:    true,
+                progressiveMode:    gameName == "kombilo" ? "pattern" : "id",
                 markNext:           true,
                 showPlayerInfo:     false,
                 showOptions:        false

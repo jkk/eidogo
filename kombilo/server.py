@@ -35,6 +35,10 @@ while 1:
     algo = args[4]
     
     #print "Args:\n  q: %s, w: %d, h: %d, p: %s, a: %s\n" % (quadrant, width, height, pattern, algo)
+    if algo == "continuations":
+        show_cont = True
+    else:
+        show_cont = False
     
     if algo == "center":
       algo = CENTER_PATTERN
@@ -58,15 +62,25 @@ while 1:
     
     #print "Done. Sending results...\n"
     
-    for i in range(gl.size()):
-        cf.write(gl.getCurrentProperty(i, 'filename') + "\t" +\
-            gl.getCurrentProperty(i, 'PW') + "\t" +\
-            gl.getCurrentProperty(i, 'WR') + "\t" +\
-            gl.getCurrentProperty(i, 'PB') + "\t" +\
-            gl.getCurrentProperty(i, 'BR') + "\t" +\
-            gl.getCurrentProperty(i, 'RE') + "\t" +\
-            gl.getCurrentProperty(i, 'DT') + "\t" +\
-            gl.currentEntryAsString(i) + "\n");
+    if show_cont:
+        for y in range(p.sizeY):
+            for x in range(p.sizeX):
+                if gl.lookupLabel(x,y) != '.':
+                    cont = gl.lookupContinuation(x,y);
+                    # label, x, y, num games
+                    cf.write("%c\t%d\t%d\t%d\n" % (gl.lookupLabel(x,y), x, y, cont.B + cont.W))
+                    # print "      %c      |   %3d (    %3d /    %3d ) |   %3d (   %3d /    %3d) |" % \
+                        # (gl.lookupLabel(x,y), cont.B, cont.wB, cont.lB, cont.W, cont.wW, cont.lW)
+    else:            
+        for i in range(gl.size()):
+            cf.write(gl.getCurrentProperty(i, 'filename') + "\t" +\
+                gl.getCurrentProperty(i, 'PW') + "\t" +\
+                gl.getCurrentProperty(i, 'WR') + "\t" +\
+                gl.getCurrentProperty(i, 'PB') + "\t" +\
+                gl.getCurrentProperty(i, 'BR') + "\t" +\
+                gl.getCurrentProperty(i, 'RE') + "\t" +\
+                gl.getCurrentProperty(i, 'DT') + "\t" +\
+                gl.currentEntryAsString(i) + "\n");
     
     #print "Done. Closing connection...\n"
     

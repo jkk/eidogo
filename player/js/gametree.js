@@ -28,8 +28,8 @@ eidogo.GameNode.prototype = {
      * @param {GameNode} parent Parent of the node
      * @param {Object} properties SGF-like JSON object to load into the node
      */
-    init: function(parent, properties) {
-        this._id = eidogo.gameNodeIdCounter++;
+    init: function(parent, properties, id) {
+        this._id = (typeof id != "undefined" ? id : eidogo.gameNodeIdCounter++);
         this._parent = parent || null;
         this._children = [];
         this._preferredChild = 0;

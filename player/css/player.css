@@ -673,6 +673,50 @@
     background: #822 !important;
     color: #fff !important;
 }
+.eidogo-player .continuations {
+    background: #aa9;
+    padding: 5px;
+}
+.eidogo-player .continuation {
+   clear: left;
+   padding: 5px;
+   cursor: pointer;
+   height: 12px;
+}
+.eidogo-player .continuation:hover {
+    background: #ccb;
+}
+.eidogo-player .continuation div.cont-label {
+    width: 15px;
+    float: left;
+    clear: left;
+    font-weight: bold;
+    color: #443;
+}
+.eidogo-player .continuation div.cont-bar {
+    float: left;
+    margin-top: 3px;
+    height: 7px;
+    background: #665;
+}
+.eidogo-player .continuation div.cont-count {
+    width: 100px;
+    float: left;
+    margin: 0 0 0 5px;
+    font-size: 9px;
+    color: #554;
+}
+#cont-search {
+    display: block;
+    background: #ddc;
+    padding: 5px;
+    margin: 0 0 10px 0;
+/*    border-bottom: 1px solid #889;*/
+/*    text-decoration: none;*/
+}
+#cont-search:hover {
+    text-decoration: underline;
+}
 .eidogo-player .preferences {
 	clear: right;
 	float: right;

@@ -2,12 +2,20 @@
 
 $kombilo_dir = "../kombilo";
 
-// safety checks
-$q = preg_replace("/[^nsew]/", "", $_GET['q']);
-$w = (int)$_GET['w'];
-$h = (int)$_GET['h'];
-$p = preg_replace("/[^\.OX]/", "", strtoupper($_GET['p']));
-$a = preg_replace("/[^a-z]/", "", $_GET['a']);
+if (!$_SERVER['QUERY_STRING']) {
+    $q = "ne";
+    $w = 7;
+    $h = 7;
+    $p = ".................................................";
+    $a = "continuations";
+} else {
+    // safety checks
+    $q = preg_replace("/[^nsew]/", "", $_GET['q']);
+    $w = (int)$_GET['w'];
+    $h = (int)$_GET['h'];
+    $p = preg_replace("/[^\.OX]/", "", strtoupper($_GET['p']));
+    $a = preg_replace("/[^a-z]/", "", $_GET['a']);
+}
 
 $output = null;
 
@@ -23,23 +31,11 @@ if (file_exists($cache_fn)) {
         $output = null;
     }
 } else {
-    /*exec("python $kombilo_dir/search.py " .
-        escapeshellcmd($q) . " " .
-        escapeshellcmd($w) . " " .
-        escapeshellcmd($h) . " " .
-        escapeshellcmd($p) . " " .
-        escapeshellcmd($a),
-        $output, $retval);
-    if ($retval) {
-        echo "ERROR $retval"; 
-        exit;
-    }
-    */
     $fp = fsockopen("127.0.0.1", 6060, $errno, $errstr, 10);
     if (!$fp) {
         echo "$errstr ($errno)<br />\n";
         exit;
-    }    
+    }
     fwrite($fp, "$q $w $h $p $a\n");
     $output = "";
     while (!feof($fp)) {
@@ -48,7 +44,6 @@ if (file_exists($cache_fn)) {
     fclose($fp);
     
     $output = split("\n", $output);
-    // print_r($output);
     
     file_put_contents($cache_fn, join("\n", $output));
 }
@@ -66,23 +61,34 @@ $odd = true;
 
 $results = array();
 
-foreach ($output as $line) {
-    list($fn, $pw, $wr, $pb, $br, $re, $dt, $mv) = split("\t", $line);
-    if (!$fn) continue;
-    $id = str_replace(".sgf", "", $fn);
-    $mv = split(",", $mv);
-    $mv = (int)$mv[count($mv)-2];
-    array_push($results, array(
-        "id"    => $id,
-        "pw"    => $pw,
-        "wr"    => $wr,
-        "pb"    => $pb,
-        "br"    => $br,
-        "re"    => $re,
-        "dt"    => $dt,
-        "mv"    => $mv,
-    ));
-    $odd = $odd ? false : true;
+if ($a == "continuations") {
+    foreach ($output as $line) {
+        list($label, $x, $y, $count) = split("\t", $line);
+        if (!$label) continue;
+        array_push($results, array(
+            "label" => $label,
+            "x"     => $x,
+            "y"     => $y,
+            "count" => $count));
+    }
+} else {
+    foreach ($output as $line) {
+        list($fn, $pw, $wr, $pb, $br, $re, $dt, $mv) = split("\t", $line);
+        if (!$fn) continue;
+        $id = str_replace(".sgf", "", $fn);
+        $mv = split(",", $mv);
+        $mv = (int)$mv[count($mv)-2];
+        array_push($results, array(
+            "id"    => $id,
+            "pw"    => $pw,
+            "wr"    => $wr,
+            "pb"    => $pb,
+            "br"    => $br,
+            "re"    => $re,
+            "dt"    => $dt,
+            "mv"    => $mv));
+        $odd = $odd ? false : true;
+    }
 }
 
 echo json_encode($results);

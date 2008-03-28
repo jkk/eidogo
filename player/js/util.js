@@ -22,13 +22,8 @@ eidogo.util = {
         return document.getElementById(id);
     },
     
-    // Adapted from jQuery
-    ajax: function(method, url, params, successFn, failureFn, scope, timeout) {
-        method = method.toUpperCase();
-        var xhr = window.ActiveXObject ?
-            new ActiveXObject("Microsoft.XMLHTTP") :
-            new XMLHttpRequest();
-        var qs = null;
+    makeQueryString: function(params) {
+        var qs = "";
         if (params && typeof params == "object") {
             var pairs = [];
             for (var key in params) {
@@ -44,6 +39,17 @@ eidogo.util = {
             }
             qs = pairs.join("&").replace(/%20/g, "+");
         }
+        return qs;
+    },
+    
+    // Adapted from jQuery
+    ajax: function(method, url, params, successFn, failureFn, scope, timeout) {
+        method = method.toUpperCase();
+        var xhr = window.ActiveXObject ?
+            new ActiveXObject("Microsoft.XMLHTTP") :
+            new XMLHttpRequest();
+        var qs = (params && typeof params == "object" ?
+            eidogo.util.makeQueryString(params) : null);
         if (qs && method == "GET" ) {
             url += (url.match(/\?/) ? "&" : "?") + qs;
             qs = null;
@@ -138,6 +144,7 @@ eidogo.util = {
     },
     
     addEvent: function(el, eventType, handler, arg, override) {
+        if (!el) return;
         if (override) {
             handler = handler.bind(arg);
         } else if (arg) {
