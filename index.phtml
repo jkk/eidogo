@@ -68,10 +68,10 @@ var player;
             player = new eidogo.Player({
                 container:          "player-container",
                 sgfPath:            "sgf/",
-                searchUrl:          "php/search.php",
-                saveUrl:            "php/save.php",
-                downloadUrl:        "php/download.php?id=",
-                scoreEstUrl:        "php/gnugo.php",
+                searchUrl:          "backend/search.php",
+                saveUrl:            "backend/save.php",
+                downloadUrl:        "backend/download.php?id=",
+                scoreEstUrl:        "backend/gnugo.php",
                 hooks:              hooks,
                 enableShortcuts:    true
             });
@@ -100,7 +100,7 @@ var player;
             }
             loadGame({
                 gameName:           "kjd",
-                sgfUrl:             "php/kjd_progressive.php",                
+                sgfUrl:             "backend/kjd_progressive.php",                
                 loadPath:           loadPath,
                 progressiveLoad:    true,
                 markNext:           true,
@@ -112,7 +112,7 @@ var player;
         if (gameName == "url") {
             loadGame({
                 gameName:   "url",
-                sgfUrl:     "php/fetch.php?url=" + hash.replace(/^#?url:/, "")
+                sgfUrl:     "backend/fetch.php?url=" + hash.replace(/^#?url:/, "")
             });
             return;
         }
@@ -154,7 +154,7 @@ var player;
             eidogo.util.show("options");
             var params = {
                 gameName:       "",
-                opponentUrl:    "php/gnugo.php",
+                opponentUrl:    "backend/gnugo.php",
                 opponentColor:  "B",
                 opponentLevel:  7,
                 handicap:       0

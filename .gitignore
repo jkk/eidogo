@@ -13,7 +13,7 @@ kombilo/t1.db
 kombilo/t1.db1
 kombilo/t1.db2
 kombilo_old
-php/db.php
+backend/db.php
 releases/*
 sgf/kjd*.sgf
 sgf/kjd*.sql

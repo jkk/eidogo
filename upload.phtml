@@ -55,7 +55,7 @@ ul li {
 
 <h3>SGF File Upload</h3>
 
-<form id="upload-form" action="php/upload.php" method="post" enctype="multipart/form-data">
+<form id="upload-form" action="backend/upload.php" method="post" enctype="multipart/form-data">
     <input type="hidden" name="type" value="file">
     <input type="file" name="sgf_file">
     <input type="submit" value="Upload">
@@ -70,7 +70,7 @@ ul li {
 
 <h3>Paste Raw SGF</h3>
 
-<form id="paste-form" action="php/upload.php" method="post">
+<form id="paste-form" action="backend/upload.php" method="post">
     <input type="hidden" name="type" value="paste">
     <textarea name="sgf"></textarea>
     <input type="submit" value="Upload">
