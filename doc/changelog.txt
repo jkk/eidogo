@@ -1,7 +1,8 @@
 Version 1.2 -
-    Features
-        * Game archive, search (server-side)
-        * GNU Go handicap, color chooser (server-side)
+    Site Features
+        * Game archive, search
+        * GNU Go handicap, color chooser
+    Embedded SGF Player Features
         * View-only mode
         * Edit game info tool
         * Clear marker tool
