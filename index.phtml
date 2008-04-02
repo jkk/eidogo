@@ -1,8 +1,45 @@
 <?php include("header.phtml"); ?>
 
+<script type="text/javascript" src="js/rsh.compressed.js"></script>
+
 <div id="options"></div>
 
-<script type="text/javascript" src="js/rsh.compressed.js"></script>
+<div id="options-joseki" style="display: none">
+    <strong>Joseki Tutor:</strong>
+    <a href="/#kjd">Kogo's Joseki Dictionary</a> |
+    <a href="/#kombilo">Kombilo / Pro Game Database</a>
+</div>
+
+<div id="options-gnugo" style="display: none">
+    <strong>GNU Go</strong>
+    &nbsp;&nbsp;&nbsp;&nbsp; Board Size:
+    <a href="/#gnugo">19x19</a> |
+    <a href="/#gnugo-9">9x9</a> |
+    <a href="/#gnugo-13">13x13</a>
+    &nbsp;&nbsp; Your Color: <select id="human-color">
+        <option value="W">White</option>
+        <option value="B">Black</option>
+    </select>
+    &nbsp;&nbsp; Handicap: <select id="handicap">
+        <option value="0">None</option>
+        <option value="1">1 stone</option>
+        <option value="2">2 stones</option>
+        <option value="3">3 stones</option>
+        <option value="4">4 stones</option>
+        <option value="5">5 stones</option>
+        <option value="6">6 stones</option>
+        <option value="7">7 stones</option>
+        <option value="8">8 stones</option>
+        <option value="9">9 stones</option>
+    </select>
+</div>
+
+<div id="options-blank" style="display: none">
+    <strong>Blank Board:</strong>
+    <a href="/#blank">19x19</a> |
+    <a href="/#blank-9">9x9</a> |
+    <a href="/#blank-13">13x13</a>
+</div>
 
 <div id="player-container"></div>
 
@@ -11,6 +48,11 @@
 var player;
 
 (function() {
+    
+    var byId = eidogo.util.byId,
+        hide = eidogo.util.hide,
+        show = eidogo.util.show,
+        addEvent = eidogo.util.addEvent;
     
     // Provide handlers for frontend things (page title, permalinks) that
     // aren't handled by Player directly
@@ -21,7 +63,7 @@ var player;
         setPermalink: function() {
             if (!this.gameName || ['search', 'gnugo', 'url'].contains(this.gameName)) return;
             var gn = this.gameName || "";
-            // use move-based path for KJD to future-proof permalinks
+            // Use move-based path for josekis to future-proof permalinks
             var path = (gn == "kjd" || gn == "kombilo" ?
                 this.cursor.getPathMoves().join("") :
                 this.cursor.getPath().join(","));
@@ -33,9 +75,8 @@ var player;
             var hash = "search:" + params.q + ":" + params.w + "x" + params.h +
                 ":" + this.compressPattern(params.p);
             if (params.a && params.a != "corner") hash += ":" + params.a;
-            if (hash != location.hash.replace(/^#/, "")) {
+            if (hash != location.hash.replace(/^#/, ""))
                 addHistory(hash);
-            }
         },
         saved: function(gn) {
             loadGame({gameName: gn, loadPath: [0,0]}, function() {
@@ -81,133 +122,118 @@ var player;
     
     var notLoaded = true;
     
+    // Perform the appriate loading action depending on what hash is given
     function loadState(hash) {
         notLoaded = false;
         var hashParts = hash ? hash.replace(/^#/, "").split(/:/) : [];
         var gameName = hashParts[0] || "";
         var loadPath = hashParts[1] ? hashParts[1].split(",") : null;
         var rest = hashParts.slice(1);
-        eidogo.util.hide("options");
-        if (!gameName || gameName == "kjd" || gameName == "kombilo") {
-            eidogo.util.byId("options").innerHTML = '<strong>Joseki Tutor:</strong>\
-                <a href="/#kjd">Kogo\'s Joseki Dictionary</a> |\
-                <a href="/#kombilo">Kombilo / Pro Game Database</a>';
-            eidogo.util.show("options");
-            if (loadPath) {
-                var s = loadPath[0];
-                var coord;
-                loadPath = [];
-                while (coord = s.substring(0, 2)) {
-                    loadPath.push(coord);
-                    s = s.substring(2);
-                }
+        
+        hide("options");
+        
+        if (!gameName || gameName == "kjd" || gameName == "kombilo")
+            loadJoseki(gameName, loadPath);
+        else if (gameName == "url")
+            loadUrl(hash.replace(/^#?url:/, ""));
+        else if (gameName == "search")
+            loadSearch(rest);
+        else if (gameName.indexOf("gnugo") === 0)
+            loadGnuGo(gameName);
+        else if (gameName.indexOf("blank") === 0)
+            loadBlank(gameName);
+        else
+            loadGame({gameName: gameName, loadPath: loadPath});
+    }
+    
+    function loadJoseki(gameName, loadPath) {
+        byId("options").innerHTML = byId("options-joseki").innerHTML;
+        show("options");
+        if (loadPath) {
+            // Parse moves out of string like "aepqnctt"
+            var s = loadPath[0];
+            var coord;
+            loadPath = [];
+            while (coord = s.substring(0, 2)) {
+                loadPath.push(coord);
+                s = s.substring(2);
             }
-            loadGame({
-                gameName:           gameName || "kjd",
-                progressiveUrl:     gameName == "kombilo" ? "backend/search.php" : "backend/kjd_progressive.php",
-                loadPath:           loadPath,
-                progressiveLoad:    true,
-                progressiveMode:    gameName == "kombilo" ? "pattern" : "id",
-                markNext:           true,
-                showPlayerInfo:     false,
-                showOptions:        false
-            });
-            return;
-        }
-        if (gameName == "url") {
-            loadGame({
-                gameName:   "url",
-                sgfUrl:     "backend/fetch.php?url=" + hash.replace(/^#?url:/, "")
-            });
-            return;
-        }
-        if (gameName == "search") {
-            if (loadPath) {
-                loadGame({showOptions: false});
-                player.loadSearch.apply(player, rest);
-            } else {
-                loadGame({
-                    gameName:    "search",
-                    showOptions: false,
-                    loadPath:    [0,0]
-                });
-            }
-            return;
-        }
-        if (gameName.indexOf("gnugo") === 0) {
-            eidogo.util.byId("options").innerHTML = '<strong>GNU Go</strong>\
-                &nbsp;&nbsp;&nbsp;&nbsp; Board Size:\
-                <a href="/#gnugo">19x19</a> |\
-                <a href="/#gnugo-9">9x9</a> |\
-                <a href="/#gnugo-13">13x13</a>\
-                &nbsp;&nbsp; Your Color: <select id="human-color">\
-                    <option value="W">White</option>\
-                    <option value="B">Black</option>\
-                    </select>\
-                &nbsp;&nbsp; Handicap: <select id="handicap">\
-                    <option value="0">None</option>\
-                    <option value="1">1 stone</option>\
-                    <option value="2">2 stones</option>\
-                    <option value="3">3 stones</option>\
-                    <option value="4">4 stones</option>\
-                    <option value="5">5 stones</option>\
-                    <option value="6">6 stones</option>\
-                    <option value="7">7 stones</option>\
-                    <option value="8">8 stones</option>\
-                    <option value="9">9 stones</option>\
-                    </select>';
-            eidogo.util.show("options");
-            var params = {
-                gameName:       "",
-                opponentUrl:    "backend/gnugo.php",
-                opponentColor:  "B",
-                opponentLevel:  7,
-                handicap:       0
-            };
-            var parts = gameName.split("-");
-            if (parts[1]) {
-                params.boardSize = parts[1];
-            }
-            var changeHandler = function() {
-                params.opponentColor = eidogo.util.byId("human-color").value == "W" ? "B" : "W";
-                params.handicap = eidogo.util.byId("handicap").value;
-                loadGame(params);
-            }
-            eidogo.util.addEvent(eidogo.util.byId("human-color"), "change", changeHandler);
-            eidogo.util.addEvent(eidogo.util.byId("handicap"), "change", changeHandler);
-            loadGame(params);
-            return;
-        }
-        if (gameName.indexOf("blank") === 0) {
-            eidogo.util.byId("options").innerHTML = 'Blank Board:\
-                <a href="/#blank">19x19</a> |\
-                <a href="/#blank-9">9x9</a> |\
-                <a href="/#blank-13">13x13</a>';
-            eidogo.util.show("options");
         }
         loadGame({
-            gameName:   gameName,
-            loadPath:   loadPath
-        });
+            gameName:           gameName || "kjd",
+            progressiveUrl:     gameName == "kombilo" ? "backend/search.php" : "backend/kjd_progressive.php",
+            loadPath:           loadPath,
+            progressiveLoad:    true,
+            progressiveMode:    gameName == "kombilo" ? "pattern" : "id",
+            markNext:           true,
+            showPlayerInfo:     false,
+            showOptions:        false});
+    }
+    
+    function loadSearch(args) {
+        if (args.length) {
+            loadGame({showOptions: false});
+            player.loadSearch.apply(player, args);
+        } else {
+            loadGame({
+                gameName:    "search",
+                showOptions: false,
+                loadPath:    [0,0]});
+        }
+    }
+    
+    function loadUrl(url) {
+        loadGame({
+            gameName:   "url",
+            sgfUrl:     "backend/fetch.php?url=" + url});
+    }
+    
+    function loadGnuGo(gameName) {
+        byId("options").innerHTML = byId("options-gnugo").innerHTML;
+        show("options");
+        var params = {
+            gameName:       "",
+            opponentUrl:    "backend/gnugo.php",
+            opponentColor:  "B",
+            opponentLevel:  7,
+            handicap:       0
+        };
+        var parts = gameName.split("-");
+        if (parts[1])
+            params.boardSize = parts[1];
+        var inputColor = byId("human-color"),
+            inputHandi = byId("handicap");
+        var changeHandler = function() {
+            params.opponentColor = inputColor.value == "W" ? "B" : "W";
+            params.handicap = inputHandi.value;
+            loadGame(params);
+        }
+        addEvent(inputColor, "change", changeHandler);
+        addEvent(inputHandi, "change", changeHandler);
+        loadGame(params);
+    }
+    
+    function loadBlank(gameName) {
+        byId("options").innerHTML = byId("options-blank").innerHTML;
+        show("options");
+        loadGame({gameName: gameName});
     }
     
     function addHistory(hash) {
-        if (dhtmlHistory.isSafari) {
-            // Safari 2 sucks
+        // Safari 2 sucks
+        if (dhtmlHistory.isSafari)
             location.hash = hash;
-        } else {
+        else
             dhtmlHistory.add(hash);
-        }
     }
     
-    // appease RSH
+    // Appease RSH
     window.dhtmlHistory.create({
         toJSON: function(o) { return ''; },
-        fromJSON: function(s) { return {}; }
-    });
+        fromJSON: function(s) { return {}; }});
 
-    // ajaxify our links
-    eidogo.util.addEvent(document, "click", function(evt) {
+    // Ajaxify our links
+    addEvent(document, "click", function(evt) {
         var target = eidogo.util.getTarget(evt)
         if (target.nodeName.toUpperCase() != "A" || target.href.indexOf("#") == -1) return true;
         var hash = target.href.replace(/^.*#/, "");
@@ -220,10 +246,9 @@ var player;
     dhtmlHistory.initialize();
     dhtmlHistory.addListener(loadState);
     
-    if (notLoaded) {
-        // make sure we load our state on first page load (RSH quirk)
+    // Make sure we load our state on first page load (RSH quirk)
+    if (notLoaded)
         loadState(location.hash.replace(/^#/, ""));
-    }
     
 })();
 
