@@ -27,6 +27,7 @@
 	user-select: none;
 	-khtml-user-select: none;
 	-moz-user-select: none;
+	-webkit-user-select: none;
 	cursor: default;
 	width: 88px;
 	height: 38px;
@@ -58,7 +59,7 @@
 	cursor: pointer;
 }
 .eidogo-player .controls .last {
-    background-position: 22px -313px;
+    background-position: 22px -315px;
 }
 .eidogo-player .controls .last-on {
     background-position: 22px -364px;
@@ -129,6 +130,7 @@
 	user-select: none;
 	-khtml-user-select: none;
 	-moz-user-select: none;
+	-webkit-user-select: none;
 }
 .eidogo-player .variation-nav.none {
 	font-weight: normal;
@@ -224,7 +226,8 @@
     border-right: none;
     border-bottom: 1px solid #999;
 }
-.eidogo-player .comments-edit-done {
+.eidogo-player .comments-edit-done, .eidogo-player .game-info-edit-done {
+    display: none;
     clear: right;
     float: right;
     width: 311px;
@@ -329,6 +332,7 @@
 	user-select: none;
 	-khtml-user-select: none;
 	-moz-user-select: none;
+	-webkit-user-select: none;
 }
 .eidogo-player .board-container.shrunk, .eidogo-player .board-container.shrunk .board-gutter {
     width: auto;
@@ -345,6 +349,7 @@
 	user-select: none;
 	-khtml-user-select: none;
 	-moz-user-select: none;
+	-webkit-user-select: none;
 }
 .eidogo-player .board-gutter.with-coords {
     background: #654 url(../images/board-bg-coords.png) no-repeat 5px 5px;
@@ -398,6 +403,7 @@
 	user-select: none;
 	-khtml-user-select: none;
 	-moz-user-select: none;
+	-webkit-user-select: none;
 	background: none;
 }
 .eidogo-player .board .point.marker.variation {
@@ -413,6 +419,7 @@
 	user-select: none;
 	-khtml-user-select: none;
 	-moz-user-select: none;
+	-webkit-user-select: none;
 	z-index: 3;
 }
 .eidogo-player .board .point.marker.current {
@@ -531,6 +538,46 @@
 }
 .eidogo-player .info a {
     color: #fff;
+}
+.eidogo-player .continuations {
+    background: #aa9;
+    padding: 5px;
+}
+.eidogo-player .continuation {
+   clear: left;
+   padding: 5px;
+   cursor: pointer;
+   height: 12px;
+}
+.eidogo-player .continuation:hover {
+    background: #ccb;
+}
+.eidogo-player .continuation div.cont-label {
+    width: 15px;
+    float: left;
+    clear: left;
+    font-weight: bold;
+    color: #443;
+}
+.eidogo-player .continuation div.cont-bar {
+    float: left;
+    margin-top: 3px;
+    height: 7px;
+    background: #665;
+}
+.eidogo-player .continuation div.cont-count {
+    width: 100px;
+    float: left;
+    margin: 0 0 0 5px;
+    font-size: 9px;
+    color: #554;
+}
+#cont-search {
+    display: block;
+    margin: 0 0 10px 0;
+}
+#cont-search:hover {
+    text-decoration: underline;
 }
 .eidogo-player .preferences {
 	clear: right;

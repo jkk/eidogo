@@ -47,7 +47,7 @@ h1 span {
 }
 #ownership {
     float: right;
-    font-size: 9px;
+    font-size: 10px;
     margin: 10px 10px 0 0;
 }
 #ownership a {
@@ -120,14 +120,14 @@ pre {
 }
 #options {
     display: none;
-    background: #444;
+    background: #445;
     padding: 7px 5px 7px 10px;
-    color: #999;
+    color: #eee;
     border: 5px solid #222;
     border-bottom: none;
 }
 #options a {
-    color: #ccc;
+    color: #ccd;
     margin: 0 5px 0 5px;
 }
 #options select {

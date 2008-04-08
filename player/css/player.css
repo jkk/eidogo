@@ -676,15 +676,14 @@
 .eidogo-player .continuations {
     background: #aa9;
     padding: 5px;
+    margin: 0 0 20px 0;
 }
 .eidogo-player .continuation {
    clear: left;
    padding: 5px;
-   cursor: pointer;
    height: 12px;
 }
 .eidogo-player .continuation:hover {
-    background: #ccb;
 }
 .eidogo-player .continuation div.cont-label {
     width: 15px;
@@ -700,7 +699,7 @@
     background: #665;
 }
 .eidogo-player .continuation div.cont-count {
-    width: 100px;
+    width: 80px;
     float: left;
     margin: 0 0 0 5px;
     font-size: 9px;

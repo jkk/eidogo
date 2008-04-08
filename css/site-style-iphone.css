@@ -79,6 +79,7 @@ pre, code {
     background-color: #ccc;
 	border-top: 1px solid #999;
 	border-bottom: none;
+	height: 56px;
 }
 #links li {
   list-style-type: none;
