@@ -23,7 +23,7 @@ def process(filenames):
         # pop.algos = 0
         # pop.rootNodeTags = 'PW,PB,RE,DT'
         pop.sgfInDB = False
-        pop.algos = ALGO_FINALPOS | ALGO_MOVELIST
+        pop.algos = ALGO_FINALPOS | ALGO_MOVELIST | ALGO_HASH_CORNER
         gl = GameList('t1.db', 'id', '', pop, 100)
     except DBError:
         print 'Database error'
