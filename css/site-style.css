@@ -8,7 +8,7 @@ body {
 	background: #999;
 }
 #container {
-    width: 760px;
+    width: 810px;
     margin: 0 auto;
 }
 #header {
@@ -94,7 +94,7 @@ pre {
 }
 #links {
     clear: both;
-    width: 760px;
+    width: 810px;
     height: 33px;
 	display: block;
     padding: 0;

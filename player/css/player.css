@@ -3,7 +3,7 @@
     font-size: 0;
 }
 .eidogo-player {
-	width: 750px;
+	width: 800px;
 	position: relative;
     background: #222;
 	padding: 5px;
@@ -37,7 +37,7 @@
     display: none;
 }
 .eidogo-player .controls-container {
-	width: 325px;
+	width: 375px;
 	float: right;
 	position: relative;
 	padding: 5px 0 0 0;
@@ -106,18 +106,18 @@
 .eidogo-player .move-number {
 	position: absolute;
 	top: 12px;
-	left: 210px;
-	color: #8aa;
+	left: 230px;
+	color: #acc;
 }
 .eidogo-player .permalink {
-      text-decoration: underline;
-      cursor: pointer;
+    text-decoration: underline;
+    cursor: pointer;
 }
 .eidogo-player .nav-slider {
 	clear: both;
 	position: relative;
 	height: 10px;
-	width: 315px;
+	width: 365px;
 	margin: 0px 5px 5px 5px;
 	border-top: 1px solid #122;
 	background: #244;
@@ -132,7 +132,7 @@
 	cursor: pointer;
 }
 .eidogo-player .variations-container {
-	width: 290px;
+	width: 340px;
     min-height: 20px;
 	padding: 10px 5px 0px 5px;
 }
@@ -172,7 +172,7 @@
     float: right;
     clear: right;
     background: #744;
-    width: 315px;
+    width: 365px;
     padding: 5px;
     margin: 5px 0 0 0;
 }
@@ -246,7 +246,7 @@
 .eidogo-player .comments {
 	clear: right;
 	float: right;
-	width: 302px;
+	width: 352px;
 	height: 243px;
 	font-size: 11px;
 	margin: 5px 0 0 0;
@@ -263,7 +263,7 @@
 .eidogo-player .comments-edit-ta {
     clear: right;
     float: right;
-    width: 312px;
+    width: 362px;
     height: 213px;
     font-size: 11px;
     font-family: arial, helvetica, sans-serif;
@@ -278,7 +278,7 @@
 .eidogo-player .comments-edit-done, .eidogo-player .game-info-edit-done {
     clear: right;
     float: right;
-    width: 311px;
+    width: 361px;
     height: 16px;
     margin: 0 5px 0 0;
     padding: 5px;
@@ -298,7 +298,7 @@
 .eidogo-player .game-info-edit {
     display: none;
     z-index: 9999;
-    width: 325px;
+    width: 375px;
     height: 300px;
     background: #ccc;
     margin: 0;
@@ -313,7 +313,7 @@
     font-family: arial, helvetica, verdana, sans-serif;
     font-size: 11px;
     border: 1px solid #888;
-    width: 200px;
+    width: 240px;
 }
 .eidogo-player .game-info-edit-done {
     margin: 0;
@@ -321,7 +321,7 @@
 .eidogo-player .search-container {
 	clear: right;
 	float: right;
-	width: 302px;
+	width: 352px;
 	height: 243px;
 	font-size: 11px;
 	margin: 5px 0 0 0;
@@ -377,10 +377,10 @@
     display: none;
 }
 .eidogo-player .search-container .search-result .pw {
-    width: 70px;
+    width: 95px;
 }
 .eidogo-player .search-container .search-result .pb {
-    width: 70px;
+    width: 95px;
 }
 .eidogo-player .search-container .search-result .re {
     width: 30px;
@@ -618,7 +618,7 @@
 }
 .eidogo-player .nav-tree-container {
     float: right;
-    width: 325px;
+    width: 375px;
     height: 100px;
     padding: 5px 0 5px 0;
     margin: 5px 0 5px 0;
@@ -731,7 +731,7 @@
 .eidogo-player .preferences {
 	clear: right;
 	float: right;
-	width: 302px;
+	width: 352px;
 	font-size: 11px;
 	margin: 15px 0 0 20px;
 	overflow: auto;
@@ -740,7 +740,7 @@
     display: none;
 }
 .eidogo-player .options {
-    width: 329px;
+    width: 379px;
     clear: right;
     display: none;
     float: right;
@@ -748,7 +748,7 @@
 .eidogo-player .options a {
     float: left;
     display: block;
-    width: 147px;
+    width: 172px;
     padding: 7px 5px 7px 5px;
     margin: 5px 0 20px 5px;
     background: #181818;
@@ -761,7 +761,7 @@
 	width: 16px;
 	height: 16px;
 	top: 62px;
-	left: 730px;
+	left: 780px;
 	padding: 0px 0 0 0px;
 	color: #777;
 	z-index: 9999;
@@ -772,7 +772,7 @@
 	position: absolute;
 	top: 130px;
 	left: 150px;
-	width: 350px;
+	width: 400px;
 	background: #933;
 	border-right: 2px solid #622;
 	border-bottom: 2px solid #622;
