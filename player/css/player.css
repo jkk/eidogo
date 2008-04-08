@@ -346,6 +346,7 @@
     cursor: pointer;
     margin-top: -10px;
     font-weight: bold;
+    border: 1px solid #99d;
 }
 .eidogo-player .search-container .search-count span {
     font-weight: bold;
@@ -390,6 +391,19 @@
 .eidogo-player .search-container .search-result .clear {
     clear: both;
     font-size: 1px;
+}
+.eidogo-player .search-container .search-more {
+}
+.eidogo-player .search-container .search-more a {
+    clear: left;
+    display: block;
+    text-decoration: none;
+    color: #008;
+    background: #aad;
+    border: 1px solid #88c;
+    font-weight: bold;
+    padding: 10px;
+    margin: 10px 0 20px 0;
 }
 .eidogo-player .board-container {
     float: left;
@@ -706,7 +720,9 @@
     color: #554;
 }
 #cont-search {
+    background: #ddc;
     display: block;
+    padding: 5px;
     margin: 0 0 10px 0;
 }
 #cont-search:hover {

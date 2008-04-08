@@ -901,7 +901,22 @@ eidogo.Player.prototype = {
             this.nowLoading();
             this.progressiveLoads++;
             this.updatedNavTree = false;
-            this.remoteLoad(this.progressiveUrl + "?id=" + loadId, loadNode, false, null, completeFn);
+            // Show pro game search after second move
+            var completeFnWrap = function() {
+                var moveNum = this.cursor.getMoveNumber();
+                if (moveNum > 1)
+                    this.prependComment("<a id='cont-search' href='#'>" +
+                        "Show pro games with this position</a>", 'cont-search-container');
+                if (completeFn && typeof completeFn == "function")
+                    completeFn();
+                addEvent(byId("cont-search"), "click", function(e) {
+                    var size = 8;
+                    var pattern = this.convertRegionPattern(this.board.getRegion(0, 19 - size, size, size));
+                    this.loadSearch("ne", size + "x" + size, this.compressPattern(pattern));
+                    stopEvent(e);
+                }.bind(this));
+            }.bind(this);
+            this.remoteLoad(this.progressiveUrl + "?id=" + loadId, loadNode, false, null, completeFnWrap);
         }
     },
     
@@ -972,7 +987,6 @@ eidogo.Player.prototype = {
             this.load(contBranch, this.cursor.node);
             addEvent(byId("cont-search"), "click", function(e) {
                 this.loadSearch("ne", size + "x" + size, this.compressPattern(pattern));
-                this.searchRegion();
                 stopEvent(e);
             }.bind(this));
             if (completeFn && typeof completeFn == "function")
@@ -1308,7 +1322,7 @@ eidogo.Player.prototype = {
      * Set up a board position to represent a search pattern, then start
      * the search
     **/
-    loadSearch: function(q, dim, p, a) {
+    loadSearch: function(q, dim, p, a, o) {
         var blankGame = {_children: [{SZ: this.board.boardSize, _children: []}]};
         this.load(blankGame);
         a = a || "corner";
@@ -1352,7 +1366,7 @@ eidogo.Player.prototype = {
         
         // highlight the selected search region by dimming surroundings
         var b = this.getRegionBounds();
-        var r = [b[1], b[0], b[1]+b[2], b[0]+b[3]];
+        var r = [b[1], b[0], b[1]+b[2], b[0]+b[3]-1];
         for (y = 0; y < this.board.boardSize; y++) {
             for (x = 0; x < this.board.boardSize; x++) {
                 if (!this.boundsCheck(x, y, r)) {
@@ -1361,14 +1375,14 @@ eidogo.Player.prototype = {
             }
         }
         
-        this.searchRegion();
+        this.searchRegion(o);
     },
     
     /**
      * Call out to our external handler to perform a pattern search. Also
      * prevent meaningless or overly-simple searches.
     **/
-    searchRegion: function() {
+    searchRegion: function(offset) {
         if (this.searching) return;
         this.searching = true;
         
@@ -1379,6 +1393,7 @@ eidogo.Player.prototype = {
             return;
         }
         
+        var offset = parseInt(offset, 10) || 0;
         var algo = this.dom.searchAlgo.value;
 
         var bounds = this.getRegionBounds();
@@ -1435,10 +1450,14 @@ eidogo.Player.prototype = {
                 this.dom.searchCount.innerHTML = "No";
                 return;
             }
-            var results = eval("(" + req.responseText + ")");
-            var result;
-            var html = "";
-            var odd;
+            var ret = eval("(" + req.responseText + ")");
+            var results = ret.results,
+                result,
+                html = "",
+                odd,
+                total = parseInt(ret.total, 10),
+                offsetStart = parseInt(ret.offset, 10) + 1,
+                offsetEnd = parseInt(ret.offset, 10) + 50;
             for(var i = 0; result = results[i]; i++) {
                 odd = odd ? false : true;
                 html += "<a class='search-result" + (odd ? " odd" : "") + "' href='#'>\
@@ -1451,9 +1470,22 @@ eidogo.Player.prototype = {
                     <div class='clear'>&nbsp;</div>\
                     </a>";
             }
+            if (total > offsetEnd)
+                html += "<div class='search-more'><a href='#' id='search-more'>Show more...</a></div>";
             show(this.dom.searchResultsContainer);
-            this.dom.searchResults.innerHTML = html;
-            this.dom.searchCount.innerHTML = results.length;
+            this.dom.searchResults.innerHTML = html + "<br>";
+            this.dom.searchCount.innerHTML = total;
+            this.dom.searchOffsetStart.innerHTML = offsetStart;
+            this.dom.searchOffsetEnd.innerHTML = (total < offsetEnd ? total : offsetEnd);
+            this.dom.searchContainer.scrollTop = 0;
+            if (total > offsetEnd) {
+                setTimeout(function() {
+                    addEvent(byId("search-more"), "click", function(e) {
+                        this.loadSearch(quadrant, bounds[2] + "x" + bounds[3], pattern, "corner", ret.offset + 51);
+                        stopEvent(e);
+                    }.bind(this));
+                }.bind(this), 0);
+            }
         }
         var failure = function(req) {
             this.croak(t['error retrieving']);
@@ -1464,6 +1496,7 @@ eidogo.Player.prototype = {
             h: bounds[3],
             p: pattern,
             a: algo,
+            o: offset,
             t: (new Date()).getTime()
         };
         
@@ -2115,7 +2148,8 @@ eidogo.Player.prototype = {
             </div>\
             <div id='search-container' class='search-container'>\
                 <div id='search-close' class='search-close'>" + t['close search'] + "</div>\
-                <p class='search-count'><span id='search-count'></span>&nbsp;" + t['matches found'] + "</p>\
+                <p class='search-count'><span id='search-count'></span>&nbsp;" + t['matches found'] + "\
+                    Showing <span id='search-offset-start'></span>-<span id='search-offset-end'></span></p>\
                 <div id='search-results-container' class='search-results-container'>\
                     <div class='search-result'>\
                         <span class='pw'><b>" + t['white'] + "</b></span>\

@@ -15,6 +15,7 @@ if (!$_SERVER['QUERY_STRING']) {
     $h = (int)$_GET['h'];
     $p = preg_replace("/[^\.OX]/", "", strtoupper($_GET['p']));
     $a = preg_replace("/[^a-z]/", "", $_GET['a']);
+    $o = (int)$_GET['o'];
 }
 
 $output = null;
@@ -53,8 +54,9 @@ if (!count($output)) {
     exit;
 }
 
-if (count($output) > 50) {
-    $output = array_slice($output, 0, 50);
+$total = count($output);
+if ($total > 50) {
+    $output = array_slice($output, $o, 50);
 }
 
 $odd = true;
@@ -89,6 +91,7 @@ if ($a == "continuations") {
             "mv"    => $mv));
         $odd = $odd ? false : true;
     }
+    $results = array("total" => $total, "offset" => $o, "results" => $results);
 }
 
 echo json_encode($results);
