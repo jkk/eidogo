@@ -2119,7 +2119,7 @@ eidogo.Player.prototype = {
                     <option value='add_b'>&#9679; " + t['add_b'] + "</option>\
                     <option value='add_w'>&#9675; " + t['add_w'] + "</option>\
                     " + (this.searchUrl ? ("<option value='region'>&#9618; " + t['region'] + "</option>") : "") +"\
-                    " + (this.saveUrl && this.progressiveLoad ? ("<option value='comment'>&para; " + t['edit comment'] + "</option>") : "") + "\
+                    " + (this.saveUrl && !this.progressiveLoad ? ("<option value='comment'>&para; " + t['edit comment'] + "</option>") : "") + "\
                     " + (this.saveUrl ? ("<option value='gameinfo'>&#8962; " + t['edit game info'] + "</option>") : "") + "\
                     <option value='tr'>&#9650; " + t['triangle'] + "</option>\
                     <option value='sq'>&#9632; " + t['square'] + "</option>\
@@ -2214,10 +2214,6 @@ eidogo.Player.prototype = {
             this.dom[jsName] = byId(id);
         }
         
-        // for speedup
-        this.dom.navSlider._width = this.dom.navSlider.offsetWidth;
-        this.dom.navSliderThumb._width = this.dom.navSliderThumb.offsetWidth;
-        
         // dom element      handler
         [['moveNumber',       'setPermalink'],
          ['controlFirst',     'first'],
@@ -2280,14 +2276,13 @@ eidogo.Player.prototype = {
     },
     
     updateNavSlider: function(offset) {
-        var width = this.dom.navSlider._width - this.dom.navSliderThumb._width;
+        var width = this.dom.navSlider.offsetWidth - this.dom.navSliderThumb.offsetHeight;
         var steps = this.totalMoves;
         var offsetGiven = !!offset;
         offset = offset || (this.moveNumber / steps * width);
         offset = offset > width ? width : offset;
         offset = offset < 0 ? 0 : offset;
         var moveOffset = parseInt(offset / width * steps, 10);
-        
         // only update the board when we're given an offset; otherwise,
         // assume we're just reflecting the board position
         if (offsetGiven) {
