@@ -905,8 +905,10 @@ eidogo.Player.prototype = {
             var completeFnWrap = function() {
                 var moveNum = this.cursor.getMoveNumber();
                 if (moveNum > 1)
-                    this.prependComment("<a id='cont-search' href='#'>" +
-                        "Show pro games with this position</a>", 'cont-search-container');
+                    this.cursor.node.C = "<a id='cont-search' href='#'>" +
+                        "Show pro games with this position</a>" +
+                        this.cursor.node.C;
+                this.refresh();
                 if (completeFn && typeof completeFn == "function")
                     completeFn();
                 addEvent(byId("cont-search"), "click", function(e) {

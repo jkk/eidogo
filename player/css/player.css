@@ -246,11 +246,11 @@
 .eidogo-player .comments {
 	clear: right;
 	float: right;
-	width: 352px;
+	width: 356px;
 	height: 243px;
 	font-size: 11px;
 	margin: 5px 0 0 0;
-	padding: 15px 10px 40px 10px;
+	padding: 15px 8px 40px 8px;
 	overflow: auto;
     background: #bba;
     border-left: 3px solid #998;
@@ -724,9 +724,10 @@
     display: block;
     padding: 5px;
     margin: 0 0 10px 0;
+    text-decoration: none;
 }
 #cont-search:hover {
-    text-decoration: underline;
+    background: #eed;
 }
 .eidogo-player .preferences {
 	clear: right;

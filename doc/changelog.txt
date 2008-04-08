@@ -1,7 +1,10 @@
 Version 1.2 -
     Site Features
-        * Game archive, search
+        * Game archive, game info search
         * GNU Go handicap, color chooser
+        * Kombilo-based joseki tutor
+        * "Show pro games with this position" link in joseki tutor
+        * Multi-page pattern search results
     Embedded SGF Player Features
         * View-only mode
         * Edit game info tool

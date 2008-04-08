@@ -1,6 +1,4 @@
 planned
-- link each kogo's position with pro game search
-- show more search results
 - tree navigation for IE
 - multiple games per sgf
 - make failed game load non-fatal
