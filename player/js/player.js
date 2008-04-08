@@ -893,71 +893,7 @@ eidogo.Player.prototype = {
         var loadNode = this.cursor.node || null;
         if (loadNode && loadNode._cached) return;
         if (this.progressiveMode == "pattern") {
-            this.nowLoading();
-            this.progressiveLoads++;
-            this.updatedNavTree = false;
-            var moveNum = this.cursor.getMoveNumber();
-            var size = (moveNum > 1 ? 11 : 7);
-            var left = 19 - size - 1;
-            var pattern = this.board ?
-                this.convertRegionPattern(this.board.getRegion(0, left+1, size, size)) :
-                ".................................................";
-            var params = {
-                q: "ne",
-                w: size,
-                h: size,
-                p: pattern,
-                a: "continuations",
-                t: (new Date()).getTime()};
-            var failure = function(req) {
-                this.croak(t['error retrieving']);
-            }
-            var success = function(req) {
-                var contBranch = {LB: [], _children: []}, contNode;
-                contBranch.C = moveNum > 1 ? "<a id='cont-search' href='#'>" +
-                    "Show games with this position</a>" : "";
-                var cont, conts = eval('(' + req.responseText + ')');
-                if (conts.length) {
-                    conts.sort(function(a, b) { return a.label > b.label; });
-                    var highCount = conts[0].count;
-                    var x, y, coord, percent;
-                    contBranch.C += "<div class='continuations'>";
-                    for (var i = 0; cont = conts[i]; i++) {
-                        percent = parseInt(cont.count / highCount * 100);
-                        if (highCount > 20 && parseInt(cont.count, 10) < 10) continue;
-                        contNode = {};
-                        x = left + parseInt(cont.x, 10) + 1;
-                        y = parseInt(cont.y, 10);
-                        coord = this.pointToSgfCoord({x:x,y:y});
-                        contNode[this.currentColor || "B"] = coord;
-                        contBranch.LB.push(coord + ":" + cont.label);
-                        if (percent)
-                            contBranch.C += "<div class='continuation'>" +
-                                "<div class='cont-label'>" + cont.label + "</div>" +
-                                "<div class='cont-bar' style='width: " + percent + "px'></div>" +
-                                "<div class='cont-count'>" + cont.count + "</div>" + 
-                                "</div>";
-                        contBranch._children.push(contNode);
-                    }
-                    contBranch.C += "</div>";
-                    if (!this.cursor.node) {
-                        contBranch.GN = "Kombilo / Pro Game Database";
-                        contBranch.GC = "Continuations derived from around 10,000 pro games.\n\n" +
-                            "Since the continuations are computed automatically, there is a certain " +
-                            "amount of spurious, non-fuseki moves included.";
-                        contBranch = {_children: [contBranch]};
-                    }
-                }
-                this.load(contBranch, this.cursor.node);
-                addEvent(byId("cont-search"), "click", function(e) {
-                    this.loadSearch("ne", size + "x" + (size-1), this.compressPattern(pattern));
-                    this.searchRegion();
-                    stopEvent(e);
-                }.bind(this));
-                if (completeFn && typeof completeFn == "function")
-                    completeFn();
-            }.bind(this);
-            ajax('get', this.progressiveUrl, params, success, failure, this, 45000);
+            this.fetchProgressiveContinuations(completeFn);
         } else {
             var loadId = (loadNode && loadNode._id) || 0;
             this.nowLoading();
@@ -965,6 +901,80 @@ eidogo.Player.prototype = {
             this.updatedNavTree = false;
             this.remoteLoad(this.progressiveUrl + "?id=" + loadId, loadNode, false, null, completeFn);
         }
+    },
+    
+    fetchProgressiveContinuations: function(completeFn) {
+        this.nowLoading();
+        this.progressiveLoads++;
+        this.updatedNavTree = false;
+        var moveNum = this.cursor.getMoveNumber();
+        var size = (moveNum > 1 ? 11 : 7);
+        var left = 19 - size - 1;
+        var pattern = this.board ?
+            this.convertRegionPattern(this.board.getRegion(0, left+1, size, size)) :
+            "..................................................";
+        var params = {
+            q: "ne",
+            w: size,
+            h: size,
+            p: pattern,
+            a: "continuations",
+            t: (new Date()).getTime()};
+        var failure = function(req) {
+            this.croak(t['error retrieving']);
+        }
+        var success = function(req) {
+            if (!req.responseText || req.responseText == "NONE") {
+                this.progressiveLoads--;
+                this.doneLoading();
+                return;
+            }
+            var contBranch = {LB: [], _children: []}, contNode;
+            contBranch.C = moveNum > 1 ? "<a id='cont-search' href='#'>" +
+                "Show pro games with this position</a>" : "";
+            var cont,
+                conts = eval('(' + req.responseText + ')');
+            if (conts.length) {
+                conts.sort(function(a, b) { return parseInt(b.count, 10) - parseInt(a.count, 10); });
+                var highCount = parseInt(conts[0].count, 10);
+                var x, y, coord, percent;
+                contBranch.C += "<div class='continuations'>";
+                for (var i = 0; cont = conts[i]; i++) {
+                    percent = parseInt(cont.count / highCount * 150);
+                    if (highCount > 20 && parseInt(cont.count, 10) < 10) continue;
+                    contNode = {};
+                    x = left + parseInt(cont.x, 10) + 1;
+                    y = parseInt(cont.y, 10);
+                    coord = this.pointToSgfCoord({x:x,y:y});
+                    contNode[this.currentColor || "B"] = coord;
+                    contBranch.LB.push(coord + ":" + cont.label);
+                    if (percent)
+                        contBranch.C += "<div class='continuation'>" +
+                            "<div class='cont-label'>" + cont.label + "</div>" +
+                            "<div class='cont-bar' style='width: " + percent + "px'></div>" +
+                            "<div class='cont-count'>" + cont.count + "</div>" + 
+                            "</div>";
+                    contBranch._children.push(contNode);
+                }
+                contBranch.C += "</div>";
+                if (!this.cursor.node) {
+                    contBranch.GN = "Kombilo / Pro Game Database";
+                    contBranch.GC = "Continuations derived from around 10,000 pro games.\n\n" +
+                        "Since the continuations are computed automatically, there is a certain " +
+                        "amount of spurious, non-fuseki moves included.";
+                    contBranch = {_children: [contBranch]};
+                }
+            }
+            this.load(contBranch, this.cursor.node);
+            addEvent(byId("cont-search"), "click", function(e) {
+                this.loadSearch("ne", size + "x" + size, this.compressPattern(pattern));
+                this.searchRegion();
+                stopEvent(e);
+            }.bind(this));
+            if (completeFn && typeof completeFn == "function")
+                completeFn();
+        }.bind(this);
+        ajax('get', this.progressiveUrl, params, success, failure, this, 45000);
     },
 
     /**
@@ -2072,7 +2082,7 @@ eidogo.Player.prototype = {
                     <option value='add_b'>&#9679; " + t['add_b'] + "</option>\
                     <option value='add_w'>&#9675; " + t['add_w'] + "</option>\
                     " + (this.searchUrl ? ("<option value='region'>&#9618; " + t['region'] + "</option>") : "") +"\
-                    " + (this.saveUrl ? ("<option value='comment'>&para; " + t['edit comment'] + "</option>") : "") + "\
+                    " + (this.saveUrl && this.progressiveLoad ? ("<option value='comment'>&para; " + t['edit comment'] + "</option>") : "") + "\
                     " + (this.saveUrl ? ("<option value='gameinfo'>&#8962; " + t['edit game info'] + "</option>") : "") + "\
                     <option value='tr'>&#9650; " + t['triangle'] + "</option>\
                     <option value='sq'>&#9632; " + t['square'] + "</option>\
