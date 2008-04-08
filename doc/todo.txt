@@ -1,5 +1,4 @@
 planned
-- fix progressive permalink bug
 - link each kogo's position with pro game search
 - show more search results
 - tree navigation for IE

@@ -733,19 +733,20 @@ eidogo.Player.prototype = {
         
         // Path of moves (SGF coords)
         if (isNaN(parseInt(path[0], 10))) {
-            this.variation(0, true); // first game tree is assumed
+            if (!this.cursor.node._parent)
+                this.variation(0, true); // first game tree is assumed
             while (path.length) {
+                if (this.progressiveLoads > 0) {
+                    this.loadPath.push(position);
+                    return;
+                }
                 position = path.shift();
-                vars = this.getVariations(true);
+                vars = this.getVariations();
                 for (var i = 0; i < vars.length; i++) {
                     if (vars[i].move == position) {
                         this.variation(vars[i].varNum, true);
                         break;
                     }
-                }
-                if (this.progressiveLoads > 0) {
-                    this.loadPath.push(position);
-                    return;
                 }
             }
             this.refresh();
@@ -893,6 +894,7 @@ eidogo.Player.prototype = {
         var loadNode = this.cursor.node || null;
         if (loadNode && loadNode._cached) return;
         if (this.progressiveMode == "pattern") {
+            if (loadNode && !loadNode._parent._parent) return; // special case
             this.fetchProgressiveContinuations(completeFn);
         } else {
             var loadId = (loadNode && loadNode._id) || 0;
@@ -912,7 +914,7 @@ eidogo.Player.prototype = {
         var left = 19 - size - 1;
         var pattern = this.board ?
             this.convertRegionPattern(this.board.getRegion(0, left+1, size, size)) :
-            "..................................................";
+            ".................................................";
         var params = {
             q: "ne",
             w: size,
@@ -927,6 +929,8 @@ eidogo.Player.prototype = {
             if (!req.responseText || req.responseText == "NONE") {
                 this.progressiveLoads--;
                 this.doneLoading();
+                this.cursor.node._cached = true;
+                this.refresh();
                 return;
             }
             var contBranch = {LB: [], _children: []}, contNode;
