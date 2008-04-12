@@ -1,4 +1,4 @@
-Version 1.2 -
+Version 1.2 - May 12 1008
     Site Features
         * Game archive, game info search
         * GNU Go handicap, color chooser
@@ -19,6 +19,7 @@ Version 1.2 -
     Bug fixes
         * Multiple KGS comments no longer mess up SGF upon saving to server
         * Non-regular board sizes open as 19x19 instead of breaking
+        * Most errors now allow you to continue playing or loading games
 
 Version 1.1 - Jan 21 2008
     Features
