@@ -723,8 +723,9 @@
     background: #ddc;
     display: block;
     padding: 5px;
-    margin: 0 0 10px 0;
-    text-decoration: none;
+    margin: 0 0 10px -5px;
+    color: #332;
+    font-weight: bold;
 }
 #cont-search:hover {
     background: #eed;

@@ -36,6 +36,7 @@ eidogo.i18n = eidogo.i18n || {
     'no search url':    'No search URL provided.',
     'close search':     'close search',
     'matches found':    'matches found.', // as in, "12 matches found"
+    'show games':       'Show pro games with this position',
     'save to server':   'Save to Server',
     'download sgf':     'Download SGF',
     'next game':        'Next Game',

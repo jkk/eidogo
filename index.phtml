@@ -60,6 +60,21 @@ var player;
         initGame: function() {
             document.title = "EidoGo - " + this.getGameDescription();
         },
+        showGameInfo: function(info) {
+            if (this.gameName == "kjd") {
+                ['KM', 'HA', 'CP', 'DT'].forEach(function(p) { delete info[p]; });
+                info.GC = "Available from " +
+                    "<a href='http://waterfire.us/joseki.htm'>http://waterfire.us/joseki.htm</a><br><br>" +
+                    "KJD Copyright 2006-2007 by Andre Ay. Copyright 1998-2005 " +
+                    "by Gary Odom. Portions copyright 2000-2001 by Stefan " +
+                    "Verstraeten. Used with permission.";
+            } else if (this.gameName == "kombilo") {
+                info.GN = "Kombilo / Pro Game Database";
+                info.GC = "Continuations derived from around 10,000 pro games.\n\n" +
+                    "Since the continuations are computed automatically, there is a certain " +
+                    "amount of spurious, non-fuseki moves included.";
+            }
+        },
         setPermalink: function() {
             if (!this.gameName || ['search', 'gnugo', 'url'].contains(this.gameName)) return;
             var gn = this.gameName || "";

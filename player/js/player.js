@@ -220,7 +220,7 @@ eidogo.Player.prototype = {
     **/
     hook: function(hook, params) {
         if (hook in this.hooks) {
-            this.hooks[hook].bind(this)(params);
+            return this.hooks[hook].bind(this)(params);
         }
     },
     
@@ -906,8 +906,7 @@ eidogo.Player.prototype = {
                 var moveNum = this.cursor.getMoveNumber();
                 if (moveNum > 1)
                     this.cursor.node.C = "<a id='cont-search' href='#'>" +
-                        "Show pro games with this position</a>" +
-                        this.cursor.node.C;
+                        t['show games'] + "</a>" + (this.cursor.node.C || "");
                 this.refresh();
                 if (completeFn && typeof completeFn == "function")
                     completeFn();
@@ -952,7 +951,7 @@ eidogo.Player.prototype = {
             }
             var contBranch = {LB: [], _children: []}, contNode;
             contBranch.C = moveNum > 1 ? "<a id='cont-search' href='#'>" +
-                "Show pro games with this position</a>" : "";
+                t['show games'] + "</a>" : "";
             var cont,
                 conts = eval('(' + req.responseText + ')');
             if (conts.length) {
@@ -978,13 +977,8 @@ eidogo.Player.prototype = {
                     contBranch._children.push(contNode);
                 }
                 contBranch.C += "</div>";
-                if (!this.cursor.node) {
-                    contBranch.GN = "Kombilo / Pro Game Database";
-                    contBranch.GC = "Continuations derived from around 10,000 pro games.\n\n" +
-                        "Since the continuations are computed automatically, there is a certain " +
-                        "amount of spurious, non-fuseki moves included.";
+                if (!this.cursor.node)
                     contBranch = {_children: [contBranch]};
-                }
             }
             this.load(contBranch, this.cursor.node);
             addEvent(byId("cont-search"), "click", function(e) {
@@ -1696,6 +1690,8 @@ eidogo.Player.prototype = {
      * Parse and display the game's info
     **/
     showGameInfo: function(gameInfo) {
+        if (this.hooks.showGameInfo)
+            this.hook("showGameInfo", gameInfo);
         if (!gameInfo) return;
         this.dom.infoGame.innerHTML = "";
         this.dom.whiteName.innerHTML = "";
@@ -2034,7 +2030,7 @@ eidogo.Player.prototype = {
 
     showComments: function(comments, junk, noRender) {
         if (!comments || noRender) return;
-        this.dom.comments.innerHTML += comments.replace(/\n/g, "<br />");
+        this.dom.comments.innerHTML += comments.replace(/^(\n|\r|\t|\s)+/, "").replace(/\n/g, "<br />");
     },
 
     /**
