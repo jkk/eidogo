@@ -492,7 +492,6 @@ eidogo.Player.prototype = {
         
         var success = function(req) {
             var data = req.responseText.replace(/^( |\t|\r|\n)*/, "");
-        
             // infer the kind of file we got
             if (data.charAt(0) == '(') {
                 // SGF
@@ -1477,7 +1476,8 @@ eidogo.Player.prototype = {
             if (total > offsetEnd) {
                 setTimeout(function() {
                     addEvent(byId("search-more"), "click", function(e) {
-                        this.loadSearch(quadrant, bounds[2] + "x" + bounds[3], pattern, "corner", ret.offset + 51);
+                        this.loadSearch(quadrant, bounds[2] + "x" + bounds[3],
+                            pattern, "corner", ret.offset + 51);
                         stopEvent(e);
                     }.bind(this));
                 }.bind(this), 0);
@@ -2479,9 +2479,13 @@ eidogo.Player.prototype = {
 
     croak: function(msg) {
         this.doneLoading();
-        this.dom.player.innerHTML += "<div class='eidogo-error'>" +
-            msg.replace(/\n/g, "<br />") + "</div>";
-        this.croaked = true;
+        if (this.board) {
+            alert(msg);
+        } else {
+            this.dom.player.innerHTML += "<div class='eidogo-error'>" +
+                msg.replace(/\n/g, "<br />") + "</div>";
+            this.croaked = true;
+        }
     }
 };
     

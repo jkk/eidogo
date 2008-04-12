@@ -1,5 +1,5 @@
 for 1.2
-- make failed game load non-fatal
+- problem config, response hook
 
 planned
 - link directly to a node within a progressive-loading tree (use MPTT?)
