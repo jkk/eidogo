@@ -1,4 +1,4 @@
-Version 1.2 - May 12 1008
+Version 1.2 - Apr 12 1008
     Site Features
         * Game archive, game info search
         * GNU Go handicap, color chooser
