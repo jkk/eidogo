@@ -694,7 +694,9 @@ eidogo.Player.prototype = {
         // short delay before playing
         setTimeout(function() {
             this.variation(null, noRender);
-            if (!this.cursor.hasNext()) {
+            if (this.hooks.playProblemResponse) {
+                this.hook("playProblemResponse");
+            } else if (!this.cursor.hasNext()) {
                 // not sure if it's safe to say "WRONG" -- that would work for
                 // goproblems.com SGFs but I don't know about others
                 this.prependComment(t['end of variation']);
@@ -1690,8 +1692,7 @@ eidogo.Player.prototype = {
      * Parse and display the game's info
     **/
     showGameInfo: function(gameInfo) {
-        if (this.hooks.showGameInfo)
-            this.hook("showGameInfo", gameInfo);
+        this.hook("showGameInfo", gameInfo);
         if (!gameInfo) return;
         this.dom.infoGame.innerHTML = "";
         this.dom.whiteName.innerHTML = "";

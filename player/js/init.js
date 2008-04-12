@@ -47,15 +47,11 @@
         var el;
         for (var i = 0; el = els[i]; i++) {
             var cfg = {container: el, disableShortcuts: true, theme: "compact"};
-            if (eidogo.util.hasClass(el, "eidogo-player-problem")) {
-                for (var key in problemCfg) {
+            for (var key in autoCfg)
+                cfg[key] = autoCfg[key];
+            if (eidogo.util.hasClass(el, "eidogo-player-problem"))
+                for (var key in problemCfg)
                     cfg[key] = problemCfg[key];
-                }
-            } else {
-                for (var key in autoCfg) {
-                    cfg[key] = autoCfg[key];
-                }
-            }
             
             var sgfUrl = el.getAttribute('sgf');
             if (sgfUrl) cfg.sgfUrl = sgfUrl;
