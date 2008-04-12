@@ -2481,8 +2481,11 @@ eidogo.Player.prototype = {
         this.doneLoading();
         if (this.board) {
             alert(msg);
+        } else if (this.problemMode) {
+            this.prependComment(msg);
         } else {
-            this.dom.player.innerHTML += "<div class='eidogo-error'>" +
+            this.dom.player.innerHTML += "<div class='eidogo-error " +
+                (this.theme ? " theme-" + this.theme : "") + "'>" +
                 msg.replace(/\n/g, "<br />") + "</div>";
             this.croaked = true;
         }
