@@ -4,6 +4,9 @@ RewriteEngine on
 RewriteCond %{HTTP_HOST} ^www\.eidogo\.com [NC]
 RewriteRule (.*) http://eidogo.com$1 [R=301,L]
 
+RedirectMatch 404 /\\.svn(/|$)
+RedirectMatch 404 /\\.git(/|$)
+
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^source$ /source.phtml [L,NE]
