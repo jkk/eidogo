@@ -269,6 +269,8 @@ eidogo.Player.prototype = {
         this.mouseDown = null;
         this.mouseDownX = null;
         this.mouseDownY = null;
+        this.mouseDownClickX = null;
+        this.mouseDownClickY = null;
     
         // for the letter and number tools
         this.labelLastLetter = null;
@@ -913,12 +915,15 @@ eidogo.Player.prototype = {
                     completeFn();
                 addEvent(byId("cont-search"), "click", function(e) {
                     var size = 8;
-                    var pattern = this.convertRegionPattern(this.board.getRegion(0, 19 - size, size, size));
+                    var region = this.board.getRegion(0, 19 - size, size, size);
+                    var pattern = this.convertRegionPattern(region);
                     this.loadSearch("ne", size + "x" + size, this.compressPattern(pattern));
                     stopEvent(e);
                 }.bind(this));
             }.bind(this);
-            this.remoteLoad(this.progressiveUrl + "?id=" + loadId, loadNode, false, null, completeFnWrap);
+            var url = this.progressiveUrl + "?" +
+                eidogo.util.makeQueryString({id: loadId, pid: this.uniq});
+            this.remoteLoad(url, loadNode, false, null, completeFnWrap);
         }
     },
     
@@ -1050,12 +1055,14 @@ eidogo.Player.prototype = {
      * attachment (or Flash event handling, or whatever) and passes along
      * the appropriate board coordinate.
     **/
-    handleBoardMouseDown: function(x, y, e) {
+    handleBoardMouseDown: function(x, y, cx, cy, e) {
         if (this.domLoading) return;
         if (!this.boundsCheck(x, y, [0, this.board.boardSize-1])) return;
         this.mouseDown = true;
         this.mouseDownX = x;
         this.mouseDownY = y;
+        this.mouseDownClickX = cx;
+        this.mouseDownClickY = cy;
         // begin region selection
         if (this.mode == "region" && x >= 0 && y >= 0 && !this.regionBegun) {
             this.regionTop = y;
@@ -1067,11 +1074,14 @@ eidogo.Player.prototype = {
     /**
      * Called by the board renderer upon hover, with appropriate coordinate
     **/
-    handleBoardHover: function(x, y, e) {
+    handleBoardHover: function(x, y, cx, cy, e) {
         if (this.domLoading) return;
         if (this.mouseDown || this.regionBegun) {
             if (!this.boundsCheck(x, y, [0, this.board.boardSize-1])) return;
-            if (this.searchUrl && !this.regionBegun && (x != this.mouseDownX || y != this.mouseDownY)) {
+            var boardDiff = (x != this.mouseDownX || y != this.mouseDownY);
+            var clickDiff = Math.abs(this.mouseDownClickX-cx) >= 19 ||
+                Math.abs(this.mouseDownClickY-cy) >= 19;
+            if (this.searchUrl && !this.regionBegun && boardDiff && clickDiff) {
                 // click and drag: implicit region select
                 this.selectTool("region");
                 this.regionBegun = true;

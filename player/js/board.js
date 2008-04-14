@@ -321,11 +321,11 @@ eidogo.BoardRendererHtml.prototype = {
     },
     handleHover: function(e) {
         var xy = this.getXY(e);
-        this.player.handleBoardHover(xy[0], xy[1]);
+        this.player.handleBoardHover(xy[0], xy[1], xy[2], xy[3], e);
     },
     handleMouseDown: function(e) {
         var xy = this.getXY(e);
-        this.player.handleBoardMouseDown(xy[0], xy[1]);
+        this.player.handleBoardMouseDown(xy[0], xy[1], xy[2], xy[3], e);
     },
     handleMouseUp: function(e) {
         var xy = this.getXY(e);
@@ -344,7 +344,7 @@ eidogo.BoardRendererHtml.prototype = {
         var x = Math.round((clickXY[0] - m - (pw / 2)) / pw);
         var y = Math.round((clickXY[1] - m - (ph / 2)) / ph);
     
-        return [x, y];
+        return [x, y, clickXY[0], clickXY[1]];
     },
     crop: function(crop) {
         eidogo.util.addClass(this.domContainer, "shrunk");
