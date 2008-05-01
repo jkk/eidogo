@@ -54,7 +54,7 @@ if (!count($output)) {
     exit;
 }
 
-$total = count($output);
+$total = count($output) - 1;
 if ($total > 50) {
     $output = array_slice($output, $o, 50);
 }
