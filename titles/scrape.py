@@ -111,6 +111,8 @@ def scrape_subpage(subpage_fn):
             print "  " + fn
             sgf = sgfparser.Cursor(raw_sgf)
             info = sgf.getRootNode(0)
+            if (not info.has_key('DT')):
+                info['DT'] = ''
             cur.execute(
                 "insert into games (fn, dt, ev, pw, pb, re) values (?,?,?,?,?,?)",
                 (fn,
