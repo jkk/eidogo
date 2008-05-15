@@ -43,5 +43,6 @@ if (strlen($_POST['sgf'] > 30000)) {
 
 file_put_contents("../sgf/saved/$id.sgf", $sgf);
 header("location: /#$id");
+echo $id;
 
 ?>
