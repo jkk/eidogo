@@ -151,6 +151,8 @@ var player;
             loadJoseki(gameName, loadPath);
         else if (gameName == "url")
             loadUrl(hash.replace(/^#?url:/, ""));
+        else if (gameName == "raw")
+            loadRaw(decodeURIComponent(hash.replace(/^#?raw:/g, "").replace(/\+/g, " ")));
         else if (gameName == "search")
             loadSearch(rest);
         else if (gameName.indexOf("gnugo") === 0)
@@ -201,6 +203,12 @@ var player;
         loadGame({
             gameName:   "url",
             sgfUrl:     "backend/fetch.php?url=" + url});
+    }
+    
+    function loadRaw(data) {
+        loadGame({
+            gameName:   "raw",
+            sgf:        data});
     }
     
     function loadGnuGo(gameName) {
