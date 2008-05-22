@@ -18,12 +18,22 @@
     <div id="player-container"></div>
 
     <script type="text/javascript">
-    var player = new eidogo.Player({
-        container:       "player-container",
-        theme:           "compact",
-        sgfUrl:          "sgf/" + (location.search ? location.search.substring(1) : "example.sgf"),
-        enableShortcuts: true
-    });
+    (function() {
+        var params = {},
+            pairs = location.search ? location.search.substring(1).split(/&/) : [],
+            i, keyval;
+        for (i = 0; i < pairs.length; i++) {
+            keyval = pairs[i].split(/\=/);
+            params[keyval[0]] = keyval[1];
+        }
+        window.player = new eidogo.Player({
+            container:       "player-container",
+            theme:           "compact",
+            sgfUrl:          "sgf/" + (params.sgf ? params.sgf : "example.sgf"),
+            enableShortcuts: true
+        });    
+    })();
+    
     </script>
     
 </body>
