@@ -2328,7 +2328,8 @@ eidogo.Player.prototype = {
             curId = this.cursor.node._id,
             nodeWidth = this.board.renderer.pointWidth + 5,
             path = [this.cursor.getGameRoot().getPosition()],
-            player = this;
+            player = this,
+            maxMoveNum = -1;
         var traverse = function(node, startNum, varNum) {
             var indent = 0,
                 offset = 0,
@@ -2340,7 +2341,6 @@ eidogo.Player.prototype = {
                 html += "<a href='#' id='navtree-node-" + pathStr  + "' class='" +
                     (typeof node.W != "undefined" ? 'w' : (typeof node.B != "undefined" ? 'b' : 'x')) +
                     "'>" + (moveNum) + "</a>";
-                
                 moveNum++;
                 if (node._children.length != 1) break;
                 if (node._parent._parent == null)
@@ -2363,9 +2363,10 @@ eidogo.Player.prototype = {
             if (node._children.length > 1)
                 html += "</ul>";
             html += "</li>";
+            if (moveNum > maxMoveNum) maxMoveNum = moveNum;
         }
         traverse(this.cursor.getGameRoot(), 0, 0);
-        this.dom.navTree.style.width = ((this.totalMoves+2) * nodeWidth) + "px";
+        this.dom.navTree.style.width = ((maxMoveNum+2) * nodeWidth) + "px";
         this.dom.navTree.innerHTML = "<ul class='root'>" + html + "</ul>";
         setTimeout(function() {
             this.showNavTreeCurrent();

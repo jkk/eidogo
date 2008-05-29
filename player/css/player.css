@@ -645,6 +645,9 @@
 .eidogo-player .nav-tree ul.root > li {
     padding-left: 0;
 }
+.eidogo-player .nav-tree ul.root > li.first > ul {
+    padding-bottom: 30px;
+}
 .eidogo-player .nav-tree li {
     position: relative;
     clear: left;
@@ -687,6 +690,15 @@
     background: #822 !important;
     color: #fff !important;
 }
+/*.eidogo-player .nav-tree li {
+    float: left;
+    background: red;
+    margin: 5px;
+    border: 1px solid yellow;
+}
+.eidogo-player .nav-tree li a {
+    display: block;
+}*/
 .eidogo-player .continuations {
     background: #aa9;
     padding: 5px;

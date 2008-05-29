@@ -144,13 +144,13 @@ eidogo.GameNode.prototype = {
      * Applies a function to this node and all its children, recursively
      * (although we use a stack instead of actual recursion)
     **/
-    walk: function(fn) {
+    walk: function(fn, thisObj) {
         var stack = [this];
         var node;
         var i, len;
         while (stack.length) {
             node = stack.pop();
-            fn(node);
+            fn.call(thisObj || this, node);
             len = (node._children ? node._children.length : 0);
             for (i = 0; i < len; i++)
                 stack.push(node._children[i]);
