@@ -463,7 +463,10 @@ eidogo.Player.prototype = {
         
         // find out which color to play as for problem mode
         if (!target._parent && this.problemMode) {
-            this.currentColor = this.problemColor = this.cursor.getNextColor();
+            if (!this.problemColor)
+                this.currentColor = this.problemColor = this.cursor.getNextColor();
+            else
+                this.currentColor = this.problemColor;
         }
     },
 
@@ -572,9 +575,8 @@ eidogo.Player.prototype = {
         if (this.board && this.board.renderer && this.board.boardSize == size) return;
         try {
             this.dom.boardContainer.innerHTML = "";
-            var rendererProto;
-            if (this.renderer == "flash") rendererProto = eidogo.BoardRendererFlash;
-            else rendererProto = eidogo.BoardRendererHtml;
+            var rendererProto = (this.renderer == "flash" ?
+                eidogo.BoardRendererFlash : eidogo.BoardRendererHtml);
             var renderer = new rendererProto(this.dom.boardContainer, size, this, this.cropParams);
             this.board = new eidogo.Board(renderer, size);
         } catch (e) {
@@ -1937,7 +1939,7 @@ eidogo.Player.prototype = {
     setColor: function(color) {
         this.prependComment(color == "B" ? t['black to play'] :
             t['white to play']);
-        this.currentColor = color;
+        this.currentColor = this.problemColor = color;
     },
 
     setMoveNumber: function(num) {
