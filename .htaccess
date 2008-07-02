@@ -7,6 +7,15 @@ RewriteRule (.*) http://eidogo.com$1 [R=301,L]
 RedirectMatch 404 /\\.svn(/|$)
 RedirectMatch 404 /\\.git(/|$)
 
+# Here we assume certain MSIE 6.0 agents are from linkscanner
+# redirect these requests back to avg in the hope they'll see their silliness.
+# Taken from http://www.pixelbeat.org/docs/web/avg_linkscanner.html
+RewriteCond %{HTTP_USER_AGENT} ".*MSIE 6.0; Windows NT 5.1; SV1.$" [OR]
+RewriteCond %{HTTP_USER_AGENT} ".*MSIE 6.0; Windows NT 5.1;1813.$"
+RewriteCond %{HTTP_REFERER} ^$
+RewriteCond %{HTTP:Accept-Encoding} ^$
+RewriteRule ^.* http://www.avg.com/?LinkScannerSucks [R=307,L]
+
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^source$ /source.phtml [L,NE]
