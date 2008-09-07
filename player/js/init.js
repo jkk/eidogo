@@ -20,8 +20,7 @@
         problemMode:    true,
         markVariations: false,
         markNext:       false,
-        shrinkToFit:    true
-    };
+        shrinkToFit:    true};
     var scriptPath = eidogo.util.getPlayerPath();    
     var path = eidogo.playerPath = (autoCfg.playerPath || scriptPath || 'player').replace(/\/$/, "");
     

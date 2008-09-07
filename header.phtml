@@ -5,29 +5,35 @@
 <title>EidoGo - <?php if ($title) echo $title; else echo "Go Games, Pattern Search, Joseki Tutor, SGF Editor"; ?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-<link rel="stylesheet" href="css/site-style.css?<?=date("Ymd", filectime("css/site-style.css"))?>" type="text/css">
+<link rel="stylesheet" href="/css/site-style.css?<?=date("Ymd", filectime("css/site-style.css"))?>" type="text/css">
 
 <?php if (strpos(strtolower($_SERVER['HTTP_USER_AGENT']), "iphone") !== false) { ?>
-<link rel="stylesheet" href="css/site-style-iphone.css" type="text/css" media="only screen and (max-device-width: 480px)">
-<link rel="stylesheet" href="player/css/player-iphone.css" type="text/css" media="only screen and (max-device-width: 480px)">
+<link rel="stylesheet" href="/css/site-style-iphone.css" type="text/css" media="only screen and (max-device-width: 480px)">
+<link rel="stylesheet" href="/player/css/player-iphone.css" type="text/css" media="only screen and (max-device-width: 480px)">
 <meta name="viewport" content="width=421, minimum-scale=0.76">
 <script type="text/javascript">
 eidogoConfig = {skipCss: true};
 </script>
 <?php } ?>
 
-<script type="text/javascript" src="player/js/all.compressed.js?<?=date("Ymd", filectime("player/js/all.compressed.js"))?>"></script>
+<?php if (strpos($_SERVER['PHP_SELF'], "/problems") === 0) { ?>
+<script type="text/javascript">
+eidogoConfig = {enableShortcuts: true};
+</script>
+<?php } ?>
 
-<!-- <script type="text/javascript" src="player/js/lang.js"></script>
-<script type="text/javascript" src="player/js/eidogo.js"></script>
-<script type="text/javascript" src="player/js/util.js"></script>
-<script type="text/javascript" src="player/i18n/en.js"></script>
-<script type="text/javascript" src="player/js/gametree.js"></script>
-<script type="text/javascript" src="player/js/sgf.js"></script>
-<script type="text/javascript" src="player/js/board.js"></script>
-<script type="text/javascript" src="player/js/rules.js"></script>
-<script type="text/javascript" src="player/js/player.js"></script>
-<script type="text/javascript" src="player/js/init.js"></script> -->
+<script type="text/javascript" src="/player/js/all.compressed.js?<?=date("Ymd", filectime("player/js/all.compressed.js"))?>"></script>
+
+<!-- <script type="text/javascript" src="/player/js/lang.js"></script>
+<script type="text/javascript" src="/player/js/eidogo.js"></script>
+<script type="text/javascript" src="/player/js/util.js"></script>
+<script type="text/javascript" src="/player/i18n/en.js"></script>
+<script type="text/javascript" src="/player/js/gametree.js"></script>
+<script type="text/javascript" src="/player/js/sgf.js"></script>
+<script type="text/javascript" src="/player/js/board.js"></script>
+<script type="text/javascript" src="/player/js/rules.js"></script>
+<script type="text/javascript" src="/player/js/player.js"></script>
+<script type="text/javascript" src="/player/js/init.js"></script> -->
 
 </head>
 <body>
@@ -39,15 +45,16 @@ eidogoConfig = {skipCss: true};
         <h1><a href='/'>Eido<span>Go</span></a></h1>
 
         <p id="ownership">
-            EidoGo is <a href="source">Open Source &mdash; Embed it in your website!</a>
+            EidoGo is <a href="/source">Open Source &mdash; Embed it in your website!</a>
             &nbsp;Created by <script type="text/javascript">document.write("<n uers=\"znvygb:wx\100gva\056ah\">Whfgva Xenzre<\057n>".replace(/[a-zA-Z]/g, function(c){return String.fromCharCode((c<="Z"?90:122)>=(c=c.charCodeAt(0)+13)?c:c-26);}));</script>.
         </p>
 
         <ul id="links">
             <li><a href="/#kjd">Joseki Tutor</a></li>
             <li><a href="/#search">Pattern Search</a></li>
-            <li><a href="tourney">Games</a></li>
-            <li><a href="upload">Upload</a></li>
+            <li><a href="/tourney">Games</a></li>
+            <li><a href="/problems">Problems</a></li>
+            <li><a href="/upload">Upload</a></li>
             <li><a href="/#gnugo">Play GNU Go</a></li>
             <li><a href="/#blank">Blank Board</a></li>
             <li><a href="http://senseis.xmp.net/?EidoGo">Latest Updates</a></li>
