@@ -1639,13 +1639,15 @@ eidogo.Player.prototype = {
         // Variations can be selected by pressing the appropriate alphanumberic
         // character that is either 1) its variation number; or 2) its
         // marker label.
+        var varMoves = [];
         for (var i = 0; i < this.variations.length; i++) {
-            var varPt = this.sgfCoordToPoint(this.variations[i].move);
+            var varMove = this.variations[i].move;
+            var varPt = this.sgfCoordToPoint(varMove);
             var varLabel = '' + (i + 1);
-            if (varPt.x != null
-                && this.board.getMarker(varPt) != this.board.EMPTY
-                && typeof this.board.getMarker(varPt) == "string") {
-                varLabel = this.board.getMarker(varPt).toLowerCase();
+            var marker = this.board.getMarker(varPt);
+            if (varPt.x != null && marker != this.board.EMPTY &&
+                typeof marker == "string" && !varMoves.contains(varMove)) {
+                varLabel = marker.toLowerCase();
             }
             varLabel = varLabel.replace(/^var:/, "");
             if (charKey == varLabel.charAt(0)) {
@@ -1653,6 +1655,7 @@ eidogo.Player.prototype = {
                 stopEvent(e);
                 return;
             }
+            varMoves.push(varMove);
         }
     
         // tool shortcuts
@@ -1878,6 +1881,7 @@ eidogo.Player.prototype = {
         this.dom.variations.innerHTML = "";
         for (var i = 0; i < this.variations.length; i++) {
             var varLabel = i + 1;
+            var overlapped = false;
             if (!this.variations[i].move || this.variations[i].move == "tt") {
                 // 'pass' variation
                 addClass(this.dom.controlPass, "pass-on");
@@ -1885,9 +1889,15 @@ eidogo.Player.prototype = {
                 // show clickable variation on the board
                 var varPt = this.sgfCoordToPoint(this.variations[i].move);
                 if (this.board.getMarker(varPt) != this.board.EMPTY) {
-                    varLabel = this.board.getMarker(varPt);
+                    var marker = this.board.getMarker(varPt);
+                    if (marker.indexOf("var:") !== 0) {
+                        varLabel = marker;
+                    } else {
+                        // More than one variation on the same point
+                        overlapped = true;
+                    }
                 }
-                if (this.prefs.markVariations) {
+                if (this.prefs.markVariations && !overlapped) {
                     this.board.addMarker(varPt, "var:" + varLabel);
                 }
             }
