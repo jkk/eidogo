@@ -1,9 +1,9 @@
 <?php
 
 if ($_SERVER['HTTP_HOST'] == "eidogo.com") {
-    define("PATH_GNUGO", "/var/www/eidogo.com/gnugo/interface/gnugo");
+    define("PATH_GNUGO", "/usr/bin/nice -n 20 /var/www/eidogo.com/gnugo/interface/gnugo");
 } else {
-    define("PATH_GNUGO", "/Users/tin/Sites/eidogo/gnugo/gnugo/interface/gnugo");
+    define("PATH_GNUGO", "/usr/bin/nice -n 20 /Users/tin/Sites/eidogo/gnugo/gnugo/interface/gnugo");
 }
 
 $sgf = $_REQUEST['sgf'];
