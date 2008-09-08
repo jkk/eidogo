@@ -539,6 +539,66 @@
 .eidogo-player .info a {
     color: #fff;
 }
+.eidogo-player .nav-tree-container {
+    float: right;
+    width: 420px;
+    height: 100px;
+    padding: 5px 0 5px 5px;
+    margin: 5px 0 5px 0;
+    overflow: auto;
+    background: #333;
+    display: none;
+    position: relative;
+}
+.eidogo-player .nav-tree table {
+    padding: 0;
+    margin: 0;
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+.eidogo-player .nav-tree table td {
+    width: 24px;
+    height: 24px;
+    background: url(../images/navtree-line.gif);
+    padding: 0;
+}
+.eidogo-player .nav-tree .empty, .eidogo-player .nav-tree .elbow {
+    width: 19px;
+    height: 15px;
+    padding: 0 0 5px 5px;
+    background: #333;
+}
+.eidogo-player .nav-tree .elbow {
+    background: #333 url(../images/navtree-elbow.gif) 5px -2px no-repeat;
+}
+.eidogo-player .nav-tree a {
+    float: left;
+    margin: 0 0 5px 5px;
+    width: 19px;
+    height: 15px;
+    text-decoration: none;
+    font-size: 9px;
+    font-family: arial, helvetica, sans-serif;
+    text-align: center;
+    padding: 4px 0 0 0;
+    cursor: pointer;
+}
+.eidogo-player .nav-tree a.w {
+    background: url(../images/w.png);
+    color: #000;
+}
+.eidogo-player .nav-tree a.b {
+    background: url(../images/b.png);
+    color: #fff;
+}
+.eidogo-player .nav-tree a.x {
+    background: #444;
+    color: #ccc;
+}
+.eidogo-player .nav-tree a.current {
+    background: #822 !important;
+    color: #fff !important;
+}
 .eidogo-player .continuations {
     background: #aa9;
     padding: 5px;

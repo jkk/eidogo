@@ -618,53 +618,44 @@
 }
 .eidogo-player .nav-tree-container {
     float: right;
-    width: 375px;
+    width: 370px;
     height: 100px;
-    padding: 5px 0 5px 0;
+    padding: 5px 0 5px 5px;
     margin: 5px 0 5px 0;
     overflow: auto;
     background: #333;
     display: none;
     position: relative;
 }
-.eidogo-player .nav-tree ul {
-    clear: left;
-    margin: 0;
+.eidogo-player .nav-tree table {
     padding: 0;
-    list-style-type: none;
-    background: url(../images/navtree-left.gif) no-repeat;
-    background-position: 0 24px;
-    position: relative;
-    top: -24px;
+    margin: 0;
+    border-collapse: collapse;
+    border-spacing: 0;
 }
-.eidogo-player .nav-tree ul.root {
-    position: static;
-    top: 0;
-    padding-left: 5px;
+.eidogo-player .nav-tree table td {
+    width: 24px;
+    height: 24px;
+    background: url(../images/navtree-line.gif);
+    padding: 0;
 }
-.eidogo-player .nav-tree ul.root > li {
-    padding-left: 0;
-}
-.eidogo-player .nav-tree ul.root > li.first > ul {
-    padding-bottom: 30px;
-}
-.eidogo-player .nav-tree li {
-    position: relative;
-    clear: left;
-    padding: 0 0 0 24px;
+.eidogo-player .nav-tree .empty, .eidogo-player .nav-tree .elbow {
+    width: 19px;
     height: 19px;
-    background: url(../images/navtree-elbow.gif) no-repeat;
+    padding: 0 0 5px 5px;
+    background: #333;
 }
-.eidogo-player .nav-tree li.first {
-    background: none;
-    cursor: pointer;
+.eidogo-player .nav-tree .elbow {
+    background: #333 url(../images/navtree-elbow.gif) 5px 0px no-repeat;
 }
-.eidogo-player .nav-tree li div.mainline {
-    height: 19px;
+.eidogo-player .nav-tree .line {
+    width: 24px;
+    height: 24px;
+    background: #333 url(../images/navtree-left.gif) 5px 0 no-repeat;
 }
 .eidogo-player .nav-tree a {
     float: left;
-    margin: 0 5px 5px 0;
+    margin: 0 0 5px 5px;
     width: 19px;
     height: 15px;
     text-decoration: none;
@@ -690,15 +681,6 @@
     background: #822 !important;
     color: #fff !important;
 }
-/*.eidogo-player .nav-tree li {
-    float: left;
-    background: red;
-    margin: 5px;
-    border: 1px solid yellow;
-}
-.eidogo-player .nav-tree li a {
-    display: block;
-}*/
 .eidogo-player .continuations {
     background: #aa9;
     padding: 5px;

@@ -308,9 +308,6 @@ eidogo.Player.prototype = {
         this.prefs.showOptions = !!cfg.showOptions;
         this.prefs.showNavTree = !this.progressiveLoad && typeof cfg.showNavTree != "undefined" ?
             !!cfg.showNavTree : false;
-        // Firefox and Safari 3 only for now
-        if (this.prefs.showNavTree && !(eidogo.browser.moz || eidogo.browser.safari3))
-            this.prefs.showNavTree = false;
     },
     
     /**
@@ -436,6 +433,7 @@ eidogo.Player.prototype = {
      * a new gameRoot and initializes the game.
     **/
     load: function(data, target) {
+        var newGame = false;
         if (!target) {
             // load from scratch
             target = new eidogo.GameNode();
@@ -450,10 +448,11 @@ eidogo.Player.prototype = {
             // other if specified
             var gameIndex = this.loadPath.length ? parseInt(this.loadPath[0], 10) : 0;
             this.initGame(target._children[gameIndex || 0]);
+            newGame = true;
         }
         
         if (this.loadPath.length) {
-            this.goTo(this.loadPath, false);
+            this.goTo(this.loadPath, newGame);
             if (!this.progressiveLoad) {
                 this.loadPath = [0,0];
             }
@@ -766,7 +765,7 @@ eidogo.Player.prototype = {
                 for (var i = 0; i < position; i++)
                     this.variation(0, true);
             } else if (path.length) {
-                if (!first && this.cursor.node._parent._parent)
+                if (!first && fromStart)
                     while (this.cursor.node._children.length == 1)
                         this.variation(0, true);
                 this.variation(position, true);
@@ -905,7 +904,6 @@ eidogo.Player.prototype = {
             var loadId = (loadNode && loadNode._id) || 0;
             this.nowLoading();
             this.progressiveLoads++;
-            this.updatedNavTree = false;
             // Show pro game search after second move
             var completeFnWrap = function() {
                 var moveNum = this.cursor.getMoveNumber();
@@ -932,7 +930,6 @@ eidogo.Player.prototype = {
     fetchProgressiveContinuations: function(completeFn) {
         this.nowLoading();
         this.progressiveLoads++;
-        this.updatedNavTree = false;
         var moveNum = this.cursor.getMoveNumber();
         var size = (moveNum > 1 ? 11 : 7);
         var left = 19 - size - 1;
@@ -1623,7 +1620,8 @@ eidogo.Player.prototype = {
         varNode._cached = true;
         this.totalMoves++;
         this.cursor.node.appendChild(varNode);
-        this.unsavedChanges = true;
+        this.unsavedChanges = [this.cursor.node._children.last(), this.cursor.node];
+        this.updatedNavTree = false;
         this.variation(this.cursor.node._children.length-1);
     },
 
@@ -2328,77 +2326,155 @@ eidogo.Player.prototype = {
         this.dom.navSliderThumb.style.left = offset + "px";
     },
     
+    /**
+     * Construct a navigation tree from scratch, assuming it hasn't been done
+     * already and no unsaved additions have been made.
+     *
+     * We do this in two passes:
+     *    1) Construct a 2D array, navGrid, containing all nodes and where
+     *       to display them horizontally and vertically (adjustments are
+     *       made to avoid overlapping lines of play)
+     *    2) Based on navGrid, construct an HTML table to actually display
+     *       the nav tree
+     *
+     * Every time a new move is played, this entire process repeats, which is
+     * kind of slow and inefficient. An attempt was made to only update
+     * select portions of the tree, but it didn't improve performance much at
+     * all, especially not in IE, where the HTML display is the slowest part.
+     * A feasible method for making selective updates doesn't come to mind.
+    **/
     updateNavTree: function() {
         if (!this.prefs.showNavTree)
             return;
-        if (!this.unsavedChanges && this.updatedNavTree) {
+        if (this.updatedNavTree) {
             this.showNavTreeCurrent();
             return;
         }
         this.updatedNavTree = true;
-        var html = "",
-            curId = this.cursor.node._id,
-            nodeWidth = this.board.renderer.pointWidth + 5,
+        // Construct 2D nav grid
+        var navGrid = [],
             path = [this.cursor.getGameRoot().getPosition()],
-            player = this,
-            maxMoveNum = -1;
-        var traverse = function(node, startNum, varNum) {
-            var indent = 0,
-                offset = 0,
-                moveNum = startNum,
-                pathStr;
-            html += "<li" + (varNum == 0 ? " class='first'" : "") + "><div class='mainline'>";
-            do {
-                pathStr = path.join('-') + "-" + offset;
-                html += "<a href='#' id='navtree-node-" + pathStr  + "' class='" +
-                    (typeof node.W != "undefined" ? 'w' : (typeof node.B != "undefined" ? 'b' : 'x')) +
-                    "'>" + (moveNum) + "</a>";
-                moveNum++;
-                if (node._children.length != 1) break;
-                if (node._parent._parent == null)
-                    path.push(node.getPosition());
-                else
-                    offset++;
-                node = node._children[0];
-                indent++;
-            } while (node);
-            html += "</div>";
-            if (node._children.length > 1)
-                html += "<ul style='margin-left: " + (indent * nodeWidth) + "px'>";
-            for (var i = 0; i < node._children.length; i++) {
-                if (node._children.length > 1)
-                    path.push(i);
-                traverse(node._children[i], moveNum, i);
-                if (node._children.length > 1)
-                    path.pop();
+            cur = new eidogo.GameCursor(),
+            maxx = 0;
+        var traverse = function(node, startx, starty) {
+            var y = starty, x = startx;
+            var n = node, width = 1;
+            while (n && n._children.length == 1) {
+                width++;
+                n = n._children[0];
             }
-            if (node._children.length > 1)
-                html += "</ul>";
-            html += "</li>";
-            if (moveNum > maxMoveNum) maxMoveNum = moveNum;
+            // If we'll overlap any future moves, skip down a row
+            while (navGrid[y] && navGrid[y].slice(x, x + width + 1).some(function(el) {
+                return (typeof el != "undefined");
+            })) {
+                y++;
+            }
+            do {   
+                if (!navGrid[y])
+                    navGrid[y] = [];
+                cur.node = node;
+                node._pathStr = path.join('-') + "-" + (x - startx);
+                navGrid[y][x] = node;
+                if (x > maxx)
+                    maxx = x;
+                x++;
+                if (node._children.length != 1) break;
+                node = node._children[0];
+            } while (node);
+            for (var i = 0; i < node._children.length; i++) {
+                path.push(i);
+                traverse(node._children[i], x, y);
+                path.pop();
+            }
         }
         traverse(this.cursor.getGameRoot(), 0, 0);
-        this.dom.navTree.style.width = ((maxMoveNum+2) * nodeWidth) + "px";
-        this.dom.navTree.innerHTML = "<ul class='root'>" + html + "</ul>";
+        // Construct HTML
+        var html = ["<table class='nav-tree'>"],
+            node, td, cur = new eidogo.GameCursor(),
+            x, y, showLine,
+            ELBOW = 1, LINE = 2;
+        for (x = 0; x < maxx; x++) {
+            showLine = false
+            for (y = navGrid.length - 1; y > 0; y--) {
+                if (!navGrid[y][x]) {
+                    if (typeof navGrid[y][x + 1] == "object") {
+                        navGrid[y][x] = ELBOW;
+                        showLine = true;
+                    } else if (showLine) {
+                        navGrid[y][x] = LINE;
+                    }
+                } else {
+                    showLine = false;
+                }
+            }    
+        }
+        for (y = 0; y < navGrid.length; y++) {
+            html.push("<tr>");
+            for (x = 0; x < navGrid[y].length; x++) {
+                node = navGrid[y][x];
+                if (node == ELBOW) {
+                    td = "<div class='elbow'></div>";
+                } else if (node == LINE) {
+                    td = "<div class='line'></div>";
+                } else if (node) {
+                    td = ["<a href='#' id='navtree-node-",
+                          node._pathStr,
+                          "' class='",
+                          (typeof node.W != "undefined" ? 'w' :
+                          (typeof node.B != "undefined" ? 'b' : 'x')),
+                          "'>",
+                          x,
+                          "</a>"].join("");
+                } else {
+                    td = "<div class='empty'></div>";
+                }
+                html.push("<td>");
+                html.push(td);
+                html.push("</td>");
+            }
+            html.push("</tr>");
+        }
+        html.push("</table>");
+        this.dom.navTree.innerHTML = html.join("");
         setTimeout(function() {
             this.showNavTreeCurrent();
         }.bind(this), 0);
     },
     
     showNavTreeCurrent: function() {
-        var current = byId("navtree-node-" + this.cursor.getPath().join("-"));
+        var id = "navtree-node-" + this.cursor.getPath().join("-"),
+            current = byId(id);
         if (!current) return;
+        // Highlight node
         if (this.prevNavTreeCurrent)
             this.prevNavTreeCurrent.className = this.prevNavTreeCurrentClass;
         this.prevNavTreeCurrent = current;
         this.prevNavTreeCurrentClass = current.className;
         current.className = "current";
+        // Scroll into view if necessary
+        var w = current.offsetWidth,
+            h = current.offsetHeight,
+            xy = eidogo.util.getElXY(current),
+            navxy = eidogo.util.getElXY(this.dom.navTree),
+            l = xy[0] - navxy[0],
+            t = xy[1] - navxy[1],
+            ntc = this.dom.navTreeContainer,
+            maxl = ntc.scrollLeft,
+            maxr = maxl + ntc.offsetWidth - 100;
+            maxt = ntc.scrollTop,
+            maxb = maxt + ntc.offsetHeight - 30;
+        if (l < maxl)
+            ntc.scrollLeft -= (maxl - l);
+        if (l + w > maxr)
+            ntc.scrollLeft += ((l + w) - maxr);
+        if (t < maxt)
+            ntc.scrollTop -= (maxt - t);
+        if (t + h > maxb)
+            ntc.scrollTop += ((t + h) - maxb);
     },
     
     navTreeClick: function(e) {
         var target = e.target || e.srcElement;
-        if (target.nodeName.toLowerCase() == "li" && target.className == "first")
-            target = target.parentNode.previousSibling.lastChild;
         if (!target || !target.id) return;
         var path = target.id.replace(/^navtree-node-/, "").split("-");
         this.goTo(path, true);
