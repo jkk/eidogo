@@ -714,6 +714,10 @@ eidogo.Player.prototype = {
     **/
     goTo: function(path, fromStart) {
         fromStart = typeof fromStart != "undefined" ? fromStart : true;
+        
+        if (fromStart && path.length > 1 && path[0] != this.cursor.getGameRoot().getPosition())
+            this.updatedNavTree = false;
+        
         if (fromStart)
             this.resetCursor(true);
         

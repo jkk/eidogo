@@ -1564,6 +1564,9 @@ this.prependComment(t["end of variation"]);
 }.bind(this),200);
 },goTo:function(_57,_58){
 _58=typeof _58!="undefined"?_58:true;
+if(_58&&_57.length>1&&_57[0]!=this.cursor.getGameRoot().getPosition()){
+this.updatedNavTree=false;
+}
 if(_58){
 this.resetCursor(true);
 }
