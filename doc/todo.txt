@@ -1,6 +1,5 @@
 planned
 - link directly to a node within a progressive-loading tree (use MPTT?)
-- custom labels
 - user accounts
 - democracy go
 - wiki-like SGF editing

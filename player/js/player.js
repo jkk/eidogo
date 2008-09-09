@@ -1206,6 +1206,10 @@ eidogo.Player.prototype = {
                         this.labelLastLetter = String.fromCharCode(
                             this.labelLastLetter.charCodeAt(0)+1);
                         break;
+                    case "label":
+                        prop = "LB";
+                        coord = coord + ":" + this.dom.labelInput.value;
+                        break;
                     case "clear":
                         this.cursor.node.deletePropertyValue(
                             ['TR', 'SQ', 'CR', 'MA', 'DD', 'LB'], new RegExp("^" + coord));
@@ -1754,19 +1758,24 @@ eidogo.Player.prototype = {
     selectTool: function(tool) {
         var cursor;
         hide(this.dom.scoreEst);
+        hide(this.dom.labelInput);
         if (tool == "region") {
             cursor = "crosshair";
         } else if (tool == "comment") {
             this.startEditComment();
         } else if (tool == "gameinfo") {
             this.startEditGameInfo();
+        } else if (tool == "label") {
+            show(this.dom.labelInput, "inline");
+            this.dom.labelInput.focus();
         } else {
             cursor = "default";
             this.regionBegun = false;
             this.hideRegion();
             hide(this.dom.searchButton);
             hide(this.dom.searchAlgo);
-            if (this.searchUrl) show(this.dom.scoreEst, "inline");
+            if (this.searchUrl)
+                show(this.dom.scoreEst, "inline");
         }
         this.board.renderer.setCursor(cursor);
         this.mode = tool;
@@ -1950,13 +1959,13 @@ eidogo.Player.prototype = {
         var node = this.cursor.node, pos, html, js;
         if (node._parent && !node._parent._parent && node._parent._children.length > 1) {
             pos = node.getPosition();
-            html = "Multi-game SGF: ";
+            html = t['multi-game sgf'];
             js = "javascript:eidogo.delegate(" + this.uniq + ", \"goTo\", [";
             if (pos)
-                html += "<a href='" + js + (pos - 1) + ",0])'>previous game</a>";
+                html += "<a href='" + js + (pos - 1) + ",0])'>" + t['previous game'] + "</a>";
             if (node._parent._children[pos + 1])
                 html += (pos ? " | " : "") +
-                        "<a href='" + js + (pos + 1) + ",0])'>next game</a>";
+                        "<a href='" + js + (pos + 1) + ",0])'>" + t['next game'] + "</a>";
             this.prependComment(html, "comment-info");
         }
     },
@@ -2163,6 +2172,7 @@ eidogo.Player.prototype = {
                     <option value='x'>&times; " + t['x'] + "</option>\
                     <option value='letter'>A " + t['letter'] + "</option>\
                     <option value='number'>5 " + t['number'] + "</option>\
+                    <option value='label'>&Ccedil; " + t['label'] + "</option>\
                     <option value='dim'>&#9619; " + t['dim'] + "</option>\
                     <option value='clear'>&#9617; " + t['clear'] + "</option>\
                 </select>\
@@ -2172,6 +2182,7 @@ eidogo.Player.prototype = {
                     <option value='center'>" + t['search center'] + "</option>\
                 </select>\
                 <input type='button' id='search-button' class='search-button' value='" + t['search'] + "' />\
+                <input type='text' id='label-input' class='label-input' />\
             </div>\
             <div id='comments' class='comments'></div>\
             <div id='comments-edit' class='comments-edit'>\

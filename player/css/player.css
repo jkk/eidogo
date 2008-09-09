@@ -204,11 +204,16 @@
     z-index: 9999;
     display: none;
 }
-.eidogo-player .tools-select, .eidogo-player .search-algo {
+.eidogo-player .tools-select, .eidogo-player .search-algo, .eidogo-player .label-input {
     font-family: verdana;
     font-size: 11px !important;
 }
 .eidogo-player .search-algo {
+    margin: 0 0 0 4px;
+    display: none;
+}
+.eidogo-player .label-input {
+    border: 1px solid #555;
     margin: 0 0 0 4px;
     display: none;
 }

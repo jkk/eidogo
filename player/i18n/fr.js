@@ -23,6 +23,7 @@ eidogo.i18n = eidogo.i18n || {
     'x':                'X',
     'letter':           'Lettre',
     'number':           'Nombre',
+    'label':            'Custom Label',
     'dim':              'Sombre',
     'clear':            'Enlever les Marqueurs',
     'score':            'Score', // as in score tool
@@ -39,6 +40,7 @@ eidogo.i18n = eidogo.i18n || {
     'show games':       'Show pro games with this position',
     'save to server':   'Sauver vers le Serveur',
     'download sgf':     'Télécharger le SGF',
+    'multi-game sgf':   'Multi-game SGF: ',
     'next game':        'Partie Suivante',
     'previous game':    'Partie Précédente',
     'end of variation': 'Fin de la variation',
