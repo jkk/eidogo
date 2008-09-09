@@ -894,6 +894,11 @@
     text-decoration: none;
     background: #444;
 }
+.eidogo-player.theme-compact .nav-tree-container {
+    margin: 0;
+    width: 416px;
+    height: 60px;
+}
 .eidogo-loading.theme-compact {
     background: none;
     width: 0;
