@@ -4,8 +4,6 @@ planned
 - user accounts
 - democracy go
 - wiki-like SGF editing
-- tree navigation for IE
-- multiple games per sgf
 - accurate nav slider after new moves played (base on nextSibling)
 
 maybe

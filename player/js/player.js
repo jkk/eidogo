@@ -1917,6 +1917,7 @@ eidogo.Player.prototype = {
                 t['no variations'] + "</div>";
         }
     
+        // nav buttons
         if (this.cursor.hasNext()) {
             addClass(this.dom.controlForward, "forward-on");
             addClass(this.dom.controlLast, "last-on");
@@ -1939,10 +1940,25 @@ eidogo.Player.prototype = {
                 this.prependComment(info, "comment-info");
         }
         
+        // nav slider & nav tree
         if (!this.progressiveLoad)
             this.updateNavSlider();
         if (this.prefs.showNavTree)
             this.updateNavTree();
+            
+        // multiple games per sgf
+        var node = this.cursor.node, pos, html, js;
+        if (node._parent && !node._parent._parent && node._parent._children.length > 1) {
+            pos = node.getPosition();
+            html = "Multi-game SGF: ";
+            js = "javascript:eidogo.delegate(" + this.uniq + ", \"goTo\", [";
+            if (pos)
+                html += "<a href='" + js + (pos - 1) + ",0])'>previous game</a>";
+            if (node._parent._children[pos + 1])
+                html += (pos ? " | " : "") +
+                        "<a href='" + js + (pos + 1) + ",0])'>next game</a>";
+            this.prependComment(html, "comment-info");
+        }
     },
 
     setColor: function(color) {
@@ -2357,13 +2373,14 @@ eidogo.Player.prototype = {
                 clearTimeout(this.navTreeTimeout);
             this.navTreeTimeout = setTimeout(function() {
                 this.updateNavTree(true);
-            }.bind(this), 1000);
+            }.bind(this), eidogo.browser.ie ? 1000 : 500);
             return;
         }
         this.updatedNavTree = true;
         // Construct 2D nav grid
         var navGrid = [],
-            path = [this.cursor.getGameRoot().getPosition()],
+            gameRoot = this.cursor.getGameRoot();
+            path = [gameRoot.getPosition()],
             cur = new eidogo.GameCursor(),
             maxx = 0;
         var traverse = function(node, startx, starty) {
@@ -2397,7 +2414,7 @@ eidogo.Player.prototype = {
                 path.pop();
             }
         }
-        traverse(this.cursor.getGameRoot(), 0, 0);
+        traverse(gameRoot, 0, 0);
         // Construct HTML
         var html = ["<table class='nav-tree'>"],
             node, td, cur = new eidogo.GameCursor(),
