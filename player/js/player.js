@@ -282,6 +282,7 @@ eidogo.Player.prototype = {
         
         // to know when to update the nav tree
         this.updatedNavTree = false;
+        this.navTreeTimeout = null;
         
         // whether we're currently searching or editing
         this.searching = false;
@@ -2337,17 +2338,26 @@ eidogo.Player.prototype = {
      *    2) Based on navGrid, construct an HTML table to actually display
      *       the nav tree
      *
-     * Every time a new move is played, this entire process repeats, which is
-     * kind of slow and inefficient. An attempt was made to only update
-     * select portions of the tree, but it didn't improve performance much at
-     * all, especially not in IE, where the HTML display is the slowest part.
-     * A feasible method for making selective updates doesn't come to mind.
+     * We use a timeout to limit how often the intense calculations happen,
+     * and to provide a more responsive UI.
     **/
-    updateNavTree: function() {
+    updateNavTree: function(update) {
         if (!this.prefs.showNavTree)
             return;
         if (this.updatedNavTree) {
             this.showNavTreeCurrent();
+            return;
+        }
+        // Reconstruct the nav tree a max of once per second (if multiple
+        // moves are played quickly in a row, it will wait until one second
+        // after the last one is played). The timeout also has the benefit
+        // of updating the rest of the UI first, so it seems more responsive.
+        if (!update) {
+            if (this.navTreeTimeout)
+                clearTimeout(this.navTreeTimeout);
+            this.navTreeTimeout = setTimeout(function() {
+                this.updateNavTree(true);
+            }.bind(this), 1000);
             return;
         }
         this.updatedNavTree = true;

@@ -1260,6 +1260,7 @@ this.labelLastNumber=null;
 this.resetLastLabels();
 this.unsavedChanges=false;
 this.updatedNavTree=false;
+this.navTreeTimeout=null;
 this.searching=false;
 this.editingText=false;
 this.goingBack=false;
@@ -2817,7 +2818,7 @@ this.refresh();
 }
 _157=parseInt(_15b/_159*_158,10)||0;
 this.dom.navSliderThumb.style.left=_157+"px";
-},updateNavTree:function(){
+},updateNavTree:function(_15e){
 if(!this.prefs.showNavTree){
 return;
 }
@@ -2825,27 +2826,36 @@ if(this.updatedNavTree){
 this.showNavTreeCurrent();
 return;
 }
+if(!_15e){
+if(this.navTreeTimeout){
+clearTimeout(this.navTreeTimeout);
+}
+this.navTreeTimeout=setTimeout(function(){
+this.updateNavTree(true);
+}.bind(this),1000);
+return;
+}
 this.updatedNavTree=true;
-var _15e=[],path=[this.cursor.getGameRoot().getPosition()],cur=new eidogo.GameCursor(),maxx=0;
-var _162=function(node,_164,_165){
-var y=_165,x=_164;
-var n=node,_169=1;
+var _15f=[],path=[this.cursor.getGameRoot().getPosition()],cur=new eidogo.GameCursor(),maxx=0;
+var _163=function(node,_165,_166){
+var y=_166,x=_165;
+var n=node,_16a=1;
 while(n&&n._children.length==1){
-_169++;
+_16a++;
 n=n._children[0];
 }
-while(_15e[y]&&_15e[y].slice(x,x+_169+1).some(function(el){
+while(_15f[y]&&_15f[y].slice(x,x+_16a+1).some(function(el){
 return (typeof el!="undefined");
 })){
 y++;
 }
 do{
-if(!_15e[y]){
-_15e[y]=[];
+if(!_15f[y]){
+_15f[y]=[];
 }
 cur.node=node;
-node._pathStr=path.join("-")+"-"+(x-_164);
-_15e[y][x]=node;
+node._pathStr=path.join("-")+"-"+(x-_165);
+_15f[y][x]=node;
 if(x>maxx){
 maxx=x;
 }
@@ -2857,34 +2867,34 @@ node=node._children[0];
 }while(node);
 for(var i=0;i<node._children.length;i++){
 path.push(i);
-_162(node._children[i],x,y);
+_163(node._children[i],x,y);
 path.pop();
 }
 };
-_162(this.cursor.getGameRoot(),0,0);
-var html=["<table class='nav-tree'>"],node,td,cur=new eidogo.GameCursor(),x,y,_171,_172=1,LINE=2;
+_163(this.cursor.getGameRoot(),0,0);
+var html=["<table class='nav-tree'>"],node,td,cur=new eidogo.GameCursor(),x,y,_172,_173=1,LINE=2;
 for(x=0;x<maxx;x++){
-_171=false;
-for(y=_15e.length-1;y>0;y--){
-if(!_15e[y][x]){
-if(typeof _15e[y][x+1]=="object"){
-_15e[y][x]=_172;
-_171=true;
+_172=false;
+for(y=_15f.length-1;y>0;y--){
+if(!_15f[y][x]){
+if(typeof _15f[y][x+1]=="object"){
+_15f[y][x]=_173;
+_172=true;
 }else{
-if(_171){
-_15e[y][x]=LINE;
+if(_172){
+_15f[y][x]=LINE;
 }
 }
 }else{
-_171=false;
+_172=false;
 }
 }
 }
-for(y=0;y<_15e.length;y++){
+for(y=0;y<_15f.length;y++){
 html.push("<tr>");
-for(x=0;x<_15e[y].length;x++){
-node=_15e[y][x];
-if(node==_172){
+for(x=0;x<_15f[y].length;x++){
+node=_15f[y][x];
+if(node==_173){
 td="<div class='elbow'></div>";
 }else{
 if(node==LINE){
@@ -2909,17 +2919,17 @@ setTimeout(function(){
 this.showNavTreeCurrent();
 }.bind(this),0);
 },showNavTreeCurrent:function(){
-var id="navtree-node-"+this.cursor.getPath().join("-"),_175=_2(id);
-if(!_175){
+var id="navtree-node-"+this.cursor.getPath().join("-"),_176=_2(id);
+if(!_176){
 return;
 }
 if(this.prevNavTreeCurrent){
 this.prevNavTreeCurrent.className=this.prevNavTreeCurrentClass;
 }
-this.prevNavTreeCurrent=_175;
-this.prevNavTreeCurrentClass=_175.className;
-_175.className="current";
-var w=_175.offsetWidth,h=_175.offsetHeight,xy=eidogo.util.getElXY(_175),_179=eidogo.util.getElXY(this.dom.navTree),l=xy[0]-_179[0],t=xy[1]-_179[1],ntc=this.dom.navTreeContainer,maxl=ntc.scrollLeft,maxr=maxl+ntc.offsetWidth-100;
+this.prevNavTreeCurrent=_176;
+this.prevNavTreeCurrentClass=_176.className;
+_176.className="current";
+var w=_176.offsetWidth,h=_176.offsetHeight,xy=eidogo.util.getElXY(_176),_17a=eidogo.util.getElXY(this.dom.navTree),l=xy[0]-_17a[0],t=xy[1]-_17a[1],ntc=this.dom.navTreeContainer,maxl=ntc.scrollLeft,maxr=maxl+ntc.offsetWidth-100;
 maxt=ntc.scrollTop,maxb=maxt+ntc.offsetHeight-30;
 if(l<maxl){
 ntc.scrollLeft-=(maxl-l);
@@ -2934,61 +2944,61 @@ if(t+h>maxb){
 ntc.scrollTop+=((t+h)-maxb);
 }
 },navTreeClick:function(e){
-var _17f=e.target||e.srcElement;
-if(!_17f||!_17f.id){
+var _180=e.target||e.srcElement;
+if(!_180||!_180.id){
 return;
 }
-var path=_17f.id.replace(/^navtree-node-/,"").split("-");
+var path=_180.id.replace(/^navtree-node-/,"").split("-");
 this.goTo(path,true);
 _7(e);
 },resetLastLabels:function(){
 this.labelLastNumber=1;
 this.labelLastLetter="A";
-},getGameDescription:function(_181){
+},getGameDescription:function(_182){
 var root=this.cursor.getGameRoot();
 if(!root){
 return;
 }
-var desc=(_181?"":root.GN||this.gameName);
+var desc=(_182?"":root.GN||this.gameName);
 if(root.PW&&root.PB){
 var wr=root.WR?" "+root.WR:"";
 var br=root.BR?" "+root.BR:"";
 desc+=(desc.length?" - ":"")+root.PW+wr+" vs "+root.PB+br;
 }
 return desc;
-},sgfCoordToPoint:function(_186){
-if(!_186||_186=="tt"){
+},sgfCoordToPoint:function(_187){
+if(!_187||_187=="tt"){
 return {x:null,y:null};
 }
-var _187={a:0,b:1,c:2,d:3,e:4,f:5,g:6,h:7,i:8,j:9,k:10,l:11,m:12,n:13,o:14,p:15,q:16,r:17,s:18};
-return {x:_187[_186.charAt(0)],y:_187[_186.charAt(1)]};
+var _188={a:0,b:1,c:2,d:3,e:4,f:5,g:6,h:7,i:8,j:9,k:10,l:11,m:12,n:13,o:14,p:15,q:16,r:17,s:18};
+return {x:_188[_187.charAt(0)],y:_188[_187.charAt(1)]};
 },pointToSgfCoord:function(pt){
 if(!pt||(this.board&&!this.boundsCheck(pt.x,pt.y,[0,this.board.boardSize-1]))){
 return null;
 }
 var pts={0:"a",1:"b",2:"c",3:"d",4:"e",5:"f",6:"g",7:"h",8:"i",9:"j",10:"k",11:"l",12:"m",13:"n",14:"o",15:"p",16:"q",17:"r",18:"s"};
 return pts[pt.x]+pts[pt.y];
-},expandCompressedPoints:function(_18a){
-var _18b;
+},expandCompressedPoints:function(_18b){
+var _18c;
 var ul,lr;
 var x,y;
-var _190=[];
+var _191=[];
 var hits=[];
-for(var i=0;i<_18a.length;i++){
-_18b=_18a[i].split(/:/);
-if(_18b.length>1){
-ul=this.sgfCoordToPoint(_18b[0]);
-lr=this.sgfCoordToPoint(_18b[1]);
+for(var i=0;i<_18b.length;i++){
+_18c=_18b[i].split(/:/);
+if(_18c.length>1){
+ul=this.sgfCoordToPoint(_18c[0]);
+lr=this.sgfCoordToPoint(_18c[1]);
 for(x=ul.x;x<=lr.x;x++){
 for(y=ul.y;y<=lr.y;y++){
-_190.push(this.pointToSgfCoord({x:x,y:y}));
+_191.push(this.pointToSgfCoord({x:x,y:y}));
 }
 }
 hits.push(i);
 }
 }
-_18a=_18a.concat(_190);
-return _18a;
+_18b=_18b.concat(_191);
+return _18b;
 },setPermalink:function(){
 if(!this.permalinkable){
 return true;
