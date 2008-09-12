@@ -349,8 +349,8 @@ eidogo.BoardRendererHtml.prototype = {
     crop: function(crop) {
         eidogo.util.addClass(this.domContainer, "shrunk");
         this.domGutter.style.overflow = "hidden";
-        var width = crop.width * this.pointWidth + this.margin;
-        var height = crop.height * this.pointHeight + this.margin;
+        var width = crop.width * this.pointWidth + (this.margin * 2);
+        var height = crop.height * this.pointHeight + (this.margin * 2);
         this.domGutter.style.width = width + "px";
         this.domGutter.style.height = height + "px";
         this.player.dom.player.style.width = width + "px";

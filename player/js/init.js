@@ -51,9 +51,13 @@
             for (var key in autoCfg)
                 cfg[key] = autoCfg[key];
             var sgfUrl = el.getAttribute('sgf');
-            if (sgfUrl) cfg.sgfUrl = sgfUrl;
-            else if (el.innerHTML) cfg.sgf = el.innerHTML;
-            
+            if (sgfUrl)
+                cfg.sgfUrl = sgfUrl;
+            else if (el.innerHTML)
+                cfg.sgf = el.innerHTML;
+            var shrink = el.getAttribute('shrink');
+            if (shrink)
+                cfg.shrinkToFit = (shrink == "no" ? false : true);            
             el.innerHTML = "";
             eidogo.util.show(el);
             

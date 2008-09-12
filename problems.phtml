@@ -25,6 +25,9 @@ if ($dir && $collections[$dir] && $num) {
 } else {
     
     echo "<h2>Go Problems</h2>";
+    echo "<p>Note: responses are provided for the problems, but they will not
+        tell you when you get it right. This area of the site is still
+        being developed.</p>";
     echo "<ul>\n";
     foreach ($collections as $dir => $title) {
         echo "<li><p><a href='/problems/$dir/1'>$title</a></p></li>\n";

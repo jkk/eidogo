@@ -291,7 +291,7 @@ eidogo.Player.prototype = {
         
         // problem-solving mode: respond when the user plays a move
         this.problemMode = cfg.problemMode;
-        this.problemColor = cfg.problemColor || "W";
+        this.problemColor = cfg.problemColor || "B";
     
         // user-changeable preferences
         this.prefs = {};
@@ -373,7 +373,7 @@ eidogo.Player.prototype = {
     
             // start from scratch
             var boardSize = cfg.boardSize || "19";
-            var komiMap = {19: 6.5, 13: 4.5, 9: 3.5};
+            var komiMap = {19: 6.5, 13: 4.5, 9: 3.5, 7: 2.5};
             var blankGame = {_children: [{
                     SZ: boardSize,
                     KM: cfg.komi || komiMap[boardSize] || 6.5,
@@ -532,9 +532,18 @@ eidogo.Player.prototype = {
         this.handleDisplayPrefs();
         var size = gameRoot.SZ || 19;
         // Only three sizes supported for now
-        if (size != 9 && size != 13 && size != 19)
+        if (size != 7 && size != 9 && size != 13 && size != 19)
             size = 19;
-        if (this.shrinkToFit) this.calcShrinkToFit(gameRoot, size);
+        if (this.shrinkToFit)
+            this.calcShrinkToFit(gameRoot, size);
+        else if (this.problemMode && !this.cropParams) {
+            this.cropParams = {
+                width: size,
+                height: size,
+                top: 0,
+                left: 0,
+                padding: 1};
+        }
         if (!this.board) {
             // first time
             this.createBoard(size);

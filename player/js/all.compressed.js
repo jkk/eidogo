@@ -1010,8 +1010,8 @@ return [x,y,_3b[0],_3b[1]];
 },crop:function(_41){
 eidogo.util.addClass(this.domContainer,"shrunk");
 this.domGutter.style.overflow="hidden";
-var _42=_41.width*this.pointWidth+this.margin;
-var _43=_41.height*this.pointHeight+this.margin;
+var _42=_41.width*this.pointWidth+(this.margin*2);
+var _43=_41.height*this.pointHeight+(this.margin*2);
 this.domGutter.style.width=_42+"px";
 this.domGutter.style.height=_43+"px";
 this.player.dom.player.style.width=_42+"px";
@@ -1272,7 +1272,7 @@ this.searching=false;
 this.editingText=false;
 this.goingBack=false;
 this.problemMode=cfg.problemMode;
-this.problemColor=cfg.problemColor||"W";
+this.problemColor=cfg.problemColor||"B";
 this.prefs={};
 this.prefs.markCurrent=typeof cfg.markCurrent!="undefined"?!!cfg.markCurrent:true;
 this.prefs.markNext=typeof cfg.markNext!="undefined"?cfg.markNext:false;
@@ -1316,7 +1316,7 @@ this.progressiveUrl=cfg.progressiveUrl||cfg.sgfUrl.replace(/\?.+$/,"");
 }
 }else{
 var _19=cfg.boardSize||"19";
-var _1a={19:6.5,13:4.5,9:3.5};
+var _1a={19:6.5,13:4.5,9:3.5,7:2.5};
 var _1b={_children:[{SZ:_19,KM:cfg.komi||_1a[_19]||6.5,_children:[]}]};
 if(cfg.opponentUrl){
 this.gameName="gnugo";
@@ -1411,11 +1411,15 @@ _3("get",url,null,_27,_2c,this,30000);
 _2e=_2e||{};
 this.handleDisplayPrefs();
 var _2f=_2e.SZ||19;
-if(_2f!=9&&_2f!=13&&_2f!=19){
+if(_2f!=7&&_2f!=9&&_2f!=13&&_2f!=19){
 _2f=19;
 }
 if(this.shrinkToFit){
 this.calcShrinkToFit(_2e,_2f);
+}else{
+if(this.problemMode&&!this.cropParams){
+this.cropParams={width:_2f,height:_2f,top:0,left:0,padding:1};
+}
 }
 if(!this.board){
 this.createBoard(_2f);
@@ -3115,10 +3119,14 @@ if(el.innerHTML){
 _a.sgf=el.innerHTML;
 }
 }
+var _d=el.getAttribute("shrink");
+if(_d){
+_a.shrinkToFit=(_d=="no"?false:true);
+}
 el.innerHTML="";
 eidogo.util.show(el);
-var _d=new eidogo.Player(_a);
-eidogo.autoPlayers.push(_d);
+var _e=new eidogo.Player(_a);
+eidogo.autoPlayers.push(_e);
 }
 });
 })();
