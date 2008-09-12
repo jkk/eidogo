@@ -263,12 +263,13 @@ eidogo.util.addEventHelper(el,_21,_22);
 },onClick:function(el,_28,_29){
 eidogo.util.addEvent(el,"click",_28,_29,true);
 },getElClickXY:function(e,el,_2c){
+var doc=el.ownerDocument;
 if(!e.pageX){
-e.pageX=e.clientX+(document.documentElement.scrollLeft||document.body.scrollLeft);
-e.pageY=e.clientY+(document.documentElement.scrollTop||document.body.scrollTop);
+e.pageX=e.clientX+(doc.documentElement.scrollLeft||doc.body.scrollLeft);
+e.pageY=e.clientY+(doc.documentElement.scrollTop||doc.body.scrollTop);
 }
-var _2d=eidogo.util.getElXY(el,_2c);
-return [e.pageX-_2d[0],e.pageY-_2d[1]];
+var _2e=eidogo.util.getElXY(el,_2c);
+return [e.pageX-_2e[0],e.pageY-_2e[1]];
 },stopEvent:function(e){
 if(!e){
 return;
@@ -313,15 +314,15 @@ return true;
 }
 }
 return false;
-},show:function(el,_3f){
-_3f=_3f||"block";
+},show:function(el,_40){
+_40=_40||"block";
 if(typeof el=="string"){
 el=eidogo.util.byId(el);
 }
 if(!el){
 return;
 }
-el.style.display=_3f;
+el.style.display=_40;
 },hide:function(el){
 if(typeof el=="string"){
 el=eidogo.util.byId(el);
@@ -330,51 +331,57 @@ if(!el){
 return;
 }
 el.style.display="none";
-},getElXY:function(el,_42){
-var _43=el,elX=0,elY=0,_46=el.parentNode,sx=0,sy=0;
-while(_43){
-elX+=_43.offsetLeft;
-elY+=_43.offsetTop;
-_43=_43.offsetParent?_43.offsetParent:null;
+},getElXY:function(el,_43){
+var _44=el,elX=0,elY=0,_47=el.parentNode,sx=0,sy=0,doc=el.ownerDocument;
+if(el.getBoundingClientRect){
+var _4b=el.getBoundingClientRect();
+elX=_4b.left+Math.max(doc.documentElement.scrollLeft,doc.body.scrollLeft);
+elY=_4b.top+Math.max(doc.documentElement.scrollTop,doc.body.scrollTop);
+}else{
+while(_44){
+elX+=_44.offsetLeft;
+elY+=_44.offsetTop;
+_44=_44.offsetParent?_44.offsetParent:null;
 }
-while(!_42&&_46&&_46.tagName&&!/^body|html$/i.test(_46.tagName)){
-sx+=_46.scrollLeft;
-sy+=_46.scrollTop;
-elX-=_46.scrollLeft;
-elY-=_46.scrollTop;
-_46=_46.parentNode;
+while(!_43&&_47&&_47.tagName&&!/^body|html$/i.test(_47.tagName)){
+sx+=_47.scrollLeft;
+sy+=_47.scrollTop;
+elX-=_47.scrollLeft;
+elY-=_47.scrollTop;
+_47=_47.parentNode;
+}
 }
 return [elX,elY,sx,sy];
 },getElX:function(el){
 return this.getElXY(el)[0];
 },getElY:function(el){
 return this.getElXY(el)[1];
-},addStyleSheet:function(_4b){
+},addStyleSheet:function(_4e){
 if(document.createStyleSheet){
-document.createStyleSheet(_4b);
+document.createStyleSheet(_4e);
 }else{
-var _4c=document.createElement("link");
-_4c.rel="stylesheet";
-_4c.type="text/css";
-_4c.href=_4b;
-document.getElementsByTagName("head")[0].appendChild(_4c);
+var _4f=document.createElement("link");
+_4f.rel="stylesheet";
+_4f.type="text/css";
+_4f.href=_4e;
+document.getElementsByTagName("head")[0].appendChild(_4f);
 }
 },getPlayerPath:function(){
-var _4d=document.getElementsByTagName("script");
-var _4e;
-var _4f;
-for(var i=0;_4f=_4d[i];i++){
-if(/(all\.compressed\.js|eidogo\.js)/.test(_4f.src)){
-_4e=_4f.src.replace(/\/js\/[^\/]+$/,"");
+var _50=document.getElementsByTagName("script");
+var _51;
+var _52;
+for(var i=0;_52=_50[i];i++){
+if(/(all\.compressed\.js|eidogo\.js)/.test(_52.src)){
+_51=_52.src.replace(/\/js\/[^\/]+$/,"");
 }
 }
-return _4e;
+return _51;
 },numProperties:function(obj){
-var _52=0;
+var _55=0;
 for(var i in obj){
-_52++;
+_55++;
 }
-return _52;
+return _55;
 }};
 })();
 

@@ -162,12 +162,13 @@ eidogo.util = {
     },
     
     getElClickXY: function(e, el, noScroll) {
+        var doc = el.ownerDocument;
         // for IE
         if(!e.pageX) {
-            e.pageX = e.clientX + (document.documentElement.scrollLeft ||
-                document.body.scrollLeft);
-            e.pageY = e.clientY + (document.documentElement.scrollTop ||
-                document.body.scrollTop);
+            e.pageX = e.clientX + (doc.documentElement.scrollLeft ||
+                doc.body.scrollLeft);
+            e.pageY = e.clientY + (doc.documentElement.scrollTop ||
+                doc.body.scrollTop);
         }
         var elXY = eidogo.util.getElXY(el, noScroll);
         return [e.pageX - elXY[0], e.pageY - elXY[1]];
@@ -239,23 +240,26 @@ eidogo.util = {
     },
     
     getElXY: function(el, noScroll) {
-        // TODO: improve caching?
-        // if (el._x && el._y) return [el._x, el._y];
-        var node = el, elX = 0, elY = 0, parent = el.parentNode, sx = 0, sy = 0;
-        while (node) {
-            elX += node.offsetLeft;
-            elY += node.offsetTop;
-            node = node.offsetParent ? node.offsetParent : null;
+        var node = el, elX = 0, elY = 0, parent = el.parentNode,
+            sx = 0, sy = 0, doc = el.ownerDocument;
+        if (el.getBoundingClientRect) {
+            var rect = el.getBoundingClientRect();
+            elX = rect.left + Math.max(doc.documentElement.scrollLeft, doc.body.scrollLeft);
+            elY = rect.top + Math.max(doc.documentElement.scrollTop, doc.body.scrollTop);
+        } else {
+            while (node) {
+                elX += node.offsetLeft;
+                elY += node.offsetTop;
+                node = node.offsetParent ? node.offsetParent : null;
+            }
+            while (!noScroll && parent && parent.tagName && !/^body|html$/i.test(parent.tagName)) {
+                sx += parent.scrollLeft;
+                sy += parent.scrollTop;
+                elX -= parent.scrollLeft;
+                elY -= parent.scrollTop;
+                parent = parent.parentNode;
+            }
         }
-        while (!noScroll && parent && parent.tagName && !/^body|html$/i.test(parent.tagName)) {
-            sx += parent.scrollLeft;
-            sy += parent.scrollTop;
-            elX -= parent.scrollLeft;
-            elY -= parent.scrollTop;
-            parent = parent.parentNode;
-        }
-        // el._x = elX;
-        // el._y = elY;
         return [elX, elY, sx, sy];
     },
     

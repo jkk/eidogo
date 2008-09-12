@@ -1108,7 +1108,7 @@ eidogo.Player.prototype = {
         if (this.domLoading) return;
         
         this.mouseDown = false;
-    
+        
         var coord = this.pointToSgfCoord({x: x, y: y});
         
         // click on a variation?
