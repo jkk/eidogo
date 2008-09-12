@@ -1272,7 +1272,7 @@ this.searching=false;
 this.editingText=false;
 this.goingBack=false;
 this.problemMode=cfg.problemMode;
-this.problemColor=cfg.problemColor||"B";
+this.problemColor=cfg.problemColor;
 this.prefs={};
 this.prefs.markCurrent=typeof cfg.markCurrent!="undefined"?!!cfg.markCurrent:true;
 this.prefs.markNext=typeof cfg.markNext!="undefined"?cfg.markNext:false;
@@ -1366,9 +1366,9 @@ this.loadPath=[0,0];
 }else{
 this.refresh();
 }
-if(!_1f._parent&&this.problemMode){
+if(_20&&this.problemMode){
 if(!this.problemColor){
-this.currentColor=this.problemColor=this.cursor.getNextColor();
+this.currentColor=this.problemColor=(this.cursor.getNextColor()||"B");
 }else{
 this.currentColor=this.problemColor;
 }

@@ -291,7 +291,7 @@ eidogo.Player.prototype = {
         
         // problem-solving mode: respond when the user plays a move
         this.problemMode = cfg.problemMode;
-        this.problemColor = cfg.problemColor || "B";
+        this.problemColor = cfg.problemColor;
     
         // user-changeable preferences
         this.prefs = {};
@@ -462,9 +462,9 @@ eidogo.Player.prototype = {
         }
         
         // find out which color to play as for problem mode
-        if (!target._parent && this.problemMode) {
+        if (newGame && this.problemMode) {
             if (!this.problemColor)
-                this.currentColor = this.problemColor = this.cursor.getNextColor();
+                this.currentColor = this.problemColor = (this.cursor.getNextColor() || "B");
             else
                 this.currentColor = this.problemColor;
         }
