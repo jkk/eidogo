@@ -498,3 +498,10 @@ eidogo.BoardRendererAscii.prototype = {
         // I don't think this is possible
     }
 }
+
+// Registry for renderers
+eidogo.renderers = {
+  html: eidogo.BoardRendererHtml,
+  flash: eidogo.BoardRendererFlash,
+  ascii: eidogo.BoardRendererAscii
+};

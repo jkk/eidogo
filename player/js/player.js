@@ -584,8 +584,7 @@ eidogo.Player.prototype = {
         if (this.board && this.board.renderer && this.board.boardSize == size) return;
         try {
             this.dom.boardContainer.innerHTML = "";
-            var rendererProto = (this.renderer == "flash" ?
-                eidogo.BoardRendererFlash : eidogo.BoardRendererHtml);
+            var rendererProto = eidogo.renderers[this.renderer]
             var renderer = new rendererProto(this.dom.boardContainer, size, this, this.cropParams);
             this.board = new eidogo.Board(renderer, size);
         } catch (e) {
