@@ -1106,6 +1106,7 @@ this.content=this.content.substring(0,_5a-1)+(_59=="white"?"O":"#")+this.content
 this.domNode.innerHTML="<pre>"+this.content+"</pre>";
 },renderMarker:function(pt,_5c){
 }};
+eidogo.renderers={html:eidogo.BoardRendererHtml,flash:eidogo.BoardRendererFlash,ascii:eidogo.BoardRendererAscii};
 
 eidogo.Rules=function(_1){
 this.init(_1);
@@ -1454,7 +1455,7 @@ return;
 }
 try{
 this.dom.boardContainer.innerHTML="";
-var _32=(this.renderer=="flash"?eidogo.BoardRendererFlash:eidogo.BoardRendererHtml);
+var _32=eidogo.renderers[this.renderer];
 var _33=new _32(this.dom.boardContainer,_31,this,this.cropParams);
 this.board=new eidogo.Board(_33,_31);
 }
