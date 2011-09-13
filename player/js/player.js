@@ -1132,7 +1132,7 @@ eidogo.Player.prototype = {
             }
         }
         
-        if (this.mode == "view") {
+        if (this.mode == "view" && !this.problemMode) {
             // Jump to any moved played at the clicked coordinate
             var root = this.cursor.getGameRoot(),
                 path = [0, root.getPosition()],

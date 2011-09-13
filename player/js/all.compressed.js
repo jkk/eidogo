@@ -1907,7 +1907,7 @@ return;
 }
 }
 }
-if(this.mode=="view"){
+if(this.mode=="view"&&!this.problemMode){
 var _a7=this.cursor.getGameRoot(),_a8=[0,_a7.getPosition()],mn=0,_aa=_a7._children[0];
 while(_aa){
 if(_aa.getMove()==_a4){
