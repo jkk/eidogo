@@ -301,6 +301,8 @@ eidogo.Player.prototype = {
             cfg.markNext : false;
         this.prefs.markVariations = typeof cfg.markVariations != "undefined" ?
             !!cfg.markVariations : true;
+        this.prefs.restrictViewMoveSearch = typeof cfg.restrictViewMoveSearch != "undefined" ?
+            !!cfg.restrictViewMoveSearch : false;
         this.prefs.showGameInfo = !!cfg.showGameInfo;
         this.prefs.showPlayerInfo = !!cfg.showPlayerInfo;
         this.prefs.showTools = !!cfg.showTools;
@@ -1132,7 +1134,8 @@ eidogo.Player.prototype = {
             }
         }
         
-        if (this.mode == "view" && !this.problemMode) {
+        if (this.mode == "view" && !(this.problemMode ||
+                                     this.prefs.restrictViewMoveSearch)) {
             // Jump to any moved played at the clicked coordinate
             var root = this.cursor.getGameRoot(),
                 path = [0, root.getPosition()],
