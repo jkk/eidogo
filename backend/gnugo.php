@@ -1,4 +1,7 @@
 <?php
+// Disable for now
+echo "tt";
+exit;
 
 if ($_SERVER['HTTP_HOST'] == "eidogo.com") {
     define("PATH_GNUGO", "/usr/bin/nice -n 20 /var/www/eidogo.com/gnugo/interface/gnugo");

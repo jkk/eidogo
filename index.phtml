@@ -127,12 +127,18 @@ var player;
                 searchUrl:          "backend/search.php",
                 saveUrl:            "backend/save.php",
                 downloadUrl:        "backend/download.php?id=",
-                scoreEstUrl:        "backend/gnugo.php",
+                scoreEstUrl:        "",//"backend/gnugo.php",
                 hooks:              hooks,
                 enableShortcuts:    true
             });
+            // Temporary notice for score est
+            addEvent(player.dom.scoreEst, "click", function(e) {
+                alert("Sorry, Score Estimate is temporarily unavailable.\n\nIt was using excessive server resources. If you have a server with lots of spare CPU cycles, let me know.");
+                eidogo.util.stopEvent(e);
+                return false;
+            });
         }
-        player.loadSgf(cfg, completeFn);
+        player.loadSgf(cfg, completeFn && completeFn.bind(player));
     }
     
     var notLoaded = true;
@@ -212,6 +218,10 @@ var player;
     }
     
     function loadGnuGo(gameName) {
+        loadGame({gameName: ""}, function() {
+            this.showComments("<p>Sorry, GNU Go is temporarily unavailable.</p><p>It was using excessive server resources. If you have a server with lots of spare CPU cycles, let me know.</p>");
+        });
+        return;
         byId("options").innerHTML = byId("options-gnugo").innerHTML;
         show("options");
         var params = {
