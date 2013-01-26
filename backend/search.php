@@ -50,7 +50,7 @@ if (file_exists($cache_fn)) {
 }
 
 if (!count($output)) {
-    echo "NONE";
+    echo "[]";
     exit;
 }
 
