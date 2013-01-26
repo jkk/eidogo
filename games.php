@@ -23,13 +23,13 @@
 
 function show_results($query) {
     $query = preg_replace("/[^a-zA-Z0-9 -]/", "", $query);
-    $db = sqlite3_open("kombilo/t1.db");
-    $res = sqlite3_query($db, "select * from games
+    $db = new SQLite3("kombilo/t1.db");
+    $res = $db->query("select * from games
         where pb like '%$query%' or pw like '%$query%' or ev like '%$query%' or date like '%$query%'
         order by date desc
         limit 300");
     $games = array();
-    while ($game = sqlite3_fetch_array($res)) $games[] = $game;
+    while ($game = $res->fetchArray()) $games[] = $game;
     if (!count($games)) {
         echo "<p>No games found matching &quot;$query&quot;.</p>";
         return;
