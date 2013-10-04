@@ -1,5 +1,7 @@
 YUI.add('eidogo-graphicrenderer', 
 	function(Y) {
+	    var NS = Y.namespace('Eidogo');
+
 	    function GraphicRenderer() {
 		this.init.apply(this, arguments);
 	    }
@@ -9,8 +11,9 @@ YUI.add('eidogo-graphicrenderer',
 		stoneSize: {value: 20} //Default stonesize.  This will get set when the board renders into the space provided.
 	    };
 
-	    Y.Eidogo.GraphicRenderer = GraphicRenderer
-	    Y.extend(Y.Eidogo.GraphicRenderer, Y.Widget, {
+	    NS.GraphicRenderer = GraphicRenderer;
+
+	    Y.extend(NS.GraphicRenderer, Y.Widget, {
 		init: function(domContainer, boardSize, player, crop) {
 		    if(typeof player == 'undefined') return;
 		    this.player = player;
@@ -237,4 +240,4 @@ YUI.add('eidogo-graphicrenderer',
 	    });
 	}, 
 	'1.0.0',
-	{ requires: [ 'graphics', 'widget', 'event', 'eidogo', 'array' ] });
+	{ requires: [ 'graphics', 'widget', 'event', 'eidogo' ] });

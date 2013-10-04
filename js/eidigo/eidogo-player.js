@@ -7,6 +7,7 @@
  * This file contains the meat of EidoGo.
  */
 YUI.add('eidogo-player', function (Y) {
+    var NS = Y.namespace('Eidogo');
 
     // shortcuts (local only to this file)
     var t = Y.Intl.get("eidogo");
@@ -16,7 +17,7 @@ YUI.add('eidogo-player', function (Y) {
      * load and replay games. It's a "player" in the sense of a DVD player, not
      * a person who plays a game.
      */
-    Y.Eidogo.Player = function (cfg) {
+    NS.Player = function (cfg) {
         cfg = cfg || {};
         
         // play, add_b, add_w, region, tr, sq, cr, label, number, score(?)
@@ -149,13 +150,13 @@ YUI.add('eidogo-player', function (Y) {
         this.fire('initDone', {});
     }
     
-    Y.Eidogo.Player.NAME = 'eidogo-player';
+    NS.Player.NAME = 'eidogo-player';
 
-    Y.Eidogo.Player.ATTRS = {
+    NS.Player.ATTRS = {
 	//name: {value: ..};
     };
 
-    Y.extend(Y.Eidogo.Player, Y.Widget, {
+    Y.extend(NS.Player, Y.Widget, {
 	/**
 	 * Inits settings that are persistent among games
 	 * @constructor

@@ -14,7 +14,7 @@
 YUI.add( 'eidogo', function(Y)
 	 {
 	     //Make sure our namespace is initialized.
-	     if(!Y.Eidogo) Y.Eidogo = {};
+	     var NS = Y.namespace('Eidogo');
 	 },
 	 '1.0.0',
-	 { requires: [ ] });
+	 { requires:	[ ] });

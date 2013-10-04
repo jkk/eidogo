@@ -14,17 +14,19 @@
 
 YUI.add('eidogo-sgfparser', function(Y)
 	{
-	    Y.Eidogo.SgfParser = function() {
+	    var NS = Y.namespace('Eidogo');
+
+	    NS.SgfParser = function() {
 		this.init.apply(this, arguments);
 	    }
 
-	    Y.Eidogo.SgfParser.NAME = 'eidogo-player';
+	    NS.SgfParser.NAME = 'eidogo-player';
 
-	    Y.Eidogo.SgfParser.ATTRS = {
+	    NS.SgfParser.ATTRS = {
 		//name: {value: ..};
 	    };
 
-	    Y.extend(Y.Eidogo.SgfParser, Y.Base,  {
+	    Y.extend(NS.SgfParser, Y.Base,  {
 		/**
 		 * @constructor
 		 * @param {String} sgf Raw SGF data to parse
@@ -118,4 +120,4 @@ YUI.add('eidogo-sgfparser', function(Y)
 	    });
 	},		 
 	'1.0.0',
-	[ 'eidogo' ] );
+	{ requires:	[ 'eidogo' ] });

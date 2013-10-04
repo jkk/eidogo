@@ -10,19 +10,21 @@
  */
 YUI.add('eidogo-rules', function(Y)
 	{
-	    Y.Eidogo.Rules = function(board) {
+	    var NS = Y.namespace('Eidogo');
+
+	    NS.Rules = function(board) {
 		this.init(board);
 	    };
-	    Y.Eidogo.Rules.NAME = 'eidogo-rules';
+	    NS.Rules.NAME = 'eidogo-rules';
 
-	    Y.Eidogo.Rules.ATTRS = {
+	    NS.Rules.ATTRS = {
 		//name: {value: ..};
 	    };
 
-	    Y.extend(Y.Eidogo.Rules, Y.Base, {
+	    Y.extend(NS.Rules, Y.Base, {
 		/**
 		 * @constructor
-		 * @param {Y.Eidogo.Board} board The board to apply rules to
+		 * @param {NS.Board} board The board to apply rules to
 		 */
 		init: function(board) {
 		    this.board = board;
@@ -106,4 +108,4 @@ YUI.add('eidogo-rules', function(Y)
 	    });
 	},		 
 	'1.0.0',
-	[ 'eidogo' ] );
+	{ requires:	[ 'eidogo' ] } );

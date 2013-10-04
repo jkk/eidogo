@@ -9,33 +9,33 @@
 
 YUI.add('eidogo-gametree', function(Y)
 	{
-
+	    var NS = Y.namespace('Eidogo');
 	    /**
 	     * For uniquely identifying nodes. Should work even if we have
 	     * multiple Player instantiations. Setting this to 100000 is kind of a hack
 	     * to avoid overlap with ids of as-yet-unloaded trees.
 	     */
-	    Y.Eidogo.gameNodeIdCounter = 100000;
+	    NS.gameNodeIdCounter = 100000;
 
 	    /**
 	     * @class GameNode holds SGF-like data containing things like moves, labels
 	     * game information, and so on. Each GameNode has children and (usually) a
 	     * parent. The first child is the main line.
 	     */
-	    Y.Eidogo.GameNode = function() {
+	    NS.GameNode = function() {
 		this.init.apply(this, arguments);
 	    };
 
-	    Y.Eidogo.GameNode.NAME = "eidogo-gamenode";
+	    NS.GameNode.NAME = "eidogo-gamenode";
 
-	    Y.extend(Y.Base, Y.Eidogo.GameNode,  {
+	    Y.extend(Y.Base, NS.GameNode,  {
 		/**
 		 * @constructor
 		 * @param {GameNode} parent Parent of the node
 		 * @param {Object} properties SGF-like JSON object to load into the node
 		 */
 		init: function(parent, properties, id) {
-		    this._id = (typeof id != "undefined" ? id : Y.Eidogo.gameNodeIdCounter++);
+		    this._id = (typeof id != "undefined" ? id : NS.gameNodeIdCounter++);
 		    this._parent = parent || null;
 		    this._children = [];
 		    this._preferredChild = 0;
@@ -105,7 +105,7 @@ YUI.add('eidogo-gametree', function(Y)
 			for (i = 0; i < len; i++) {
 			    jsonStack.push(jsonNode._children[i]);
 			    if (!gameNode._children[i])
-				gameNode._children[i] = new Y.Eidogo.GameNode(gameNode);
+				gameNode._children[i] = new NS.GameNode(gameNode);
 			    gameStack.push(gameNode._children[i]);
 			}
 		    }
@@ -117,7 +117,7 @@ YUI.add('eidogo-gametree', function(Y)
 		    for (var prop in data) {
 			if (prop == "_id") {
 			    this[prop] = data[prop].toString();
-			    Y.Eidogo.gameNodeIdCounter = Math.max(Y.Eidogo.gameNodeIdCounter,
+			    NS.gameNodeIdCounter = Math.max(NS.gameNodeIdCounter,
 								  parseInt(data[prop], 10));
 			    continue;
 			}
@@ -257,14 +257,14 @@ YUI.add('eidogo-gametree', function(Y)
 	    /**
 	     * @class GameCursor is used to navigate among the nodes of a game tree.
 	     */
-	    Y.Eidogo.GameCursor = function() {
+	    NS.GameCursor = function() {
 		this.init.apply(this, arguments);
 	    }
 
-	    Y.extend(Y.Base, Y.Eidogo.GameCursor, {
+	    Y.extend(NS.GameCursor, Y.Base, {
 		/**
 		 * @constructor
-		 * @param {Y.Eidogo.GameNode} A node to start with
+		 * @param {NS.GameNode} A node to start with
 		 */
 		init: function(node) {
 		    this.node = node;
@@ -329,7 +329,7 @@ YUI.add('eidogo-gametree', function(Y)
 		},
 		getPathMoves: function() {
 		    var path = [];
-		    var cur = new Y.Eidogo.GameCursor(this.node);
+		    var cur = new NS.GameCursor(this.node);
 		    path.push(cur.node.getMove());
 		    while (cur.previous()) {
 			var move = cur.node.getMove();
@@ -348,7 +348,7 @@ YUI.add('eidogo-gametree', function(Y)
 		},
 		getGameRoot: function() {
 		    if (!this.node) return null;
-		    var cur = new Y.Eidogo.GameCursor(this.node);
+		    var cur = new NS.GameCursor(this.node);
 		    // If we're on the tree root, return the first game
 		    if (!this.node._parent && this.node._children.length)
 			return this.node._children[0];
@@ -357,4 +357,5 @@ YUI.add('eidogo-gametree', function(Y)
 		}
 	    });
 	},
-	'1.0.0', [ 'eidogo' ] );
+	'1.0.0', 
+	{ requires:	[ 'eidogo' ] });
