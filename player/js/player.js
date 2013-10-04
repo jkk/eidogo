@@ -578,15 +578,28 @@ eidogo.Player.prototype = {
 
     /**
      * Create our board. This can be called multiple times.
-    **/
+     **/
     createBoard: function(size) {
         size = size || 19;
         if (this.board && this.board.renderer && this.board.boardSize == size) return;
         try {
             this.dom.boardContainer.innerHTML = "";
-            var rendererProto = (this.renderer == "flash" ?
-                eidogo.BoardRendererFlash : eidogo.BoardRendererHtml);
-            var renderer = new rendererProto(this.dom.boardContainer, size, this, this.cropParams);
+	    var rendererConstructor;
+	    if( typeof this.renderer == "function" )
+	    {
+		rendererConstructor = this.renderer;
+	    } else if (this.renderer = "html" )
+	    {
+		rendererConstructor = eidogo.BoardRendererHtml;
+	    } else if ( this.renderer = "flash" )
+	    {
+		rendererConstructor = eidogo.BoardRendererFlash;
+	    } else
+	    {
+		throw "Unknown renderer!";
+	    }
+	    var renderer = new rendererConstructor(this.dom.boardContainer, size, this, this.cropParams);    
+	    
             this.board = new eidogo.Board(renderer, size);
         } catch (e) {
             if (e == "No DOM container") {
