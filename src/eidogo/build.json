@@ -1,0 +1,19 @@
+{
+    "name": "eidogo",
+    "builds": {
+        "eidogo": {
+            "jsfiles": [    
+	    	"js/eidogo.js",          
+	        "js/eidogo-sgfparser.js",
+	        "js/eidogo-rules.js",
+                "js/eidogo-board.js",
+                "js/eidogo-gametree.js",
+                "js/eidogo-renderer-canvas.js",
+		"js/eidogo-player.js"
+                ],
+            "config": {
+                "requires": [ "base", "node", "plugin", "intl", "graphics", "widget", "event", "io"]
+            }
+        }
+    }
+}

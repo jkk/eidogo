@@ -1,19 +1,15 @@
 YUI.GlobalConfig = 
     {
         filter: 'raw',
-	modules:
-	{
-	    
-	}
     };
 
-YUI({ filter: 'debug' }).use('eidigo-player', 'eidigo-graphicrenderer', function(Y)
+YUI({ filter: 'debug' }).use(  function(Y)
 			     {
 				 var params = {};
 				 
-				 window.player = new Y.Eidogo.Player({
+				 /*window.player = new Y.Eidogo.Player({
 				     srcNode:       "#goban",
-				     renderer:        new Y.Eidogo.GraphicRenderer({srcNode: '#goban'}),
+				     renderer:        new Y.Eidogo.Renderers.CanvasRenderer({srcNode: '#goban'}),
 				     sgfUrl:          "sgf/" + (params.sgf ? params.sgf : "example.sgf")
-				 }); 
+				 }); */
 			     });

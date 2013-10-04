@@ -7,14 +7,9 @@
  * This file sets up the EidoGo framework.
  */
 
-/**
- * Our namespaces.
- */
+//Make sure our namespace is initialized.
+var NS = Y.namespace('Eidogo');
 
-YUI.add( 'eidogo', function(Y)
-	 {
-	     //Make sure our namespace is initialized.
-	     var NS = Y.namespace('Eidogo');
-	 },
-	 '1.0.0',
-	 { requires:	[ ] });
+//Expose localizations.
+NS.resources = Y.Intl.get("eidogo");
+	

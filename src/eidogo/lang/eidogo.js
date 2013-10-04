@@ -1,9 +1,4 @@
-YUI.add("lang/eidigo_en", function(Y) {
-
-    Y.Intl.add(
-	"eidogo",     // associated module
-        "en",       // BCP 47 language tag
-	{ 
+{ 
 	    'move':             'Move',
 	    'loading':          'Loading',
 	    'passed':           'passed',
@@ -121,5 +116,4 @@ YUI.add("lang/eidigo_en", function(Y) {
 	    'bad path':         'Don\'t know how to get to path: ',
 	    
 	    'gnugo thinking':   'GNU Go is thinking...'
-	} );
-}, "1.0.0");
+	}

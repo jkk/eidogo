@@ -1,5 +1,4 @@
-eidogo = window.eidogo || {};
-eidogo.i18n = eidogo.i18n || {
+{
     'move':             'Zug',
     'loading':          'Laden',
     'passed':           'passt',
