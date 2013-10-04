@@ -1,4 +1,0 @@
-CFBundleName = "EidoGo";
-CFBundleShortVersionString = "1.0";
-CFBundleGetInfoString = "EidoGo version 1.0 Copyright 2008 Justin Kramer";
-NSHumanReadableCopyright = "Copyright 2008 Justin Kramer.";
