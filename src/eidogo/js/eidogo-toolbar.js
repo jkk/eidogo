@@ -25,11 +25,16 @@ Y.extend(NS.Toolbar, Y.Widget, {
 	{
 		var html = "<button class='eidogo-back'>&lt;</button><button class='eidogo-fwd'>&gt;</button>";
 		this.srcNode.append(html);
-		
+		this.backButton = new Y.Button({
+			srcNode: this.srcNode.one('.eidogo-back')
+		}).render();
+		this.forwardButton = new Y.Button({
+			srcNode: this.srcNode.one('.eidogo-fwd')
+		}).render();
 	},
 	bindUI: function()
 	{
-		this.srcNode.one('.eidogo-back').on('click', function(e){this.player.back()}, this); 
-		this.srcNode.one('.eidogo-fwd').on('click', function(e){this.player.forward()}, this); 
+		this.backButton.on('click', function(e){this.player.back()}, this); 
+		this.forwardButton.on('click', function(e){this.player.forward()}, this); 
 	}
 });

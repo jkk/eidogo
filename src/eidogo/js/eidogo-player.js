@@ -703,11 +703,11 @@ Y.extend(NS.Player, Y.Base, {
      *      considerations.
      */
     execNode: function(noRender) {
-        
         if (!this.cursor.node) return;
 		
         if (!noRender) {
 			this.board.clearMarkers();
+			this.comments = ""
 			this.moveNumber = this.cursor.getMoveNumber();
         }
 		
@@ -725,14 +725,13 @@ Y.extend(NS.Player, Y.Base, {
                 );
 			}
         }
-        
-        if (noRender) {
-			this.board.commit();
-        } else {
+		
+		if(!noRender) 
+		{
 			// let the opponent move
 			if (this.opponentUrl && this.opponentColor == this.currentColor
-                && this.moveNumber == this.totalMoves) {
-                this.fetchOpponentMove();
+				&& this.moveNumber == this.totalMoves) {
+				this.fetchOpponentMove();
 			}
 			this.findVariations();
 			if(this.prefs.showVariations || true)
@@ -740,14 +739,14 @@ Y.extend(NS.Player, Y.Base, {
 				for( var i=0; i < this.variations.length; i++)
 				{
 					if(this.variations[i].move)
-						this.addMarker(this.variations[i].move, 'var:' + (this.variations[i].varNum + 1));
+						this.addMarker(this.variations[i].move, 'var:' + (this.variations[i].varNum + 1) + '!');
 				}
 			}
+		}
 
-
-			this.board.commit();
-			this.board.render();
-        }
+		this.board.commit(); //Commit the changes to the board.
+        noRender || this.board.render();
+		noRender || this.fire('execNode', {});
         
         // play a reponse in problem-solving mode, unless we just navigated backwards
         if (this.problemMode && this.currentColor && this.currentColor != this.problemColor && !this.goingBack)
@@ -1182,8 +1181,8 @@ Y.extend(NS.Player, Y.Base, {
     },
 
     showComments: function(comments, junk, noRender) {
-        if (!comments || noRender) return;
-		this.fire('comment', { comments:comments, moveNumber: this.moveNumber} );
+        if (!comments) return;
+		this.comments = comments;
     },
 
     /**
@@ -1191,7 +1190,7 @@ Y.extend(NS.Player, Y.Base, {
      **/
     prependComment: function(content, cls) {
         cls = cls || "comment-status";
-		this.fire('comment', { comments:comments, moveNumber: 0} );
+		this.comments = msg + "\n" + this.comments;
     },
     
     /**

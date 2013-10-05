@@ -8,9 +8,9 @@ YUI({filter: 'debug'}).use( 'eidogo-player', 'eidogo-toolbar', function(Y)
 									sgf:          sgfData
 								});
 
-								window.player.on('comment', function (e) 
+								window.player.on('execNode', function (e) 
 												 {
-													 Y.one('#comments').setHTML('<p><b>Move ' + e.moveNumber + '</b>' +e.comments + '</p>');
+													 Y.one('#comments').setHTML('<p><b>Move ' + window.player.moveNumber + ': </b>' + window.player.comments + '</p>');
 												 });
 
 								var tb = new Y.Eidogo.Toolbar({srcNode: '#toolbar', player: window.player});

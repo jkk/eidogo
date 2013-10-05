@@ -59,7 +59,7 @@
             "jsfiles": [              
                 "js/eidogo-toolbar.js"],
             "config": {
-                "requires": [ "widget", "event", "node-base", "event", "eidogo"  ]
+                "requires": [ "widget", "event", "node-base", "event", "button", "eidogo"  ]
             }
         }
     }

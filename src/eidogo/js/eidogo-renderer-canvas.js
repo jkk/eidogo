@@ -195,7 +195,27 @@ Y.extend(NS.CanvasRenderer, Y.Widget, {
 	    context.beginPath();
 	    context.fillStyle = "#000000" ;
 	    context.strokeStyle = "#000000" ;
-	    
+
+		
+	    context.fillStyle = "#000";
+	    context.strokeStyle = "#000";
+
+		var hoshi = [3, Math.ceil(boardSize/2)-1, boardSize - 4];  //Indices are zero based.
+		//Draw Hoshi
+		for(var i = 0; i < 3; i++ ) for(var j = 0; j < 3; j++ )
+		{
+			var x = hoshi[i] + 0.5;
+			var y = hoshi[j] + 0.5;
+			context.beginPath()
+	        context.arc(stoneSize*(x),  
+		             stoneSize*(y),
+		             stoneSize * 0.1, 
+		             2 * Math.PI, false);
+	        context.fill();
+			context.stroke();
+	        context.closePath();
+		}
+			
 	    for(var i = 0.5; i<=boardSize; i++)
 	    {
 	        context.moveTo(stoneSize*i,
