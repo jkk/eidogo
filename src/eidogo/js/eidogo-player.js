@@ -155,6 +155,8 @@ Y.extend(NS.Player, Y.Base, {
     reset: function(cfg) {
         this.gameName = "";
         
+	this.prefs = cfg || {};
+
         // Multiple games can be contained in collectionRoot. We default
         // to the first (collectionRoot._children[0])
         // See http://www.red-bean.com/sgf/sgf4.html 
@@ -961,12 +963,15 @@ Y.extend(NS.Player, Y.Base, {
     /**
      * Check if a coordinate is within bounds
     **/
-    boundsCheck: function(x,y, arr)
-    {
-	//TODO: Why is the third parameter an array?
-	return x <= arr[2] && x>= arr[0] && y>= arr[0] && y <= arr[1];
+    boundsCheck: function(x, y, region) {
+        if (region.length == 2) {
+            region[3] = region[2] = region[1];
+            region[1] = region[0];
+        }
+        return (x >= region[0] && y >= region[1] && x <= region[2] && y <= region[3]);
     },
     
+
     /**
      * If there are no properties left in a node, ask whether to delete it
      **/
@@ -1054,7 +1059,7 @@ Y.extend(NS.Player, Y.Base, {
         varNode._cached = true;
         this.totalMoves++;
         this.cursor.node.appendChild(varNode);
-        this.unsavedChanges = [this.cursor.node._children.last(), this.cursor.node];
+        this.unsavedChanges = [this.cursor.node._children[this.cursor.node._children.length-1] , this.cursor.node];
         this.updatedNavTree = false;
         this.variation(this.cursor.node._children.length-1);
     },

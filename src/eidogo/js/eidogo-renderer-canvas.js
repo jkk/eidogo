@@ -64,7 +64,7 @@ Y.extend(NS.CanvasRenderer, Y.Widget, {
 	var XY = this.Graphics.getXY();
 	var stoneX = Math.floor( (evt.pageX - XY[0])/stoneSize );
 	var stoneY = Math.floor( (evt.pageY - XY[1])/stoneSize );
-	return [stoneX, stoneY, evt.pageX, evt.pageY];
+	return {x:stoneX, y:stoneY};
     },
 
     resizeBoard: function()
