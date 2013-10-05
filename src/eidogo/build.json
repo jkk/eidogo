@@ -11,7 +11,7 @@
 	"eidogo-player": {
             "jsfiles": [ "js/eidogo-player.js"],
             "config": {
-                "requires": [ "widget", "event", "io", "eidogo", "eidogo-gametree", "eidogo-sgfparser", "eidogo-renderer-canvas", "eidogo-board", "eidogo-rules" ]
+                "requires": [ "widget", "event", "node-base", "io", "eidogo", "eidogo-gametree", "eidogo-sgfparser", "eidogo-renderer-canvas", "eidogo-board", "eidogo-rules" ]
             }
         },
 	"eidogo-sgfparser": {
@@ -42,6 +42,20 @@
             }
         },
 	"eidogo-renderer-canvas": {
+            "jsfiles": [              
+                "js/eidogo-renderer-canvas.js"],
+            "config": {
+                "requires": [ "node-base", "graphics", "widget", "event", "eidogo"  ]
+            }
+        },
+	"eidogo-navtree": {
+            "jsfiles": [              
+                "js/eidogo-renderer-canvas.js"],
+            "config": {
+                "requires": [ "node-base", "graphics", "widget", "event", "eidogo"  ]
+            }
+        },
+	"eidogo-toolbar": {
             "jsfiles": [              
                 "js/eidogo-renderer-canvas.js"],
             "config": {
