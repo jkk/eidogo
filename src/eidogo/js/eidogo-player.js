@@ -10,7 +10,6 @@ var NS = Y.namespace('Eidogo');
 
 // shortcuts (local only to this file)
 var t = NS.resources;
-alert(JSON.stringify(t));
 
 /**
  * @class Player is the overarching control structure that allows you to
@@ -31,7 +30,7 @@ NS.Player = function (cfg) {
     //domContainer
     this.srcNode = Y.one(cfg.srcNode) || "body";
 
-    this.renderer = cfg.renderer;
+    this.renderer = cfg.renderer || Y.Eidogo.Renderers.CanvasRenderer;
     
     // pattern and game info search
     this.searchUrl = cfg.searchUrl;
@@ -112,9 +111,6 @@ NS.Player = function (cfg) {
     
     // initialize per-game settings
     this.reset(cfg);
-    
-    // custom renderer?
-    this.renderer = cfg.renderer;
     
     // crop settings
     this.cropParams = null;
@@ -259,8 +255,6 @@ Y.extend(NS.Player, Y.Base, {
 	    // load data from a URL
 	    this.remoteLoad(cfg.sgfUrl, null, false, null, completeFn);
 	    noCb = true;
-	    
-	    
         } else {
 	    
 	    // start from scratch
@@ -334,7 +328,7 @@ Y.extend(NS.Player, Y.Base, {
         }
         target.loadJson(data);
         target._cached = true;
-        this.doneLoading();
+	
         if (!target._parent) {
 	    // Loading into tree root; use the first game by default or
 	    // other if specified
@@ -400,12 +394,12 @@ Y.extend(NS.Player, Y.Base, {
                 this.load(data, target);
                 completeFn && completeFn();
 	    } else {
-                this.croak(t['invalid data']);
+                this.croak('invalid data');
 	    }
         }
 	
         var failure = function(id, req) {
-	    this.croak(t['error retrieving']);
+	    this.croak('error retrieving');
         }
         
 	Y.io(url, {
@@ -424,7 +418,6 @@ Y.extend(NS.Player, Y.Base, {
      **/
     initGame: function(gameRoot) {
         gameRoot = gameRoot || {};
-        this.handleDisplayPrefs();
         var size = gameRoot.SZ || 19;
         // Only three sizes supported for now
         if (size != 7 && size != 9 && size != 13 && size != 19)
@@ -450,9 +443,9 @@ Y.extend(NS.Player, Y.Base, {
         var moveCursor = new NS.GameCursor(this.cursor.node);
         while (moveCursor.next()) { this.totalMoves++; }
         this.totalMoves--;
-        this.showGameInfo(gameRoot);
-        this.enableNavSlider();
-        this.selectTool(this.mode == "view" ? "view" : "play");
+//        this.showGameInfo(gameRoot);
+  //      this.enableNavSlider();
+        //this.selectTool(this.mode == "view" ? "view" : "play");
         this.fire('initGame', {});
     },
 
@@ -464,16 +457,32 @@ Y.extend(NS.Player, Y.Base, {
         if (this.board && this.board.renderer && this.board.boardSize == size) return;
         try {
 	    var rendererProto;
-	    if( typeof this.renderer != "function" )
+	    if( typeof this.renderer == "function" )
+	    {
 		rendererProto = this.renderer;
-	    
-	    //TODO: Fix this crap
-	    this.renderer = new rendererProto(this.srcNode, size, this, this.cropParams);
+		this.renderer = new rendererProto({srcNode: this.srcNode,
+						   boardSize: size,
+						   player: this,
+						   crop: this.cropParams});	
+	    } else if( typeof this.renderer != "object" )
+	    {
+		this.croak("No renderer object or constructor provided");
+	    }
 	    this.board = new NS.Board(this.renderer, size);
+
+	    this.wireEventHandlers();
         } catch (e) {	
-            this.croak(t['error board']);
+            this.croak('error board: ' + e);
             return;
         }
+    },
+
+    wireEventHandlers: function()
+    {
+	//this.renderer.on('boardClick', {}, this);
+	this.renderer.on('boardMouseDown', this.handleBoardMouseDown, this);
+	this.renderer.on('boardMouseUp', this.handleBoardMouseUp, this);
+	this.renderer.on('boardHover', this.handleBoardHover, this);
     },
     
     /**
@@ -537,7 +546,7 @@ Y.extend(NS.Player, Y.Base, {
 	    this.createMove(req.responseText);
         }
         var failure = function(req) {
-	    this.croak(t['error retrieving']);
+	    this.croak('error retrieving');
         }
         var root = this.cursor.getGameRoot();
         var params = {
@@ -720,7 +729,7 @@ Y.extend(NS.Player, Y.Base, {
                 this.fetchOpponentMove();
 	    }
 	    this.findVariations();
-	    this.updateControls();
+//	    this.updateControls();
 	    this.board.commit();
 	    this.board.render();
         }
@@ -790,15 +799,13 @@ Y.extend(NS.Player, Y.Base, {
      * attachment (or Flash event handling, or whatever) and passes along
      * the appropriate board coordinate.
      **/
-    handleBoardMouseDown: function(x, y, cx, cy, e) {
-        if (!this.boundsCheck(x, y, [0, this.board.boardSize-1])) return;
+    handleBoardMouseDown: function(pt) {
+        if (!this.boundsCheck(pt.x, pt.y, [0, this.board.boardSize-1])) return;
         this.mouseDown = true;
-        this.mouseDownX = x;
-        this.mouseDownY = y;
-        this.mouseDownClickX = cx;
-        this.mouseDownClickY = cy;
+        this.mouseDownX = pt.x;
+        this.mouseDownY = pt.y;
         // begin region selection
-        if (this.mode == "region" && x >= 0 && y >= 0 && !this.regionBegun) {
+        if (this.mode == "region" && pt.x >= 0 && pt.y >= 0 && !this.regionBegun) {
 	    this.regionTop = y;
 	    this.regionLeft = x;
 	    this.regionBegun = true;
@@ -808,41 +815,34 @@ Y.extend(NS.Player, Y.Base, {
     /**
      * Called by the board renderer upon hover, with appropriate coordinate
      **/
-    handleBoardHover: function(x, y, cx, cy, e) {
+    handleBoardHover: function(pt) {
         if (this.mouseDown || this.regionBegun) {
-	    if (!this.boundsCheck(x, y, [0, this.board.boardSize-1])) return;
-	    var boardDiff = (x != this.mouseDownX || y != this.mouseDownY);
-	    var clickDiff = Math.abs(this.mouseDownClickX-cx) >= 19 ||
-                Math.abs(this.mouseDownClickY-cy) >= 19;
 	    if (this.searchUrl && !this.regionBegun && boardDiff && clickDiff) {
                 // click and drag: implicit region select
                 this.selectTool("region");
                 this.regionBegun = true;
-                this.regionTop = this.mouseDownY;
-                this.regionLeft = this.mouseDownX;
 	    }
 	    if (this.regionBegun) {
-                this.regionRight = x + (x >= this.regionLeft ? 1 : 0);
-                this.regionBottom = y + (y >= this.regionTop ? 1 : 0);
+                this.regionRight = pt.x + (pt.x >= this.regionLeft ? 1 : 0);
+                this.regionBottom = pt.y + (pt.y >= this.regionTop ? 1 : 0);
                 this.showRegion();
 	    }
-	    stopEvent(e);
         }
     },
 
     /**
      * Called by the board renderer upon mouse up, with appropriate coordinate
      **/
-    handleBoardMouseUp: function(x, y, e) {
+    handleBoardMouseUp: function(pt) {
         this.mouseDown = false;
         
-        var coord = this.pointToSgfCoord({x: x, y: y});
+        var coord = this.pointToSgfCoord(pt);
         
         // click on a variation?
         if (this.mode == "view" || this.mode == "play") {
 	    for (var i = 0; i < this.variations.length; i++) {
                 var varPt = this.sgfCoordToPoint(this.variations[i].move);
-                if (varPt.x == x && varPt.y == y) {
+                if (varPt.x == pt.x && varPt.y == pt.y) {
 		    this.variation(this.variations[i].varNum);
 		    stopEvent(e);
 		    return;
@@ -870,7 +870,7 @@ Y.extend(NS.Player, Y.Base, {
         
         if (this.mode == "play") {
 	    // can't click there?
-	    if (!this.rules.check({x: x, y: y}, this.currentColor)) {
+	    if (!this.rules.check(pt, this.currentColor)) {
                 return;
 	    }
 	    // play the move
@@ -884,28 +884,28 @@ Y.extend(NS.Player, Y.Base, {
 		    this.createMove(coord);
                 }
 	    }
-        } else if (this.mode == "region" && x >= -1 && y >= -1 && this.regionBegun) {
+        } else if (this.mode == "region" && pt.x >= -1 && pt.y >= -1 && this.regionBegun) {
 	    if (this.regionTop == y && this.regionLeft == x && !this.regionClickSelect) {
                 // allow two-click selection in addition to click-and-drag (for iphone!)
                 this.regionClickSelect = true;
-                this.regionRight = x + 1;
-                this.regionBottom = y + 1;
+                this.regionRight = pt.x + 1;
+                this.regionBottom = pt.y + 1;
                 this.showRegion();
 	    } else {
                 // end of region selection
                 this.regionBegun = false;
                 this.regionClickSelect = false;
-                this.regionBottom = (y < 0 ? 0 : (y >= this.board.boardSize) ?
-				     y : y + (y > this.regionTop ? 1 : 0));
-                this.regionRight = (x < 0 ? 0 :  (x >= this.board.boardSize) ?
-				    x : x + (x > this.regionLeft ? 1 : 0));
+                this.regionBottom = (pt.y < 0 ? 0 : (pt.y >= this.board.boardSize) ?
+				     pt.y : pt.y + (pt.y > this.regionTop ? 1 : 0));
+                this.regionRight = (pt.x < 0 ? 0 :  (pt.x >= this.board.boardSize) ?
+				   pt.x : pt.x + (pt.x > this.regionLeft ? 1 : 0));
                 this.showRegion();
                 stopEvent(e);
 	    }
         } else {
 	    // place black stone, white stone, labels
 	    var prop;
-	    var stone = this.board.getStone({x:x,y:y});
+	    var stone = this.board.getStone(pt);
 	    if (this.mode == "add_b" || this.mode == "add_w") {
                 // if a stone was placed previously, we add an empty point (AE);
                 // otherwise, we remove the stone property from the current node
@@ -914,7 +914,7 @@ Y.extend(NS.Player, Y.Base, {
 		    prop = "AB";
                 } else if (stone != this.board.WHITE && this.mode == "add_w") {
 		    prop = "AW";
-                } else if (this.board.getStone({x:x,y:y}) != this.board.EMPTY && !deleted) {
+                } else if (this.board.getStone(pt) != this.board.EMPTY && !deleted) {
 		    prop = "AE";
                 }
 	    } else {
@@ -956,6 +956,15 @@ Y.extend(NS.Player, Y.Base, {
 	    this.refresh();
 	    if (deleted) this.prependComment(t['position deleted']);
         }
+    },
+
+    /**
+     * Check if a coordinate is within bounds
+    **/
+    boundsCheck: function(x,y, arr)
+    {
+	//TODO: Why is the third parameter an array?
+	return x <= arr[2] && x>= arr[0] && y>= arr[0] && y <= arr[1];
     },
     
     /**
@@ -1196,7 +1205,7 @@ Y.extend(NS.Player, Y.Base, {
 	    this.fire('saved', [req.responseText]);
         }
         var failure = function(req) {
-	    this.croak(t['error retrieving']);
+	    this.croak('error retrieving');
         }
         var sgf = this.cursor.getGameRoot().toSgf();
         ajax('POST', this.saveUrl, {sgf: sgf}, success, failure, this, 30000);
@@ -1266,12 +1275,12 @@ Y.extend(NS.Player, Y.Base, {
     },
     croak: function(msg) {
         if (this.board) {
-	    alert(msg);
+	    alert("Croaked: " + msg);
         } else if (this.problemMode) {
 	    this.prependComment(msg);
         } else {
 	    //TODO: handle a croak by displaying some kind of error on the page.
-	    alert(msg);
+	    alert("Croaked: " + msg);
 	    this.croaked = true;
         }
     }

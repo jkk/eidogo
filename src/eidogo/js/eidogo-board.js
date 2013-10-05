@@ -12,7 +12,6 @@
  * We can theoretically have any kind of renderer. The board state is
  * independent of its visual presentation.
  */
-
 var NS = Y.namespace('Eidogo');
 
 NS.Board = function() {
@@ -39,7 +38,7 @@ Y.extend( NS.Board, Y.Base,  {
         this.captures.W = 0;
         this.captures.B = 0;
         this.cache = [];
-        this.renderer = renderer || Y.Eidogo.GobanRenderer;
+        this.renderer = renderer;
         this.lastRender = {
 	    stones: this.makeBoardArray(null),
 	    markers: this.makeBoardArray(null)
@@ -71,7 +70,11 @@ Y.extend( NS.Board, Y.Base,  {
     makeBoardArray: function(val) {
         // We could use a multi-dimensional array but doing this avoids
         // the need for deep copying during commit, which is very slow.
-        return [].setLength(this.boardSize * this.boardSize, val);
+	var arr = new Array(this.boardSize * this.boardSize)
+	for( var i = 0; i < arr.length; i++)
+	    arr[i] = val;
+
+        return arr;
     },
     /**
      * Save the current state. This allows us to revert back
@@ -87,10 +90,11 @@ Y.extend( NS.Board, Y.Base,  {
      * Undo any uncomitted changes.
      */
     rollback: function() {
-        if (this.cache.last()) {
-	    this.stones = this.cache.last().stones.concat();
-	    this.captures.W = this.cache.last().captures.W;
-	    this.captures.B = this.cache.last().captures.B;
+	last = this.cache[this.cache.length-1];
+        if (last) {
+	    this.stones = last.stones.concat();
+	    this.captures.W = last.captures.W;
+	    this.captures.B = last.captures.B;
         } else {
 	    this.clear();
         }
@@ -134,8 +138,9 @@ Y.extend( NS.Board, Y.Base,  {
         var markers = this.makeBoardArray(null);
         var color, type;
         var len;
-        if (!complete && this.cache.last()) {
-	    var lastCache = this.cache.last();
+	var last = this.cache[this.cache.length - 1];
+        if (!complete && last) {
+	    var lastCache = last;
 	    len = this.stones.length;
 	    // render only points that have changed since the last render
 	    for (var i = 0; i < len; i++) {

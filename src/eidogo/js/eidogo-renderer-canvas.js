@@ -1,3 +1,4 @@
+
 var NS = Y.namespace('Eidogo.Renderers');
 
 NS.CanvasRenderer = function () {
@@ -11,39 +12,39 @@ NS.CanvasRenderer.ATTRS = {
 };
 
 Y.extend(NS.CanvasRenderer, Y.Widget, {
-    init: function(domContainer, boardSize, player, crop) {
-	if(typeof player == 'undefined') return;
-	this.player = player;
-	this.boardSize = parseInt(boardSize);
+    init: function(cfg) {
+	if(typeof cfg.player == 'undefined') alert("eh?");
+	
+	//domContainer, boardSize, player, crop
 
+	this.player = cfg.player;
+	this.boardSize = parseInt(cfg.boardSize);
 	this.antislip = true;
 	
 	NS.CanvasRenderer.superclass.constructor.apply(this, arguments);
 
 	this.Graphics = new Y.Graphic({
-	    render: domContainer,
+	    render: cfg.srcNode,
 	    autoSize: 'sizeGraphicToContent',
 	});
 
-	this.srcNode = Y.one(domContainer);
+	this.srcNode = Y.one(cfg.srcNode);
 
-	this.set('boardSize', boardSize || 19);
+	this.set('boardSize', this.boardSize || 19);
 	this.set('stoneSize', 20);
-
-	this.boardSize = this.get('boardSize');
 	
 	Y.one(document).on('windowresize', this.resizeBoard, this );
 	
-	var graphidNode = Y.one(this.Graphics.get('node'));
+	var graphicNode = Y.one(this.Graphics.get('node'));
 
-	graphicNode.on('mouseDown', this.handleMouseDown, this);
-	graphicNode.on('mouseOver', this.handleHover, this);
-	graphicNode.on('mouseUp', this.handleMouseUp, this);
+	graphicNode.on('mousedown', this.handleMouseDown, this);
+	graphicNode.on('mouseover', this.handleHover, this);
+	graphicNode.on('mouseup', this.handleMouseUp, this);
 	graphicNode.on( this.antislip ? 'dblclick' : 'click', this.handleClick, this);
 
 	this.renderCache = {
-	    stones: new Array(boardSize * boardSize),
-	    markers: new Array(boardSize * boardSize)
+	    stones: new Array(this.boardSize * this.boardSize),
+	    markers: new Array(this.boardSize * this.boardSize)
 	}
 	this.resizeBoard();  //resize it for the first time... (heh..)
     },
@@ -52,7 +53,7 @@ Y.extend(NS.CanvasRenderer, Y.Widget, {
 	var boardSize = this.get('boardSize');
 	return {x: i%boardSize, y: Math.floor(i/boardSize)}
     },
-    XyToInt: function (ptr)
+    XyToInt: function (pt)
     {
 	var boardSize = this.get('boardSize');
 	return pt.x + pt.y*boardSize;
@@ -159,7 +160,7 @@ Y.extend(NS.CanvasRenderer, Y.Widget, {
 		y: stoneSize*pt.y
 	    });
 
-	    this.renderCache.stones[XyToInt(pt)] = bgRect;
+	    this.renderCache.stones[this.XyToInt(pt)] = bgRect;
 	}
 	return null;
     },
@@ -174,7 +175,7 @@ Y.extend(NS.CanvasRenderer, Y.Widget, {
 	}
 
 	if (type == "empty" || !type) { 
-	    this.renderCache.markers[this.XyToInt(pt)] = 0;
+	    this.renderCache.markers[xy] = 0;
 	    return null;
 	}
 
@@ -189,7 +190,7 @@ Y.extend(NS.CanvasRenderer, Y.Widget, {
 	    case "dim":
 	    case "current":
 		//TODO: Fix this.
-		this.renderCache.markers[this.XyToInt(pt)] = 0;
+		this.renderCache.markers[xy] = 0;
 		break;
 	    default:
 		if (type.indexOf("var:") == 0) {

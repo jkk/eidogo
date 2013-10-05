@@ -7,6 +7,7 @@
  * This file sets up the EidoGo framework.
  */
 
+
 //Make sure our namespace is initialized.
 var NS = Y.namespace('Eidogo');
 

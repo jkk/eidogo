@@ -12,7 +12,6 @@
  *      { PROP1: value,  PROP2: value, ..., _children: [...]}
  */
 
-
 var NS = Y.namespace('Eidogo');
 
 NS.SgfParser = function() {
