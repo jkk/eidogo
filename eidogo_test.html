@@ -13,15 +13,24 @@ body
 margin:0;
 }
 #player{
+display: inline-block;
 height:100%;
+width: 100%;
+}
+#righthand
+{
+vertical-align: top;
+display: inline-block;
+width: 20%;
+height 80%;
+border: 1px solid black;
 }
 
 #goban
 {
-display: block;
-position: relative;
+display: inline-block;
 border: 1px solid black;
-height: 100%;
+height: 80%;
 width: 56.25%;
 }
 </style>
@@ -32,14 +41,18 @@ width: 56.25%;
 <script type="text/javascript" src="build/eidogo-renderer-canvas/eidogo-renderer-canvas.js"></script>
 <script type="text/javascript" src="build/eidogo-player/eidogo-player.js"></script>
 <script type="text/javascript" src="build/eidogo-gametree/eidogo-gametree.js"></script>
-<script type="text/javascript" src="build/eidogo-board/eidogo-board.js"></script>
+<script type="text/javascript"
+src="build/eidogo-board/eidogo-board.js"></script>
+<script type="text/javascript" src="build/eidogo-toolbar/eidogo-toolbar.js"></script>
 <script src="js/gobantest.js"></script>
 </head>
 <body class="yui3-skin-sam" style="height: 100%">
 <div id="player">
    <div id="goban"></div>
-   <div id="navtree"></div>
-   <div id="comments"></div>
+   <div id="righthand">
+	  <div id="toolbar"></div>
+	  <div id="comments">Comments:</div>
+  </div> 
 </div>
 </body>
 </html>

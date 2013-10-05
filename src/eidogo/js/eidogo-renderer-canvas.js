@@ -81,17 +81,17 @@ var ShapeRenderers =
 	            this.closePath();
 	        }
         },
-		territory-white: function()
+		'territory-white': function ()
 		{
-			return function() {};
+			return function () { return null; };
 		},
-		territory-black: function()
+		'territory-black': function()
 		{
-			return function() {};
+			return function () {return null; };
 		},
 		dim: function()
 		{
-			return function() {};
+			return function () {return null; }
 		},
         text: function(pt, text)
         {

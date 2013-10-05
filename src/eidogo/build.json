@@ -45,21 +45,21 @@
             "jsfiles": [              
                 "js/eidogo-renderer-canvas.js"],
             "config": {
-                "requires": [ "node-base", "graphics", "widget", "event", "eidogo"  ]
+                "requires": [ "node", "widget", "graphics", "event", "eidogo"  ]
             }
         },
 	"eidogo-navtree": {
             "jsfiles": [              
                 "js/eidogo-renderer-canvas.js"],
             "config": {
-                "requires": [ "node-base", "graphics", "widget", "event", "eidogo"  ]
+                "requires": [ "node-base", "widget", "event", "eidogo"  ]
             }
         },
 	"eidogo-toolbar": {
             "jsfiles": [              
-                "js/eidogo-renderer-canvas.js"],
+                "js/eidogo-toolbar.js"],
             "config": {
-                "requires": [ "node-base", "graphics", "widget", "event", "eidogo"  ]
+                "requires": [ "widget", "event", "node-base", "event", "eidogo"  ]
             }
         }
     }

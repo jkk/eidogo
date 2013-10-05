@@ -1183,7 +1183,7 @@ Y.extend(NS.Player, Y.Base, {
 
     showComments: function(comments, junk, noRender) {
         if (!comments || noRender) return;
-		this.fire('comment', { comments:comments, moveNumber: this.moveNumer} );
+		this.fire('comment', { comments:comments, moveNumber: this.moveNumber} );
     },
 
     /**
