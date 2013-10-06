@@ -39,10 +39,6 @@ Y.extend( NS.Board, Y.Base,  {
         this.captures.B = 0;
         this.cache = [];
         this.renderer = renderer;
-        this.lastRender = {
-			stones: this.stones.slice(),
-			markers: this.markers.slice()
-        };
     },
     reset: function() {
         this.init(this.renderer, this.boardSize);
@@ -140,8 +136,12 @@ Y.extend( NS.Board, Y.Base,  {
         var len;
 	    var last = this.cache[this.cache.length - 1];
 	    
-	    if(!last) return; //No commited changes to render;
-	    
+	    if(!last) throw "Nothing to render idiots!"; //No commited changes to render -- do everything
+
+	    if(!this.lastRender)//This needs to be here.  If it's in the init it gets triggered on a board refresh and then things don't update properly.
+			this.lastRender = { stones: this.stones.slice(), markers: this.markers.slice()	};
+
+
 	    var colorLookup = {}
 	    colorLookup[this.WHITE] = "white"; 
 	    colorLookup[this.BLACK] = "black";
@@ -151,14 +151,14 @@ Y.extend( NS.Board, Y.Base,  {
         for (var x = 0; x < this.boardSize; x++) {
 	        for (var y = 0; y < this.boardSize; y++) {
 		        i =  y * this.boardSize + x;
-		        if( this.lastRender.stones[i] != last.stones[i] || complete)
+		        if( complete || this.lastRender.stones[i] != last.stones[i] )
 		        {
 		            this.renderer.setStone({x:x, y:y}, colorLookup[last.stones[i]]);
 		            this.lastRender.stones[i] = last.stones[i];
 		        }
 		        
 		        //Maybe we want to set marker color here and have it change based on stone color.
-		        if( this.lastRender.markers[i] != last.markers[i] || complete)
+		        if( complete || this.lastRender.markers[i] != last.markers[i] )
 		        {
 		            this.renderer.setMarker({x:x, y:y}, last.markers[i]);
 		            this.lastRender.markers[i] = last.markers[i];

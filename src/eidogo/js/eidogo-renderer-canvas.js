@@ -124,8 +124,10 @@ NS.CanvasRenderer = function (cfg) {
     NS.CanvasRenderer.superclass.constructor.apply(this, arguments);
 
     this.canvas = Y.Node.create('<canvas></canvas>');
-    this.srcNode = Y.one(cfg.srcNode);
-    this.srcNode.appendChild(this.canvas);
+    var replaceTag = Y.one(cfg.srcNode);
+	this.srcNode = replaceTag.ancestor();
+    this.srcNode.insert(this.canvas, replaceTag);
+	replaceTag.remove();
 
     this.set('boardSize', this.boardSize || 19);
     this.set('stoneSize', 20);
@@ -166,7 +168,7 @@ Y.extend(NS.CanvasRenderer, Y.Widget, {
     getXY: function(evt)
     {
 	    var stoneSize = this.get('stoneSize');
-	    var XY = this.srcNode.get('region');
+	    var XY = this.canvas.get('region');
 	    var stoneX = Math.floor( (evt.pageX - XY[0])/stoneSize );
 	    var stoneY = Math.floor( (evt.pageY - XY[1])/stoneSize );
 	    return {x:stoneX, y:stoneY};
@@ -303,18 +305,22 @@ Y.extend(NS.CanvasRenderer, Y.Widget, {
     handleClick: function(e) 
     {
 	    var xy = this.getXY(e);
+		xy.e = e;
 	    this.fire('boardClick', xy);
     },
     handleHover: function(e) {
 	    var xy = this.getXY(e);
+			xy.e = e;
 	    this.fire('boardHover', xy);
     },
     handleMouseDown: function(e) {
 	    var xy = this.getXY(e);
+		xy.e = e;
 	    this.fire('boardMouseDown', xy);
     },
     handleMouseUp: function(e) {
 	    var xy = this.getXY(e);
+		xy.e = e;
 	    this.fire('boardMouseUp', xy);
     },
     showRegion: function(bounds) {

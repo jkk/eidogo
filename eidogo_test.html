@@ -12,29 +12,41 @@ body
 {
 margin:0;
 }
-#player{
-display: inline-block;
-height:100%;
-width: 100%;
-}
-#righthand
+
+div.eidogo-variation
 {
-vertical-align: top;
-display: inline-block;
-width: 40%;
-height 100%;
+display:inline-block;
+height:1em;
+width: 1em;
 border: 1px solid black;
+text-align: center;
+cursor: hand;
+margin: 0.25em;
 }
 
-#goban
+div.pure-g-r
 {
-display: inline-block;
-border: 1px solid black;
-height: 100%;
-width: 56.25%;
+height:100%;
 }
+
+div.pure-u-2-3
+{
+text-align: center;
+height: 100%;
+}
+
+@media (max-width:767px) {
+div.pure-u-2-3
+{
+height: 80%;
+}
+}
+
+
 </style>
-<script src="http://yui.yahooapis.com/3.12.0/build/yui/yui-debug.js"></script>
+<script
+src="http://yui.yahooapis.com/3.12.0/build/yui/yui-debug.js"></script>
+<link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.3.0/grids-min.css">
 <script type="text/javascript" src="build/eidogo/eidogo.js"></script>
 <script type="text/javascript" src="build/eidogo-sgfparser/eidogo-sgfparser.js"></script>
 <script type="text/javascript" src="build/eidogo-rules/eidogo-rules.js"></script>
@@ -47,12 +59,14 @@ src="build/eidogo-board/eidogo-board.js"></script>
 <script src="js/gobantest.js"></script>
 </head>
 <body class="yui3-skin-sam" style="height: 100%">
-<div id="player">
-   <div id="goban"></div>
-   <div id="righthand">
-	  <div id="toolbar"></div>
-	  <div id="comments">Comments:</div>
-  </div> 
+<div class="pure-g-r">
+<div class="pure-u-2-3"> <div id="goban"></div> </div>
+<div class="pure-u-1-3">
+<div id="toolbar"></div>
+<div id="comments">Comments:</div>
+</div>
+
+</div>
 </div>
 </body>
 </html>

@@ -314,27 +314,23 @@ Y.extend(NS.GameCursor, Y.Base, {
 		var n = this.node,
 		rpath = [],
 		mn = 0;
-		while (n && n._parent && n._parent._children.length == 1 && n._parent._parent) {
+		while ( n && n.getPosition() != null) {
 			mn++;
-			n = n._parent;
-		}
-		rpath.push(mn);
-		while (n) {
-			if (n._parent && (n._parent._children.length > 1 || !n._parent._parent))
-				rpath.push(n.getPosition() || 0);
+			rpath.push(n.getPosition());
 			n = n._parent;
 		}
 		return rpath.reverse();
     },
     getPathMoves: function() {
-		var path = [];
-		var cur = new NS.GameCursor(this.node);
-		path.push(cur.node.getMove());
-		while (cur.previous()) {
-			var move = cur.node.getMove();
-			if (move) path.push(move);
+		var n = this.node,
+		rpath = [],
+		mn = 0;
+		while (n && n.getPosition() != null) {
+			mn++;
+			rpath.push(n.getMove());
+			n = n._parent;
 		}
-		return path.reverse();
+		return rpath.reverse();
     },
     getMoveNumber: function() {
 		var num = 0,

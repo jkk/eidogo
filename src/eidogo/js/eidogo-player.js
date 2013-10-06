@@ -31,7 +31,9 @@ NS.Player = function (cfg) {
     this.srcNode = Y.one(cfg.srcNode) || "body";
 
     this.renderer = cfg.renderer || Y.Eidogo.Renderers.CanvasRenderer;
-    
+    this.doRender = true;
+
+
     // pattern and game info search
     this.searchUrl = cfg.searchUrl;
     this.showingSearch = false;
@@ -332,12 +334,9 @@ Y.extend(NS.Player, Y.Base, {
 			newGame = true;
         }
         
-        if (this.loadPath.length) {
-			this.goTo(this.loadPath, newGame);
-        } else {
-			this.refresh();
-        }
-        
+		this.resetCursor();
+		this.refresh();
+                
         // find out which color to play as for problem mode
         if (newGame && this.problemMode) {
 			if (!this.problemColor)
@@ -567,10 +566,10 @@ Y.extend(NS.Player, Y.Base, {
     /**
      * Respond to a move made in problem-solving mode
      **/
-    playProblemResponse: function(noRender) {
+    playProblemResponse: function() {
         // short delay before playing
         setTimeout(function() {
-			this.variation(null, noRender);
+			this.variation(null);
 			this.fire('playProblemResponse', {});
 			
 			if (!this.cursor.hasNext()) {
@@ -585,73 +584,57 @@ Y.extend(NS.Player, Y.Base, {
      * Navigates to a location within the game.
      **/
     goTo: function(path, fromStart) {
-        fromStart = typeof fromStart != "undefined" ? fromStart : true;
-        
-        if (fromStart && path.length > 1 && path[0] != this.cursor.getGameRoot().getPosition())
-			this.updatedNavTree = false;
-        
-        if (fromStart)
-			this.resetCursor(true);
-        
-        // Move number
-        var steps = parseInt(path, 10);
-        if (!(path instanceof Array) && !isNaN(steps)) {
-			if (fromStart) steps++; // not zero-based
-			for (var i = 0; i < steps; i++)
-                this.variation(null, true);
-			this.refresh();
-			return;
-        }
-        
-        // Not a path?
-        if (!(path instanceof Array) || !path.length) {
-			alert(t['bad path'] + " " + path);
-			return;
-        }
+		try 
+		{
+			this.doRender = false;
 
-        var position;
-        var vars;
-        
-        // Path of moves (SGF coords)
-        if (isNaN(parseInt(path[0], 10))) {
-			if (!this.cursor.node._parent)
-                this.variation(0, true); // first game tree is assumed
-			while (path.length) {
-                position = path.shift();
-                vars = this.getVariations();
-                for (var i = 0; i < vars.length; i++) {
-					if (vars[i].move == position) {
-                        this.variation(vars[i].varNum, true);
-                        break;
+			if (fromStart)
+			{
+				this.resetCursor(); //goto collection start
+			}
+			
+			// Move number
+			if (typeof path == "number" && !isNaN(steps)) {
+				var steps = parseInt(path, 10);
+				if (fromStart) steps++; // not zero-based
+				for (var i = 0; i < steps; i++)
+					this.variation(null);
+			} else if ( path instanceof Array && path.length) {
+				var position;
+				var vars;
+				
+				// Path of moves (SGF coords)
+				if ( isNaN( parseInt(path[0], 10) ) ) {
+					while (path.length) {
+						position = path.shift();
+						vars = this.getVariations();
+						for (var i = 0; i < vars.length; i++) {
+							if (vars[i].move == position) {
+								this.variation(vars[i].varNum);
+								break;
+							}
+						}
 					}
-                }
+				}  else { //Path of variation numbers
+					while (path.length)
+					{
+						position = parseInt(path.shift(), 10);
+						this.variation(position);
+					}
+				}
 			}
-			this.refresh();
-			return;
-        }
-        
-        // Path of branch indexes and final move number
-        var first = true;
-        while (path.length) {
-			position = parseInt(path.shift(), 10);
-			if (!path.length) {
-                for (var i = 0; i < position; i++)
-					this.variation(0, true);
-			} else if (path.length) {
-                if (!first && fromStart)
-					while (this.cursor.node._children.length == 1)
-                        this.variation(0, true);
-                this.variation(position, true);
-			}
-			first = false;
-        }
-        this.refresh();
+		} finally{
+			this.doRender = true;
+		}
+
+		this.refresh();
+		return;
     },
 
     /**
      * Resets the game cursor to the first node
      **/
-    resetCursor: function(noRender, toGameRoot) {
+    resetCursor: function(toGameRoot) {
         this.board.reset();
         this.resetCurrentColor();
         if (toGameRoot) {
@@ -659,7 +642,7 @@ Y.extend(NS.Player, Y.Base, {
         } else {
 			this.cursor.node = this.collectionRoot;
         }
-        this.refresh(noRender);
+        this.refresh();
     },
     
     /**
@@ -675,19 +658,18 @@ Y.extend(NS.Player, Y.Base, {
     /**
      * Refresh the current node
      **/
-    refresh: function(noRender) {
+    refresh: function() {
         this.board.revert(1);
-        this.execNode(noRender);
+        this.execNode();
     },
 
     /**
      * Handles going the next sibling or variation
      * @param {Number} varNum Variation number to follow
-     * @param {Boolean} noRender If true, don't render the board
      */
-    variation: function(varNum, noRender) {
+    variation: function(varNum) {
         if (this.cursor.next(varNum)) {
-			this.execNode(noRender);
+			this.execNode();
 			this.resetLastLabels();
 			return true;
         }
@@ -698,14 +680,11 @@ Y.extend(NS.Player, Y.Base, {
      * Delegates the work of putting down stones etc to various handler
      * functions. Also resets some settings and makes sure the interface
      * gets updated.
-     * @param {Boolean} noRender If true, don't render the board
-     * @param {Boolean} ignoreProgressive Ignores progressive loading
-     *      considerations.
      */
-    execNode: function(noRender) {
+    execNode: function() {
         if (!this.cursor.node) return;
 		
-        if (!noRender) {
+        if  (this.doRender) {
 			this.board.clearMarkers();
 			this.comments = ""
 			this.moveNumber = this.cursor.getMoveNumber();
@@ -721,12 +700,12 @@ Y.extend(NS.Player, Y.Base, {
 			if (this.propertyHandlers[propName]) {
                 (this.propertyHandlers[propName]).apply(
 					this,
-					[this.cursor.node[propName], propName, noRender]
+					[this.cursor.node[propName], propName]
                 );
 			}
         }
 		
-		if(!noRender) 
+		if( this.doRender) 
 		{
 			// let the opponent move
 			if (this.opponentUrl && this.opponentColor == this.currentColor
@@ -745,12 +724,12 @@ Y.extend(NS.Player, Y.Base, {
 		}
 
 		this.board.commit(); //Commit the changes to the board.
-        noRender || this.board.render();
-		noRender || this.fire('execNode', {});
+        this.doRender && this.board.render();
+		this.doRender && this.fire('execNode', {});
         
         // play a reponse in problem-solving mode, unless we just navigated backwards
         if (this.problemMode && this.currentColor && this.currentColor != this.problemColor && !this.goingBack)
-			this.playProblemResponse(noRender);
+			this.playProblemResponse();
         
         this.goingBack = false;
     },
@@ -772,27 +751,41 @@ Y.extend(NS.Player, Y.Base, {
         return vars;
     },
 
-    back: function(e, obj, noRender) {
+    back: function(e, obj) {
         if (this.cursor.previous()) {
 			this.board.revert(1);
 			this.goingBack = true;
-			this.refresh(noRender);
+			this.refresh();
 			this.resetLastLabels();
         }
     },
 
-    forward: function(e, obj, noRender) {
-        this.variation(null, noRender);
+    forward: function(e, obj) {
+        this.variation(null);
     },
 
     first: function() {
         if (!this.cursor.hasPrevious()) return;
-        this.resetCursor(false, true);
+		try
+		{
+			this.doRender = false;
+			this.resetCursor(true);
+		} finally {
+			this.doRender = true; 
+		}
     },
 
     last: function() {
         if (!this.cursor.hasNext()) return;
-        while (this.variation(null, true)) {}
+		try
+		{
+			this.doRender = false;
+			while (this.variation(null)) {}
+		}
+		finally
+		{
+			this.doRender = true;
+		}
         this.refresh();
     },
 
@@ -863,25 +856,19 @@ Y.extend(NS.Player, Y.Base, {
 			}
         }
         
-        if (this.mode == "view") {
-			// Jump to any moved played at the clicked coordinate
-			var root = this.cursor.getGameRoot(),
-            path = [0, root.getPosition()],
-            mn = 0,
-            node = root._children[0];
-			while (node) {
-                if (node.getMove() == coord) {
-					path.push(mn);
-					this.goTo(path);
-					break;
-                }
-                mn++;
-                node = node._children[0];
-			}
+        if (this.mode == "view" || pt.e.shiftKey) {
+			var path;
+			this.cursor.node.walk( function(node)
+								   {
+									   if (!path && node.getMove() == coord) 
+									   {
+										   path = (new NS.GameCursor(node)).getPath();
+									   }
+								   },
+								   this);
+			path && this.goTo(path, true);
 			return;
-        }
-        
-        if (this.mode == "play") {
+        } else if (this.mode == "play") {
 			// can't click there?
 			if (!this.rules.check(pt, this.currentColor)) {
                 return;
@@ -961,6 +948,7 @@ Y.extend(NS.Player, Y.Base, {
 					prop = null;
                 }
 			}
+
 			if (prop)
                 this.cursor.node.pushProperty(prop, coord);
 			this.unsavedChanges = true;
@@ -1088,12 +1076,12 @@ Y.extend(NS.Player, Y.Base, {
      * Play a move on the board and apply rules to it. This is different from
      * merely adding a stone.
      **/
-    playMove: function(coord, color, noRender) {
+    playMove: function(coord, color) {
         color = color || this.currentColor;
         this.currentColor = (color == "B" ? "W" : "B");
         color = color == "W" ? this.board.WHITE : this.board.BLACK;
         var pt = this.sgfCoordToPoint(coord);
-        if ((!coord || coord == "tt" || coord == "") && !noRender) {
+        if (!coord || coord == "tt" || coord == "") {
 			this.prependComment((color == this.board.WHITE ?
 								 t['white'] : t['black']) + " " + t['passed'], "comment-pass");
         } else if (coord == "resign") {
@@ -1102,7 +1090,7 @@ Y.extend(NS.Player, Y.Base, {
         } else if (coord && coord != "tt") {
 			this.board.addStone(pt, color);
 			this.rules.apply(pt, color);
-			if (this.prefs.markCurrent && !noRender) {
+			if (this.prefs.markCurrent && this.doRender) {
                 this.addMarker(coord, "current");
 			}
         }
@@ -1180,7 +1168,7 @@ Y.extend(NS.Player, Y.Base, {
         this.prependComment(msg);
     },
 
-    showComments: function(comments, junk, noRender) {
+    showComments: function(comments, junk) {
         if (!comments) return;
 		this.comments = comments;
     },
