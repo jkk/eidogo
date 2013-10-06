@@ -33,6 +33,8 @@ NS.Player = function (cfg) {
     this.renderer = cfg.renderer || Y.Eidogo.Renderers.CanvasRenderer;
     this.doRender = true;
 
+    // unique id, so we can have more than one player on a page and for progressive loading
+    this.uniq = (new Date()).getTime();
 
     // pattern and game info search
     this.searchUrl = cfg.searchUrl;
@@ -40,6 +42,9 @@ NS.Player = function (cfg) {
     
     // save to file
     this.saveUrl = cfg.saveUrl;
+
+	//progressiveLoad url?
+	this.progressiveUrl = cfg.progressiveUrl;
     
     // url to handle downloads
     this.downloadUrl = cfg.downloadUrl;
@@ -129,7 +134,7 @@ NS.Player = function (cfg) {
     //TODO: Readd this if we add selection regions back.
     //Y.one(document).on('mouseUp', this.handleDocMouseUp, this);
     
-    if (cfg.sgf || cfg.sgfUrl || (cfg.sgfPath && cfg.gameName)) {
+    if (cfg.sgf || cfg.sgfUrl || (cfg.sgfPath && cfg.gameName) || cfg.progressiveUrl ) {
 		this.loadSgf(cfg);
     }
     
@@ -151,6 +156,8 @@ Y.extend(NS.Player, Y.Base, {
         this.gameName = "";
         
 		this.prefs = cfg || {};
+
+		this.prefs.markCurrent = this.prefs.markCurrent || true;
 
         // Multiple games can be contained in collectionRoot. We default
         // to the first (collectionRoot._children[0])
@@ -222,8 +229,7 @@ Y.extend(NS.Player, Y.Base, {
         this.sgfPath = cfg.sgfPath || this.sgfPath;
 		
         // Load the first node of the first node by default
-        this.loadPath = cfg.loadPath && cfg.loadPath.length > 1 ?
-			cfg.loadPath : [0, 0];
+        this.loadPath = cfg.loadPath && cfg.loadPath.length > 1 ? cfg.loadPath : [0];
 		
         // game name (= file name) of the game to load
         this.gameName = cfg.gameName || "";
@@ -237,12 +243,18 @@ Y.extend(NS.Player, Y.Base, {
 			var sgf = new NS.SgfParser(cfg.sgf);
 			this.load(sgf.root);
 			
-        } else if (typeof cfg.sgf == "object") {
-			
+        } else if (typeof cfg.sgf == "object")
+		{
 			// already-parsed JSON game tree
 			this.load(cfg.sgf);
+		} else if (cfg.progressiveUrl) 
+		{
+			this.progressiveLoads = 0;
+			this.progressiveUrl = cfg.progressiveUrl;
+            this.fetchProgressiveData(completeFn);
+            noCb = true;
 
-        } else if (typeof cfg.sgfUrl == "string" || this.gameName) {
+		} else if (typeof cfg.sgfUrl == "string" || this.gameName) {
 			
 			// the URL can be provided as a single sgfUrl or as sgfPath + gameName
 			if (!cfg.sgfUrl) {
@@ -250,10 +262,9 @@ Y.extend(NS.Player, Y.Base, {
 			}
 			
 			// load data from a URL
-			this.remoteLoad(cfg.sgfUrl, null, false, null, completeFn);
+			this.remoteLoad(cfg.sgfUrl, {}, null, null, completeFn);
 			noCb = true;
         } else {
-			
 			// start from scratch
 			var boardSize = cfg.boardSize || "19";
 			var komiMap = {19: 6.5, 13: 4.5, 9: 3.5, 7: 2.5};
@@ -335,7 +346,12 @@ Y.extend(NS.Player, Y.Base, {
         }
         
 		this.resetCursor();
-		this.refresh();
+
+		if (this.loadPath.length) {
+            this.goTo(this.loadPath, newGame);
+        } else {
+            this.refresh();
+        }
                 
         // find out which color to play as for problem mode
         if (newGame && this.problemMode) {
@@ -351,21 +367,10 @@ Y.extend(NS.Player, Y.Base, {
      * domain.
      * @param {string} url URL to load game data from
      * @param {GameNode} target inserts data into this node if given
-     * @param {boolean} useSgfPath if true, prepends sgfPath to url
      * @param {Array} loadPath GameNode path to load
      **/
-    remoteLoad: function(url, target, useSgfPath, loadPath, completeFn) {
-        useSgfPath = useSgfPath == "undefined" ? true : useSgfPath;
-        
+    remoteLoad: function(url, params, target, loadPath, completeFn) {
         completeFn = (typeof completeFn == "function") ? completeFn : null;
-        
-        if (useSgfPath) {
-			if (!target) {
-                this.gameName = url;
-			}
-			// if we're using sgfPath, assume url does not include .sgf extension
-			url = this.sgfPath + url + ".sgf";
-        }
         
         if (loadPath) {
 			this.loadPath = loadPath;
@@ -398,6 +403,7 @@ Y.extend(NS.Player, Y.Base, {
         
 		Y.io(url, {
 			method: 'GET',
+			data: Y.QueryString.stringify(params),
 			on: {
 				success: success,
 				failure: failure
@@ -442,7 +448,65 @@ Y.extend(NS.Player, Y.Base, {
         //this.selectTool(this.mode == "view" ? "view" : "play");
         this.fire('initGame', {});
     },
+	getGameInfo: function(gameInfo) {
+		if (!gameInfo) return;
+		var val, parsedInfo = {};
+		
+		for (var propName in this.infoLabels) {
+			if (gameInfo[propName] instanceof Array) {
+				gameInfo[propName] = gameInfo[propName][0];
+			}
 
+			if (gameInfo[propName]) { //This won't work right now since the fucking localization is broken.
+				if (propName == "PW") {
+					parsedInfo.whiteName = gameInfo[propName] +	(gameInfo['WR'] ? ", " + gameInfo['WR'] : "");
+					continue;
+				} else if (propName == "PB") {
+					parsedInfo.blackName = gameInfo[propName] +	(gameInfo['BR'] ? ", " + gameInfo['BR'] : "");
+					continue;
+				}
+				if (propName == "WR" || propName == "BR") {
+					continue;
+				}
+				val = gameInfo[propName];
+				if (propName == "DT") {
+					var dateParts = gameInfo[propName].split(/[\.-]/);
+					if (dateParts.length == 3) {
+						val = dateParts[2].replace(/^0+/, "") + " "
+							+ this.months[dateParts[1]-1] + " " + dateParts[0];
+					}
+				}
+				parsedInfo[propName] = vale;
+			}
+		}
+
+		return parsedInfo;
+	},
+	/**
+	 * Handle tool switching
+	 * TODO:  Make this stuff work again.   The toolbar needs a tool selection widget
+	 **/
+    selectTool: function(tool) {
+        var cursor;
+        if (tool == "region") {
+            cursor = "crosshair";
+        } else if (tool == "comment") {
+            this.startEditComment();
+        } else if (tool == "label") {
+            show(this.dom.labelInput, "inline");
+            this.dom.labelInput.focus();
+        } else {
+            cursor = "default";
+            this.regionBegun = false;
+            this.hideRegion();
+            hide(this.dom.searchButton);
+            hide(this.dom.searchAlgo);
+            if (this.searchUrl)
+                show(this.dom.scoreEst, "inline");
+        }
+        //this.board.renderer.setCursor(cursor);
+        this.mode = tool;
+    },
     /**
      * Create our board. This can be called multiple times.
      **/
@@ -693,6 +757,19 @@ Y.extend(NS.Player, Y.Base, {
         if (this.moveNumber < 1) {
 			this.resetCurrentColor();
         }
+
+		if( this.doRender) 
+		{
+			this.findVariations();
+			if(!this.prefs.disableVariations)
+			{
+				for( var i=0; i < this.variations.length; i++)
+				{
+					if(this.variations[i].move)
+						this.addMarker(this.variations[i].move, 'var:' + (this.variations[i].varNum + 1) + '!');
+				}
+			}
+		}
 		
         // execute handlers for the appropriate properties
         var props = this.cursor.node.getProperties();
@@ -704,28 +781,14 @@ Y.extend(NS.Player, Y.Base, {
                 );
 			}
         }
-		
-		if( this.doRender) 
-		{
-			// let the opponent move
-			if (this.opponentUrl && this.opponentColor == this.currentColor
-				&& this.moveNumber == this.totalMoves) {
-				this.fetchOpponentMove();
-			}
-			this.findVariations();
-			if(this.prefs.showVariations || true)
-			{
-				for( var i=0; i < this.variations.length; i++)
-				{
-					if(this.variations[i].move)
-						this.addMarker(this.variations[i].move, 'var:' + (this.variations[i].varNum + 1) + '!');
-				}
-			}
-		}
 
 		this.board.commit(); //Commit the changes to the board.
         this.doRender && this.board.render();
 		this.doRender && this.fire('execNode', {});
+
+		// progressive loading?        
+        if (this.prefs.progressiveUrl)
+            this.fetchProgressiveData();
         
         // play a reponse in problem-solving mode, unless we just navigated backwards
         if (this.problemMode && this.currentColor && this.currentColor != this.problemColor && !this.goingBack)
@@ -1078,24 +1141,38 @@ Y.extend(NS.Player, Y.Base, {
      **/
     playMove: function(coord, color) {
         color = color || this.currentColor;
+
         this.currentColor = (color == "B" ? "W" : "B");
+
         color = color == "W" ? this.board.WHITE : this.board.BLACK;
+
         var pt = this.sgfCoordToPoint(coord);
-        if (!coord || coord == "tt" || coord == "") {
+
+        if (!coord || coord == "tt" || coord == "")
+		{
 			this.prependComment((color == this.board.WHITE ?
 								 t['white'] : t['black']) + " " + t['passed'], "comment-pass");
-        } else if (coord == "resign") {
+        } else if (coord == "resign") 
+		{
 			this.prependComment((color == this.board.WHITE ?
 								 t['white'] : t['black']) + " " + t['resigned'], "comment-resign");
-        } else if (coord && coord != "tt") {
+        } else if (coord && coord != "tt") 
+		{
 			this.board.addStone(pt, color);
-			this.rules.apply(pt, color);
-			if (this.prefs.markCurrent && this.doRender) {
-                this.addMarker(coord, "current");
+			try
+			{
+				this.rules.apply(pt, color);
+				if (this.prefs.markCurrent && this.doRender) {
+					this.addMarker(coord, "current");
+				}
+			} catch (e)
+			{
+				this.board.rollback();
+				alert(e);
 			}
-        }
+		}
     },
-
+	
     addStone: function(coord, color) {
         if (!(coord instanceof Array)) {
 			coord = [coord];
@@ -1291,5 +1368,19 @@ Y.extend(NS.Player, Y.Base, {
 			alert("Croaked: " + msg);
 			this.croaked = true;
         }
+    },
+	/*****************
+	 * Progressive Loading Code
+	 ***************/
+    fetchProgressiveData: function(completeFn) {
+        var loadNode = this.cursor.node || null;
+        if (loadNode && loadNode._cached) return;
+		
+        var loadId = (loadNode && loadNode._id) || 0;
+        this.progressiveLoads++;
+		
+		var url = this.progressiveUrl;
+
+        this.remoteLoad(url, {id: loadId, pid: this.uniq}, loadNode, null, completeFn);
     }
 });

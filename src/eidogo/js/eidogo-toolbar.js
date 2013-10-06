@@ -51,10 +51,12 @@ Y.extend(NS.Toolbar, Y.Widget, {
 
 	resetVariations: function()
 	{
+		if(!this.player.variations) return;
+
 		this.variationsDiv.setHTML('Variations: ');
 		for(var i = 0; i < this.player.variations.length; i++)
 		{
-			var p = Y.Node.create('<div class="eidogo-variation">' + (i) + '</div>');
+			var p = Y.Node.create('<a class="eidogo-variation" href="#">' + (i+1) + '</a>');
 			p.on('click', function(e, varNum) { this.player.variation(varNum); }, this, i );
 			this.variationsDiv.appendChild(p);
 		}

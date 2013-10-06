@@ -34,8 +34,6 @@ var ShapeRenderers =
         {
 	        return function()
 	        {
-	            this.fillStyle = "#ff0000";
-	            this.strokeStyle = "#000";
 	            this.fillRect(this.stoneSize*(pt.x + 0.25),  
 			                  this.stoneSize*(pt.y + 0.25),
 			                  this.stoneSize/2, 
@@ -50,8 +48,6 @@ var ShapeRenderers =
 		{
 			return function() {
 				this.beginPath()
-				this.fillStyle = "#ff0000";
-				this.strokeStyle = "#000";
 				this.moveTo(this.stoneSize*(pt.x + 0.5),  
 							this.stoneSize*(pt.y + 0.15));
 				this.lineTo(this.stoneSize*(pt.x + 0.75),  
@@ -65,13 +61,12 @@ var ShapeRenderers =
 				this.closePath();
 			}
 		},
+		current: function(pt) { return ShapeRenderers.circle(pt); },
 		circle: function(pt)
         {
 	        return function()
 	        {
 				this.beginPath()
-	            this.fillStyle = "#ff0000";
-	            this.strokeStyle = "#000";
 	            this.arc(this.stoneSize*(pt.x + 0.5),  
 		                 this.stoneSize*(pt.y + 0.5),
 		                 this.stoneSize/4, 
@@ -97,8 +92,6 @@ var ShapeRenderers =
         {
 	        return function()
 	        {
-	            this.fillStyle = "#ffffff";
-	            this.strokeStyle = "#000000";
 				this.textAlign = "center";
 				this.textBaseline = 'middle';
 	            this.font = 'bold '+ this.stoneSize*.5 + 'pt Calibri';
@@ -242,6 +235,14 @@ Y.extend(NS.CanvasRenderer, Y.Widget, {
 	        }
 	        if(renderedMarkers[i])
 	        {
+				if( ! renderedStones[i] ) 
+				{
+					context.fillStyle = "#FFFFCC" ;
+					context.fillRect( (i%boardSize) * stoneSize, Math.floor(i/boardSize) * stoneSize, stoneSize, stoneSize);					
+				}
+				//this only matters if there was a stone rendered before.  So the above if statement won't break anything.
+				context.fillStyle = (context.fillStyle == "#000000") ? "#FFFFFF" : "#000000";
+
 		        renderedMarkers[i].call(context);
 	        }
 	    }

@@ -11,7 +11,7 @@
 	"eidogo-player": {
             "jsfiles": [ "js/eidogo-player.js"],
             "config": {
-                "requires": [ "widget", "event", "node-base", "io", "eidogo", "eidogo-gametree", "eidogo-sgfparser", "eidogo-renderer-canvas", "eidogo-board", "eidogo-rules" ]
+                "requires": [ "querystring-stringify-simple", "widget", "event", "node-base", "io", "eidogo", "eidogo-gametree", "eidogo-sgfparser", "eidogo-renderer-canvas", "eidogo-board", "eidogo-rules" ]
             }
         },
 	"eidogo-sgfparser": {

@@ -38,6 +38,7 @@ Y.extend(NS.Rules, Y.Base, {
 		if (this.board.getStone(pt) != this.board.EMPTY) {
 			return false;
 		}
+
 		// TODO: check for suicide? (allowed in certain rulesets)    
 		// TODO: ko
 		return true;
@@ -47,6 +48,10 @@ Y.extend(NS.Rules, Y.Base, {
      **/
     apply: function(pt, color) {
 		this.doCaptures(pt, color);
+		if( this.board.getStone(pt) == this.board.EMPTY )
+		{
+			throw "suicide!";
+		}
     },
     /**
      * Thanks to Arno Hollosi for the capturing algorithm
