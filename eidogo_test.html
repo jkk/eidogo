@@ -3,44 +3,116 @@
 <head>
 <title>Test Goban Widget</title>
 <style>
-html
-{
-padding:0;
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
 }
-
-body
-{
-margin:0;
-}
-
 a.eidogo-variation
 {
-display:inline-block;
-height:1em;
-width: 1em;
-text-decoration: none;
 border: 1px solid black;
+text-decoration: none;
 text-align: center;
 cursor: hand;
 margin: 0.25em;
 }
 
+.eidogo-node
+{
+text-decoration: none;
+cursor: pointer;
+margin: 0.25em;
+}
+.yui3-eidogo-toolbar
+{
+display: block;
+border: 1px solid black;
+-webkit-touch-callout: none;
+-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;
+}
+div#comments
+{
+display: block;
+overflow: auto;
+height: 30%;
+border: 1px solid black;
+-webkit-touch-callout: none;
+-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;
+}
+div#navtree
+{
+display: block;
+overflow: auto;
+height: 55%;
+border: 1px solid black;
+-webkit-touch-callout: none;
+-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;
+}
+
+ol
+{
+display: none;
+}
+
+ol.eidogo-activeNode, li.eidogo-activeNode > ol
+{
+display: block;
+border: 1px none black;
+border-bottom: 1px solid black;
+font-weight: bold;
+}
+
+li.eidogo-activeNode
+{
+display: list-item;
+border: 1px none black;
+border-bottom: 1px solid black;
+font-weight: bold;
+}
+
 div.pure-g-r
 {
-height:100%;
+    height:100%;
 }
 
 div.pure-u-2-3
 {
-text-align: center;
-height: 100%;
+    text-align: center;
+    height: 100%;
+}
+
+div.pure-u-1-3
+{
+    text-align: left;
+    height: 100%;
+}
+
+.pure-u-1-3 {
+    overflow: hidden;
 }
 
 @media (max-width:767px) {
-div.pure-u-2-3
-{
-height: 80%;
-}
+    div.pure-u-2-3
+    {
+        height: 60%;
+    }
+    div.pure-u-1-3
+    {
+        height: 40%;
+    }
 }
 
 
@@ -56,17 +128,19 @@ src="http://yui.yahooapis.com/3.12.0/build/yui/yui-debug.js"></script>
 <script type="text/javascript" src="build/eidogo-gametree/eidogo-gametree.js"></script>
 <script type="text/javascript"
 src="build/eidogo-board/eidogo-board.js"></script>
-<script type="text/javascript" src="build/eidogo-toolbar/eidogo-toolbar.js"></script>
+<script type="text/javascript"
+src="build/eidogo-toolbar/eidogo-toolbar.js"></script>
+<script type="text/javascript" src="build/eidogo-navtree/eidogo-navtree.js"></script>
 <script src="js/gobantest.js"></script>
 </head>
 <body class="yui3-skin-sam" style="height: 100%">
 <div class="pure-g-r">
-<div class="pure-u-2-3"> <div id="goban"></div> </div>
+<div class="pure-u-2-3"><div id="goban"></div></div>
 <div class="pure-u-1-3">
-<div id="toolbar"></div>
-<div id="comments">Comments:</div>
+  <div id="toolbar"></div>
+  <div id="comments">Comments:</div>
+  <div id="navtree"></div>
 </div>
-
 </div>
 </div>
 </body>

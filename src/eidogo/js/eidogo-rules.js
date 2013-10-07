@@ -12,8 +12,9 @@
 var NS = Y.namespace('Eidogo');
 
 NS.Rules = function(board) {
-    NS.Rules.superclass.constructor.apply(this,arguments);
-    this.init(board);
+    NS.Rules.superclass.constructor.apply(this,{});
+    this.board = board;
+	this.pendingCaptures = [];
 };
 NS.Rules.NAME = 'eidogo-rules';
 
@@ -22,14 +23,6 @@ NS.Rules.ATTRS = {
 };
 
 Y.extend(NS.Rules, Y.Base, {
-    /**
-     * @constructor
-     * @param {NS.Board} board The board to apply rules to
-     */
-    init: function(board) {
-		this.board = board;
-		this.pendingCaptures = [];
-    },
     /**
      * Called to see whether a stone may be placed at a given point
      **/

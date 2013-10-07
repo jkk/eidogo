@@ -50,9 +50,9 @@
         },
 	"eidogo-navtree": {
             "jsfiles": [              
-                "js/eidogo-renderer-canvas.js"],
+                "js/eidogo-navtree.js"],
             "config": {
-                "requires": [ "node-base", "widget", "event", "eidogo"  ]
+                "requires": [ "node-base", "widget", "event", "eidogo", "eidogo-gametree"  ]
             }
         },
 	"eidogo-toolbar": {

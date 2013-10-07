@@ -20,27 +20,25 @@ NS.gameNodeIdCounter = 100000;
  * game information, and so on. Each GameNode has children and (usually) a
  * parent. The first child is the main line.
  */
-NS.GameNode = function() {
-    NS.GameNode.superclass.constructor.apply(this,arguments);
-    this.init.apply(this, arguments);
+
+/**
+ * @constructor
+ * @param {GameNode} parent Parent of the node
+ * @param {Object} properties SGF-like JSON object to load into the node
+ */
+NS.GameNode = function(parent, properties, id) {
+ //   NS.GameNode.superclass.constructor.apply(this,{});
+    this._id = (typeof id != "undefined" ? id : NS.gameNodeIdCounter++);
+	this._parent = parent || null;
+	this._children = [];
+	this._preferredChild = 0;
+	if (properties)
+		this.loadJson(properties);
 };
 
 NS.GameNode.NAME = "eidogo-gamenode";
 
-Y.extend(NS.GameNode, Y.Base,  {
-    /**
-     * @constructor
-     * @param {GameNode} parent Parent of the node
-     * @param {Object} properties SGF-like JSON object to load into the node
-     */
-    init: function(parent, properties, id) {
-		this._id = (typeof id != "undefined" ? id : NS.gameNodeIdCounter++);
-		this._parent = parent || null;
-		this._children = [];
-		this._preferredChild = 0;
-		if (properties)
-			this.loadJson(properties);
-    },
+NS.GameNode.prototype =  {
     /**
      * Adds a property to this node without replacing existing values. If
      * the given property already exists, it will make the value an array
@@ -149,16 +147,20 @@ Y.extend(NS.GameNode, Y.Base,  {
      * Applies a function to this node and all its children, recursively
      * (although we use a stack instead of actual recursion)
      **/
-    walk: function(fn, thisObj) {
-		var stack = [this];
+    walk: function(fn, thisObj, depthFirst) {
+		var collection = [this];
 		var node;
 		var i, len;
-		while (stack.length) {
-			node = stack.pop();
-			fn.call(thisObj || this, node);
+		while (collection.length) {
+			node = depthFirst ? collection.shift() : collection.pop();
+
+			if( fn.call(thisObj || this, node) ) break;
 			len = (node._children ? node._children.length : 0);
 			for (i = 0; i < len; i++)
-				stack.push(node._children[i]);
+			{
+				if( depthFirst) collection.unshift(node._children[i])
+				else collection.push(node._children[i]);
+			}
 		}
     },
     /**
@@ -197,6 +199,14 @@ Y.extend(NS.GameNode, Y.Base,  {
 		}
 		return deleted;
     },
+	countSiblings: function()
+	{
+		return this._parent ? this._parent.countChildren() - 1 : 0;
+	},
+	countChildren: function()
+	{
+		return this._children ? this._children.length : 0;
+	},
     /**
      * Returns the node's position in its parent's _children array
      **/
@@ -249,25 +259,23 @@ Y.extend(NS.GameNode, Y.Base,  {
 		
 		return sgf;
     }
-});
+};
 
 
 
 /**
  * @class GameCursor is used to navigate among the nodes of a game tree.
  */
-NS.GameCursor = function() {
-    this.init.apply(this, arguments);
+NS.GameCursor = function(node) {
+//	NS.GameCursor.superclass.constructor.apply(this,{});
+	this.node = node;
 }
 
-Y.extend(NS.GameCursor, Y.Base, {
+NS.GameCursor.prototype = {
     /**
      * @constructor
      * @param {NS.GameNode} A node to start with
      */
-    init: function(node) {
-		this.node = node;
-    },
     next: function(varNum) {
 		if (!this.hasNext()) return false;
 		varNum = (typeof varNum == "undefined" || varNum == null ?
@@ -350,4 +358,4 @@ Y.extend(NS.GameCursor, Y.Base, {
 		while (cur.previous()) {};
 		return cur.node;
     }
-});
+};

@@ -14,34 +14,33 @@
  */
 var NS = Y.namespace('Eidogo');
 
-NS.Board = function() {
-    NS.Board.superclass.constructor.apply(this,arguments);
-    this.init.apply(this, arguments);
+/**
+ * @constructor
+ * @param {Object} The renderer to use to draw the board. Renderers must
+ * have at least three methods: clear(), renderStone(), and renderMarker()
+ * @param {Number} Board size -- theoretically could be any size,
+ * but there's currently only CSS for 9, 13, and 19
+ */
+NS.Board = function(renderer, boardSize) {
+    NS.Board.superclass.constructor.apply(this,{});
+
+    this.boardSize = boardSize || 19;
+    this.stones = this.makeBoardArray(this.EMPTY);
+    this.markers = this.makeBoardArray(this.EMPTY);
+    this.captures = {};
+    this.captures.W = 0;
+    this.captures.B = 0;
+    this.cache = [];
+    this.renderer = renderer;
 };
 
 Y.extend( NS.Board, Y.Base,  {
     WHITE: 1,
     BLACK: -1,
     EMPTY: 0,
-    /**
-     * @constructor
-     * @param {Object} The renderer to use to draw the board. Renderers must
-     * have at least three methods: clear(), renderStone(), and renderMarker()
-     * @param {Number} Board size -- theoretically could be any size,
-     * but there's currently only CSS for 9, 13, and 19
-     */
-    init: function(renderer, boardSize) {
-        this.boardSize = boardSize || 19;
-        this.stones = this.makeBoardArray(this.EMPTY);
-        this.markers = this.makeBoardArray(this.EMPTY);
-        this.captures = {};
-        this.captures.W = 0;
-        this.captures.B = 0;
-        this.cache = [];
-        this.renderer = renderer;
-    },
+  
     reset: function() {
-        this.init(this.renderer, this.boardSize);
+        this.constructor(this.renderer, this.boardSize);
     },
     clear: function() {
         this.clearStones();

@@ -14,6 +14,8 @@ var ShapeRenderers =
         {
 	        return ShapeRenderers.stone(pt, angle, '#000000');
         },
+
+		//TODO: Swap this out for rendering vector textures.
         stone: function (pt, angle, color) 
         {
 	        return function()
@@ -105,24 +107,20 @@ var ShapeRenderers =
 
 
 NS.CanvasRenderer = function (cfg) {
-    if(typeof cfg.player == 'undefined') throw "no renderer configuration";
-    
-
-    //domContainer, boardSize, player, crop
-
-    this.player = cfg.player;
     this.boardSize = parseInt(cfg.boardSize);
     this.antislip = true;
     
     NS.CanvasRenderer.superclass.constructor.apply(this, arguments);
 
     this.canvas = Y.Node.create('<canvas></canvas>');
-    var replaceTag = Y.one(cfg.srcNode);
-	this.srcNode = replaceTag.ancestor();
-    this.srcNode.insert(this.canvas, replaceTag);
-	replaceTag.remove();
+	var srcNode = Y.one(cfg.srcNode)
+	this.srcNode = srcNode.ancestor();
+    srcNode.insert(this.canvas, 'replace');
+
 
     this.set('boardSize', this.boardSize || 19);
+
+	this.boardSize = this.get('boardSize');
     this.set('stoneSize', 20);
     
     Y.one(document).on('windowresize', this.resizeBoard, this );

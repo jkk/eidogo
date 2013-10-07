@@ -20,6 +20,8 @@ NS.Player = function (cfg) {
     NS.Player.superclass.constructor.apply(this,arguments);
 
     cfg = cfg || {};
+
+	this.reset(cfg)
     
     // play, add_b, add_w, region, tr, sq, cr, label, number, score(?)
     this.mode = cfg.mode ? cfg.mode : "play";
@@ -27,21 +29,11 @@ NS.Player = function (cfg) {
     // URL path to SGF files
     this.sgfPath = cfg.sgfPath;
 
-    //domContainer
-    this.srcNode = Y.one(cfg.srcNode) || "body";
-
     this.renderer = cfg.renderer || Y.Eidogo.Renderers.CanvasRenderer;
     this.doRender = true;
 
     // unique id, so we can have more than one player on a page and for progressive loading
     this.uniq = (new Date()).getTime();
-
-    // pattern and game info search
-    this.searchUrl = cfg.searchUrl;
-    this.showingSearch = false;
-    
-    // save to file
-    this.saveUrl = cfg.saveUrl;
 
 	//progressiveLoad url?
 	this.progressiveUrl = cfg.progressiveUrl;
@@ -112,9 +104,6 @@ NS.Player = function (cfg) {
 		AP: t['created with']
 		// FF, GM, TM
     };
-
-    // UI theme
-    this.theme = cfg.theme;
     
     // initialize per-game settings
     this.reset(cfg);
@@ -135,7 +124,7 @@ NS.Player = function (cfg) {
     //Y.one(document).on('mouseUp', this.handleDocMouseUp, this);
     
     if (cfg.sgf || cfg.sgfUrl || (cfg.sgfPath && cfg.gameName) || cfg.progressiveUrl ) {
-		this.loadSgf(cfg);
+		this.loadSgf();
     }
     
     this.fire('initDone', {});
@@ -220,8 +209,12 @@ Y.extend(NS.Player, Y.Base, {
     /**
      * Load an SGF file or start from a blank board
      **/
-    loadSgf: function(cfg, completeFn) {
-        cfg = cfg || {};
+    loadSgf: function() {
+		var self = this;
+		var completeFn = function() { 
+			self.fire('loadComplete',{}); 
+		}
+        var cfg = this.prefs;
         
         this.reset(cfg);
         
@@ -518,9 +511,10 @@ Y.extend(NS.Player, Y.Base, {
 			if( typeof this.renderer == "function" )
 			{
 				rendererProto = this.renderer;
-				this.renderer = new rendererProto({srcNode: this.srcNode,
+
+				//TODO: Figure out a good order for this renderer to be loaded.
+				this.renderer = new rendererProto({srcNode: this.prefs.srcNode,
 												   boardSize: size,
-												   player: this,
 												   crop: this.cropParams});	
 			} else if( typeof this.renderer != "object" )
 			{
@@ -926,6 +920,7 @@ Y.extend(NS.Player, Y.Base, {
 									   if (!path && node.getMove() == coord) 
 									   {
 										   path = (new NS.GameCursor(node)).getPath();
+										   return true; //stop walking
 									   }
 								   },
 								   this);
@@ -1255,7 +1250,7 @@ Y.extend(NS.Player, Y.Base, {
      **/
     prependComment: function(content, cls) {
         cls = cls || "comment-status";
-		this.comments = msg + "\n" + this.comments;
+		this.comments = content + "\n" + this.comments;
     },
     
     /**

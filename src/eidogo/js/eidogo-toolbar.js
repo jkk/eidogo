@@ -11,9 +11,10 @@ NS.Toolbar = function (cfg) {
 		throw "No player!"
 
 	this.srcNode = Y.one(cfg.srcNode);
+	this.set('boundingBox', this.srcNode);
 
 	this.player.on('execNode', this.resetVariations, this);
-
+	
 	if( this.srcNode )
 		this.render();
 }
@@ -25,7 +26,7 @@ NS.Toolbar.ATTRS = {
 Y.extend(NS.Toolbar, Y.Widget, {
     renderUI: function()
 	{
-		var html = "<button class='eidogo-beginning'>&lt;&lt;<button class='eidogo-back'>&lt;</button><button class='eidogo-fwd'>&gt;</button><div class='eidogo-variations'></div>";
+		var html = "<button class='eidogo-rewind'>&lt;&lt;</button><button class='eidogo-back'>&lt;</button><button class='eidogo-fwd'>&gt;</button><button class='eidogo-fastFwd'>&gt;&gt;</button><div class='eidogo-variations'>Variations:</div>";
 		this.srcNode.append(html);
 		this.backButton = new Y.Button({
 			srcNode: this.srcNode.one('.eidogo-back')
@@ -33,16 +34,28 @@ Y.extend(NS.Toolbar, Y.Widget, {
 		this.forwardButton = new Y.Button({
 			srcNode: this.srcNode.one('.eidogo-fwd')
 		}).render();
-		this.beginningButton = new Y.Button({
-			srcNode: this.srcNode.one('.eidogo-beginning')
+		this.rewindButton = new Y.Button({
+			srcNode: this.srcNode.one('.eidogo-rewind')
 		}).render();
+		this.fastFwdButton = new Y.Button({
+			srcNode: this.srcNode.one('.eidogo-fastFwd')
+		}).render();
+		
 		this.variationsDiv = this.srcNode.one('.eidogo-variations');
 	},
 	bindUI: function()
 	{
 		this.backButton.on('click', function(e){this.player.back()}, this); 
 		this.forwardButton.on('click', function(e){this.player.forward()}, this); 
-		this.beginningButton.on('click', function(e){this.player.resetCursor(false, false)}, this); 
+		this.rewindButton.on('click', function(e){
+			var curPath =  this.player.cursor.getPath();
+			this.player.goTo(curPath.slice(0,curPath.length-10), true)
+		}, this); 
+		this.fastFwdButton.on('click', function(e){
+			var curDepth =  this.player.cursor.getPath().length;
+			var cursor = new NS.GameCursor(this.player.cursor.getNextNodeWithVariations());
+			this.player.goTo(cursor.getPath().slice(0,curDepth+10), true)
+		}, this);
 	},
 	syncUI: function()
 	{
@@ -51,9 +64,9 @@ Y.extend(NS.Toolbar, Y.Widget, {
 
 	resetVariations: function()
 	{
+		this.variationsDiv.setHTML('Variations: ');
 		if(!this.player.variations) return;
 
-		this.variationsDiv.setHTML('Variations: ');
 		for(var i = 0; i < this.player.variations.length; i++)
 		{
 			var p = Y.Node.create('<a class="eidogo-variation" href="#">' + (i+1) + '</a>');
