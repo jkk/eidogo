@@ -49,8 +49,9 @@ Y.extend(NS.NavTree, Y.Widget, {
 	visitNode: function(node)
 	{
 		var curDomNode;
-		curDomNode = Y.Node.create('<li class="eidogo-node" ><a>' + node.countChildren() + '</a></li>');
+		curDomNode = Y.Node.create('<li class="eidogo-node" ><a></a></li>');
 		curDomNode.sgfNode = node;
+		this.setNodeText(curDomNode);
 		(curDomNode).on('click', this.gotoNodeHandler, this, node);
 
 		if(node._parent )
@@ -76,6 +77,13 @@ Y.extend(NS.NavTree, Y.Widget, {
 		this.nodeTags[node._id] = curDomNode; 
 	},
 
+	setNodeText: function(yuinode)
+	{
+		var data = [yuinode.sgfNode.getMoveColor(), 'Vars:', yuinode.sgfNode.countChildren(), ].join(' ');
+		yuinode.one('a').set('text', data);
+		
+	},
+
 	selectNode: function()
 	{
 		var id = this.player.cursor.node._id
@@ -87,7 +95,8 @@ Y.extend(NS.NavTree, Y.Widget, {
 			this.activeNode.removeClass('eidogo-activeNode');
 			this.activeNode.ancestors("ol,li").removeClass('eidogo-activeNode');
 			
-			this.activeNode.one('a').set('text', this.activeNode.sgfNode.countChildren());
+			this.setNodeText(this.activeNode)
+			
 		}
 		this.activeNode = this.nodeTags[id];
 

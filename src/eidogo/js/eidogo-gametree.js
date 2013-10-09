@@ -39,6 +39,79 @@ NS.GameNode = function(parent, properties, id) {
 NS.GameNode.NAME = "eidogo-gamenode";
 
 NS.GameNode.prototype =  {
+//Pree-init properties for V8 speed, and as a potential error check of valid properties.
+	AB: null,
+	AE: null,
+	AN: null,
+	AP: null,
+	AR: null,
+	AS: null,
+	AW: null,
+	B:  null,
+	BL: null,
+	BM: null,
+	BR: null,
+	BT: null,
+	C : null,
+	CA: null,
+	CP: null,
+	CR: null,
+	DD: null,
+	DM: null,
+	DO: null,
+	DT: null,
+	EV: null,
+	FF: null,
+	FG: null,
+	GB: null,
+	GC: null,
+	GM: null,
+	GN: null,
+	GW: null,
+	HA: null,
+	HO: null,
+	IP: null,
+	IT: null,
+	IY: null,
+	KM: null,
+	KO: null,
+	LB: null,
+	LN: null,
+	MA: null,
+	MN: null,
+	N: null,
+	OB: null,
+	ON: null,
+	OT: null,
+	OW: null,
+	PB: null,
+	PC: null,
+	PL: null,
+	PM: null,
+	PW: null,
+	RE: null,
+	RO: null,
+	RU: null,
+	SE: null,
+	SL: null,
+	SO: null,
+	SQ: null,
+	ST: null,
+	SU: null,
+	SZ: null,
+	TB: null,
+	TE: null,
+	TM: null,
+	TR: null,
+	TW: null,
+	UC: null,
+	US: null,
+	V:  null,
+	VW: null,
+	W:  null,
+	WL: null,
+	WR: null,
+	WT: null,
     /**
      * Adds a property to this node without replacing existing values. If
      * the given property already exists, it will make the value an array
@@ -48,7 +121,7 @@ NS.GameNode.prototype =  {
 		if (this[prop]) {
 			if (!(this[prop] instanceof Array))
 				this[prop] = [this[prop]];
-			if (!this[prop].contains(value))
+			if (this[prop].indexOf(value) == -1)
 				this[prop].push(value);
 		} else {
 			this[prop] = value;
@@ -126,8 +199,13 @@ NS.GameNode.prototype =  {
      * Add a new child (variation)
      **/
     appendChild: function(node) {
+		if( typeof node == "undefined" )
+			node = new NS.GameNode();
+
 		node._parent = this;
 		this._children.push(node);
+
+		return node;
     },
     /**
      * Returns all the properties for this node
@@ -167,12 +245,16 @@ NS.GameNode.prototype =  {
      * Get the current black or white move as a raw SGF coordinate
      **/
     getMove: function() {
-		if (typeof this.W != "undefined")
-			return this.W;
-		else if (typeof this.B != "undefined")
-			return this.B;
+		if(typeof this.W == "string") return this.W;
+		else if (typeof this.B == "string") return this.B;
 		return null;
     },
+	getMoveColor: function()
+	{
+		if (typeof this.W == "string") return "W";
+		if (typeof this.B == "string") return "B";
+		return null;
+	},
     /**
      * Empty the current node of any black or white stones (played or added)
      **/
@@ -308,8 +390,8 @@ NS.GameCursor.prototype = {
 		if (!this.hasNext()) return null;
 		var i, node;
 		for (var i = 0; node = this.node._children[i]; i++)
-			if (node.W || node.B)
-				return node.W ? "W" : "B";
+			if (node.getColor())
+				return node.getColor();
 		return null;
     },
     getNextNodeWithVariations: function() {

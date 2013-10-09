@@ -10,8 +10,8 @@ YUI({filter: 'debug'}).use( 'querystring-stringify-simple', 'eidogo-player', 'ei
 									srcNode: '#goban',
 									//renderer:       Y.Eidogo.Renderers.CanvasRenderer,
 									//progressiveUrl: "http://eidogo.com/backend/kjd_progressive.php"
-									//sgf: sgfData
-									sgfUrl:          "sgf/oasiny.sgf"
+									sgf: sgfData
+									//sgfUrl:          "sgf/oasiny.sgf"
 								});
 								
 								window.player.on('execNode', function (e) 

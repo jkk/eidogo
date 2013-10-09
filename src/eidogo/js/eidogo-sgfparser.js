@@ -3,8 +3,6 @@
  * Copyright (c) 2007, Justin Kramer <jkkramer@gmail.com>
  * Code licensed under AGPLv3:
  * http://www.fsf.org/licensing/licenses/agpl-3.0.html
- *
- * Quick and dirty SGF parser.
  */
 
 /**
@@ -14,106 +12,77 @@
 
 var NS = Y.namespace('Eidogo');
 
-NS.SgfParser = function() {
-    NS.SgfParser.superclass.constructor.apply(this,arguments);
-    this.init.apply(this, arguments);
+NS.SgfParser = function(sgf, completeFn) {
+    completeFn = (typeof completeFn == "function") ? completeFn : null;
+	this.sgf = sgf;
+	this.index = 0;
+	this.curChar = "";
+	this.root = new NS.GameNode();
+	this.parseTree(this.root);
+	completeFn && completeFn.call(this);
 }
 
 NS.SgfParser.NAME = 'eidogo-sgfparser';
 
-NS.SgfParser.ATTRS = {
-    //name: {value: ..};
-};
+NS.SgfParser.prototype =  {
+    parseTree: function(startNode) {
+		var nodeStack = [];
 
-Y.extend(NS.SgfParser, Y.Base,  {
-    /**
-     * @constructor
-     * @param {String} sgf Raw SGF data to parse
-     */
-    init: function(sgf, completeFn) {
-		completeFn = (typeof completeFn == "function") ? completeFn : null;
-		this.sgf = sgf;
-		this.index = 0;
-		this.root = {_children: []};
-		this.parseTree(this.root);
-		completeFn && completeFn.call(this);
-    },
-    parseTree: function(curnode) {
+		curNode = startNode;
 		while (this.index < this.sgf.length) {
-			var c = this.curChar();
-			this.index++;
+			var c = this.getChar();
 			switch (c) {
 			case ';':
-				curnode = this.parseNode(curnode);
+				curNode = curNode.appendChild();
+				this.parseProperties(curNode);
 				break;
 			case '(':
-				this.parseTree(curnode);
+				nodeStack.push(curNode);
+				//curNode = curNode.appendChild();
 				break;
 			case ')':
-				return;
+				curNode = nodeStack.pop();
 				break;
 			}
 		}
     },
-    parseNode: function(parent) {
-		var node = {_children: []};
-		if (parent)
-			parent._children.push(node);
-		else
-			this.root = node;
-		node = this.parseProperties(node);
-		return node;
-    },
+
     parseProperties: function(node) {
-		var key = "";
-		var values = [];
+		var keyTemp = "";
 		var i = 0;
+		var c = 0;
+		var lastKey = "";
 		while (this.index < this.sgf.length) {
-			var c = this.curChar();
+			var c = this.getChar();
+
 			if (c == ';' || c == '(' || c == ')') {
+				this.index--;
 				break;
-			}
-			if (this.curChar() == '[') {
-				while (this.curChar() == '[') {
-					this.index++;
-					values[i] = "";
-					while (this.curChar() != ']' && this.index < this.sgf.length) {
-						if (this.curChar() == '\\') {
-							this.index++;
-							// not technically correct, but works in practice
-							while (this.curChar() == "\r" || this.curChar() == "\n") {
-								this.index++;
-							}
-						}
-						values[i] += this.curChar();
-						this.index++;
-					}
-					i++;
-					while (this.curChar() == ']' || this.curChar() == "\n" || this.curChar() == "\r") {
-						this.index++;
+			} else if (c == '[') {
+				var value = ""
+				var lastKey = keyTemp || lastKey;
+				keyTemp = "";
+
+				c = this.getChar();
+
+				while ( c != ']')  {
+					value += c;
+					c = this.getChar();
+					if (c == '\\') {
+						c = this.getChar();
 					}
 				}
-				if (node[key]) {
-					if (!(node[key] instanceof Array)) {
-						node[key] = [node[key]];
-					}
-					node[key] = node[key].concat(values);
-				} else {
-					node[key] = values.length > 1 ? values : values[0];
-				}
-				key = "";
-				values = [];
-				i = 0;
-				continue;
+
+				node.pushProperty(lastKey,value);
+			} else if (c != " " && c != "\n" && c != "\r" && c != "\t") {
+				keyTemp += c;
 			}
-			if (c != " " && c != "\n" && c != "\r" && c != "\t") {
-				key += c;
-			}
-			this.index++;
 		}
 		return node;
     },
-    curChar: function() {
-		return this.sgf.charAt(this.index);
-    }
-});
+	getChar: function() {
+		this.curChar = this.sgf.charAt(this.index);
+		this.index++;
+		return this.curChar;
+	}
+};

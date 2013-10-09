@@ -11,6 +11,35 @@ var NS = Y.namespace('Eidogo');
 // shortcuts (local only to this file)
 var t = NS.resources;
 
+var GameInfoPropLabels =
+	{
+  		GN: t['game'],
+		PW: t['white'],
+		WR: t['white rank'],
+		WT: t['white team'],
+		PB: t['black'],
+		BR: t['black rank'],
+		BT: t['black team'],
+		HA: t['handicap'],
+		KM: t['komi'],
+		RE: t['result'],
+		DT: t['date'],
+		GC: t['info'],
+		PC: t['place'],
+		EV: t['event'],
+		RO: t['round'],
+		OT: t['overtime'],
+		ON: t['opening'],
+		RU: t['ruleset'],
+		AN: t['annotator'],
+		CP: t['copyright'],
+		SO: t['source'],
+		TM: t['time limit'],
+		US: t['transcriber'],
+		AP: t['created with']
+    };
+
+
 /**
  * @class Player is the overarching control structure that allows you to
  * load and replay games. It's a "player" in the sense of a DVD player, not
@@ -77,34 +106,6 @@ NS.Player = function (cfg) {
 		OW: this.showTime
     };
     
-    this.infoLabels = {
-		GN: t['game'],
-		PW: t['white'],
-		WR: t['white rank'],
-		WT: t['white team'],
-		PB: t['black'],
-		BR: t['black rank'],
-		BT: t['black team'],
-		HA: t['handicap'],
-		KM: t['komi'],
-		RE: t['result'],
-		DT: t['date'],
-		GC: t['info'],
-		PC: t['place'],
-		EV: t['event'],
-		RO: t['round'],
-		OT: t['overtime'],
-		ON: t['opening'],
-		RU: t['ruleset'],
-		AN: t['annotator'],
-		CP: t['copyright'],
-		SO: t['source'],
-		TM: t['time limit'],
-		US: t['transcriber'],
-		AP: t['created with']
-		// FF, GM, TM
-    };
-    
     // initialize per-game settings
     this.reset(cfg);
     
@@ -123,9 +124,9 @@ NS.Player = function (cfg) {
     //TODO: Readd this if we add selection regions back.
     //Y.one(document).on('mouseUp', this.handleDocMouseUp, this);
     
-    if (cfg.sgf || cfg.sgfUrl || (cfg.sgfPath && cfg.gameName) || cfg.progressiveUrl ) {
+	/*if (cfg.sgf || cfg.sgfUrl || (cfg.sgfPath && cfg.gameName) || cfg.progressiveUrl ) {
 		this.loadSgf();
-    }
+    }*/
     
     this.fire('initDone', {});
 }
@@ -148,7 +149,7 @@ Y.extend(NS.Player, Y.Base, {
 
 		this.prefs.markCurrent = this.prefs.markCurrent || true;
 
-        // Multiple games can be contained in collectionRoot. We default
+        // Mutiple games can be contained in collectionRoot. We default
         // to the first (collectionRoot._children[0])
         // See http://www.red-bean.com/sgf/sgf4.html 
         this.collectionRoot = new NS.GameNode();
@@ -231,15 +232,12 @@ Y.extend(NS.Player, Y.Base, {
         var noCb = false;
         
         if (typeof cfg.sgf == "string") {
-			
-			// raw SGF data
-			var sgf = new NS.SgfParser(cfg.sgf);
-			this.load(sgf.root);
-			
+			var sgf = (new NS.SgfParser(cfg.sgf));
+			this.loadJsonSgf(sgf.root);
         } else if (typeof cfg.sgf == "object")
 		{
 			// already-parsed JSON game tree
-			this.load(cfg.sgf);
+			this.loadJsonSgf(cfg.sgf);
 		} else if (cfg.progressiveUrl) 
 		{
 			this.progressiveLoads = 0;
@@ -309,7 +307,7 @@ Y.extend(NS.Player, Y.Base, {
                 }
 			}
 			
-			this.load(blankGame);
+			this.loadJsonSgf(blankGame);
         }
         if (!noCb && typeof completeFn == "function") {
 			completeFn();
@@ -320,15 +318,28 @@ Y.extend(NS.Player, Y.Base, {
      * Loads game data into a given target. If no target is given, creates
      * a new gameRoot and initializes the game.
      **/
-    load: function(data, target) {
+    loadJsonSgf: function(data, target) {
         var newGame = false;
-        if (!target) {
-			// load from scratch
+
+		if (  ! target ) {
 			target = new NS.GameNode();
-			this.collectionRoot = target;
         }
-        target.loadJson(data);
-        target._cached = true;
+		
+		if( data instanceof NS.GameNode ) //Already have a setup gamenode, no need to reallocate them all.
+		{
+			data._parent = target.parent;
+			target = data;
+		} else
+		{
+			target.loadJson(data);
+		}
+        
+		
+		if( ! target.parent )
+			this.collectionRoot = data;
+        
+
+		target._cached = true;
 		
         if (!target._parent) {
 			// Loading into tree root; use the first game by default or
@@ -445,7 +456,7 @@ Y.extend(NS.Player, Y.Base, {
 		if (!gameInfo) return;
 		var val, parsedInfo = {};
 		
-		for (var propName in this.infoLabels) {
+		for (var propName in PropertyLabels) {
 			if (gameInfo[propName] instanceof Array) {
 				gameInfo[propName] = gameInfo[propName][0];
 			}

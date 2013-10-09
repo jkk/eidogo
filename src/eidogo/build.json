@@ -18,7 +18,7 @@
             "jsfiles": [              
 	        "js/eidogo-sgfparser.js"],
             "config": {
-                "requires": [ "eidogo"  ]
+                "requires": [ "eidogo", "eidogo-gametree"  ]
             }
         },
 	"eidogo-rules": {
