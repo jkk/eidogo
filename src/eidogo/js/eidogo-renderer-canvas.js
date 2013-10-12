@@ -112,6 +112,9 @@ NS.CanvasRenderer = function (cfg) {
     
     NS.CanvasRenderer.superclass.constructor.apply(this, arguments);
 
+
+	//Replace the given node with the canvas so we can resize the canvas to fit into the original container.
+	//Maybe we shouldn't do this -- but it seems like it works out better for layout.
     this.canvas = Y.Node.create('<canvas></canvas>');
 	var srcNode = Y.one(cfg.srcNode)
 	this.srcNode = srcNode.ancestor();
@@ -128,7 +131,7 @@ NS.CanvasRenderer = function (cfg) {
     this.canvas.on('mousedown', this.handleMouseDown, this);
     this.canvas.on('mouseover', this.handleHover, this);
     this.canvas.on('mouseup', this.handleMouseUp, this);
-    this.canvas.on( this.antislip ? 'dblclick' : 'click', this.handleClick, this);
+    this.canvas.on( cfg.antislip ? 'dblclick' : 'click', this.handleClick, this);
 
     this.renderCache = {
 	    stones: new Array(this.boardSize * this.boardSize),
@@ -156,13 +159,14 @@ Y.extend(NS.CanvasRenderer, Y.Widget, {
 	    var boardSize = this.get('boardSize');
 	    return pt.x + pt.y*boardSize;
     },
+
     getXY: function(evt)
     {
 	    var stoneSize = this.get('stoneSize');
 	    var XY = this.canvas.get('region');
 	    var stoneX = Math.floor( (evt.pageX - XY[0])/stoneSize );
 	    var stoneY = Math.floor( (evt.pageY - XY[1])/stoneSize );
-	    return {x:stoneX, y:stoneY};
+	    return {x:stoneX, y:stoneY, e:e};
     },
     resizeBoard: function()
     {
@@ -201,14 +205,15 @@ Y.extend(NS.CanvasRenderer, Y.Widget, {
 			var y = hoshi[j] + 0.5;
 			context.beginPath()
 	        context.arc(stoneSize*(x),  
-		             stoneSize*(y),
-		             stoneSize * 0.1, 
-		             2 * Math.PI, false);
+						stoneSize*(y),
+						stoneSize * 0.1, 
+						2 * Math.PI, false);
 	        context.fill();
 			context.stroke();
 	        context.closePath();
 		}
-			
+		
+		//Draw board intersections
 	    for(var i = 0.5; i<=boardSize; i++)
 	    {
 	        context.moveTo(stoneSize*i,
@@ -304,22 +309,18 @@ Y.extend(NS.CanvasRenderer, Y.Widget, {
     handleClick: function(e) 
     {
 	    var xy = this.getXY(e);
-		xy.e = e;
 	    this.fire('boardClick', xy);
     },
     handleHover: function(e) {
 	    var xy = this.getXY(e);
-			xy.e = e;
 	    this.fire('boardHover', xy);
     },
     handleMouseDown: function(e) {
 	    var xy = this.getXY(e);
-		xy.e = e;
 	    this.fire('boardMouseDown', xy);
     },
     handleMouseUp: function(e) {
 	    var xy = this.getXY(e);
-		xy.e = e;
 	    this.fire('boardMouseUp', xy);
     },
     showRegion: function(bounds) {
