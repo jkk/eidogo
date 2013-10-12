@@ -14,75 +14,75 @@ var NS = Y.namespace('Eidogo');
 
 NS.SgfParser = function(sgf, completeFn) {
     completeFn = (typeof completeFn == "function") ? completeFn : null;
-	this.sgf = sgf;
-	this.index = 0;
-	this.curChar = "";
-	this.root = new NS.GameNode();
-	this.parseTree(this.root);
-	completeFn && completeFn.call(this);
+    this.sgf = sgf;
+    this.index = 0;
+    this.curChar = "";
+    this.root = new NS.GameNode();
+    this.parseTree(this.root);
+    completeFn && completeFn.call(this);
 }
 
 NS.SgfParser.NAME = 'eidogo-sgfparser';
 
 NS.SgfParser.prototype =  {
     parseTree: function(startNode) {
-		var nodeStack = [];
+        var nodeStack = [];
 
-		curNode = startNode;
-		while (this.index < this.sgf.length) {
-			var c = this.getChar();
-			switch (c) {
-			case ';':
-				curNode = curNode.appendChild();
-				this.parseProperties(curNode);
-				break;
-			case '(':
-				nodeStack.push(curNode);
-				//curNode = curNode.appendChild();
-				break;
-			case ')':
-				curNode = nodeStack.pop();
-				break;
-			}
-		}
+        curNode = startNode;
+        while (this.index < this.sgf.length) {
+            var c = this.getChar();
+            switch (c) {
+            case ';':
+                curNode = curNode.appendChild();
+                this.parseProperties(curNode);
+                break;
+            case '(':
+                nodeStack.push(curNode);
+                //curNode = curNode.appendChild();
+                break;
+            case ')':
+                curNode = nodeStack.pop();
+                break;
+            }
+        }
     },
 
     parseProperties: function(node) {
-		var keyTemp = "";
-		var i = 0;
-		var c = 0;
-		var lastKey = "";
-		while (this.index < this.sgf.length) {
-			var c = this.getChar();
+        var keyTemp = "";
+        var i = 0;
+        var c = 0;
+        var lastKey = "";
+        while (this.index < this.sgf.length) {
+            var c = this.getChar();
 
-			if (c == ';' || c == '(' || c == ')') {
-				this.index--;
-				break;
-			} else if (c == '[') {
-				var value = ""
-				var lastKey = keyTemp || lastKey;
-				keyTemp = "";
+            if (c == ';' || c == '(' || c == ')') {
+                this.index--;
+                break;
+            } else if (c == '[') {
+                var value = ""
+                var lastKey = keyTemp || lastKey;
+                keyTemp = "";
 
-				c = this.getChar();
+                c = this.getChar();
 
-				while ( c != ']')  {
-					value += c;
-					c = this.getChar();
-					if (c == '\\') {
-						c = this.getChar();
-					}
-				}
+                while ( c != ']')  {
+                    value += c;
+                    c = this.getChar();
+                    if (c == '\\') {
+                        c = this.getChar();
+                    }
+                }
 
-				node.pushProperty(lastKey,value);
-			} else if (c != " " && c != "\n" && c != "\r" && c != "\t") {
-				keyTemp += c;
-			}
-		}
-		return node;
+                node.pushProperty(lastKey,value);
+            } else if (c != " " && c != "\n" && c != "\r" && c != "\t") {
+                keyTemp += c;
+            }
+        }
+        return node;
     },
-	getChar: function() {
-		this.curChar = this.sgf.charAt(this.index);
-		this.index++;
-		return this.curChar;
-	}
+    getChar: function() {
+        this.curChar = this.sgf.charAt(this.index);
+        this.index++;
+        return this.curChar;
+    }
 };

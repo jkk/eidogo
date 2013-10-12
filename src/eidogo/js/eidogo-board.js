@@ -38,7 +38,7 @@ Y.extend( NS.Board, Y.Base,  {
     WHITE: 1,
     BLACK: -1,
     EMPTY: 0,
-  
+    
     reset: function() {
         this.constructor(this.renderer, this.boardSize);
     },
@@ -50,12 +50,12 @@ Y.extend( NS.Board, Y.Base,  {
     clearStones: function() {
         // we could use makeBoardArray(), but this is more efficient
         for (var i = 0; i < this.stones.length; i++) {
-			this.stones[i] = this.EMPTY;
+            this.stones[i] = this.EMPTY;
         }
     },
     clearMarkers: function() {
         for (var i = 0; i < this.markers.length; i++) {
-			this.markers[i] = this.EMPTY;
+            this.markers[i] = this.EMPTY;
         }
     },
     clearCaptures: function() {
@@ -65,9 +65,9 @@ Y.extend( NS.Board, Y.Base,  {
     makeBoardArray: function(val) {
         // We could use a multi-dimensional array but doing this avoids
         // the need for deep copying during commit, which is very slow.
-		var arr = new Array(this.boardSize * this.boardSize)
-		for( var i = 0; i < arr.length; i++)
-			arr[i] = val;
+        var arr = new Array(this.boardSize * this.boardSize)
+        for( var i = 0; i < arr.length; i++)
+            arr[i] = val;
 
         return arr;
     },
@@ -77,23 +77,23 @@ Y.extend( NS.Board, Y.Base,  {
      */
     commit: function() {
         this.cache.push({
-			stones: this.stones.slice(),
-			markers: this.markers.slice(),
-			captures: {W: this.captures.W, B: this.captures.B}
+            stones: this.stones.slice(),
+            markers: this.markers.slice(),
+            captures: {W: this.captures.W, B: this.captures.B}
         });
     },
     /**
      * Undo any uncomitted changes.
      */
     rollback: function() {
-		last = this.cache[this.cache.length-1];
+        last = this.cache[this.cache.length-1];
         if (last) {
-			this.stones = last.stones.slice();
-			this.markers = last.markers.slice();
-			this.captures.W = last.captures.W;
-			this.captures.B = last.captures.B;
+            this.stones = last.stones.slice();
+            this.markers = last.markers.slice();
+            this.captures.W = last.captures.W;
+            this.captures.B = last.captures.B;
         } else {
-			this.clear();
+            this.clear();
         }
     },
     /**
@@ -103,7 +103,7 @@ Y.extend( NS.Board, Y.Base,  {
         steps = steps || 1;
         this.rollback();
         for (var i = 0; i < steps; i++) {
-			this.cache.pop();
+            this.cache.pop();
         }
         this.rollback();
     },
@@ -117,10 +117,10 @@ Y.extend( NS.Board, Y.Base,  {
         var region = [].setLength(w * h, this.EMPTY);
         var offset;
         for (var y = t; y < t + h; y++) {
-			for (var x = l; x < l + w; x++) {
+            for (var x = l; x < l + w; x++) {
                 offset = (y - t) * w + (x - l);
                 region[offset] = this.getStone({x:x, y:y});
-			}
+            }
         }
         return region;
     },
@@ -133,39 +133,51 @@ Y.extend( NS.Board, Y.Base,  {
     render: function(complete) {
         var color, type;
         var len;
-	    var last = this.cache[this.cache.length - 1];
-	    
-	    if(!last) throw "Nothing to render idiots!"; //No commited changes to render -- do everything
+        var last = this.cache[this.cache.length - 1];
+        
+        if(!last) throw "Nothing to render idiots!"; //No commited changes to render -- do everything
 
-	    if(!this.lastRender)//This needs to be here.  If it's in the init it gets triggered on a board refresh and then things don't update properly.
-			this.lastRender = { stones: this.stones.slice(), markers: this.markers.slice()	};
+        if(!this.lastRender)//This needs to be here.  If it's in the init it gets triggered on a board refresh and then things don't update properly.
+            this.lastRender = { stones: this.stones.slice(), markers: this.markers.slice() };
 
 
-	    var colorLookup = {}
-	    colorLookup[this.WHITE] = "white"; 
-	    colorLookup[this.BLACK] = "black";
-	    colorLookup[this.EMPTY] = "empty";
-	    
+        var colorLookup = {}
+        colorLookup[this.WHITE] = "white"; 
+        colorLookup[this.BLACK] = "black";
+        colorLookup[this.EMPTY] = "empty";
+        
         var i;
         for (var x = 0; x < this.boardSize; x++) {
-	        for (var y = 0; y < this.boardSize; y++) {
-		        i =  y * this.boardSize + x;
-		        if( complete || this.lastRender.stones[i] != last.stones[i] )
-		        {
-		            this.renderer.setStone({x:x, y:y}, colorLookup[last.stones[i]]);
-		            this.lastRender.stones[i] = last.stones[i];
-		        }
-		        
-		        //Maybe we want to set marker color here and have it change based on stone color.
-		        if( complete || this.lastRender.markers[i] != last.markers[i] )
-		        {
-		            this.renderer.setMarker({x:x, y:y}, last.markers[i]);
-		            this.lastRender.markers[i] = last.markers[i];
-		        }
-		        
-	        }
-	    }
+            for (var y = 0; y < this.boardSize; y++) {
+                i =  y * this.boardSize + x;
+                if( complete || this.lastRender.stones[i] != last.stones[i] )
+                {
+                    this.renderer.setStone({x:x, y:y}, colorLookup[last.stones[i]]);
+                    this.lastRender.stones[i] = last.stones[i];
+                }
+                
+                //Maybe we want to set marker color here and have it change based on stone color.
+                if( complete || this.lastRender.markers[i] != last.markers[i] )
+                {
+                    this.renderer.setMarker({x:x, y:y}, last.markers[i]);
+                    this.lastRender.markers[i] = last.markers[i];
+                }
+                
+            }
+        }
 
         this.renderer.render();
+    },
+    compare: function (otherBoard) {
+        // compare lengths - can save a lot of time
+        if (this.stones.length != otherBoard.stones.length)
+            return false;
+        
+        for (var i = 0; i < this.stones.length; i++) {
+            if (this.stones[i] !== otherBoard.stones[i]) {
+                return false;
+            }
+        }
+        return true;
     }
 });

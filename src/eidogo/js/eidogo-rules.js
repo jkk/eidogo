@@ -14,7 +14,7 @@ var NS = Y.namespace('Eidogo');
 NS.Rules = function(board) {
     NS.Rules.superclass.constructor.apply(this,{});
     this.board = board;
-	this.pendingCaptures = [];
+    this.pendingCaptures = [];
 };
 NS.Rules.NAME = 'eidogo-rules';
 
@@ -27,80 +27,93 @@ Y.extend(NS.Rules, Y.Base, {
      * Called to see whether a stone may be placed at a given point
      **/
     check: function(pt, color) {
-		// already occupied?
-		if (this.board.getStone(pt) != this.board.EMPTY) {
-			return false;
-		}
+        // already occupied?
+        if (this.board.getStone(pt) != this.board.EMPTY) {
+            return false;
+        }
+        
+        //check for suicide
+        this.board.addStone(pt,color);
+        this.doCaptures(pt,color)
+        var suicide = this.board.getStone(pt) == this.board.EMPTY
 
-		// TODO: check for suicide? (allowed in certain rulesets)    
-		// TODO: ko
-		return true;
+
+        //check for superko.  This may become excessively slow... Maybe limit depth to 2?
+        var superko = false;
+        cacheLen = this.board.cache.length;
+        for(var i = 0; i < this.board.cache.length; i++)
+        {
+            if( this.board.compare(this.board.cache[i]) )
+            {
+                superko = true;
+                break; //Stop checking so we don't overwrite our finding of a superko violation.
+            }
+        }
+        this.board.rollback();
+
+        return !( suicide || superko);
     },
     /**
      * Apply rules to the current game (perform any captures, etc)
      **/
     apply: function(pt, color) {
-		this.doCaptures(pt, color);
-		if( this.board.getStone(pt) == this.board.EMPTY )
-		{
-			throw "suicide!";
-		}
+        this.doCaptures(pt, color);
     },
     /**
      * Thanks to Arno Hollosi for the capturing algorithm
      */
     doCaptures: function(pt, color) {
-		var captures = 0;
-		captures += this.doCapture({x: pt.x-1, y: pt.y}, color);
-		captures += this.doCapture({x: pt.x+1, y: pt.y}, color);
-		captures += this.doCapture({x: pt.x, y: pt.y-1}, color);
-		captures += this.doCapture({x: pt.x, y: pt.y+1}, color);
-		// check for suicide
-		captures -= this.doCapture(pt, -color);
-		if (captures < 0) {
-			// make sure suicides give proper points (some rulesets allow it)
-			color = -color;
-			captures = -captures;
-		}
-		color = color == this.board.WHITE ? "W" : "B";
-		this.board.captures[color] += captures;
+        var captures = 0;
+        captures += this.doCapture({x: pt.x-1, y: pt.y}, color);
+        captures += this.doCapture({x: pt.x+1, y: pt.y}, color);
+        captures += this.doCapture({x: pt.x, y: pt.y-1}, color);
+        captures += this.doCapture({x: pt.x, y: pt.y+1}, color);
+        // check for suicide
+        captures -= this.doCapture(pt, -color);
+        if (captures < 0) {
+            // make sure suicides give proper points (some rulesets allow it)
+            color = -color;
+            captures = -captures;
+        }
+        color = color == this.board.WHITE ? "W" : "B";
+        this.board.captures[color] += captures;
     },
     doCapture: function(pt, color) {
-		this.pendingCaptures = [];
-		if (this.findCaptures(pt, color))
-			return 0;
-		var caps = this.pendingCaptures.length;
-		while (this.pendingCaptures.length) {
-			this.board.addStone(this.pendingCaptures.pop(), this.board.EMPTY);
-		}
-		return caps;
+        this.pendingCaptures = [];
+        if (this.findCaptures(pt, color))
+            return 0;
+        var caps = this.pendingCaptures.length;
+        while (this.pendingCaptures.length) {
+            this.board.addStone(this.pendingCaptures.pop(), this.board.EMPTY);
+        }
+        return caps;
     },
     findCaptures: function(pt, color) {
-		// out of bounds?
-		if (pt.x < 0 || pt.y < 0 ||
-			pt.x >= this.board.boardSize || pt.y >= this.board.boardSize)
-			return 0;
-		// found opposite color
-		if (this.board.getStone(pt) == color)
-			return 0;
-		// found a liberty
-		if (this.board.getStone(pt) == this.board.EMPTY)
-			return 1;
-		// already visited?
-		for (var i = 0; i < this.pendingCaptures.length; i++)
-			if (this.pendingCaptures[i].x == pt.x && this.pendingCaptures[i].y == pt.y)
-				return 0;
-		
-		this.pendingCaptures.push(pt);
-		
-		if (this.findCaptures({x: pt.x-1, y: pt.y}, color))
-			return 1;
-		if (this.findCaptures({x: pt.x+1, y: pt.y}, color))
-			return 1;
-		if (this.findCaptures({x: pt.x, y: pt.y-1}, color))
-			return 1;
-		if (this.findCaptures({x: pt.x, y: pt.y+1}, color))
-			return 1;
-		return 0;
+        // out of bounds?
+        if (pt.x < 0 || pt.y < 0 ||
+            pt.x >= this.board.boardSize || pt.y >= this.board.boardSize)
+            return 0;
+        // found opposite color
+        if (this.board.getStone(pt) == color)
+            return 0;
+        // found a liberty
+        if (this.board.getStone(pt) == this.board.EMPTY)
+            return 1;
+        // already visited?
+        for (var i = 0; i < this.pendingCaptures.length; i++)
+            if (this.pendingCaptures[i].x == pt.x && this.pendingCaptures[i].y == pt.y)
+                return 0;
+        
+        this.pendingCaptures.push(pt);
+        
+        if (this.findCaptures({x: pt.x-1, y: pt.y}, color))
+            return 1;
+        if (this.findCaptures({x: pt.x+1, y: pt.y}, color))
+            return 1;
+        if (this.findCaptures({x: pt.x, y: pt.y-1}, color))
+            return 1;
+        if (this.findCaptures({x: pt.x, y: pt.y+1}, color))
+            return 1;
+        return 0;
     }
 });
