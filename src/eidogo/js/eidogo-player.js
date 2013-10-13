@@ -6,39 +6,36 @@
  *
  * This file contains the meat of EidoGo.
  */
-var NS = Y.namespace('Eidogo');
+var NS = Y.namespace('Eidogo'), resources = NS.resources;
 
-// shortcuts (local only to this file)
-var t = NS.resources;
-
+/*
 var GameInfoPropLabels =
     {
-        GN: t['game'],
-        PW: t['white'],
-        WR: t['white rank'],
-        WT: t['white team'],
-        PB: t['black'],
-        BR: t['black rank'],
-        BT: t['black team'],
-        HA: t['handicap'],
-        KM: t['komi'],
-        RE: t['result'],
-        DT: t['date'],
-        GC: t['info'],
-        PC: t['place'],
-        EV: t['event'],
-        RO: t['round'],
-        OT: t['overtime'],
-        ON: t['opening'],
-        RU: t['ruleset'],
-        AN: t['annotator'],
-        CP: t['copyright'],
-        SO: t['source'],
-        TM: t['time limit'],
-        US: t['transcriber'],
-        AP: t['created with']
-    };
-
+        GN: resources.get('game'),
+        PW: resources.get('white'),
+        WR: resources.get('white rank'),
+        WT: resources.get('white team'),
+        PB: resources.get('black'),
+        BR: resources.get('black rank'),
+        BT: resources.get('black team'),
+        HA: resources.get('handicap'),
+        KM: resources.get('komi'),
+        RE: resources.get('result'),
+        DT: resources.get('date'),
+        GC: resources.get('info'),
+        PC: resources.get('place'),
+        EV: resources.get('event'),
+        RO: resources.get('round'),
+        OT: resources.get('overtime'),
+        ON: resources.get('opening'),
+        RU: resources.get('ruleset'),
+        AN: resources.get('annotator'),
+        CP: resources.get('copyright'),
+        SO: resources.get('source'),
+        TM: resources.get('time limit'),
+        US: resources.get('transcriber'),
+        AP: resources.get('created with')
+    };*/
 
 /**
  * @class Player is the overarching control structure that allows you to
@@ -50,86 +47,10 @@ NS.Player = function (cfg) {
 
     cfg = cfg || {};
 
-    this.reset(cfg)
-    
-    // play, add_b, add_w, region, tr, sq, cr, label, number, score(?)
-    this.mode = cfg.mode ? cfg.mode : "play";
-    
-    // URL path to SGF files
-    this.sgfPath = cfg.sgfPath;
-
-    this.renderer = cfg.renderer || Y.Eidogo.Renderers.CanvasRenderer;
-    this.doRender = true;
-
-    // unique id, so we can have more than one player on a page and for progressive loading
-    this.uniq = (new Date()).getTime();
-
-    //progressiveLoad url?
-    this.progressiveUrl = cfg.progressiveUrl;
-    
-    // url to handle downloads
-    this.downloadUrl = cfg.downloadUrl;
-    
-    // handlers for the various types of GameNode properties
-    this.propertyHandlers = {
-        W:  this.playMove,
-        B:  this.playMove,
-        KO: this.playMove,
-        MN: this.setMoveNumber,
-        AW: this.addStone,
-        AB: this.addStone,
-        AE: this.addStone,
-        CR: this.addMarker, // circle
-        LB: this.addMarker, // label
-        TR: this.addMarker, // triangle
-        MA: this.addMarker, // X
-        SQ: this.addMarker, // square
-        TW: this.addMarker,
-        TB: this.addMarker,
-        DD: this.addMarker,
-        PL: this.setColor,
-        C:  this.showComments,
-        N:  this.showAnnotation,
-        GB: this.showAnnotation,
-        GW: this.showAnnotation,
-        DM: this.showAnnotation,
-        HO: this.showAnnotation,
-        UC: this.showAnnotation,
-        V:  this.showAnnotation,
-        BM: this.showAnnotation,
-        DO: this.showAnnotation,
-        IT: this.showAnnotation,
-        TE: this.showAnnotation,
-        BL: this.showTime,
-        OB: this.showTime,
-        WL: this.showTime,
-        OW: this.showTime
-    };
-    
-    // initialize per-game settings
     this.reset(cfg);
-    
-    // crop settings
-    this.cropParams = null;
-    this.shrinkToFit = cfg.shrinkToFit;
-    if (this.shrinkToFit || cfg.cropWidth || cfg.cropHeight) {
-        this.cropParams = {};
-        this.cropParams.width = cfg.cropWidth;
-        this.cropParams.height = cfg.cropHeight;
-        this.cropParams.left = cfg.cropLeft;
-        this.cropParams.top = cfg.cropTop;
-        this.cropParams.padding = cfg.cropPadding || 1;
-    }
-    
-    //TODO: Readd this if we add selection regions back.
-    //Y.one(document).on('mouseUp', this.handleDocMouseUp, this);
-    
-    /*if (cfg.sgf || cfg.sgfUrl || (cfg.sgfPath && cfg.gameName) || cfg.progressiveUrl ) {
-      this.loadSgf();
-      }*/
-    
+
     this.fire('initDone', {});
-}
+};
 
 NS.Player.NAME = 'eidogo-player';
 
@@ -138,20 +59,20 @@ NS.Player.ATTRS = {
 };
 
 Y.extend(NS.Player, Y.Base, {
-    
+
     /**
      * Resets settings that can change per game
      **/
     reset: function(cfg) {
         this.gameName = "";
-        
+
         this.prefs = cfg || {};
 
         this.prefs.markCurrent = this.prefs.markCurrent || true;
 
         // Mutiple games can be contained in collectionRoot. We default
         // to the first (collectionRoot._children[0])
-        // See http://www.red-bean.com/sgf/sgf4.html 
+        // See http://www.red-bean.com/sgf/sgf4.html
         this.collectionRoot = new NS.GameNode();
         this.cursor = new NS.GameCursor();
 
@@ -159,7 +80,7 @@ Y.extend(NS.Player, Y.Base, {
         this.opponentUrl = null;
         this.opponentColor = null;
         this.opponentLevel = null;
-        
+
         // these are populated after load
         this.board = null;
         this.rules = null;
@@ -189,137 +110,198 @@ Y.extend(NS.Player, Y.Base, {
         this.labelLastLetter = null;
         this.labelLastNumber = null;
         this.resetLastLabels();
-        
+
         // so we know when permalinks and downloads are unreliable
         this.unsavedChanges = false;
-        
+
         // to know when to update the nav tree
         this.updatedNavTree = false;
         this.navTreeTimeout = null;
-        
+
         // whether we're currently searching or editing
         this.searching = false;
         this.editingText = false;
         this.goingBack = false;
-        
+
         // problem-solving mode: respond when the user plays a move
         this.problemMode = cfg.problemMode;
         this.problemColor = cfg.problemColor;
+
+        // play, add_b, add_w, region, tr, sq, cr, label, number, score(?)
+        this.mode = cfg.mode ? cfg.mode : "play";
+
+        // URL path to SGF files
+        this.sgfPath = cfg.sgfPath;
+
+        this.renderer = cfg.renderer || Y.Eidogo.Renderers.CanvasRenderer;
+        this.doRender = true;
+
+        // unique id, so we can have more than one player on a page and for progressive loading
+        this.uniq = (new Date()).getTime();
+
+        //progressiveLoad url?
+        this.progressiveUrl = cfg.progressiveUrl;
+
+        // url to handle downloads
+        this.downloadUrl = cfg.downloadUrl;
+
+        // handlers for the various types of GameNode properties
+        this.propertyHandlers = {
+            W:  this.playMove,
+            B:  this.playMove,
+            KO: this.playMove,
+            MN: this.setMoveNumber,
+            AW: this.addStone,
+            AB: this.addStone,
+            AE: this.addStone,
+            CR: this.addMarker, // circle
+            LB: this.addMarker, // label
+            TR: this.addMarker, // triangle
+            MA: this.addMarker, // X
+            SQ: this.addMarker, // square
+            TW: this.addMarker,
+            TB: this.addMarker,
+            DD: this.addMarker,
+            PL: this.setColor,
+            C:  this.showComments,
+            N:  this.showAnnotation,
+            GB: this.showAnnotation,
+            GW: this.showAnnotation,
+            DM: this.showAnnotation,
+            HO: this.showAnnotation,
+            UC: this.showAnnotation,
+            V:  this.showAnnotation,
+            BM: this.showAnnotation,
+            DO: this.showAnnotation,
+            IT: this.showAnnotation,
+            TE: this.showAnnotation,
+            BL: this.showTime,
+            OB: this.showTime,
+            WL: this.showTime,
+            OW: this.showTime
+        };
+
+        // crop settings
+        this.cropParams = null;
+        this.shrinkToFit = cfg.shrinkToFit;
+        if (this.shrinkToFit || cfg.cropWidth || cfg.cropHeight) {
+            this.cropParams = {};
+            this.cropParams.width = cfg.cropWidth;
+            this.cropParams.height = cfg.cropHeight;
+            this.cropParams.left = cfg.cropLeft;
+            this.cropParams.top = cfg.cropTop;
+            this.cropParams.padding = cfg.cropPadding || 1;
+        }
     },
-    
+
     /**
      * Load an SGF file or start from a blank board
      **/
     loadSgf: function() {
-        var self = this;
-        var completeFn = function() { 
-            self.fire('loadComplete',{}); 
-        }
-        var cfg = this.prefs;
-        
-        this.reset(cfg);
-        
-        // URL path to SGF files
-        this.sgfPath = cfg.sgfPath || this.sgfPath;
+        var self = this, noCb = false,
+        completeFn = function() {
+            self.fire('loadComplete',{});
+        },
+        cfg = this.prefs,
+        sgf,
+        boardSize = cfg.boardSize || "19";
+        komiMap = {19: 6.5, 13: 4.5, 9: 3.5, 7: 2.5};
+        blankGame = {_children:
+                     [ {
+                         SZ: boardSize,
+                         KM: cfg.komi || komiMap[boardSize] || 6.5,
+                         _children: []
+                     }]},
+        root = blankGame._children[0],
+        handiCoords = {
+            19: [['pd', 'dp'],
+                 ['pd', 'dp', 'pp'],
+                 ['pd', 'dp', 'pp', 'dd'],
+                 ['pd', 'dp', 'pp', 'dd', 'jj'],
+                 ['pd', 'dp', 'pp', 'dd', 'dj', 'pj'],
+                 ['pd', 'dp', 'pp', 'dd', 'dj', 'pj', 'jj'],
+                 ['pd', 'dp', 'pp', 'dd', 'dj', 'pj', 'jd', 'jp'],
+                 ['pd', 'dp', 'pp', 'dd', 'dj', 'pj', 'jd', 'jp', 'jj']],
+            13: [['jd', 'dj'],
+                 ['jd', 'dj', 'jj'],
+                 ['jd', 'dj', 'jj', 'dd'],
+                 ['jd', 'dj', 'jj', 'dd', 'gg'],
+                 ['jd', 'dj', 'jj', 'dd', 'dg', 'jg'],
+                 ['jd', 'dj', 'jj', 'dd', 'dg', 'jg', 'gg'],
+                 ['jd', 'dj', 'jj', 'dd', 'dg', 'jg', 'gd', 'gj'],
+                 ['jd', 'dj', 'jj', 'dd', 'dg', 'jg', 'gd', 'gj', 'gg']],
+            9: [['cg', 'gc'],
+                ['cg', 'gc', 'gg'],
+                ['cg', 'gc', 'gg', 'cc'],
+                ['cg', 'gc', 'gg', 'cc', 'ee'],
+                ['cg', 'gc', 'gg', 'cc', 'ce', 'ge'],
+                ['cg', 'gc', 'gg', 'cc', 'ce', 'ge', 'ee'],
+                ['cg', 'gc', 'gg', 'cc', 'ce', 'ge', 'ec', 'eg'],
+                ['cg', 'gc', 'gg', 'cc', 'ce', 'ge', 'ec', 'eg', 'ee']]};
 
         // Load the first node of the first node by default
         this.loadPath = cfg.loadPath && cfg.loadPath.length > 1 ? cfg.loadPath : [0];
 
         // game name (= file name) of the game to load
         this.gameName = cfg.gameName || "";
-        
+
         // For calling completeFn asynchronously
-        var noCb = false;
-        
-        if (typeof cfg.sgf == "string") {
-            var sgf = (new NS.SgfParser(cfg.sgf));
+        noCb = false;
+
+        if (typeof cfg.sgf === "string") {
+            sgf = (new NS.SgfParser(cfg.sgf));
             this.loadJsonSgf(sgf.root);
-        } else if (typeof cfg.sgf == "object")
+        } else if (typeof cfg.sgf === "object")
         {
             // already-parsed JSON game tree
             this.loadJsonSgf(cfg.sgf);
-        } else if (cfg.progressiveUrl) 
+        } else if (cfg.progressiveUrl)
         {
             this.progressiveLoads = 0;
             this.progressiveUrl = cfg.progressiveUrl;
             this.fetchProgressiveData(completeFn);
             noCb = true;
-
-        } else if (typeof cfg.sgfUrl == "string" || this.gameName) {
-            
+        } else if (typeof cfg.sgfUrl === "string" || this.gameName) {
             // the URL can be provided as a single sgfUrl or as sgfPath + gameName
-            if (!cfg.sgfUrl) {
+            if (!cfg.sgfUrl)
+            {
                 cfg.sgfUrl = this.sgfPath + this.gameName + ".sgf";
             }
-            
             // load data from a URL
             this.remoteLoad(cfg.sgfUrl, {}, null, null, completeFn);
             noCb = true;
         } else {
-            // start from scratch
-            var boardSize = cfg.boardSize || "19";
-            var komiMap = {19: 6.5, 13: 4.5, 9: 3.5, 7: 2.5};
-            var blankGame = {_children: [{
-                SZ: boardSize,
-                KM: cfg.komi || komiMap[boardSize] || 6.5,
-                _children: []}]};
-            
             // AI opponent (e.g. GNU Go)
             if (cfg.opponentUrl) {
                 this.gameName = "gnugo";
                 this.opponentUrl = cfg.opponentUrl;
-                this.opponentColor = cfg.opponentColor == "B" ? cfg.opponentColor : "W";
+                this.opponentColor = cfg.opponentColor === "B" ? cfg.opponentColor : "W";
                 this.opponentLevel = cfg.opponentLevel || 7;
-                var root = blankGame._children[0];
-                root.PW = this.opponentColor == "B" ? t['you'] : "GNU Go";
-                root.PB = this.opponentColor == "B" ? "GNU Go" : t['you'];
+                root = blankGame._children[0];
+                root.PW = this.opponentColor === "B" ? resources.get('you') : "GNU Go";
+                root.PB = this.opponentColor === "B" ? "GNU Go" : resources.get('you');
                 root.HA = parseInt(cfg.handicap, 10) || 0;
                 if (root.HA) {
-                    var handiCoords = {
-                        19: [['pd', 'dp'],
-                             ['pd', 'dp', 'pp'],
-                             ['pd', 'dp', 'pp', 'dd'],
-                             ['pd', 'dp', 'pp', 'dd', 'jj'],
-                             ['pd', 'dp', 'pp', 'dd', 'dj', 'pj'],
-                             ['pd', 'dp', 'pp', 'dd', 'dj', 'pj', 'jj'],
-                             ['pd', 'dp', 'pp', 'dd', 'dj', 'pj', 'jd', 'jp'],
-                             ['pd', 'dp', 'pp', 'dd', 'dj', 'pj', 'jd', 'jp', 'jj']],
-                        13: [['jd', 'dj'],
-                             ['jd', 'dj', 'jj'],
-                             ['jd', 'dj', 'jj', 'dd'],
-                             ['jd', 'dj', 'jj', 'dd', 'gg'],
-                             ['jd', 'dj', 'jj', 'dd', 'dg', 'jg'],
-                             ['jd', 'dj', 'jj', 'dd', 'dg', 'jg', 'gg'],
-                             ['jd', 'dj', 'jj', 'dd', 'dg', 'jg', 'gd', 'gj'],
-                             ['jd', 'dj', 'jj', 'dd', 'dg', 'jg', 'gd', 'gj', 'gg']],
-                        9: [['cg', 'gc'],
-                            ['cg', 'gc', 'gg'],
-                            ['cg', 'gc', 'gg', 'cc'],
-                            ['cg', 'gc', 'gg', 'cc', 'ee'],
-                            ['cg', 'gc', 'gg', 'cc', 'ce', 'ge'],
-                            ['cg', 'gc', 'gg', 'cc', 'ce', 'ge', 'ee'],
-                            ['cg', 'gc', 'gg', 'cc', 'ce', 'ge', 'ec', 'eg'],
-                            ['cg', 'gc', 'gg', 'cc', 'ce', 'ge', 'ec', 'eg', 'ee']]};
                     root.KM = 0.5;
                     if (root.HA > 1) {
                         root.AB = handiCoords[boardSize][root.HA-2];
                     }
                 }
             }
-            
+
             this.loadJsonSgf(blankGame);
         }
-        if (!noCb && typeof completeFn == "function") {
+        if (!noCb && typeof completeFn === "function") {
             completeFn();
         }
     },
-    
+
     /**
      * Loads game data into a given target. If no target is given, creates
      * a new gameRoot and initializes the game.
      **/
     loadJsonSgf: function(data, target) {
-        var newGame = false;
+        var newGame = false, gameIndex;
 
         if (  ! target ) {
             target = new NS.GameNode();
@@ -333,22 +315,22 @@ Y.extend(NS.Player, Y.Base, {
         {
             target.loadJson(data);
         }
-        
 
-        if( ! target.parent )
+
+        if( ! target.parent ) {
             this.collectionRoot = data;
-        
+        }
 
         target._cached = true;
 
         if (!target._parent) {
             // Loading into tree root; use the first game by default or
             // other if specified
-            var gameIndex = this.loadPath.length ? parseInt(this.loadPath[0], 10) : 0;
+            gameIndex = this.loadPath.length ? parseInt(this.loadPath[0], 10) : 0;
             this.initGame(target._children[gameIndex || 0]);
             newGame = true;
         }
-        
+
         this.resetCursor();
 
         if (this.loadPath.length) {
@@ -356,13 +338,14 @@ Y.extend(NS.Player, Y.Base, {
         } else {
             this.refresh();
         }
-        
+
         // find out which color to play as for problem mode
         if (newGame && this.problemMode) {
-            if (!this.problemColor)
+            if (!this.problemColor) {
                 this.currentColor = this.problemColor = (this.cursor.getNextColor() || "B");
-            else
+            } else {
                 this.currentColor = this.problemColor;
+            }
         }
     },
 
@@ -374,37 +357,41 @@ Y.extend(NS.Player, Y.Base, {
      * @param {Array} loadPath GameNode path to load
      **/
     remoteLoad: function(url, params, target, loadPath, completeFn) {
-        completeFn = (typeof completeFn == "function") ? completeFn : null;
-        
+
+        completeFn = (typeof completeFn === "function") ? completeFn : null;
+
         if (loadPath) {
             this.loadPath = loadPath;
         }
-        
+
         var success = function(id, req) {
-            var data = req.responseText.replace(/^( |\t|\r|\n)*/, "");
+            id = null;
+
+            var data = req.responseText.replace(/^( |\t|\r|\n)*/, ""), me = this, sgf;
+
             // infer the kind of file we got
-            if (data.charAt(0) == '(') {
+            if (data.charAt(0) === '(') {
                 // SGF
-                var me = this;
-                var sgf = new NS.SgfParser(data, function() {
+                sgf = new NS.SgfParser(data, function() {
                     // parsing is asychronous
                     me.load(this.root, target);
-                    completeFn && completeFn();
+                    if( completeFn ) { completeFn(); }
                 });
-            } else if (data.charAt(0) == '{') {
+            } else if (data.charAt(0) === '{') {
                 // JSON
-                data = eval("(" + data + ")");
+                data = JSON.parse(data);
                 this.load(data, target);
-                completeFn && completeFn();
+                if( completeFn ) { completeFn(); }
             } else {
                 this.croak('invalid data');
             }
-        }
-
-        var failure = function(id, req) {
+        },
+        failure = function(id, req) {
+            id = null;
+            req = null;
             this.croak('error retrieving');
-        }
-        
+        };
+
         Y.io(url, {
             method: 'GET',
             data: Y.QueryString.stringify(params),
@@ -422,13 +409,18 @@ Y.extend(NS.Player, Y.Base, {
      **/
     initGame: function(gameRoot) {
         gameRoot = gameRoot || {};
-        var size = gameRoot.SZ || 19;
+        
+        var size = gameRoot.SZ || 19,
+        moveCursor;
+
         // Only three sizes supported for now
-        if (size != 7 && size != 9 && size != 13 && size != 19)
+        if (size !== 7 && size !== 9 && size !== 13 && size !== 19) {
             size = 19;
-        if (this.shrinkToFit)
+        }
+
+        if (this.shrinkToFit) {
             this.calcShrinkToFit(gameRoot, size);
-        else if (this.problemMode && !this.cropParams) {
+        } else if (this.problemMode && !this.cropParams) {
             this.cropParams = {
                 width: size,
                 height: size,
@@ -436,51 +428,59 @@ Y.extend(NS.Player, Y.Base, {
                 left: 0,
                 padding: 1};
         }
+
         if (!this.board) {
             // first time
             this.createBoard(size);
             this.rules = new NS.Rules(this.board);
         }
+
         this.unsavedChanges = false;
         this.resetCursor(true);
         this.totalMoves = 0;
-        var moveCursor = new NS.GameCursor(this.cursor.node);
-        while (moveCursor.next()) { this.totalMoves++; }
+        moveCursor = new NS.GameCursor(this.cursor.node);
+        while (moveCursor.next()) {
+            this.totalMoves++;
+        }
         this.totalMoves--;
+
         //        this.showGameInfo(gameRoot);
         //      this.enableNavSlider();
         //this.selectTool(this.mode == "view" ? "view" : "play");
+
         this.fire('initGame', {});
     },
     getGameInfo: function(gameInfo) {
-        if (!gameInfo) return;
-        var val, parsedInfo = {};
+        if (!gameInfo) { return; }
+        var val, parsedInfo = {}, propName, dateParts;
 
-        for (var propName in PropertyLabels) {
-            if (gameInfo[propName] instanceof Array) {
-                gameInfo[propName] = gameInfo[propName][0];
-            }
+        for (propName in PropertyLabels) {
+            if( PropertyLabels.hasOwnProperty(propName) ) {
+                if (gameInfo[propName] instanceof Array) {
+                    gameInfo[propName] = gameInfo[propName][0];
+                }
 
-            if (gameInfo[propName]) { //This won't work right now since the fucking localization is broken.
-                if (propName == "PW") {
-                    parsedInfo.whiteName = gameInfo[propName] +(gameInfo['WR'] ? ", " + gameInfo['WR'] : "");
-                    continue;
-                } else if (propName == "PB") {
-                    parsedInfo.blackName = gameInfo[propName] +(gameInfo['BR'] ? ", " + gameInfo['BR'] : "");
-                    continue;
-                }
-                if (propName == "WR" || propName == "BR") {
-                    continue;
-                }
-                val = gameInfo[propName];
-                if (propName == "DT") {
-                    var dateParts = gameInfo[propName].split(/[\.-]/);
-                    if (dateParts.length == 3) {
-                        val = dateParts[2].replace(/^0+/, "") + " "
-                            + this.months[dateParts[1]-1] + " " + dateParts[0];
+                if (gameInfo[propName]) { //This won't work right now since the fucking localization is broken.
+                    if (propName === "PW") {
+                        parsedInfo.whiteName = gameInfo[propName] +(gameInfo.WR ? ", " + gameInfo.WR : "");
+                        continue;
+                    } else if (propName === "PB") {
+                        parsedInfo.blackName = gameInfo[propName] +(gameInfo.BR ? ", " + gameInfo.BR : "");
+                        continue;
                     }
+                    if (propName === "WR" || propName === "BR") {
+                        continue;
+                    }
+                    val = gameInfo[propName];
+                    if (propName === "DT") {
+                        dateParts = gameInfo[propName].split(/[\.\-]/);
+                        if (dateParts.length === 3) {
+                            val = dateParts[2].replace(/^0+/, "") + " "
+                                + this.months[dateParts[1]-1] + " " + dateParts[0];
+                        }
+                    }
+                    parsedInfo[propName] = vale;
                 }
-                parsedInfo[propName] = vale;
             }
         }
 
@@ -492,23 +492,19 @@ Y.extend(NS.Player, Y.Base, {
      **/
     selectTool: function(tool) {
         var cursor;
-        if (tool == "region") {
+
+        if (tool === "region") {
             cursor = "crosshair";
-        } else if (tool == "comment") {
-            this.startEditComment();
-        } else if (tool == "label") {
-            show(this.dom.labelInput, "inline");
-            this.dom.labelInput.focus();
+        } else if (tool === "comment") {
+            cursor = "arrow";
+        } else if (tool === "label") {
+            cursor = "arrow";
         } else {
-            cursor = "default";
-            this.regionBegun = false;
-            this.hideRegion();
-            hide(this.dom.searchButton);
-            hide(this.dom.searchAlgo);
-            if (this.searchUrl)
-                show(this.dom.scoreEst, "inline");
+            cursor = "arrow";
         }
-        //this.board.renderer.setCursor(cursor);
+
+        if ( cursor ) { this.board.renderer.setCursor(cursor); }
+
         this.mode = tool;
     },
     /**
@@ -516,21 +512,23 @@ Y.extend(NS.Player, Y.Base, {
      **/
     createBoard: function(size) {
         size = size || 19;
-        if (this.board && this.board.renderer && this.board.boardSize == size) return;
-        try {
-            var rendererProto;
-            if( typeof this.renderer == "function" )
+        var RendererProto;
+
+        if (this.board && this.board.renderer && this.board.boardSize === size) { return; }
+
+        try {            if( typeof this.renderer === "function" )
             {
-                rendererProto = this.renderer;
+                RendererProto = this.renderer;
 
                 //TODO: Figure out a good order for this renderer to be loaded.
-                this.renderer = new rendererProto({srcNode: this.prefs.srcNode,
+                this.renderer = new RendererProto({srcNode: this.prefs.srcNode,
                                                    boardSize: size,
                                                    crop: this.cropParams});
-            } else if( typeof this.renderer != "object" )
+            } else if( typeof this.renderer !== "object" )
             {
                 this.croak("No renderer object or constructor provided");
             }
+
             this.board = new NS.Board(this.renderer, size);
 
             this.wireEventHandlers();
@@ -542,12 +540,11 @@ Y.extend(NS.Player, Y.Base, {
 
     wireEventHandlers: function()
     {
-        //this.renderer.on('boardClick', {}, this);
         this.renderer.on('boardMouseDown', this.handleBoardMouseDown, this);
         this.renderer.on('boardMouseUp', this.handleBoardMouseUp, this);
         this.renderer.on('boardHover', this.handleBoardHover, this);
     },
-    
+
     /**
      * Calculates the crop area to use based on the widest distance between
      * stones and markers in the given game. We're conservative with respect
@@ -555,44 +552,69 @@ Y.extend(NS.Player, Y.Base, {
      **/
     calcShrinkToFit: function(gameRoot, size) {
         // leftmost, topmost, rightmost, bottommost
-        var l = null, t = null, r = null, b = null;
-        var points = {};
-        var me = this;
+        var l = null, t = null, r = null, b = null,
+        points = {},
+        me = this,
+        key, lpad, tpad, rpad, bpad, pad, pt;
+
         // find all points occupied by stones or labels
         gameRoot.walk(function(node) {
             var prop, i, coord;
+
             for (prop in node) {
-                if (/^(W|B|AW|AB|LB)$/.test(prop)) {
-                    coord = node[prop];
-                    if (!(coord instanceof Array)) coord = [coord];
-                    if (prop != 'LB') coord = me.expandCompressedPoints(coord);
-                    else coord = [coord[0].split(/:/)[0]];
-                    for (i = 0; i < coord.length; i++)
-                        points[coord[i]] = "";
+                if( node.hasOwnProperty(prop) ) {
+                    if (/^(W|B|AW|AB|LB)$/.test(prop)) {
+                        coord = node[prop];
+
+                        if (!(coord instanceof Array)) {
+                            coord = [coord];
+                        }
+
+                        if (prop !== 'LB') {
+                            coord = me.expandCompressedPoints(coord);
+                        }
+                        else {
+                            coord = [coord[0].split(/:/)[0]];
+                        }
+
+                        for (i = 0; i < coord.length; i++) {
+                            points[coord[i]] = "";
+                        }
+                    }
                 }
             }
         });
+
         // nab the outermost points
-        for (var key in points) {
-            var pt = this.sgfCoordToPoint(key);
-            if (l == null || pt.x < l) l = pt.x;
-            if (r == null || pt.x > r) r = pt.x;
-            if (t == null || pt.y < t) t = pt.y;
-            if (b == null || pt.y > b) b = pt.y;
+        for (key in points) {
+            if(points.hasOwnProperty(key)) {
+                pt = this.sgfCoordToPoint(key);
+                if (l === null || pt.x < l) { l = pt.x; }
+                if (r === null || pt.x > r) { r = pt.x; }
+                if (t === null || pt.y < t) { t = pt.y; }
+                if (b === null || pt.y > b) { b = pt.y; }
+            }
         }
+
         this.cropParams.width = r - l + 1;
         this.cropParams.height = b - t + 1;
         this.cropParams.left = l;
         this.cropParams.top = t;
         // add padding
-        var pad = this.cropParams.padding;
-        for (var lpad = pad; l - lpad < 0; lpad--) {};
+        pad = this.cropParams.padding;
+
+        for (lpad = pad; l - lpad < 0; lpad--) { continue; }
+
         if (lpad) { this.cropParams.width += lpad; this.cropParams.left -= lpad; }
-        for (var tpad = pad; t - tpad < 0; tpad--) {};
+
+        for (tpad = pad; t - tpad < 0; tpad--) { continue; }
+
         if (tpad) { this.cropParams.height += tpad; this.cropParams.top -= tpad; }
-        for (var rpad = pad; r + rpad > size; rpad--) {};
+
+        for (rpad = pad; r + rpad > size; rpad--) { continue; }
         if (rpad) { this.cropParams.width += rpad; }
-        for (var bpad = pad; b + bpad > size; bpad--) {};
+
+        for (bpad = pad; b + bpad > size; bpad--) { continue; }
         if (bpad) { this.cropParams.height += bpad; }
     },
 
@@ -603,17 +625,20 @@ Y.extend(NS.Player, Y.Base, {
      * move to play.
      **/
     fetchOpponentMove: function() {
-        this.nowLoading(t['gnugo thinking']);
+        this.nowLoading(resources.get('gnugo thinking'));
+
         var success = function(id, req) {
+            id = null;
             this.doneLoading();
             this.createMove(req.responseText);
-        }
-        var failure = function(id, req) {
+        },
+        failure = function(id, req) {
+            id = null;
+            req = null;
             this.croak('error retrieving');
-        }
-        var root = this.cursor.getGameRoot();
-
-        var params = {
+        },
+        root = this.cursor.getGameRoot(),
+        params = {
             sgf: root.toSgf(),
             move: this.currentColor,
             size: root.SZ,
@@ -631,7 +656,7 @@ Y.extend(NS.Player, Y.Base, {
         });
 
     },
-    
+
     /**
      * Respond to a move made in problem-solving mode
      **/
@@ -640,20 +665,22 @@ Y.extend(NS.Player, Y.Base, {
         setTimeout(function() {
             this.variation(null);
             this.fire('playProblemResponse', {});
-            
+
             if (!this.cursor.hasNext()) {
                 // not sure if it's safe to say "WRONG" -- that would work for
                 // goproblems.com SGFs but I don't know about others
-                this.prependComment(t['end of variation']);
+                this.prependComment(resources.get('end of variation'));
             }
         }.bind(this), 200);
     },
-    
+
     /**
      * Navigates to a location within the game.
      **/
     goTo: function(path, fromStart) {
-        try 
+        var steps, i = 0, position, vars;
+
+        try
         {
             this.doRender = false;
 
@@ -661,24 +688,25 @@ Y.extend(NS.Player, Y.Base, {
             {
                 this.resetCursor(); //goto collection start
             }
-            
-            // Move number
-            if (typeof path == "number" && !isNaN(steps)) {
-                var steps = parseInt(path, 10);
-                if (fromStart) steps++; // not zero-based
-                for (var i = 0; i < steps; i++)
-                    this.variation(null);
-            } else if ( path instanceof Array && path.length) {
-                var position;
-                var vars;
 
+            // Move number
+            if (typeof path === "number" && !isNaN(steps)) {
+                steps = parseInt(path, 10);
+                if (fromStart) {
+                    steps++;
+                }// not zero-based
+
+                for ( i = 0; i < steps; i++) {
+                    this.variation(null);
+                }
+            } else if ( path instanceof Array && path.length) {
                 // Path of moves (SGF coords)
                 if ( isNaN( parseInt(path[0], 10) ) ) {
                     while (path.length) {
                         position = path.shift();
                         vars = this.getVariations();
-                        for (var i = 0; i < vars.length; i++) {
-                            if (vars[i].move == position) {
+                        for ( i = 0; i < vars.length; i++) {
+                            if (vars[i].move === position) {
                                 this.variation(vars[i].varNum);
                                 break;
                             }
@@ -713,15 +741,16 @@ Y.extend(NS.Player, Y.Base, {
         }
         this.refresh();
     },
-    
+
     /**
      * Resets the current color as appropriate
      **/
     resetCurrentColor: function() {
         this.currentColor = (this.problemMode ? this.problemColor : "B");
         var root = this.cursor.getGameRoot();
-        if (root && root.HA > 1)
+        if (root && root.HA > 1) {
             this.currentColor = 'W';
+        }
     },
 
     /**
@@ -751,11 +780,13 @@ Y.extend(NS.Player, Y.Base, {
      * gets updated.
      */
     execNode: function() {
-        if (!this.cursor.node) return;
+        var propName, props, i =0;
+
+        if (!this.cursor.node) { return; }
 
         if  (this.doRender) {
             this.board.clearMarkers();
-            this.comments = ""
+            this.comments = "";
             this.moveNumber = this.cursor.getMoveNumber();
         }
 
@@ -763,22 +794,23 @@ Y.extend(NS.Player, Y.Base, {
             this.resetCurrentColor();
         }
 
-        if( this.doRender) 
+        if( this.doRender)
         {
             this.findVariations();
             if(!this.prefs.disableVariations)
             {
-                for( var i=0; i < this.variations.length; i++)
+                for( i=0; i < this.variations.length; i++)
                 {
-                    if(this.variations[i].move)
+                    if(this.variations[i].move) {
                         this.addMarker(this.variations[i].move, 'var:' + (this.variations[i].varNum + 1) + '!');
+                    }
                 }
             }
         }
 
         // execute handlers for the appropriate properties
-        var props = this.cursor.node.getProperties();
-        for (var propName in props) {
+        props = this.cursor.node.getProperties();
+        for (propName in props) {
             if (this.propertyHandlers[propName]) {
                 (this.propertyHandlers[propName]).apply(
                     this,
@@ -788,17 +820,21 @@ Y.extend(NS.Player, Y.Base, {
         }
 
         this.board.commit(); //Commit the changes to the board.
-        this.doRender && this.board.render();
-        this.doRender && this.fire('execNode', {});
+        if( this.doRender ) {
+            this.board.render();
+            this.fire('execNode', {});
+        }
 
-        // progressive loading?        
-        if (this.prefs.progressiveUrl)
+        // progressive loading?
+        if (this.prefs.progressiveUrl) {
             this.fetchProgressiveData();
-        
+        }
+
         // play a reponse in problem-solving mode, unless we just navigated backwards
-        if (this.problemMode && this.currentColor && this.currentColor != this.problemColor && !this.goingBack)
+        if (this.problemMode && this.currentColor && this.currentColor !== this.problemColor && !this.goingBack) {
             this.playProblemResponse();
-        
+        }
+
         this.goingBack = false;
     },
 
@@ -809,17 +845,19 @@ Y.extend(NS.Player, Y.Base, {
     findVariations: function() {
         this.variations = this.getVariations();
     },
-    
+
     getVariations: function() {
         var vars = [],
-        kids = this.cursor.node._children;
-        for (var i = 0; i < kids.length; i++) {
+        kids = this.cursor.node._children,
+        i=0;
+
+        for (i = 0; i < kids.length; i++) {
             vars.push({move: kids[i].getMove(), varNum: i});
         }
         return vars;
     },
 
-    back: function(e, obj) {
+    back: function() {
         if (this.cursor.previous()) {
             this.board.revert(1);
             this.goingBack = true;
@@ -828,27 +866,27 @@ Y.extend(NS.Player, Y.Base, {
         }
     },
 
-    forward: function(e, obj) {
+    forward: function() {
         this.variation(null);
     },
 
     first: function() {
-        if (!this.cursor.hasPrevious()) return;
+        if (!this.cursor.hasPrevious()) { return; }
         try
         {
             this.doRender = false;
             this.resetCursor(true);
         } finally {
-            this.doRender = true; 
+            this.doRender = true;
         }
     },
 
     last: function() {
-        if (!this.cursor.hasNext()) return;
+        if (!this.cursor.hasNext()) { return; }
         try
         {
             this.doRender = false;
-            while (this.variation(null)) {}
+            while (this.variation()) { continue; }
         }
         finally
         {
@@ -858,9 +896,11 @@ Y.extend(NS.Player, Y.Base, {
     },
 
     pass: function() {
-        if (!this.variations) return;
-        for (var i = 0; i < this.variations.length; i++) {
-            if (!this.variations[i].move || this.variations[i].move == "tt") {
+        var i;
+
+        if (!this.variations) { return; }
+        for (i = 0; i < this.variations.length; i++) {
+            if (!this.variations[i].move || this.variations[i].move === "tt") {
                 this.variation(this.variations[i].varNum);
                 return;
             }
@@ -875,12 +915,12 @@ Y.extend(NS.Player, Y.Base, {
      * the appropriate board coordinate.
      **/
     handleBoardMouseDown: function(pt) {
-        if (!this.boundsCheck(pt.x, pt.y, [0, this.board.boardSize-1])) return;
+        if (!this.boundsCheck(pt.x, pt.y, [0, this.board.boardSize-1])) { return; }
         this.mouseDown = true;
         this.mouseDownX = pt.x;
         this.mouseDownY = pt.y;
         // begin region selection
-        if (this.mode == "region" && pt.x >= 0 && pt.y >= 0 && !this.regionBegun) {
+        if (this.mode === "region" && pt.x >= 0 && pt.y >= 0 && !this.regionBegun) {
             this.regionTop = y;
             this.regionLeft = x;
             this.regionBegun = true;
@@ -910,41 +950,40 @@ Y.extend(NS.Player, Y.Base, {
      **/
     handleBoardMouseUp: function(pt) {
         this.mouseDown = false;
-        
-        var coord = this.pointToSgfCoord(pt);
-        
+        var path, coord = this.pointToSgfCoord(pt), prop, stone, deleted, nextMoves,
+        i = 0, varPt;
+
         // click on a variation?
-        if (this.mode == "view" || this.mode == "play") {
-            for (var i = 0; i < this.variations.length; i++) {
-                var varPt = this.sgfCoordToPoint(this.variations[i].move);
-                if (varPt.x == pt.x && varPt.y == pt.y) {
+        if (this.mode === "view" || this.mode === "play") {
+            for (i = 0; i < this.variations.length; i++) {
+                varPt = this.sgfCoordToPoint(this.variations[i].move);
+                if (varPt.x === pt.x && varPt.y === pt.y) {
                     this.variation(this.variations[i].varNum);
                     return;
                 }
             }
         }
-        
-        if (this.mode == "view" || pt.e.shiftKey) {
-            var path;
+
+        if (this.mode === "view" || pt.e.shiftKey) {
             this.cursor.node.walk( function(node)
                                    {
-                                       if (!path && node.getMove() == coord) 
+                                       if (!path && node.getMove() === coord)
                                        {
                                            path = (new NS.GameCursor(node)).getPath();
                                            return true; //stop walking
                                        }
                                    },
                                    this);
-            path && this.goTo(path, true);
+            if(path) { this.goTo(path, true); }
             return;
-        } else if (this.mode == "play") {
+        } else if (this.mode === "play") {
             // can't click there?
             if (!this.rules.check(pt, this.currentColor)) {
                 return;
             }
             // play the move
             if (coord) {
-                var nextMoves = this.cursor.getNextMoves();
+                nextMoves = this.cursor.getNextMoves();
                 if (nextMoves && coord in nextMoves) {
                     // move already exists
                     this.variation(nextMoves[coord]);
@@ -953,8 +992,8 @@ Y.extend(NS.Player, Y.Base, {
                     this.createMove(coord);
                 }
             }
-        } else if (this.mode == "region" && pt.x >= -1 && pt.y >= -1 && this.regionBegun) {
-            if (this.regionTop == y && this.regionLeft == x && !this.regionClickSelect) {
+        } else if (this.mode === "region" && pt.x >= -1 && pt.y >= -1 && this.regionBegun) {
+            if (this.regionTop === y && this.regionLeft === x && !this.regionClickSelect) {
                 // allow two-click selection in addition to click-and-drag (for iphone!)
                 this.regionClickSelect = true;
                 this.regionRight = pt.x + 1;
@@ -972,17 +1011,16 @@ Y.extend(NS.Player, Y.Base, {
             }
         } else {
             // place black stone, white stone, labels
-            var prop;
-            var stone = this.board.getStone(pt);
-            if (this.mode == "add_b" || this.mode == "add_w") {
+            stone = this.board.getStone(pt);
+            if (this.mode === "add_b" || this.mode === "add_w") {
                 // if a stone was placed previously, we add an empty point (AE);
                 // otherwise, we remove the stone property from the current node
-                var deleted = this.cursor.node.emptyPoint(this.pointToSgfCoord({x:x,y:y}));
-                if (stone != this.board.BLACK && this.mode == "add_b") {
+                deleted = this.cursor.node.emptyPoint(this.pointToSgfCoord({x:x,y:y}));
+                if (stone !== this.board.BLACK && this.mode === "add_b") {
                     prop = "AB";
-                } else if (stone != this.board.WHITE && this.mode == "add_w") {
+                } else if (stone !== this.board.WHITE && this.mode === "add_w") {
                     prop = "AW";
-                } else if (this.board.getStone(pt) != this.board.EMPTY && !deleted) {
+                } else if (this.board.getStone(pt) !== this.board.EMPTY && !deleted) {
                     prop = "AE";
                 }
             } else {
@@ -1018,12 +1056,13 @@ Y.extend(NS.Player, Y.Base, {
                 }
             }
 
-            if (prop)
+            if (prop) {
                 this.cursor.node.pushProperty(prop, coord);
+            }
             this.unsavedChanges = true;
-            var deleted = this.checkForEmptyNode();
+            deleted = this.checkForEmptyNode();
             this.refresh();
-            if (deleted) this.prependComment(t['position deleted']);
+            if (deleted) { this.prependComment(resources.get('position deleted')); }
         }
     },
 
@@ -1031,51 +1070,55 @@ Y.extend(NS.Player, Y.Base, {
      * Check if a coordinate is within bounds
      **/
     boundsCheck: function(x, y, region) {
-        if (region.length == 2) {
+        if (region.length === 2) {
             region[3] = region[2] = region[1];
             region[1] = region[0];
         }
         return (x >= region[0] && y >= region[1] && x <= region[2] && y <= region[3]);
     },
-    
+
 
     /**
      * If there are no properties left in a node, ask whether to delete it
      **/
     checkForEmptyNode: function() {
+        var killNode, id, index;
         if (!Y.Object.keys(this.cursor.node.getProperties()).length()) {
-            var killNode = window.confirm(t['confirm delete']);
+            killNode = window.confirm(resources.get('confirm delete'));
             if (killNode) {
-                var id = this.cursor.node._id;
-                var index = 0;
+                id = this.cursor.node._id;
+                index = 0;
                 this.back();
                 this.cursor.node._children = this.cursor.node._children.filter(function(node, i) {
-                    if (node._id == id) {
+                    if (node._id === id) {
                         index = i;
                         return false;
                     } else {
                         return true;
                     }
                 });
-                if (index && this.cursor.node._preferredChild == index)
+                if (index && this.cursor.node._preferredChild === index) {
                     this.cursor.node._preferredChild--;
+                }
                 return true;
             }
         }
         return false;
     },
-    
+
     /**
      * Takes a pattern string like ...O...XX and converts it to .3O.3X2
      */
     compressPattern: function(pattern) {
-        var c = null;
-        var pc = "";
-        var n = 1;
-        var ret = "";
-        for (var i = 0; i < pattern.length; i++) {
+        var c = null,
+        pc = "",
+        n = 1,
+        ret = "",
+        i;
+
+        for (i = 0; i < pattern.length; i++) {
             c = pattern.charAt(i);
-            if (c == pc) {
+            if (c === pc) {
                 n++;
             } else {
                 ret = ret + pc + (n > 1 ? n : "");
@@ -1088,17 +1131,19 @@ Y.extend(NS.Player, Y.Base, {
     },
 
     uncompressPattern: function(pattern) {
-        var c = null;
-        var s = null;
-        var n = "";
-        var ret = "";
-        for (var i = 0; i < pattern.length; i++) {
+        var c = null,
+        s = null,
+        n = "",
+        ret = "",
+        i, j ;
+
+        for ( i = 0; i < pattern.length; i++) {
             c = pattern.charAt(i);
-            if (c == "." || c == "x" || c == "o") {
-                if (s != null) {
+            if (c === "." || c === "x" || c === "o") {
+                if (s !== null) {
                     n = parseInt(n, 10);
                     n = isNaN(n) ? 1 : n;
-                    for (var j = 0; j < n; j++) {
+                    for (j = 0; j < n; j++) {
                         ret += s;
                     }
                     n = "";
@@ -1110,7 +1155,7 @@ Y.extend(NS.Player, Y.Base, {
         }
         n = parseInt(n, 10);
         n = isNaN(n) ? 1 : n;
-        for (var j = 0; j < n; j++) {
+        for (j = 0; j < n; j++) {
             ret += s;
         }
         return ret;
@@ -1120,9 +1165,9 @@ Y.extend(NS.Player, Y.Base, {
      * Create an as-yet unplayed move and go to it.
      */
     createMove: function(coord) {
-        var props = {};
+        var props = {}, varNode;
         props[this.currentColor] = coord;
-        var varNode = new NS.GameNode(null, props);
+        varNode = new NS.GameNode(null, props);
         varNode._cached = true;
         this.totalMoves++;
         this.cursor.node.appendChild(varNode);
@@ -1130,10 +1175,9 @@ Y.extend(NS.Player, Y.Base, {
         this.updatedNavTree = false;
         this.variation(this.cursor.node._children.length-1);
     },
-    
+
     setColor: function(color) {
-        this.prependComment(color == "B" ? t['black to play'] :
-                            t['white to play']);
+        this.prependComment(color === "B" ? resources.get('black to play') : resources.get('white to play'));
         this.currentColor = this.problemColor = color;
     },
 
@@ -1148,21 +1192,21 @@ Y.extend(NS.Player, Y.Base, {
     playMove: function(coord, color) {
         color = color || this.currentColor;
 
-        this.currentColor = (color == "B" ? "W" : "B");
+        this.currentColor = (color === "B" ? "W" : "B");
 
-        color = color == "W" ? this.board.WHITE : this.board.BLACK;
+        color = color === "W" ? this.board.WHITE : this.board.BLACK;
 
         var pt = this.sgfCoordToPoint(coord);
 
-        if (!coord || coord == "tt" || coord == "")
+        if (!coord || coord === "tt" || coord === "")
         {
-            this.prependComment((color == this.board.WHITE ?
-                                 t['white'] : t['black']) + " " + t['passed'], "comment-pass");
-        } else if (coord == "resign") 
+            this.prependComment(color === this.board.WHITE ?
+                                 resources.get('white') : resources.get('black') + " " + resources.get('passed'), "comment-pass");
+        } else if (coord === "resign")
         {
-            this.prependComment((color == this.board.WHITE ?
-                                 t['white'] : t['black']) + " " + t['resigned'], "comment-resign");
-        } else if (coord && coord != "tt") 
+            this.prependComment(color === this.board.WHITE ?
+                                resources.get('white') : resources.get('black') + " " + resources.get('resigned'), "comment-resign");
+        } else if (coord && coord !== "tt")
         {
             this.board.addStone(pt, color);
             try
@@ -1178,39 +1222,67 @@ Y.extend(NS.Player, Y.Base, {
             }
         }
     },
-    
+
+    /* addStone:
+       Generic function which is called by execNode when W and B sgf properties are encountered.
+    */
     addStone: function(coord, color) {
+        var i;
         if (!(coord instanceof Array)) {
             coord = [coord];
         }
+
         coord = this.expandCompressedPoints(coord);
-        for (var i = 0; i < coord.length; i++) {
-            this.board.addStone(
-                this.sgfCoordToPoint(coord[i]),
-                color == "AW" ? this.board.WHITE :
-                    color == "AB" ? this.board.BLACK : this.board.EMPTY
-            );
+
+        for ( i = 0; i < coord.length; i++) {
+            this.board.addStone( this.sgfCoordToPoint(coord[i]), color === "AW" ? this.board.WHITE :
+                                 color === "AB" ? this.board.BLACK : this.board.EMPTY );
         }
     },
 
+
+    /* addMarker:
+       Generic function which is called by execNode when particular SGF properties are encountered.
+    */
     addMarker: function(coord, type) {
+        var label, i;
         if (!(coord instanceof Array)) {
             coord = [coord];
         }
+
         coord = this.expandCompressedPoints(coord);
-        var label;
-        for (var i = 0; i < coord.length; i++) {
+        
+        for ( i = 0; i < coord.length; i++) {
             switch (type) {
-            case "TR": label = "triangle"; break;
-            case "SQ": label = "square"; break;
-            case "CR": label = "circle"; break;
-            case "MA": label = "ex"; break;
-            case "TW": label = "territory-white"; break;
-            case "TB": label = "territory-black"; break;
-            case "DD": label = "dim"; break;
-            case "LB": label = (coord[i].split(":"))[1]; break;
-            default: label = type; break;
+            case "TR":
+                label = "triangle";
+                break;
+            case "SQ":
+                label = "square";
+                break;
+            case "CR":
+                label = "circle";
+                break;
+            case "MA":
+                label = "ex";
+                break;
+            case "TW":
+                label = "territory-white";
+                break;
+            case "TB":
+                label = "territory-black";
+                break;
+            case "DD":
+                label = "dim";
+                break;
+            case "LB":
+                label = (coord[i].split(":"))[1];
+                break;
+            default:
+                label = type;
+                break;
             }
+
             this.board.addMarker(
                 this.sgfCoordToPoint((coord[i].split(":"))[0]),
                 label
@@ -1219,10 +1291,11 @@ Y.extend(NS.Player, Y.Base, {
     },
 
     showTime: function(value, type) {
-        var tp = (type == "BL" || type == "OB" ? "timeB" : "timeW");
-        if (type == "BL" || type == "WL") {
-            var mins = Math.floor(value / 60);
-            var secs = (value % 60).toFixed(0);
+        var tp = (type === "BL" || type === "OB" ? "timeB" : "timeW"), mins, secs;
+
+        if (type === "BL" || type === "WL") {
+            mins = Math.floor(value / 60);
+            secs = (value % 60).toFixed(0);
             secs = (secs < 10 ? "0" : "") + secs;
             this[tp] = mins + ":" + secs;
         } else {
@@ -1237,22 +1310,42 @@ Y.extend(NS.Player, Y.Base, {
         var msg;
         switch (type)
         {
-        case 'N':  msg = value; break;
-        case 'GB': msg = (value > 1 ? t['vgb'] : t['gb']); break;
-        case 'GW': msg = (value > 1 ? t['vgw'] : t['gw']); break;
-        case 'DM': msg = (value > 1 ? t['dmj'] : t['dm']); break;
-        case 'UC': msg = t['uc']; break;
-        case 'TE': msg = t['te']; break;
-        case 'BM': msg = (value > 1 ? t['vbm'] : t['bm']); break;
-        case 'DO': msg = t['do']; break;
-        case 'IT': msg = t['it']; break;
-        case 'HO': msg = t['ho']; break;
+        case 'N':
+            msg = value;
+            break;
+        case 'GB':
+            msg = (value > 1 ? resources.get('vgb') : resources.get('gb'));
+            break;
+        case 'GW':
+            msg = (value > 1 ? resources.get('vgw') : resources.get('gw'));
+            break;
+        case 'DM':
+            msg = (value > 1 ? resources.get('dmj') : resources.get('dm'));
+            break;
+        case 'UC':
+            msg = resources.get('uc');
+            break;
+        case 'TE':
+            msg = resources.get('te');
+            break;
+        case 'BM':
+            msg = (value > 1 ? resources.get('vbm') : resources.get('bm'));
+            break;
+        case 'DO':
+            msg = resources.get('do');
+            break;
+        case 'IT':
+            msg = resources.get('it');
+            break;
+        case 'HO':
+            msg = resources.get('ho');
+            break;
         }
         this.prependComment(msg);
     },
 
-    showComments: function(comments, junk) {
-        if (!comments) return;
+    showComments: function(comments) {
+        if (!comments) { return; }
         this.comments = comments;
     },
 
@@ -1260,17 +1353,18 @@ Y.extend(NS.Player, Y.Base, {
      * For special notices
      **/
     prependComment: function(content, cls) {
+        //TODO: What is CLS for?
         cls = cls || "comment-status";
         this.comments = content + "\n" + this.comments;
     },
-    
+
     /**
      * Redirect to a download handler or attempt to display data inline
      **/
-    downloadSgf: function(evt) {
+    downloadSgf: function() {
         if (this.downloadUrl) {
             if (this.unsavedChanges) {
-                alert(t['unsaved changes']);
+                alert(resources.get('unsaved changes'));
                 return;
             }
             location.href = this.downloadUrl + this.gameName;
@@ -1279,20 +1373,24 @@ Y.extend(NS.Player, Y.Base, {
                 encodeURIComponent(this.cursor.getGameRoot().toSgf());
         }
     },
-    
+
     /**
      * Send SGF data to a file-saving handler
      **/
-    save: function(evt) {
+    save: function() {
         var success = function(id, req) {
+            id = null;//Make JSLint happy.
             this.fire('saved', [req.responseText]);
-        }
-        var failure = function(id, req) {
+        },
+        failure = function(id, req) {
+            id = null;//Make JSLint happy.
+            req = null;
             this.croak('error retrieving');
-        }
-        var sgf = this.cursor.getGameRoot().toSgf();
+        },
+        sgf = this.cursor.getGameRoot().toSgf();
+
         Y.io(this.saveUrl, {
-            method: 'GET',
+            method: 'POST',
             data: {sgf: sgf},
             on: {
                 success: success,
@@ -1301,26 +1399,30 @@ Y.extend(NS.Player, Y.Base, {
             context: this
         });
     },
-    
+
     resetLastLabels: function() {
         this.labelLastNumber = 1;
         this.labelLastLetter = "A";
     },
-    
+
     getGameDescription: function(excludeGameName) {
-        var root = this.cursor.getGameRoot();
-        if (!root) return;
-        var desc = (excludeGameName ? "" : root.GN || this.gameName);
+        var root = this.cursor.getGameRoot(), desc, wr,br;
+
+        if (!root) { return; }
+
+        desc = (excludeGameName ? "" : root.GN || this.gameName);
+
         if (root.PW && root.PB) {
-            var wr = root.WR ? " " + root.WR : "";
-            var br = root.BR ? " " + root.BR : "";
+            wr = root.WR ? " " + root.WR : "",
+            br = root.BR ? " " + root.BR : "";
             desc += (desc.length ? " - " : "") + root.PW + wr + " vs " + root.PB + br;
         }
+
         return desc;
     },
 
     sgfCoordToPoint: function(coord) {
-        if (!coord || coord == "tt") return {x: null, y: null};
+        if (!coord || coord === "tt") { return {x: null, y: null}; }
         var sgfCoords = {
             a: 0, b: 1, c: 2, d: 3, e: 4, f: 5, g: 6, h: 7, i: 8, j: 9,
             k: 10,l: 11, m: 12, n: 13, o: 14, p: 15, q: 16, r: 17, s: 18
@@ -1343,12 +1445,9 @@ Y.extend(NS.Player, Y.Base, {
         return pts[pt.x] + pts[pt.y];
     },
     expandCompressedPoints: function(coords) {
-        var bounds;
-        var ul, lr;
-        var x, y;
-        var newCoords = [];
-        var hits = [];
-        for (var i = 0; i < coords.length; i++) {
+        var bounds, ul, lr, x, y, newCoords = [], hits = [], i;
+
+        for (i = 0; i < coords.length; i++) {
             bounds = coords[i].split(/:/);
             if (bounds.length > 1) {
                 ul = this.sgfCoordToPoint(bounds[0]);
@@ -1379,14 +1478,14 @@ Y.extend(NS.Player, Y.Base, {
      * Progressive Loading Code
      ***************/
     fetchProgressiveData: function(completeFn) {
-        var loadNode = this.cursor.node || null;
-        if (loadNode && loadNode._cached) return;
-        
-        var loadId = (loadNode && loadNode._id) || 0;
-        this.progressiveLoads++;
-        
-        var url = this.progressiveUrl;
+        var loadNode = this.cursor.node || null,
+        loadId = (loadNode && loadNode._id) || 0;
 
-        this.remoteLoad(url, {id: loadId, pid: this.uniq}, loadNode, null, completeFn);
+        if (loadNode && loadNode._cached) { return; }
+
+        this.progressiveLoads++;
+
+
+        this.remoteLoad(this.progressiveUrl, {id: loadId, pid: this.uniq}, loadNode, null, completeFn);
     }
 });
