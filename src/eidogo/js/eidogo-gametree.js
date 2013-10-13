@@ -156,12 +156,12 @@ NS.GameNode.prototype =  {
         var properties = {}, isString, isArray, propName;
 
         for (propName in this) {
-            if( this.hasOwnProperty(prop)) {
-                isPrivate = (prop.charAt(0) === "_");
-                isString = (typeof this[prop] === "string");
-                isArray = (this[prop] instanceof Array);
+            if( this.hasOwnProperty(propName)) {
+                isPrivate = (propName.charAt(0) === "_");
+                isString = (typeof this[propName] === "string");
+                isArray = (this[propName] instanceof Array);
                 if (!isPrivate && (isString || isArray)) {
-                    properties[prop] = this[prop];
+                    properties[propName] = this[propName];
                 }
             }
         }

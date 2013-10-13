@@ -114,9 +114,8 @@ NS.CanvasRenderer = function (cfg) {
     //Replace the given node with the canvas so we can resize the canvas to fit into the original container.
     //Maybe we shouldn't do this -- but it seems like it works out better for layout.
     this.canvas = Y.Node.create('<canvas></canvas>');
-    var srcNode = Y.one(cfg.srcNode);
-    this.srcNode = srcNode.ancestor();
-    srcNode.insert(this.canvas, 'replace');
+    this.srcNode = Y.one(cfg.srcNode);
+    this.srcNode.appendChild(this.canvas);
 
     this.set('boardSize', this.boardSize || 19);
 
@@ -128,7 +127,8 @@ NS.CanvasRenderer = function (cfg) {
     this.canvas.on('mousedown', this.handleMouseDown, this);
     this.canvas.on('mouseover', this.handleHover, this);
     this.canvas.on('mouseup', this.handleMouseUp, this);
-    this.canvas.on( cfg.antislip ? 'dblclick' : 'click', this.handleClick, this);
+    this.canvas.on('click', this.handleClick, this);
+    this.canvas.on('dblclick', this.handleDoubleClick, this);
 
     this.renderCache = {
         stones: new Array(this.boardSize * this.boardSize),
@@ -158,12 +158,12 @@ Y.extend(NS.CanvasRenderer, Y.Widget, {
 
     getXY: function(evt)
     {
-        var stoneSize = this.get('stoneSize'),
+        var stoneSize = this.stoneSize,
         XY = this.canvas.get('region'),
         stoneX = Math.floor( (evt.pageX - XY[0])/stoneSize ),
         stoneY = Math.floor( (evt.pageY - XY[1])/stoneSize );
 
-        return {x:stoneX, y:stoneY, e:e};
+        return {x:stoneX, y:stoneY, e:evt};
     },
     resizeBoard: function()
     {
@@ -243,6 +243,7 @@ Y.extend(NS.CanvasRenderer, Y.Widget, {
                 }
                 //this only matters if there was a stone rendered before.  So the above if statement won't break anything.
                 context.fillStyle = (context.fillStyle === "#000000") ? "#FFFFFF" : "#000000";
+                context.strokeStyle = context.fillStyle;
 
                 renderedMarkers[i].call(context);
             }

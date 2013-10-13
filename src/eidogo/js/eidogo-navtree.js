@@ -11,6 +11,7 @@ NS.NavTree = function (cfg) {
     }
 
     this.srcNode = Y.one(cfg.srcNode);
+    this.srcNode.addClass('eidogo-navtree');
 
     this.player.on('execNode', this.selectNode, this);
     this.player.on('loadComplete', this.walkTree, this);

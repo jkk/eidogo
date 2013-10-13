@@ -29,13 +29,17 @@ Y.extend(NS.Rules, Y.Base, {
     check: function(pt, color) {
         var suicide, superko, i;
         // already occupied?
+
         if (this.board.getStone(pt) !== this.board.EMPTY) {
             return false;
         }
         
-        //check for suicide
+        //commit the current changes so we can play the move to see if it's valid.
+        this.board.commit();
+
         this.board.addStone(pt,color);
         this.doCaptures(pt,color);
+
         suicide = this.board.getStone(pt) === this.board.EMPTY;
 
         //check for superko.  This may become excessively slow... Maybe limit depth to 2?
@@ -50,7 +54,9 @@ Y.extend(NS.Rules, Y.Base, {
                 break; //Stop checking so we don't overwrite our finding of a superko violation.
             }
         }
-        this.board.rollback();
+
+        //Pop our testing off the board stack.
+        this.board.revert(1);
 
         return !( suicide || superko);
     },
@@ -65,6 +71,7 @@ Y.extend(NS.Rules, Y.Base, {
      */
     doCaptures: function(pt, color) {
         var captures = 0;
+        if( typeof color === "string" ) {throw "This function expects numeric colors!";}
         captures += this.doCapture({x: pt.x-1, y: pt.y}, color);
         captures += this.doCapture({x: pt.x+1, y: pt.y}, color);
         captures += this.doCapture({x: pt.x, y: pt.y-1}, color);

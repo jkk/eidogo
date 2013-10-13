@@ -77,8 +77,15 @@ NS.SgfParser.prototype =  {
         return node;
     },
     getChar: function() {
+        var oldChar = this.curChar;
+        
         this.curChar = this.sgf.charAt(this.index);
         this.index++;
+
+        if( (this.curChar === " " || this.curChar === "\n" || this.curChar === "\r" || this.curChar === "\t") &&
+            (oldChar === " " || oldChar === "\n" || oldChar === "\r" || oldChar === "\t")) {
+            this.getChar();
+        }
         return this.curChar;
     }
 };

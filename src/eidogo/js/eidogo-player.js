@@ -316,7 +316,6 @@ Y.extend(NS.Player, Y.Base, {
             target.loadJson(data);
         }
 
-
         if( ! target.parent ) {
             this.collectionRoot = data;
         }
@@ -978,7 +977,7 @@ Y.extend(NS.Player, Y.Base, {
             return;
         } else if (this.mode === "play") {
             // can't click there?
-            if (!this.rules.check(pt, this.currentColor)) {
+            if (!this.rules.check(pt,  this.currentColor === "W" ? this.board.WHITE : this.board.BLACK)) {
                 return;
             }
             // play the move
