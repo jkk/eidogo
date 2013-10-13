@@ -71,7 +71,8 @@ Y.extend(NS.Rules, Y.Base, {
      */
     doCaptures: function(pt, color) {
         var captures = 0;
-        if( typeof color === "string" ) {throw "This function expects numeric colors!";}
+        if( typeof color !== "number" ) {throw "This function expects numeric colors!";}
+
         captures += this.doCapture({x: pt.x-1, y: pt.y}, color);
         captures += this.doCapture({x: pt.x+1, y: pt.y}, color);
         captures += this.doCapture({x: pt.x, y: pt.y-1}, color);

@@ -16,7 +16,6 @@ YUI().use('node','get', 'querystring-stringify-simple', 'eidogo-player', 'eidogo
     Y.Get.css(Y.Eidogo.Path + 'css/eidogo.css',  function(err) {
         Y.all('div.eidogo-player').each( function(div) {
             //Load up the preferences for this eidogo-player
-
             var 
             doComments = JSON.parse(div.getAttribute("eidogo-show-comments") || 'true'),
             doToolbar = JSON.parse(div.getAttribute("eidogo-show-toolbar") || 'true'),
@@ -45,6 +44,8 @@ YUI().use('node','get', 'querystring-stringify-simple', 'eidogo-player', 'eidogo
                 sgfUrl:sgfUrl,
                 sgf: sgfData 
             };
+
+            //TODO: Maybe we want to add some js property to the div, so we can find the player again later?
             
             player = new Y.Eidogo.Player(prefs);
             
