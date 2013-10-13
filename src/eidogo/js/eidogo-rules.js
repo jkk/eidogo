@@ -27,21 +27,22 @@ Y.extend(NS.Rules, Y.Base, {
      * Called to see whether a stone may be placed at a given point
      **/
     check: function(pt, color) {
+        var suicide, superko, i;
         // already occupied?
-        if (this.board.getStone(pt) != this.board.EMPTY) {
+        if (this.board.getStone(pt) !== this.board.EMPTY) {
             return false;
         }
         
         //check for suicide
         this.board.addStone(pt,color);
-        this.doCaptures(pt,color)
-        var suicide = this.board.getStone(pt) == this.board.EMPTY
-
+        this.doCaptures(pt,color);
+        suicide = this.board.getStone(pt) === this.board.EMPTY;
 
         //check for superko.  This may become excessively slow... Maybe limit depth to 2?
-        var superko = false;
+        superko = false;
         cacheLen = this.board.cache.length;
-        for(var i = 0; i < this.board.cache.length; i++)
+
+        for(i = 0; i < this.board.cache.length; i++)
         {
             if( this.board.compare(this.board.cache[i]) )
             {
@@ -75,45 +76,61 @@ Y.extend(NS.Rules, Y.Base, {
             color = -color;
             captures = -captures;
         }
-        color = color == this.board.WHITE ? "W" : "B";
+        color = (color === this.board.WHITE ? "W" : "B");
         this.board.captures[color] += captures;
     },
     doCapture: function(pt, color) {
+        var caps;
         this.pendingCaptures = [];
-        if (this.findCaptures(pt, color))
+        
+        if (this.findCaptures(pt, color)) {
             return 0;
-        var caps = this.pendingCaptures.length;
+        }
+
+        caps = this.pendingCaptures.length;
+        
         while (this.pendingCaptures.length) {
             this.board.addStone(this.pendingCaptures.pop(), this.board.EMPTY);
         }
         return caps;
     },
     findCaptures: function(pt, color) {
+        var i;
+
         // out of bounds?
-        if (pt.x < 0 || pt.y < 0 ||
-            pt.x >= this.board.boardSize || pt.y >= this.board.boardSize)
+        if (pt.x < 0 || pt.y < 0 || pt.x >= this.board.boardSize || pt.y >= this.board.boardSize) {
             return 0;
+        }
+
         // found opposite color
-        if (this.board.getStone(pt) == color)
+        if (this.board.getStone(pt) === color) {
             return 0;
+        }
         // found a liberty
-        if (this.board.getStone(pt) == this.board.EMPTY)
+        if (this.board.getStone(pt) === this.board.EMPTY) {
             return 1;
+        }
         // already visited?
-        for (var i = 0; i < this.pendingCaptures.length; i++)
-            if (this.pendingCaptures[i].x == pt.x && this.pendingCaptures[i].y == pt.y)
+        for (i = 0; i < this.pendingCaptures.length; i++) {
+            if (this.pendingCaptures[i].x === pt.x && this.pendingCaptures[i].y === pt.y) {
                 return 0;
+            }
+        }
         
         this.pendingCaptures.push(pt);
         
-        if (this.findCaptures({x: pt.x-1, y: pt.y}, color))
+        if (this.findCaptures({x: pt.x-1, y: pt.y}, color)) {
             return 1;
-        if (this.findCaptures({x: pt.x+1, y: pt.y}, color))
+        }
+        if (this.findCaptures({x: pt.x+1, y: pt.y}, color)) {
             return 1;
-        if (this.findCaptures({x: pt.x, y: pt.y-1}, color))
+        }
+        if (this.findCaptures({x: pt.x, y: pt.y-1}, color)) {
             return 1;
-        if (this.findCaptures({x: pt.x, y: pt.y+1}, color))
+        }
+        if (this.findCaptures({x: pt.x, y: pt.y+1}, color)) {
             return 1;
+        }
         return 0;
     }
 });

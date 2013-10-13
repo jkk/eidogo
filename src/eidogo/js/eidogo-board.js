@@ -65,9 +65,12 @@ Y.extend( NS.Board, Y.Base,  {
     makeBoardArray: function(val) {
         // We could use a multi-dimensional array but doing this avoids
         // the need for deep copying during commit, which is very slow.
-        var arr = new Array(this.boardSize * this.boardSize)
-        for( var i = 0; i < arr.length; i++)
+        var arr = new Array(this.boardSize * this.boardSize),
+        i;
+
+        for( i = 0; i < arr.length; i++) {
             arr[i] = val;
+        }
 
         return arr;
     },
@@ -114,10 +117,10 @@ Y.extend( NS.Board, Y.Base,  {
         return this.stones[pt.y * this.boardSize + pt.x];
     },
     getRegion: function(t, l, w, h) {
-        var region = [].setLength(w * h, this.EMPTY);
-        var offset;
-        for (var y = t; y < t + h; y++) {
-            for (var x = l; x < l + w; x++) {
+        var region = [].setLength(w * h, this.EMPTY), offset, x, y;
+
+        for (y = t; y < t + h; y++) {
+            for ( x = l; x < l + w; x++) {
                 offset = (y - t) * w + (x - l);
                 region[offset] = this.getStone({x:x, y:y});
             }
@@ -131,33 +134,34 @@ Y.extend( NS.Board, Y.Base,  {
         return this.markers[pt.y * this.boardSize + pt.x];
     },
     render: function(complete) {
-        var color, type;
-        var len;
-        var last = this.cache[this.cache.length - 1];
+        var i,  colorLookup = {}, x, y,
+        last = this.cache[this.cache.length - 1];
         
-        if(!last) throw "Nothing to render idiots!"; //No commited changes to render -- do everything
+        if(!last) {
+            throw "Nothing to render"; //No commited changes to render -- do everything
+        }
 
-        if(!this.lastRender)//This needs to be here.  If it's in the init it gets triggered on a board refresh and then things don't update properly.
+        //This needs to be here.  If it's in the init it
+        //gets triggered on a board refresh and then things don't update properly.
+        if(!this.lastRender) {
             this.lastRender = { stones: this.stones.slice(), markers: this.markers.slice() };
-
-
-        var colorLookup = {}
-        colorLookup[this.WHITE] = "white"; 
+        }
+        
+        colorLookup[this.WHITE] = "white";
         colorLookup[this.BLACK] = "black";
         colorLookup[this.EMPTY] = "empty";
         
-        var i;
-        for (var x = 0; x < this.boardSize; x++) {
-            for (var y = 0; y < this.boardSize; y++) {
+        for ( x = 0; x < this.boardSize; x++) {
+            for ( y = 0; y < this.boardSize; y++) {
                 i =  y * this.boardSize + x;
-                if( complete || this.lastRender.stones[i] != last.stones[i] )
+                if( complete || this.lastRender.stones[i] !== last.stones[i] )
                 {
                     this.renderer.setStone({x:x, y:y}, colorLookup[last.stones[i]]);
                     this.lastRender.stones[i] = last.stones[i];
                 }
                 
                 //Maybe we want to set marker color here and have it change based on stone color.
-                if( complete || this.lastRender.markers[i] != last.markers[i] )
+                if( complete || this.lastRender.markers[i] !== last.markers[i] )
                 {
                     this.renderer.setMarker({x:x, y:y}, last.markers[i]);
                     this.lastRender.markers[i] = last.markers[i];
@@ -170,8 +174,9 @@ Y.extend( NS.Board, Y.Base,  {
     },
     compare: function (otherBoard) {
         // compare lengths - can save a lot of time
-        if (this.stones.length != otherBoard.stones.length)
+        if (this.stones.length !== otherBoard.stones.length) {
             return false;
+        }
         
         for (var i = 0; i < this.stones.length; i++) {
             if (this.stones[i] !== otherBoard.stones[i]) {

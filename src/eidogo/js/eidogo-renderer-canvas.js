@@ -14,54 +14,53 @@ ShapeRenderers =
         {
             return ShapeRenderers.stone(pt, angle, '#000000');
         },
-
         //TODO: Swap this out for rendering vector textures.
-        stone: function (pt, angle, color) 
+        stone: function (pt, angle, color)
         {
             return function()
             {
                 this.beginPath();
                 this.fillStyle = color;
                 this.strokeStyle = "#000000";
-                this.arc(this.stoneSize*(pt.x + 0.5),  
+                this.arc(this.stoneSize*(pt.x + 0.5),
                          this.stoneSize*(pt.y + 0.5),
-                         this.stoneSize/2*.90, 
+                         this.stoneSize/2*0.90,
                          2 * Math.PI, false);
                 this.stroke();
                 this.fill();
                 this.closePath();
-            }
+            };
         },
         square: function(pt)
         {
             return function()
             {
-                this.fillRect(this.stoneSize*(pt.x + 0.25),  
+                this.fillRect(this.stoneSize*(pt.x + 0.25),
                               this.stoneSize*(pt.y + 0.25),
-                              this.stoneSize/2, 
+                              this.stoneSize/2,
                               this.stoneSize/2);
-                this.strokeRect(this.stoneSize*(pt.x + 0.25),  
+                this.strokeRect(this.stoneSize*(pt.x + 0.25),
                                 this.stoneSize*(pt.y + 0.25),
-                                this.stoneSize/2, 
+                                this.stoneSize/2,
                                 this.stoneSize/2);
-            }
+            };
         },
         triangle: function (pt)
         {
             return function() {
                 this.beginPath();
-                this.moveTo(this.stoneSize*(pt.x + 0.5),  
+                this.moveTo(this.stoneSize*(pt.x + 0.5),
                             this.stoneSize*(pt.y + 0.15));
-                this.lineTo(this.stoneSize*(pt.x + 0.75),  
+                this.lineTo(this.stoneSize*(pt.x + 0.75),
                             this.stoneSize*(pt.y + 0.70));
-                this.lineTo(this.stoneSize*(pt.x + 0.25),  
+                this.lineTo(this.stoneSize*(pt.x + 0.25),
                             this.stoneSize*(pt.y + 0.70));
-                this.lineTo(this.stoneSize*(pt.x + 0.5),  
+                this.lineTo(this.stoneSize*(pt.x + 0.5),
                             this.stoneSize*(pt.y + 0.15));
                 this.fill();
                 this.stroke();
                 this.closePath();
-            }
+            };
         },
         current: function(pt) { return ShapeRenderers.circle(pt); },
         circle: function(pt)
@@ -69,14 +68,14 @@ ShapeRenderers =
             return function()
             {
                 this.beginPath();
-                this.arc(this.stoneSize*(pt.x + 0.5),  
+                this.arc(this.stoneSize*(pt.x + 0.5),
                          this.stoneSize*(pt.y + 0.5),
-                         this.stoneSize/4, 
+                         this.stoneSize/4,
                          2 * Math.PI, false);
                 this.fill();
                 this.stroke();
                 this.closePath();
-            }
+            };
         },
         'territory-white': function ()
         {
@@ -96,18 +95,17 @@ ShapeRenderers =
             {
                 this.textAlign = "center";
                 this.textBaseline = 'middle';
-                this.font = 'bold '+ this.stoneSize*.5 + 'pt Calibri';
-                this.fillText(text, this.stoneSize*(pt.x + 0.5),  
+                this.font = 'bold '+ this.stoneSize*0.5 + 'pt Calibri';
+                this.fillText(text, this.stoneSize*(pt.x + 0.5),
                               this.stoneSize*(pt.y + 0.5));
-                this.strokeText(text, this.stoneSize*(pt.x + 0.5),  
+                this.strokeText(text, this.stoneSize*(pt.x + 0.5),
                                 this.stoneSize*(pt.y + 0.5));
-            }
+            };
         }
-    }
-
+    };
 
 NS.CanvasRenderer = function (cfg) {
-    this.boardSize = parseInt(cfg.boardSize);
+    this.boardSize = parseInt(cfg.boardSize, 10);
     this.antislip = true;
     
     NS.CanvasRenderer.superclass.constructor.apply(this, arguments);
@@ -135,10 +133,9 @@ NS.CanvasRenderer = function (cfg) {
     this.renderCache = {
         stones: new Array(this.boardSize * this.boardSize),
         markers: new Array(this.boardSize * this.boardSize)
-    }
+    };
     this.resizeBoard();  //resize it for the first time... (heh..)
-}
-
+};
 
 NS.CanvasRenderer.NAME = "eidogo-renderer-canvas";
 
@@ -149,7 +146,7 @@ NS.CanvasRenderer.ATTRS = {
 
 Y.extend(NS.CanvasRenderer, Y.Widget, {
     intToXy: function (i)
-    {  
+    {
         var boardSize = this.get('boardSize');
         return {x: i%boardSize, y: Math.floor(i/boardSize)};
     },

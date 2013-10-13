@@ -13,30 +13,30 @@ var t = NS.resources;
 
 var GameInfoPropLabels =
     {
-  	GN: t['game'],
-	PW: t['white'],
-	WR: t['white rank'],
-	WT: t['white team'],
-	PB: t['black'],
-	BR: t['black rank'],
-	BT: t['black team'],
-	HA: t['handicap'],
-	KM: t['komi'],
-	RE: t['result'],
-	DT: t['date'],
-	GC: t['info'],
-	PC: t['place'],
-	EV: t['event'],
-	RO: t['round'],
-	OT: t['overtime'],
-	ON: t['opening'],
-	RU: t['ruleset'],
-	AN: t['annotator'],
-	CP: t['copyright'],
-	SO: t['source'],
-	TM: t['time limit'],
-	US: t['transcriber'],
-	AP: t['created with']
+        GN: t['game'],
+        PW: t['white'],
+        WR: t['white rank'],
+        WT: t['white team'],
+        PB: t['black'],
+        BR: t['black rank'],
+        BT: t['black team'],
+        HA: t['handicap'],
+        KM: t['komi'],
+        RE: t['result'],
+        DT: t['date'],
+        GC: t['info'],
+        PC: t['place'],
+        EV: t['event'],
+        RO: t['round'],
+        OT: t['overtime'],
+        ON: t['opening'],
+        RU: t['ruleset'],
+        AN: t['annotator'],
+        CP: t['copyright'],
+        SO: t['source'],
+        TM: t['time limit'],
+        US: t['transcriber'],
+        AP: t['created with']
     };
 
 
@@ -72,38 +72,38 @@ NS.Player = function (cfg) {
     
     // handlers for the various types of GameNode properties
     this.propertyHandlers = {
-	W:  this.playMove,
-	B:  this.playMove,
-	KO: this.playMove,
-	MN: this.setMoveNumber,
-	AW: this.addStone,
-	AB: this.addStone,
-	AE: this.addStone,
-	CR: this.addMarker, // circle
-	LB: this.addMarker, // label
-	TR: this.addMarker, // triangle
-	MA: this.addMarker, // X
-	SQ: this.addMarker, // square
-	TW: this.addMarker,
-	TB: this.addMarker,
-	DD: this.addMarker,
-	PL: this.setColor,
-	C:  this.showComments,
-	N:  this.showAnnotation,
-	GB: this.showAnnotation,
-	GW: this.showAnnotation,
-	DM: this.showAnnotation,
-	HO: this.showAnnotation,
-	UC: this.showAnnotation,
-	V:  this.showAnnotation,
-	BM: this.showAnnotation,
-	DO: this.showAnnotation,
-	IT: this.showAnnotation,
-	TE: this.showAnnotation,
-	BL: this.showTime,
-	OB: this.showTime,
-	WL: this.showTime,
-	OW: this.showTime
+        W:  this.playMove,
+        B:  this.playMove,
+        KO: this.playMove,
+        MN: this.setMoveNumber,
+        AW: this.addStone,
+        AB: this.addStone,
+        AE: this.addStone,
+        CR: this.addMarker, // circle
+        LB: this.addMarker, // label
+        TR: this.addMarker, // triangle
+        MA: this.addMarker, // X
+        SQ: this.addMarker, // square
+        TW: this.addMarker,
+        TB: this.addMarker,
+        DD: this.addMarker,
+        PL: this.setColor,
+        C:  this.showComments,
+        N:  this.showAnnotation,
+        GB: this.showAnnotation,
+        GW: this.showAnnotation,
+        DM: this.showAnnotation,
+        HO: this.showAnnotation,
+        UC: this.showAnnotation,
+        V:  this.showAnnotation,
+        BM: this.showAnnotation,
+        DO: this.showAnnotation,
+        IT: this.showAnnotation,
+        TE: this.showAnnotation,
+        BL: this.showTime,
+        OB: this.showTime,
+        WL: this.showTime,
+        OW: this.showTime
     };
     
     // initialize per-game settings
@@ -113,12 +113,12 @@ NS.Player = function (cfg) {
     this.cropParams = null;
     this.shrinkToFit = cfg.shrinkToFit;
     if (this.shrinkToFit || cfg.cropWidth || cfg.cropHeight) {
-	this.cropParams = {};
-	this.cropParams.width = cfg.cropWidth;
-	this.cropParams.height = cfg.cropHeight;
-	this.cropParams.left = cfg.cropLeft;
-	this.cropParams.top = cfg.cropTop;
-	this.cropParams.padding = cfg.cropPadding || 1;
+        this.cropParams = {};
+        this.cropParams.width = cfg.cropWidth;
+        this.cropParams.height = cfg.cropHeight;
+        this.cropParams.left = cfg.cropLeft;
+        this.cropParams.top = cfg.cropTop;
+        this.cropParams.padding = cfg.cropPadding || 1;
     }
     
     //TODO: Readd this if we add selection regions back.
@@ -145,16 +145,16 @@ Y.extend(NS.Player, Y.Base, {
     reset: function(cfg) {
         this.gameName = "";
         
-	this.prefs = cfg || {};
+        this.prefs = cfg || {};
 
-	this.prefs.markCurrent = this.prefs.markCurrent || true;
+        this.prefs.markCurrent = this.prefs.markCurrent || true;
 
         // Mutiple games can be contained in collectionRoot. We default
         // to the first (collectionRoot._children[0])
         // See http://www.red-bean.com/sgf/sgf4.html 
         this.collectionRoot = new NS.GameNode();
         this.cursor = new NS.GameCursor();
-	
+
         // gnugo/computer opponent
         this.opponentUrl = null;
         this.opponentColor = null;
@@ -169,7 +169,7 @@ Y.extend(NS.Player, Y.Base, {
         this.variations = null;
         this.timeB = "";
         this.timeW = "";
-	
+
         // region selection state
         this.regionTop = null;
         this.regionLeft = null;
@@ -177,14 +177,14 @@ Y.extend(NS.Player, Y.Base, {
         this.regionHeight = null;
         this.regionBegun = null;
         this.regionClickSelect = null;
-	
+
         // mouse clicking/dragging state
         this.mouseDown = null;
         this.mouseDownX = null;
         this.mouseDownY = null;
         this.mouseDownClickX = null;
         this.mouseDownClickY = null;
-	
+
         // for the letter and number tools
         this.labelLastLetter = null;
         this.labelLastNumber = null;
@@ -211,20 +211,20 @@ Y.extend(NS.Player, Y.Base, {
      * Load an SGF file or start from a blank board
      **/
     loadSgf: function() {
-	var self = this;
-	var completeFn = function() { 
-	    self.fire('loadComplete',{}); 
-	}
+        var self = this;
+        var completeFn = function() { 
+            self.fire('loadComplete',{}); 
+        }
         var cfg = this.prefs;
         
         this.reset(cfg);
         
         // URL path to SGF files
         this.sgfPath = cfg.sgfPath || this.sgfPath;
-	
+
         // Load the first node of the first node by default
         this.loadPath = cfg.loadPath && cfg.loadPath.length > 1 ? cfg.loadPath : [0];
-	
+
         // game name (= file name) of the game to load
         this.gameName = cfg.gameName || "";
         
@@ -232,40 +232,40 @@ Y.extend(NS.Player, Y.Base, {
         var noCb = false;
         
         if (typeof cfg.sgf == "string") {
-	    var sgf = (new NS.SgfParser(cfg.sgf));
-	    this.loadJsonSgf(sgf.root);
+            var sgf = (new NS.SgfParser(cfg.sgf));
+            this.loadJsonSgf(sgf.root);
         } else if (typeof cfg.sgf == "object")
-	{
-	    // already-parsed JSON game tree
-	    this.loadJsonSgf(cfg.sgf);
-	} else if (cfg.progressiveUrl) 
-	{
-	    this.progressiveLoads = 0;
-	    this.progressiveUrl = cfg.progressiveUrl;
+        {
+            // already-parsed JSON game tree
+            this.loadJsonSgf(cfg.sgf);
+        } else if (cfg.progressiveUrl) 
+        {
+            this.progressiveLoads = 0;
+            this.progressiveUrl = cfg.progressiveUrl;
             this.fetchProgressiveData(completeFn);
             noCb = true;
 
-	} else if (typeof cfg.sgfUrl == "string" || this.gameName) {
-	    
-	    // the URL can be provided as a single sgfUrl or as sgfPath + gameName
-	    if (!cfg.sgfUrl) {
+        } else if (typeof cfg.sgfUrl == "string" || this.gameName) {
+            
+            // the URL can be provided as a single sgfUrl or as sgfPath + gameName
+            if (!cfg.sgfUrl) {
                 cfg.sgfUrl = this.sgfPath + this.gameName + ".sgf";
-	    }
-	    
-	    // load data from a URL
-	    this.remoteLoad(cfg.sgfUrl, {}, null, null, completeFn);
-	    noCb = true;
+            }
+            
+            // load data from a URL
+            this.remoteLoad(cfg.sgfUrl, {}, null, null, completeFn);
+            noCb = true;
         } else {
-	    // start from scratch
-	    var boardSize = cfg.boardSize || "19";
-	    var komiMap = {19: 6.5, 13: 4.5, 9: 3.5, 7: 2.5};
-	    var blankGame = {_children: [{
+            // start from scratch
+            var boardSize = cfg.boardSize || "19";
+            var komiMap = {19: 6.5, 13: 4.5, 9: 3.5, 7: 2.5};
+            var blankGame = {_children: [{
                 SZ: boardSize,
                 KM: cfg.komi || komiMap[boardSize] || 6.5,
                 _children: []}]};
-	    
-	    // AI opponent (e.g. GNU Go)
-	    if (cfg.opponentUrl) {
+            
+            // AI opponent (e.g. GNU Go)
+            if (cfg.opponentUrl) {
                 this.gameName = "gnugo";
                 this.opponentUrl = cfg.opponentUrl;
                 this.opponentColor = cfg.opponentColor == "B" ? cfg.opponentColor : "W";
@@ -275,42 +275,42 @@ Y.extend(NS.Player, Y.Base, {
                 root.PB = this.opponentColor == "B" ? "GNU Go" : t['you'];
                 root.HA = parseInt(cfg.handicap, 10) || 0;
                 if (root.HA) {
-		    var handiCoords = {
+                    var handiCoords = {
                         19: [['pd', 'dp'],
-			     ['pd', 'dp', 'pp'],
-			     ['pd', 'dp', 'pp', 'dd'],
-			     ['pd', 'dp', 'pp', 'dd', 'jj'],
-			     ['pd', 'dp', 'pp', 'dd', 'dj', 'pj'],
-			     ['pd', 'dp', 'pp', 'dd', 'dj', 'pj', 'jj'],
-			     ['pd', 'dp', 'pp', 'dd', 'dj', 'pj', 'jd', 'jp'],
-			     ['pd', 'dp', 'pp', 'dd', 'dj', 'pj', 'jd', 'jp', 'jj']],
+                             ['pd', 'dp', 'pp'],
+                             ['pd', 'dp', 'pp', 'dd'],
+                             ['pd', 'dp', 'pp', 'dd', 'jj'],
+                             ['pd', 'dp', 'pp', 'dd', 'dj', 'pj'],
+                             ['pd', 'dp', 'pp', 'dd', 'dj', 'pj', 'jj'],
+                             ['pd', 'dp', 'pp', 'dd', 'dj', 'pj', 'jd', 'jp'],
+                             ['pd', 'dp', 'pp', 'dd', 'dj', 'pj', 'jd', 'jp', 'jj']],
                         13: [['jd', 'dj'],
-			     ['jd', 'dj', 'jj'],
-			     ['jd', 'dj', 'jj', 'dd'],
-			     ['jd', 'dj', 'jj', 'dd', 'gg'],
-			     ['jd', 'dj', 'jj', 'dd', 'dg', 'jg'],
-			     ['jd', 'dj', 'jj', 'dd', 'dg', 'jg', 'gg'],
-			     ['jd', 'dj', 'jj', 'dd', 'dg', 'jg', 'gd', 'gj'],
-			     ['jd', 'dj', 'jj', 'dd', 'dg', 'jg', 'gd', 'gj', 'gg']],
+                             ['jd', 'dj', 'jj'],
+                             ['jd', 'dj', 'jj', 'dd'],
+                             ['jd', 'dj', 'jj', 'dd', 'gg'],
+                             ['jd', 'dj', 'jj', 'dd', 'dg', 'jg'],
+                             ['jd', 'dj', 'jj', 'dd', 'dg', 'jg', 'gg'],
+                             ['jd', 'dj', 'jj', 'dd', 'dg', 'jg', 'gd', 'gj'],
+                             ['jd', 'dj', 'jj', 'dd', 'dg', 'jg', 'gd', 'gj', 'gg']],
                         9: [['cg', 'gc'],
-			    ['cg', 'gc', 'gg'],
-			    ['cg', 'gc', 'gg', 'cc'],
-			    ['cg', 'gc', 'gg', 'cc', 'ee'],
-			    ['cg', 'gc', 'gg', 'cc', 'ce', 'ge'],
-			    ['cg', 'gc', 'gg', 'cc', 'ce', 'ge', 'ee'],
-			    ['cg', 'gc', 'gg', 'cc', 'ce', 'ge', 'ec', 'eg'],
-			    ['cg', 'gc', 'gg', 'cc', 'ce', 'ge', 'ec', 'eg', 'ee']]};
-		    root.KM = 0.5;
-		    if (root.HA > 1) {
+                            ['cg', 'gc', 'gg'],
+                            ['cg', 'gc', 'gg', 'cc'],
+                            ['cg', 'gc', 'gg', 'cc', 'ee'],
+                            ['cg', 'gc', 'gg', 'cc', 'ce', 'ge'],
+                            ['cg', 'gc', 'gg', 'cc', 'ce', 'ge', 'ee'],
+                            ['cg', 'gc', 'gg', 'cc', 'ce', 'ge', 'ec', 'eg'],
+                            ['cg', 'gc', 'gg', 'cc', 'ce', 'ge', 'ec', 'eg', 'ee']]};
+                    root.KM = 0.5;
+                    if (root.HA > 1) {
                         root.AB = handiCoords[boardSize][root.HA-2];
-		    }
+                    }
                 }
-	    }
-	    
-	    this.loadJsonSgf(blankGame);
+            }
+            
+            this.loadJsonSgf(blankGame);
         }
         if (!noCb && typeof completeFn == "function") {
-	    completeFn();
+            completeFn();
         }
     },
     
@@ -321,37 +321,37 @@ Y.extend(NS.Player, Y.Base, {
     loadJsonSgf: function(data, target) {
         var newGame = false;
 
-	if (  ! target ) {
-	    target = new NS.GameNode();
+        if (  ! target ) {
+            target = new NS.GameNode();
         }
-	
-	if( data instanceof NS.GameNode ) //Already have a setup gamenode, no need to reallocate them all.
-	{
-	    data._parent = target.parent;
-	    target = data;
-	} else
-	{
-	    target.loadJson(data);
-	}
-        
-	
-	if( ! target.parent )
-	    this.collectionRoot = data;
+
+        if( data instanceof NS.GameNode ) //Already have a setup gamenode, no need to reallocate them all.
+        {
+            data._parent = target.parent;
+            target = data;
+        } else
+        {
+            target.loadJson(data);
+        }
         
 
-	target._cached = true;
-	
+        if( ! target.parent )
+            this.collectionRoot = data;
+        
+
+        target._cached = true;
+
         if (!target._parent) {
-	    // Loading into tree root; use the first game by default or
-	    // other if specified
-	    var gameIndex = this.loadPath.length ? parseInt(this.loadPath[0], 10) : 0;
-	    this.initGame(target._children[gameIndex || 0]);
-	    newGame = true;
+            // Loading into tree root; use the first game by default or
+            // other if specified
+            var gameIndex = this.loadPath.length ? parseInt(this.loadPath[0], 10) : 0;
+            this.initGame(target._children[gameIndex || 0]);
+            newGame = true;
         }
         
-	this.resetCursor();
+        this.resetCursor();
 
-	if (this.loadPath.length) {
+        if (this.loadPath.length) {
             this.goTo(this.loadPath, newGame);
         } else {
             this.refresh();
@@ -359,9 +359,9 @@ Y.extend(NS.Player, Y.Base, {
         
         // find out which color to play as for problem mode
         if (newGame && this.problemMode) {
-	    if (!this.problemColor)
+            if (!this.problemColor)
                 this.currentColor = this.problemColor = (this.cursor.getNextColor() || "B");
-	    else
+            else
                 this.currentColor = this.problemColor;
         }
     },
@@ -377,43 +377,43 @@ Y.extend(NS.Player, Y.Base, {
         completeFn = (typeof completeFn == "function") ? completeFn : null;
         
         if (loadPath) {
-	    this.loadPath = loadPath;
+            this.loadPath = loadPath;
         }
         
         var success = function(id, req) {
-	    var data = req.responseText.replace(/^( |\t|\r|\n)*/, "");
-	    // infer the kind of file we got
-	    if (data.charAt(0) == '(') {
+            var data = req.responseText.replace(/^( |\t|\r|\n)*/, "");
+            // infer the kind of file we got
+            if (data.charAt(0) == '(') {
                 // SGF
                 var me = this;
                 var sgf = new NS.SgfParser(data, function() {
-		    // parsing is asychronous
-		    me.load(this.root, target);
-		    completeFn && completeFn();
+                    // parsing is asychronous
+                    me.load(this.root, target);
+                    completeFn && completeFn();
                 });
-	    } else if (data.charAt(0) == '{') {
+            } else if (data.charAt(0) == '{') {
                 // JSON
                 data = eval("(" + data + ")");
                 this.load(data, target);
                 completeFn && completeFn();
-	    } else {
+            } else {
                 this.croak('invalid data');
-	    }
+            }
         }
-	
+
         var failure = function(id, req) {
-	    this.croak('error retrieving');
+            this.croak('error retrieving');
         }
         
-	Y.io(url, {
-	    method: 'GET',
-	    data: Y.QueryString.stringify(params),
-	    on: {
-		success: success,
-		failure: failure
-	    },
-	    context: this
-	});
+        Y.io(url, {
+            method: 'GET',
+            data: Y.QueryString.stringify(params),
+            on: {
+                success: success,
+                failure: failure
+            },
+            context: this
+        });
     },
 
     /**
@@ -425,11 +425,11 @@ Y.extend(NS.Player, Y.Base, {
         var size = gameRoot.SZ || 19;
         // Only three sizes supported for now
         if (size != 7 && size != 9 && size != 13 && size != 19)
-	    size = 19;
+            size = 19;
         if (this.shrinkToFit)
-	    this.calcShrinkToFit(gameRoot, size);
+            this.calcShrinkToFit(gameRoot, size);
         else if (this.problemMode && !this.cropParams) {
-	    this.cropParams = {
+            this.cropParams = {
                 width: size,
                 height: size,
                 top: 0,
@@ -437,9 +437,9 @@ Y.extend(NS.Player, Y.Base, {
                 padding: 1};
         }
         if (!this.board) {
-	    // first time
-	    this.createBoard(size);
-	    this.rules = new NS.Rules(this.board);
+            // first time
+            this.createBoard(size);
+            this.rules = new NS.Rules(this.board);
         }
         this.unsavedChanges = false;
         this.resetCursor(true);
@@ -447,44 +447,44 @@ Y.extend(NS.Player, Y.Base, {
         var moveCursor = new NS.GameCursor(this.cursor.node);
         while (moveCursor.next()) { this.totalMoves++; }
         this.totalMoves--;
-	//        this.showGameInfo(gameRoot);
-	//      this.enableNavSlider();
+        //        this.showGameInfo(gameRoot);
+        //      this.enableNavSlider();
         //this.selectTool(this.mode == "view" ? "view" : "play");
         this.fire('initGame', {});
     },
     getGameInfo: function(gameInfo) {
-	if (!gameInfo) return;
-	var val, parsedInfo = {};
-	
-	for (var propName in PropertyLabels) {
-	    if (gameInfo[propName] instanceof Array) {
-		gameInfo[propName] = gameInfo[propName][0];
-	    }
+        if (!gameInfo) return;
+        var val, parsedInfo = {};
 
-	    if (gameInfo[propName]) { //This won't work right now since the fucking localization is broken.
-		if (propName == "PW") {
-		    parsedInfo.whiteName = gameInfo[propName] +	(gameInfo['WR'] ? ", " + gameInfo['WR'] : "");
-		    continue;
-		} else if (propName == "PB") {
-		    parsedInfo.blackName = gameInfo[propName] +	(gameInfo['BR'] ? ", " + gameInfo['BR'] : "");
-		    continue;
-		}
-		if (propName == "WR" || propName == "BR") {
-		    continue;
-		}
-		val = gameInfo[propName];
-		if (propName == "DT") {
-		    var dateParts = gameInfo[propName].split(/[\.-]/);
-		    if (dateParts.length == 3) {
-			val = dateParts[2].replace(/^0+/, "") + " "
-			    + this.months[dateParts[1]-1] + " " + dateParts[0];
-		    }
-		}
-		parsedInfo[propName] = vale;
-	    }
-	}
+        for (var propName in PropertyLabels) {
+            if (gameInfo[propName] instanceof Array) {
+                gameInfo[propName] = gameInfo[propName][0];
+            }
 
-	return parsedInfo;
+            if (gameInfo[propName]) { //This won't work right now since the fucking localization is broken.
+                if (propName == "PW") {
+                    parsedInfo.whiteName = gameInfo[propName] +(gameInfo['WR'] ? ", " + gameInfo['WR'] : "");
+                    continue;
+                } else if (propName == "PB") {
+                    parsedInfo.blackName = gameInfo[propName] +(gameInfo['BR'] ? ", " + gameInfo['BR'] : "");
+                    continue;
+                }
+                if (propName == "WR" || propName == "BR") {
+                    continue;
+                }
+                val = gameInfo[propName];
+                if (propName == "DT") {
+                    var dateParts = gameInfo[propName].split(/[\.-]/);
+                    if (dateParts.length == 3) {
+                        val = dateParts[2].replace(/^0+/, "") + " "
+                            + this.months[dateParts[1]-1] + " " + dateParts[0];
+                    }
+                }
+                parsedInfo[propName] = vale;
+            }
+        }
+
+        return parsedInfo;
     },
     /**
      * Handle tool switching
@@ -518,23 +518,23 @@ Y.extend(NS.Player, Y.Base, {
         size = size || 19;
         if (this.board && this.board.renderer && this.board.boardSize == size) return;
         try {
-	    var rendererProto;
-	    if( typeof this.renderer == "function" )
-	    {
-		rendererProto = this.renderer;
+            var rendererProto;
+            if( typeof this.renderer == "function" )
+            {
+                rendererProto = this.renderer;
 
-		//TODO: Figure out a good order for this renderer to be loaded.
-		this.renderer = new rendererProto({srcNode: this.prefs.srcNode,
-						   boardSize: size,
-						   crop: this.cropParams});	
-	    } else if( typeof this.renderer != "object" )
-	    {
-		this.croak("No renderer object or constructor provided");
-	    }
-	    this.board = new NS.Board(this.renderer, size);
+                //TODO: Figure out a good order for this renderer to be loaded.
+                this.renderer = new rendererProto({srcNode: this.prefs.srcNode,
+                                                   boardSize: size,
+                                                   crop: this.cropParams});
+            } else if( typeof this.renderer != "object" )
+            {
+                this.croak("No renderer object or constructor provided");
+            }
+            this.board = new NS.Board(this.renderer, size);
 
-	    this.wireEventHandlers();
-        } catch (e) {	
+            this.wireEventHandlers();
+        } catch (e) {
             this.croak('error board: ' + e);
             return;
         }
@@ -542,10 +542,10 @@ Y.extend(NS.Player, Y.Base, {
 
     wireEventHandlers: function()
     {
-	//this.renderer.on('boardClick', {}, this);
-	this.renderer.on('boardMouseDown', this.handleBoardMouseDown, this);
-	this.renderer.on('boardMouseUp', this.handleBoardMouseUp, this);
-	this.renderer.on('boardHover', this.handleBoardHover, this);
+        //this.renderer.on('boardClick', {}, this);
+        this.renderer.on('boardMouseDown', this.handleBoardMouseDown, this);
+        this.renderer.on('boardMouseUp', this.handleBoardMouseUp, this);
+        this.renderer.on('boardHover', this.handleBoardHover, this);
     },
     
     /**
@@ -560,25 +560,25 @@ Y.extend(NS.Player, Y.Base, {
         var me = this;
         // find all points occupied by stones or labels
         gameRoot.walk(function(node) {
-	    var prop, i, coord;
-	    for (prop in node) {
+            var prop, i, coord;
+            for (prop in node) {
                 if (/^(W|B|AW|AB|LB)$/.test(prop)) {
-		    coord = node[prop];
-		    if (!(coord instanceof Array)) coord = [coord];
-		    if (prop != 'LB') coord = me.expandCompressedPoints(coord);
-		    else coord = [coord[0].split(/:/)[0]];
-		    for (i = 0; i < coord.length; i++)
+                    coord = node[prop];
+                    if (!(coord instanceof Array)) coord = [coord];
+                    if (prop != 'LB') coord = me.expandCompressedPoints(coord);
+                    else coord = [coord[0].split(/:/)[0]];
+                    for (i = 0; i < coord.length; i++)
                         points[coord[i]] = "";
                 }
-	    }
+            }
         });
         // nab the outermost points
         for (var key in points) {
-	    var pt = this.sgfCoordToPoint(key);
-	    if (l == null || pt.x < l) l = pt.x;
-	    if (r == null || pt.x > r) r = pt.x;
-	    if (t == null || pt.y < t) t = pt.y;
-	    if (b == null || pt.y > b) b = pt.y;
+            var pt = this.sgfCoordToPoint(key);
+            if (l == null || pt.x < l) l = pt.x;
+            if (r == null || pt.x > r) r = pt.x;
+            if (t == null || pt.y < t) t = pt.y;
+            if (b == null || pt.y > b) b = pt.y;
         }
         this.cropParams.width = r - l + 1;
         this.cropParams.height = b - t + 1;
@@ -605,31 +605,31 @@ Y.extend(NS.Player, Y.Base, {
     fetchOpponentMove: function() {
         this.nowLoading(t['gnugo thinking']);
         var success = function(id, req) {
-	    this.doneLoading();
-	    this.createMove(req.responseText);
+            this.doneLoading();
+            this.createMove(req.responseText);
         }
         var failure = function(id, req) {
-	    this.croak('error retrieving');
+            this.croak('error retrieving');
         }
         var root = this.cursor.getGameRoot();
 
         var params = {
-	    sgf: root.toSgf(),
-	    move: this.currentColor,
-	    size: root.SZ,
-	    level: this.opponentLevel
+            sgf: root.toSgf(),
+            move: this.currentColor,
+            size: root.SZ,
+            level: this.opponentLevel
         };
 
-	Y.io(this.opponentUrl, {
-	    method: 'GET',
-	    data: params,
-	    on: {
-		success: success,
-		failure: failure
-	    },
-	    context: this
-	});
-	
+        Y.io(this.opponentUrl, {
+            method: 'GET',
+            data: params,
+            on: {
+                success: success,
+                failure: failure
+            },
+            context: this
+        });
+
     },
     
     /**
@@ -638,14 +638,14 @@ Y.extend(NS.Player, Y.Base, {
     playProblemResponse: function() {
         // short delay before playing
         setTimeout(function() {
-	    this.variation(null);
-	    this.fire('playProblemResponse', {});
-	    
-	    if (!this.cursor.hasNext()) {
+            this.variation(null);
+            this.fire('playProblemResponse', {});
+            
+            if (!this.cursor.hasNext()) {
                 // not sure if it's safe to say "WRONG" -- that would work for
                 // goproblems.com SGFs but I don't know about others
                 this.prependComment(t['end of variation']);
-	    }
+            }
         }.bind(this), 200);
     },
     
@@ -653,51 +653,51 @@ Y.extend(NS.Player, Y.Base, {
      * Navigates to a location within the game.
      **/
     goTo: function(path, fromStart) {
-	try 
-	{
-	    this.doRender = false;
+        try 
+        {
+            this.doRender = false;
 
-	    if (fromStart)
-	    {
-		this.resetCursor(); //goto collection start
-	    }
-	    
-	    // Move number
-	    if (typeof path == "number" && !isNaN(steps)) {
-		var steps = parseInt(path, 10);
-		if (fromStart) steps++; // not zero-based
-		for (var i = 0; i < steps; i++)
-		    this.variation(null);
-	    } else if ( path instanceof Array && path.length) {
-		var position;
-		var vars;
-		
-		// Path of moves (SGF coords)
-		if ( isNaN( parseInt(path[0], 10) ) ) {
-		    while (path.length) {
-			position = path.shift();
-			vars = this.getVariations();
-			for (var i = 0; i < vars.length; i++) {
-			    if (vars[i].move == position) {
-				this.variation(vars[i].varNum);
-				break;
-			    }
-			}
-		    }
-		}  else { //Path of variation numbers
-		    while (path.length)
-		    {
-			position = parseInt(path.shift(), 10);
-			this.variation(position);
-		    }
-		}
-	    }
-	} finally{
-	    this.doRender = true;
-	}
+            if (fromStart)
+            {
+                this.resetCursor(); //goto collection start
+            }
+            
+            // Move number
+            if (typeof path == "number" && !isNaN(steps)) {
+                var steps = parseInt(path, 10);
+                if (fromStart) steps++; // not zero-based
+                for (var i = 0; i < steps; i++)
+                    this.variation(null);
+            } else if ( path instanceof Array && path.length) {
+                var position;
+                var vars;
 
-	this.refresh();
-	return;
+                // Path of moves (SGF coords)
+                if ( isNaN( parseInt(path[0], 10) ) ) {
+                    while (path.length) {
+                        position = path.shift();
+                        vars = this.getVariations();
+                        for (var i = 0; i < vars.length; i++) {
+                            if (vars[i].move == position) {
+                                this.variation(vars[i].varNum);
+                                break;
+                            }
+                        }
+                    }
+                }  else { //Path of variation numbers
+                    while (path.length)
+                    {
+                        position = parseInt(path.shift(), 10);
+                        this.variation(position);
+                    }
+                }
+            }
+        } finally{
+            this.doRender = true;
+        }
+
+        this.refresh();
+        return;
     },
 
     /**
@@ -707,9 +707,9 @@ Y.extend(NS.Player, Y.Base, {
         this.board.reset();
         this.resetCurrentColor();
         if (toGameRoot) {
-	    this.cursor.node = this.cursor.getGameRoot();
+            this.cursor.node = this.cursor.getGameRoot();
         } else {
-	    this.cursor.node = this.collectionRoot;
+            this.cursor.node = this.collectionRoot;
         }
         this.refresh();
     },
@@ -721,7 +721,7 @@ Y.extend(NS.Player, Y.Base, {
         this.currentColor = (this.problemMode ? this.problemColor : "B");
         var root = this.cursor.getGameRoot();
         if (root && root.HA > 1)
-	    this.currentColor = 'W';
+            this.currentColor = 'W';
     },
 
     /**
@@ -738,9 +738,9 @@ Y.extend(NS.Player, Y.Base, {
      */
     variation: function(varNum) {
         if (this.cursor.next(varNum)) {
-	    this.execNode();
-	    this.resetLastLabels();
-	    return true;
+            this.execNode();
+            this.resetLastLabels();
+            return true;
         }
         return false;
     },
@@ -752,52 +752,52 @@ Y.extend(NS.Player, Y.Base, {
      */
     execNode: function() {
         if (!this.cursor.node) return;
-	
+
         if  (this.doRender) {
-	    this.board.clearMarkers();
-	    this.comments = ""
-	    this.moveNumber = this.cursor.getMoveNumber();
-        }
-	
-        if (this.moveNumber < 1) {
-	    this.resetCurrentColor();
+            this.board.clearMarkers();
+            this.comments = ""
+            this.moveNumber = this.cursor.getMoveNumber();
         }
 
-	if( this.doRender) 
-	{
-	    this.findVariations();
-	    if(!this.prefs.disableVariations)
-	    {
-		for( var i=0; i < this.variations.length; i++)
-		{
-		    if(this.variations[i].move)
-			this.addMarker(this.variations[i].move, 'var:' + (this.variations[i].varNum + 1) + '!');
-		}
-	    }
-	}
-	
+        if (this.moveNumber < 1) {
+            this.resetCurrentColor();
+        }
+
+        if( this.doRender) 
+        {
+            this.findVariations();
+            if(!this.prefs.disableVariations)
+            {
+                for( var i=0; i < this.variations.length; i++)
+                {
+                    if(this.variations[i].move)
+                        this.addMarker(this.variations[i].move, 'var:' + (this.variations[i].varNum + 1) + '!');
+                }
+            }
+        }
+
         // execute handlers for the appropriate properties
         var props = this.cursor.node.getProperties();
         for (var propName in props) {
-	    if (this.propertyHandlers[propName]) {
+            if (this.propertyHandlers[propName]) {
                 (this.propertyHandlers[propName]).apply(
-		    this,
-		    [this.cursor.node[propName], propName]
+                    this,
+                    [this.cursor.node[propName], propName]
                 );
-	    }
+            }
         }
 
-	this.board.commit(); //Commit the changes to the board.
+        this.board.commit(); //Commit the changes to the board.
         this.doRender && this.board.render();
-	this.doRender && this.fire('execNode', {});
+        this.doRender && this.fire('execNode', {});
 
-	// progressive loading?        
+        // progressive loading?        
         if (this.prefs.progressiveUrl)
             this.fetchProgressiveData();
         
         // play a reponse in problem-solving mode, unless we just navigated backwards
         if (this.problemMode && this.currentColor && this.currentColor != this.problemColor && !this.goingBack)
-	    this.playProblemResponse();
+            this.playProblemResponse();
         
         this.goingBack = false;
     },
@@ -814,17 +814,17 @@ Y.extend(NS.Player, Y.Base, {
         var vars = [],
         kids = this.cursor.node._children;
         for (var i = 0; i < kids.length; i++) {
-	    vars.push({move: kids[i].getMove(), varNum: i});
+            vars.push({move: kids[i].getMove(), varNum: i});
         }
         return vars;
     },
 
     back: function(e, obj) {
         if (this.cursor.previous()) {
-	    this.board.revert(1);
-	    this.goingBack = true;
-	    this.refresh();
-	    this.resetLastLabels();
+            this.board.revert(1);
+            this.goingBack = true;
+            this.refresh();
+            this.resetLastLabels();
         }
     },
 
@@ -834,36 +834,36 @@ Y.extend(NS.Player, Y.Base, {
 
     first: function() {
         if (!this.cursor.hasPrevious()) return;
-	try
-	{
-	    this.doRender = false;
-	    this.resetCursor(true);
-	} finally {
-	    this.doRender = true; 
-	}
+        try
+        {
+            this.doRender = false;
+            this.resetCursor(true);
+        } finally {
+            this.doRender = true; 
+        }
     },
 
     last: function() {
         if (!this.cursor.hasNext()) return;
-	try
-	{
-	    this.doRender = false;
-	    while (this.variation(null)) {}
-	}
-	finally
-	{
-	    this.doRender = true;
-	}
+        try
+        {
+            this.doRender = false;
+            while (this.variation(null)) {}
+        }
+        finally
+        {
+            this.doRender = true;
+        }
         this.refresh();
     },
 
     pass: function() {
         if (!this.variations) return;
         for (var i = 0; i < this.variations.length; i++) {
-	    if (!this.variations[i].move || this.variations[i].move == "tt") {
+            if (!this.variations[i].move || this.variations[i].move == "tt") {
                 this.variation(this.variations[i].varNum);
                 return;
-	    }
+            }
         }
         this.createMove('tt');
     },
@@ -881,9 +881,9 @@ Y.extend(NS.Player, Y.Base, {
         this.mouseDownY = pt.y;
         // begin region selection
         if (this.mode == "region" && pt.x >= 0 && pt.y >= 0 && !this.regionBegun) {
-	    this.regionTop = y;
-	    this.regionLeft = x;
-	    this.regionBegun = true;
+            this.regionTop = y;
+            this.regionLeft = x;
+            this.regionBegun = true;
         }
     },
 
@@ -892,16 +892,16 @@ Y.extend(NS.Player, Y.Base, {
      **/
     handleBoardHover: function(pt) {
         if (this.mouseDown || this.regionBegun) {
-	    if (this.searchUrl && !this.regionBegun && boardDiff && clickDiff) {
+            if (this.searchUrl && !this.regionBegun && boardDiff && clickDiff) {
                 // click and drag: implicit region select
                 this.selectTool("region");
                 this.regionBegun = true;
-	    }
-	    if (this.regionBegun) {
+            }
+            if (this.regionBegun) {
                 this.regionRight = pt.x + (pt.x >= this.regionLeft ? 1 : 0);
                 this.regionBottom = pt.y + (pt.y >= this.regionTop ? 1 : 0);
                 this.showRegion();
-	    }
+            }
         }
     },
 
@@ -915,18 +915,18 @@ Y.extend(NS.Player, Y.Base, {
         
         // click on a variation?
         if (this.mode == "view" || this.mode == "play") {
-	    for (var i = 0; i < this.variations.length; i++) {
+            for (var i = 0; i < this.variations.length; i++) {
                 var varPt = this.sgfCoordToPoint(this.variations[i].move);
                 if (varPt.x == pt.x && varPt.y == pt.y) {
-		    this.variation(this.variations[i].varNum);
-		    return;
+                    this.variation(this.variations[i].varNum);
+                    return;
                 }
-	    }
+            }
         }
         
         if (this.mode == "view" || pt.e.shiftKey) {
-	    var path;
-	    this.cursor.node.walk( function(node)
+            var path;
+            this.cursor.node.walk( function(node)
                                    {
                                        if (!path && node.getMove() == coord) 
                                        {
