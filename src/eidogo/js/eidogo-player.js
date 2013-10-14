@@ -68,6 +68,8 @@ Y.extend(NS.Player, Y.Base, {
 
         this.prefs = cfg || {};
 
+        cfg.sgf = cfg.sgf ? cfg.sgf.replace(/^( |\t|\r|\n)*/, "") : null;
+
         this.prefs.markCurrent = this.prefs.markCurrent || true;
 
         // Mutiple games can be contained in collectionRoot. We default
@@ -163,7 +165,7 @@ Y.extend(NS.Player, Y.Base, {
             TB: this.addMarker,
             DD: this.addMarker,
             PL: this.setColor,
-            C:  this.showComments,
+            C:  this.appendComment,
             N:  this.showAnnotation,
             GB: this.showAnnotation,
             GW: this.showAnnotation,
@@ -248,25 +250,26 @@ Y.extend(NS.Player, Y.Base, {
         // For calling completeFn asynchronously
         noCb = false;
 
-        if (typeof cfg.sgf === "string") {
+        if (cfg.sgf && typeof cfg.sgf === "string" ) {
             sgf = (new NS.SgfParser(cfg.sgf));
             this.loadJsonSgf(sgf.root);
-        } else if (typeof cfg.sgf === "object")
+        } else if (cfg.sgf && typeof cfg.sgf === "object")
         {
             // already-parsed JSON game tree
             this.loadJsonSgf(cfg.sgf);
-        } else if (cfg.progressiveUrl)
+        } else if (cfg.progressiveUrl && typeof cfg.progressiveUrl === "string")
         {
             this.progressiveLoads = 0;
             this.progressiveUrl = cfg.progressiveUrl;
             this.fetchProgressiveData(completeFn);
             noCb = true;
-        } else if (typeof cfg.sgfUrl === "string" || this.gameName) {
+        } else if ( (cfg.sgfUrl && typeof cfg.sgfUrl === "string" ) || this.gameName) {
             // the URL can be provided as a single sgfUrl or as sgfPath + gameName
             if (!cfg.sgfUrl)
             {
                 cfg.sgfUrl = this.sgfPath + this.gameName + ".sgf";
             }
+
             // load data from a URL
             this.remoteLoad(cfg.sgfUrl, {}, null, null, completeFn);
             noCb = true;
@@ -371,15 +374,16 @@ Y.extend(NS.Player, Y.Base, {
             // infer the kind of file we got
             if (data.charAt(0) === '(') {
                 // SGF
-                sgf = new NS.SgfParser(data, function() {
-                    // parsing is asychronous
-                    me.load(this.root, target);
-                    if( completeFn ) { completeFn(); }
-                });
+                sgf = new NS.SgfParser(data);
+                
+                // parsing is asychronous
+                me.loadJsonSgf(sgf.root, target);
+                if( completeFn ) { completeFn(); }
+                
             } else if (data.charAt(0) === '{') {
                 // JSON
                 data = JSON.parse(data);
-                this.load(data, target);
+                this.loadJsonSgf(data, target);
                 if( completeFn ) { completeFn(); }
             } else {
                 this.croak('invalid data');
@@ -1076,7 +1080,6 @@ Y.extend(NS.Player, Y.Base, {
         return (x >= region[0] && y >= region[1] && x <= region[2] && y <= region[3]);
     },
 
-
     /**
      * If there are no properties left in a node, ask whether to delete it
      **/
@@ -1343,9 +1346,9 @@ Y.extend(NS.Player, Y.Base, {
         this.prependComment(msg);
     },
 
-    showComments: function(comments) {
+    appendComment: function(comments) {
         if (!comments) { return; }
-        this.comments = comments;
+        this.comments = this.comments + comments;
     },
 
     /**

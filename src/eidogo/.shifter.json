@@ -1,5 +1,4 @@
 {
     "replace-version": "1.0.0",
-    "lint": true,
     "coverage": false
 }

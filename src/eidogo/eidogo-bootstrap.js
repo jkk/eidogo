@@ -1,19 +1,70 @@
-YUI().use('node','get', 'querystring-stringify-simple', 'eidogo-player', 'eidogo-toolbar','eidogo-navtree', function (Y) {
-    var scriptName = /eidogo\.js$/i;
+/*
+  Shammah Chancellor 2013
+  This code should be appended to the eidogo.js minified output.   
+  It will look for div's with the eidogo-player class and take them over.
 
+  It also injects the eidogo-css into the page.
+*/
+EidogoConfig = {
+    filter: 'debug',
+    combine: 'false',
+    groups: {
+        ourmodules: {
+            base: 'build/',
+            modules: {
+                'eidogo': {
+                    use: ["eidogo-lang", "eidogo-gametree", "eidogo-sgfparser", "eidogo-board", "eidogo-rules", "eidogo-renderer-canvas", "eidogo-toolbar", "eidogo-navtree", "eidogo-player" ]
+                },
+                'eidogo-lang': {
+                    requires: ['intl'],
+                    lang: ["en", "es", "de", "fr", "pt", "zh-Hans-CN"]
+                },
+                'eidogo-sgfparser': {
+                    requires:  [ "eidogo-gametree" ]
+                },
+                'eidogo-board': {
+                    requires:  [ "base", "eidogo-gametree" ]
+                },
+                'eidogo-rules': {
+                    requires: [ ]
+                },
+                'eidogo-renderer-canvas': {
+                    requires:[ "node", "widget", "event"  ]
+                },
+                'eidogo-gametree': {
+                    requires: [ ]
+                },
+                'eidogo-navtree': {
+                    requires: [ "node-base", "widget", "event", "eidogo-gametree"  ]
+                },
+                'eidogo-toolbar': {
+                    requires:  [ "widget", "event", "node-base", "event", "button" ]
+                },
+                'eidogo-player': {
+                    requires: [ "querystring-stringify-simple", "event", "node-base", "io", "eidogo-lang", "eidogo-gametree", "eidogo-sgfparser", "eidogo-renderer-canvas", "eidogo-board", "eidogo-rules" ]
+                }
+            }
+        }
+    }
+}
+
+YUI(EidogoConfig).use('node','get', 'eidogo', function (Y) {
     //Find eidogo's path
+    var scriptName = /eidogo-bootstrap\.js$/i;
+    var eidogoPath = ""
+    
     Y.all('script').each(function (node) {
         var script = node.getAttribute('src')
         if( scriptName.test(script) ) {
             script = script.split('/');
             script[script.length-1] = "";
-            Y.Eidogo.Path = script.join('/');
+            eidogoPath = script.join('/');
         }
     });
 
     Y.one('body').addClass("yui3-skin-sam");
     
-    Y.Get.css(Y.Eidogo.Path + 'css/eidogo.css',  function(err) {
+    Y.Get.css(eidogoPath + 'css/eidogo.css',  function(err) {
         Y.all('div.eidogo-player').each( function(div) {
             //Load up the preferences for this eidogo-player
             var 
@@ -62,5 +113,4 @@ YUI().use('node','get', 'querystring-stringify-simple', 'eidogo-player', 'eidogo
             player.loadSgf();
         }, this);
     });
-
 });

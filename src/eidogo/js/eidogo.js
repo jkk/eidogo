@@ -6,9 +6,3 @@
  *
  * This file sets up the EidoGo framework.
  */
-
-//Make sure our namespace is initialized.
-var NS = Y.namespace('Eidogo');
-
-//Expose localizations.
-NS.resources = Y.Intl.get("eidogo");
