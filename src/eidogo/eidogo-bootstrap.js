@@ -6,11 +6,11 @@
   It also injects the eidogo-css into the page.
 */
 EidogoConfig = {
-    filter: 'debug',
+    //filter: 'raw',
     combine: 'false',
     groups: {
-        ourmodules: {
-            base: 'build/',
+        eidogo: {
+            base: 'build/', //Path to where you put the eidogo/ directory
             modules: {
                 'eidogo': {
                     use: ["eidogo-lang", "eidogo-gametree", "eidogo-sgfparser", "eidogo-board", "eidogo-rules", "eidogo-renderer-canvas", "eidogo-toolbar", "eidogo-navtree", "eidogo-player" ]
@@ -49,22 +49,11 @@ EidogoConfig = {
 }
 
 YUI(EidogoConfig).use('node','get', 'eidogo', function (Y) {
-    //Find eidogo's path
-    var scriptName = /eidogo-bootstrap\.js$/i;
-    var eidogoPath = ""
-    
-    Y.all('script').each(function (node) {
-        var script = node.getAttribute('src')
-        if( scriptName.test(script) ) {
-            script = script.split('/');
-            script[script.length-1] = "";
-            eidogoPath = script.join('/');
-        }
-    });
-
     Y.one('body').addClass("yui3-skin-sam");
-    
-    Y.Get.css(eidogoPath + 'css/eidogo.css',  function(err) {
+
+    //Inject our css
+ 
+    Y.Get.css(EidogoConfig.groups.eidogo.base + 'css/eidogo.css',  function(err) {
         Y.all('div.eidogo-player').each( function(div) {
             //Load up the preferences for this eidogo-player
             var 
