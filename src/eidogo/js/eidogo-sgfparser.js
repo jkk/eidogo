@@ -46,32 +46,46 @@ NS.SgfParser.prototype =  {
     },
 
     parseProperties: function(node) {
-        var keyTemp = "", c = 0, lastKey = "", value = "";
+        var c = 0, lastKey = "", value = "", self = this;
+
+        function readValue () {
+            var c = self.getChar(), valueChars = [];
+
+            while ( c !== "" && c !== ']')  {
+                valueChars.push(c);
+                c = self.getChar();
+                if (c === '\\') {
+                    c = self.getChar();
+                }
+            }
+
+            return valueChars.join("");
+        }
+        function readKey() {
+            var c = self.getChar(), keyChars = [];
+
+            while ( c !== "" && c !== '['&& c !== ';' && c !== '(')  {
+                keyChars.push(c);
+                c = self.getChar();
+                if (c === '\\') {
+                    c = self.getChar();
+                }
+            }
+            self.index--;
+            return keyChars.join("");
+        }
 
         while (this.index < this.sgf.length) {
             c = this.getChar();
-
             if (c === ';' || c === '(' || c === ')') {
                 this.index--;
                 break;
-            } else if (c === '[') {
-                value = "";
-                lastKey = keyTemp || lastKey;
-                keyTemp = "";
-
-                c = this.getChar();
-
-                while ( c !== ']')  {
-                    value += c;
-                    c = this.getChar();
-                    if (c === '\\') {
-                        c = this.getChar();
-                    }
-                }
-
+            } else if (c === '[') {  //Get a value!
+                value = readValue();
                 node.pushProperty(lastKey,value);
-            } else if (c !== " " && c !== "\n" && c !== "\r" && c !== "\t") {
-                keyTemp += c;
+            } else if (c !== " " && c !== "\n" && c !== "\r" && c !== "\t") {  // Get a key
+                this.index--;
+                lastKey = readKey();
             }
         }
         return node;
@@ -82,6 +96,7 @@ NS.SgfParser.prototype =  {
         this.curChar = this.sgf.charAt(this.index);
         this.index++;
 
+        //Compress whitespace.  We don't want to return who consecutive whitespace characters.
         if( (this.curChar === " " || this.curChar === "\n" || this.curChar === "\r" || this.curChar === "\t") &&
             (oldChar === " " || oldChar === "\n" || oldChar === "\r" || oldChar === "\t")) {
             this.getChar();
