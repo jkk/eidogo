@@ -213,8 +213,8 @@ Y.extend(NS.Player, Y.Base, {
                          SZ: boardSize,
                          KM: cfg.komi || komiMap[boardSize] || 6.5,
                          _children: []
-                     }]},
-        root = blankGame._children[0],
+                     }]};
+
         handiCoords = {
             19: [['pd', 'dp'],
                  ['pd', 'dp', 'pp'],
@@ -274,24 +274,7 @@ Y.extend(NS.Player, Y.Base, {
             this.remoteLoad(cfg.sgfUrl, {}, null, null, completeFn);
             noCb = true;
         } else {
-            // AI opponent (e.g. GNU Go)
-            if (cfg.opponentUrl) {
-                this.gameName = "gnugo";
-                this.opponentUrl = cfg.opponentUrl;
-                this.opponentColor = cfg.opponentColor === "B" ? cfg.opponentColor : "W";
-                this.opponentLevel = cfg.opponentLevel || 7;
-                root = blankGame._children[0];
-                root.PW = this.opponentColor === "B" ? resources.get('you') : "GNU Go";
-                root.PB = this.opponentColor === "B" ? "GNU Go" : resources.get('you');
-                root.HA = parseInt(cfg.handicap, 10) || 0;
-                if (root.HA) {
-                    root.KM = 0.5;
-                    if (root.HA > 1) {
-                        root.AB = handiCoords[boardSize][root.HA-2];
-                    }
-                }
-            }
-
+            //New blank game.
             this.loadJsonSgf(blankGame);
         }
         if (!noCb && typeof completeFn === "function") {
@@ -320,7 +303,7 @@ Y.extend(NS.Player, Y.Base, {
         }
 
         if( ! target.parent ) {
-            this.collectionRoot = data;
+            this.collectionRoot = target;
         }
 
         target._cached = true;

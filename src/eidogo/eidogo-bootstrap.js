@@ -6,7 +6,7 @@
   It also injects the eidogo-css into the page.
 */
 EidogoConfig = {
-    //filter: 'raw',
+    filter: 'raw',
     combine: 'false',
     groups: {
         eidogo: {
