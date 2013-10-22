@@ -260,7 +260,6 @@ Y.extend(NS.Player, Y.Base, {
         } else if (cfg.progressiveUrl && typeof cfg.progressiveUrl === "string")
         {
             this.progressiveLoads = 0;
-            this.progressiveUrl = cfg.progressiveUrl;
             this.fetchProgressiveData(completeFn);
             noCb = true;
         } else if ( (cfg.sgfUrl && typeof cfg.sgfUrl === "string" ) || this.gameName) {
@@ -295,35 +294,36 @@ Y.extend(NS.Player, Y.Base, {
 
         if( data instanceof NS.GameNode ) //Already have a setup gamenode, no need to reallocate them all.
         {
-            data._parent = target.parent;
+            //Link the new node in both directions.
+            data._parent = target._parent;
+            if( target._parent) {
+                target._parent._children[target.getPosition()] = data;
+            }
             target = data;
+
+            //Make sure the cursor gets attached to this new node.  Otherwise we'll go into an infinite loop of loading.
+            this.cursor = new NS.GameCursor(target);
         } else
         {
             target.loadJson(data);
         }
 
-        if( ! target.parent ) {
-            this.collectionRoot = target;
-        }
-
         target._cached = true;
 
         if (!target._parent) {
+            this.collectionRoot = target;
+            
             // Loading into tree root; use the first game by default or
             // other if specified
             gameIndex = this.loadPath.length ? parseInt(this.loadPath[0], 10) : 0;
             this.initGame(target._children[gameIndex || 0]);
+//            this.resetCursor();
+            this.goTo(gameIndex, newGame);
             newGame = true;
-        }
-
-        this.resetCursor();
-
-        if (this.loadPath.length) {
-            this.goTo(this.loadPath, newGame);
         } else {
             this.refresh();
         }
-
+        
         // find out which color to play as for problem mode
         if (newGame && this.problemMode) {
             if (!this.problemColor) {
@@ -355,12 +355,16 @@ Y.extend(NS.Player, Y.Base, {
             var data = req.responseText.replace(/^( |\t|\r|\n)*/, ""), me = this, sgf;
 
             // infer the kind of file we got
-            if (data.charAt(0) === '(') {
+            if (data.charAt(0) === '(' || data.charAt(0) === ';') {
                 // SGF
                 sgf = new NS.SgfParser(data);
                 
                 // parsing is asychronous
-                me.loadJsonSgf(sgf.root, target);
+                if(data.charAt(0) === ';' ) {
+                    me.loadJsonSgf(sgf.root._children[0], target);
+                } else {
+                    me.loadJsonSgf(sgf.root, target);
+                }
                 if( completeFn ) { completeFn(); }
                 
             } else if (data.charAt(0) === '{') {

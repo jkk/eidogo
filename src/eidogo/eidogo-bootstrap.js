@@ -60,9 +60,11 @@ YUI(EidogoConfig).use('node','get', 'eidogo', function (Y) {
             doComments = JSON.parse(div.getAttribute("eidogo-show-comments") || 'true'),
             doToolbar = JSON.parse(div.getAttribute("eidogo-show-toolbar") || 'true'),
             doNavtree = JSON.parse(div.getAttribute("eidogo-show-navtree") || 'true'),
+            doNavtree = JSON.parse(div.getAttribute("eidogo-show-navtree") || 'true'),
             doSidebar = true,
             player, prefs,
             sgfUrl = div.getAttribute("eidogo-sgf-url"),
+            progressiveUrl = div.getAttribute("eidogo-progressive-url"),
             sgfData = div.get('text'),
             sideDiv;
 
@@ -76,13 +78,14 @@ YUI(EidogoConfig).use('node','get', 'eidogo', function (Y) {
             { sideDiv = div }
 
             if( doToolbar ) { sideDiv.append("<div class='eidogo-toolbar'></div>")}
-            if( doComments ) { sideDiv.append("<div class='eidogo-comments'></div>"); }
+            if( doComments ) { sideDiv.append("<div class='eidogo-comments'><pre></pre></div>"); }
             if( doNavtree ) { sideDiv.append("<div class='eidogo-navtree'></div>"); }
             
             prefs = {
                 srcNode: div.one(".eidogo-canvas"),
                 sgfUrl:sgfUrl,
-                sgf: sgfData 
+                sgf: sgfData ,
+                progressiveUrl: progressiveUrl
             };
 
             //TODO: Maybe we want to add some js property to the div, so we can find the player again later?
@@ -92,7 +95,7 @@ YUI(EidogoConfig).use('node','get', 'eidogo', function (Y) {
             if (doComments) { 
                 player.on('execNode', function (e) 
                           {
-                              div.one('.eidogo-comments').setHTML('<p><b>Move ' + this.moveNumber + ': </b>' + this.comments + '</p>');
+                              div.one('.eidogo-comments pre').setHTML('<p><b>Move ' + this.moveNumber + ': </b>' + this.comments + '</p>');
                           }, player);
             }
             

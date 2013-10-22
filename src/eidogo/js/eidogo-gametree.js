@@ -47,15 +47,33 @@ NS.GameNode.prototype =  {
      * containing the given value and any existing values.
      **/
     pushProperty: function(prop, value) {
-        if (this[prop]) {
-            if (!(this[prop] instanceof Array)) {
-                this[prop] = [this[prop]];
+        var self = this;
+        function pushIt(prop,value)
+        {
+            if (self[prop]) {
+                if (!(self[prop] instanceof Array)) {
+                    self[prop] = [self[prop]];
+                }
+                if (self[prop].indexOf(value) === -1) {
+                    self[prop].push(value);
+                }
+            } else {
+                self[prop] = value;
             }
-            if (this[prop].indexOf(value) === -1) {
-                this[prop].push(value);
-            }
-        } else {
-            this[prop] = value;
+        }
+
+        switch( prop )
+        {
+        case "_id":
+            this._id = value;
+            break;
+        case "W":
+        case "B":
+            this._moveNum++;
+            pushIt(prop,value);
+            break;
+        default:
+            pushIt(prop,value);
         }
     },
     /**
@@ -143,6 +161,7 @@ NS.GameNode.prototype =  {
         {
             node = new NS.GameNode();
         }
+        node._moveNum = this._moveNum;
 
         node._parent = this;
         this._children.push(node);
@@ -356,8 +375,8 @@ NS.GameCursor.prototype = {
         var i, node;
         for (i = 0; this.node._children[i]; i++) {
             node = this.node._children[i];
-            if (node.getColor()) {
-                return node.getColor();
+            if (node.getMoveColor()) {
+                return node.getMoveColor();
             }
         }
         return null;
