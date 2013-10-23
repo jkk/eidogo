@@ -1,5 +1,7 @@
 var NS = Y.namespace('Eidogo');
 
+
+//TODO: Do something different.  Manipulating the DOM is much slower than I expected.
 NS.NavTree = function (cfg) {
     cfg = cfg || {};
     NS.Toolbar.superclass.constructor.apply(this,cfg);
@@ -13,8 +15,10 @@ NS.NavTree = function (cfg) {
     this.srcNode = Y.one(cfg.srcNode);
     this.srcNode.addClass('eidogo-navtree');
 
-    this.player.on('execNode', this.selectNode, this);
     this.player.on('loadComplete', this.walkTree, this);
+    this.player.on('loadComplete', //We don't want to know about executed nodes until our tree is built.
+                   function() { this.player.on('execNode', this.selectNode, this); }, this);
+
 
     this.nodeTags = {};
 };
@@ -43,14 +47,13 @@ Y.extend(NS.NavTree, Y.Widget, {
     walkTree: function()
     {
         this.varNum = 0;
-
         this.player.collectionRoot.walk( this.visitNode, this, false);// walk depth first
         this.selectNode();
     },
     visitNode: function(node)
     {
         var curDomNode, position,parentDomNode, ol;
-
+        
         curDomNode = Y.Node.create('<li class="eidogo-node" ><a></a></li>');
         curDomNode.sgfNode = node;
         this.setNodeText(curDomNode);

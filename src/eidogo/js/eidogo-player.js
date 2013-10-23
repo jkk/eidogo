@@ -9,33 +9,33 @@
 var NS = Y.namespace('Eidogo'), resources = NS.resources;
 
 /*
-var GameInfoPropLabels =
-    {
-        GN: resources.get('game'),
-        PW: resources.get('white'),
-        WR: resources.get('white rank'),
-        WT: resources.get('white team'),
-        PB: resources.get('black'),
-        BR: resources.get('black rank'),
-        BT: resources.get('black team'),
-        HA: resources.get('handicap'),
-        KM: resources.get('komi'),
-        RE: resources.get('result'),
-        DT: resources.get('date'),
-        GC: resources.get('info'),
-        PC: resources.get('place'),
-        EV: resources.get('event'),
-        RO: resources.get('round'),
-        OT: resources.get('overtime'),
-        ON: resources.get('opening'),
-        RU: resources.get('ruleset'),
-        AN: resources.get('annotator'),
-        CP: resources.get('copyright'),
-        SO: resources.get('source'),
-        TM: resources.get('time limit'),
-        US: resources.get('transcriber'),
-        AP: resources.get('created with')
-    };*/
+  var GameInfoPropLabels =
+  {
+  GN: resources.get('game'),
+  PW: resources.get('white'),
+  WR: resources.get('white rank'),
+  WT: resources.get('white team'),
+  PB: resources.get('black'),
+  BR: resources.get('black rank'),
+  BT: resources.get('black team'),
+  HA: resources.get('handicap'),
+  KM: resources.get('komi'),
+  RE: resources.get('result'),
+  DT: resources.get('date'),
+  GC: resources.get('info'),
+  PC: resources.get('place'),
+  EV: resources.get('event'),
+  RO: resources.get('round'),
+  OT: resources.get('overtime'),
+  ON: resources.get('opening'),
+  RU: resources.get('ruleset'),
+  AN: resources.get('annotator'),
+  CP: resources.get('copyright'),
+  SO: resources.get('source'),
+  TM: resources.get('time limit'),
+  US: resources.get('transcriber'),
+  AP: resources.get('created with')
+  };*/
 
 /**
  * @class Player is the overarching control structure that allows you to
@@ -136,7 +136,7 @@ Y.extend(NS.Player, Y.Base, {
         this.sgfPath = cfg.sgfPath;
 
         this.renderer = cfg.renderer || Y.Eidogo.Renderers.CanvasRenderer;
-        this.doRender = true;
+        this.doRender = false;
 
         // unique id, so we can have more than one player on a page and for progressive loading
         this.uniq = (new Date()).getTime();
@@ -252,13 +252,17 @@ Y.extend(NS.Player, Y.Base, {
 
         if (cfg.sgf && typeof cfg.sgf === "string" ) {
             sgf = (new NS.SgfParser(cfg.sgf));
-            this.loadJsonSgf(sgf.root);
-        } else if (cfg.sgf && typeof cfg.sgf === "object")
-        {
+            try {
+                this.loadJsonSgf(sgf.root);
+            }
+            catch(e)
+            {
+                alert(e);
+            }
+        } else if (cfg.sgf && typeof cfg.sgf === "object") {
             // already-parsed JSON game tree
             this.loadJsonSgf(cfg.sgf);
-        } else if (cfg.progressiveUrl && typeof cfg.progressiveUrl === "string")
-        {
+        } else if (cfg.progressiveUrl && typeof cfg.progressiveUrl === "string") {
             this.progressiveLoads = 0;
             this.fetchProgressiveData(completeFn);
             noCb = true;
@@ -317,11 +321,10 @@ Y.extend(NS.Player, Y.Base, {
             // other if specified
             gameIndex = this.loadPath.length ? parseInt(this.loadPath[0], 10) : 0;
             this.initGame(target._children[gameIndex || 0]);
-//            this.resetCursor();
             this.goTo(gameIndex, newGame);
             newGame = true;
         } else {
-            this.refresh();
+            this.refresh(); //Re-exec this node after it's loaded, incase something changed.
         }
         
         // find out which color to play as for problem mode
@@ -332,6 +335,8 @@ Y.extend(NS.Player, Y.Base, {
                 this.currentColor = this.problemColor;
             }
         }
+
+        this.doRender = true; //No rendering will happen if this isn't turned on.
     },
 
     /**
@@ -359,14 +364,13 @@ Y.extend(NS.Player, Y.Base, {
                 // SGF
                 sgf = new NS.SgfParser(data);
                 
-                // parsing is asychronous
-                if(data.charAt(0) === ';' ) {
+                if( target ) { //Not loading into root, we only want the child node, not the default 0th node that is made.
                     me.loadJsonSgf(sgf.root._children[0], target);
                 } else {
-                    me.loadJsonSgf(sgf.root, target);
+                    me.loadJsonSgf(sgf.root, target); //We are loading into the root, go ahead and support multibranch empty nodes.
                 }
+
                 if( completeFn ) { completeFn(); }
-                
             } else if (data.charAt(0) === '{') {
                 // JSON
                 data = JSON.parse(data);
@@ -379,7 +383,7 @@ Y.extend(NS.Player, Y.Base, {
         failure = function(id, req) {
             id = null;
             req = null;
-            this.croak('error retrieving');
+            this.croak(NS.resources.get('error retrieving'));
         };
 
         Y.io(url, {
@@ -398,7 +402,7 @@ Y.extend(NS.Player, Y.Base, {
      * dynamically-loaded games).
      **/
     initGame: function(gameRoot) {
-        gameRoot = gameRoot || {};
+        gameRoot = gameRoot || new NS.GameNode();  //Make sure we have a root.
         
         var size = gameRoot.SZ || 19,
         moveCursor;
@@ -507,25 +511,24 @@ Y.extend(NS.Player, Y.Base, {
         if (this.board && this.board.renderer && this.board.boardSize === size) { return; }
 
         try {            if( typeof this.renderer === "function" )
-            {
-                RendererProto = this.renderer;
+                         {
+                             RendererProto = this.renderer;
 
-                //TODO: Figure out a good order for this renderer to be loaded.
-                this.renderer = new RendererProto({srcNode: this.prefs.srcNode,
-                                                   boardSize: size,
-                                                   crop: this.cropParams});
-            } else if( typeof this.renderer !== "object" )
-            {
-                this.croak("No renderer object or constructor provided");
+                             this.renderer = new RendererProto({srcNode: this.prefs.srcNode,
+                                                                boardSize: size,
+                                                                crop: this.cropParams});
+                         } else if( typeof this.renderer !== "object" )
+                         {
+                             this.croak("No renderer object or constructor provided");
+                         }
+
+                         this.board = new NS.Board(this.renderer, size);
+
+                         this.wireEventHandlers();
+            } catch (e) {
+                this.croak('error board: ' + e);
+                return;
             }
-
-            this.board = new NS.Board(this.renderer, size);
-
-            this.wireEventHandlers();
-        } catch (e) {
-            this.croak('error board: ' + e);
-            return;
-        }
     },
 
     wireEventHandlers: function()
@@ -548,6 +551,8 @@ Y.extend(NS.Player, Y.Base, {
         key, lpad, tpad, rpad, bpad, pad, pt;
 
         // find all points occupied by stones or labels
+
+        //TODO: This should just automatically happen when the SGF is parsed.
         gameRoot.walk(function(node) {
             var prop, i, coord;
 
@@ -652,16 +657,18 @@ Y.extend(NS.Player, Y.Base, {
      **/
     playProblemResponse: function() {
         // short delay before playing
-        setTimeout(function() {
-            this.variation(null);
-            this.fire('playProblemResponse', {});
+        setTimeout(
+            Y.bind(function() {
 
-            if (!this.cursor.hasNext()) {
-                // not sure if it's safe to say "WRONG" -- that would work for
-                // goproblems.com SGFs but I don't know about others
-                this.prependComment(resources.get('end of variation'));
-            }
-        }.bind(this), 200);
+                //TODO: Play a *RANDOM* variation
+                this.variation(null);
+                
+                if (!this.cursor.hasNext()) {
+                    // not sure if it's safe to say "WRONG" -- that would work for
+                    // goproblems.com SGFs but I don't know about others
+                    this.prependComment(resources.get('end of variation'));
+                }
+            }, this), 200);
     },
 
     /**
@@ -1190,7 +1197,7 @@ Y.extend(NS.Player, Y.Base, {
         if (!coord || coord === "tt" || coord === "")
         {
             this.prependComment(color === this.board.WHITE ?
-                                 resources.get('white') : resources.get('black') + " " + resources.get('passed'), "comment-pass");
+                                resources.get('white') : resources.get('black') + " " + resources.get('passed'), "comment-pass");
         } else if (coord === "resign")
         {
             this.prependComment(color === this.board.WHITE ?

@@ -47,7 +47,7 @@ NS.GameNode.prototype =  {
      * containing the given value and any existing values.
      **/
     pushProperty: function(prop, value) {
-        var self = this;
+        var self = this, walkNode;
         function pushIt(prop,value)
         {
             if (self[prop]) {
@@ -62,19 +62,33 @@ NS.GameNode.prototype =  {
             }
         }
 
+        //Conditional logic for specific properties.
         switch( prop )
         {
         case "_id":
             this._id = value;
-            break;
+            return;
         case "W":
         case "B":
             this._moveNum++;
-            pushIt(prop,value);
+            break;
+        case "C":
+            if( value.length >= 5 && value.lastIndexOf("RIGHT") === value.length - 5)
+            {
+                walkNode = this;
+                while( walkNode ) //Walk up the tree, and mark each node as right.
+                {
+                    pushIt("GM", "1"); //It's a good move!
+                    walkNode = walkNode._parent;
+                }
+                value = value.slice(0, -5);
+            }
             break;
         default:
-            pushIt(prop,value);
         }
+
+        pushIt(prop,value);
+        
     },
     /**
      * Check whether this node contains the given property with the given
