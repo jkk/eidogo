@@ -13,7 +13,7 @@
 var NS = Y.namespace('Eidogo');
 
 NS.SgfParser = function(sgf, completeFn) {
-    this.sgf = sgf;
+    this.sgf = sgf[0] ===';' ? sgf.slice(1) : sgf; //Support SGF fragments
     this.index = 0;
     this.curChar = "";
     this.root = new NS.GameNode();
@@ -30,10 +30,10 @@ NS.SgfParser.prototype =  {
         curNode = startNode;
         while (this.index < this.sgf.length) {
             c = this.sgf.charAt(this.index++);
+
             switch (c) {
             case ';':
                 curNode = curNode.appendChild();
-                this.parseProperties(curNode);
                 break;
             case '(':
                 nodeStack.push(curNode);
@@ -41,6 +41,14 @@ NS.SgfParser.prototype =  {
             case ')':
                 curNode = nodeStack.pop();
                 break;
+            case '\r':
+            case '\n':
+            case ' ':
+            case '\t':
+                continue;
+            default:
+                this.index--;
+                this.parseProperties(curNode); //Doing this here, instead of after ';' allows us to parse root node properties.
             }
         }
     },
@@ -53,7 +61,7 @@ NS.SgfParser.prototype =  {
         }
 
         function readValue () {
-            var c = nextChar(), valueChars = ""; //oldIndex = self.index - 1;
+            var c = nextChar(), valueChars = "";
 
             while ( c !== "" && c !== ']')  {
                 valueChars += c;
@@ -64,11 +72,9 @@ NS.SgfParser.prototype =  {
             }
 
             return valueChars;
-            //return self.sgf.slice(oldIndex,self.index - 1);
         }
         function readKey(c) {
             var keyChars = "";
-            //var oldIndex = self.index - 1;
 
             while ( c !== "" && c !== '['&& c !== ';' && c !== '(')  {
                 keyChars += c;
@@ -76,35 +82,29 @@ NS.SgfParser.prototype =  {
             }
             self.index--;
             return keyChars;
-            //return self.sgf.slice(oldIndex,self.index);
         }
 
         while (this.index < this.sgf.length) {
             c = nextChar();
-            if (c === ';' || c === '(' || c === ')') {
+            switch (c)
+            {
+            case ';':
+            case '(':
+            case ')':
                 this.index--;
-                break;
-            } else if (c === '[') { //Get a value!
+                return;
+            case '[':
                 node.pushProperty(lastKey, readValue());
-            } else if (c !== " " && c !== "\n" && c !== "\r" && c !== "\t") {  // Get a key
+                break;
+            case '\r':
+            case '\n':
+            case ' ':
+            case '\t':
+                continue;
+            default:
                 lastKey = readKey(c);
             }
         }
         return node;
-    },
-
-//Old?
-    getChar: function() {
-        var oldChar = this.curChar;
-        
-        this.curChar = this.sgf.charAt(this.index);
-        this.index++;
-
-        //Compress whitespace.  We don't want to return who consecutive whitespace characters.
-        if( (this.curChar === " " || this.curChar === "\n" || this.curChar === "\r" || this.curChar === "\t") &&
-            (oldChar === " " || oldChar === "\n" || oldChar === "\r" || oldChar === "\t")) {
-            this.getChar();
-        }
-        return this.curChar;
     }
 };

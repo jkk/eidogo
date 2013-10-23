@@ -15,9 +15,11 @@ NS.NavTree = function (cfg) {
     this.srcNode = Y.one(cfg.srcNode);
     this.srcNode.addClass('eidogo-navtree');
 
-    this.player.on('loadComplete', this.walkTree, this);
+    this.player.on('newNode', this.selectNode, this);
     this.player.on('loadComplete', //We don't want to know about executed nodes until our tree is built.
-                   function() { this.player.on('execNode', this.selectNode, this); }, this);
+                   function() {
+                       this.player.on('execNode', this.selectNode, this);
+                   }, this);
 
 
     this.nodeTags = {};
@@ -44,57 +46,68 @@ Y.extend(NS.NavTree, Y.Widget, {
         e.stopPropagation();
         e.preventDefault();
     },
-    walkTree: function()
+    walkTree: function(e)
     {
-        this.varNum = 0;
-        this.player.collectionRoot.walk( this.visitNode, this, false);// walk depth first
-        this.selectNode();
+        this.numWalk = 50;
+        e.node.walk( this.visitNode, this, true);// walk depth first
     },
     visitNode: function(node)
     {
-        var curDomNode, position,parentDomNode, ol;
-        
-        curDomNode = Y.Node.create('<li class="eidogo-node" ><a></a></li>');
-        curDomNode.sgfNode = node;
-        this.setNodeText(curDomNode);
-        (curDomNode).on('click', this.gotoNodeHandler, this, node);
+        if ( ! this.numWalk ) { return true; }
 
-        if(node._parent )
-        {
-            position = node.getPosition(),
-            parentDomNode = this.nodeTags[node._parent._id];
+        this.numWalk--;
+
+        if( this.nodeTags[node._id] ) {
+            this.setNodeText(this.nodeTags[node._id]);
+            this.nodeTags[node._id].sgfNode = node;
+        } else {
+            var curDomNode, position,parentDomNode, ol;
             
-            if( position > 0 )
+            curDomNode = Y.Node.create('<li class="eidogo-node" ><a></a></li>');
+            curDomNode.sgfNode = node;
+            this.setNodeText(curDomNode);
+            (curDomNode).on('click', this.gotoNodeHandler, this, node);
+
+            if(node._parent )
             {
-                ul = Y.Node.create('<ol></ol>');
-                ul.appendChild(curDomNode);
-                parentDomNode.appendChild(ul);
-            } else {
-                parentDomNode.insert(curDomNode, 'after');//Retarded syntax in YUI.. whoot
+                position = node.getPosition(),
+                parentDomNode = this.nodeTags[node._parent._id];
+                
+                if( position > 0 )
+                {
+                    ul = Y.Node.create('<ol></ol>');
+                    ul.appendChild(curDomNode);
+                    parentDomNode.appendChild(ul);
+                } else {
+                    parentDomNode.insert(curDomNode, 'after');//Retarded syntax in YUI.. whoot
+                }
+            } else
+            {
+                ol = Y.Node.create('<ol></ol');
+                ol.appendChild(curDomNode);
+                this.srcNode.appendChild(ol);
             }
-        } else
-        {
-            ol = Y.Node.create('<ol></ol');
-            ol.appendChild(curDomNode);
-            this.srcNode.appendChild(ol);
+            this.nodeTags[node._id] = curDomNode;
         }
 
-        this.nodeTags[node._id] = curDomNode;
     },
 
     setNodeText: function(yuinode)
     {
-        var data = [yuinode.sgfNode.getMoveColor(), 'Vars:', yuinode.sgfNode.countChildren()].join(' ');
+        var data = yuinode.sgfNode.getMoveColor()
+        data += yuinode.sgfNode._moveNum;;
+        data += ' - Nodes: ';
+        data += yuinode.sgfNode.countChildren();
         yuinode.one('a').set('text', data);
 
     },
 
-    selectNode: function()
+    selectNode: function(e)
     {
         var id = this.player.cursor.node._id;
-        if( ! this.nodeTags[id] ) {
-            this.visitNode(this.player.cursor.node);
-        }
+
+        this.walkTree( {node:e.node} ); //Refresh the tree.
+
         if(this.activeNode)
         {
             this.activeNode.removeClass('eidogo-activeNode');
@@ -102,6 +115,7 @@ Y.extend(NS.NavTree, Y.Widget, {
             
             this.setNodeText(this.activeNode);
         }
+
         this.activeNode = this.nodeTags[id];
 
         this.activeNode.ancestors("ol,li").addClass('eidogo-activeNode');

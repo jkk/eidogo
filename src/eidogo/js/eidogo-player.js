@@ -337,6 +337,8 @@ Y.extend(NS.Player, Y.Base, {
         }
 
         this.doRender = true; //No rendering will happen if this isn't turned on.
+
+        this.fire('newNode', { node: target });
     },
 
     /**
@@ -363,12 +365,7 @@ Y.extend(NS.Player, Y.Base, {
             if (data.charAt(0) === '(' || data.charAt(0) === ';') {
                 // SGF
                 sgf = new NS.SgfParser(data);
-                
-                if( target ) { //Not loading into root, we only want the child node, not the default 0th node that is made.
-                    me.loadJsonSgf(sgf.root._children[0], target);
-                } else {
-                    me.loadJsonSgf(sgf.root, target); //We are loading into the root, go ahead and support multibranch empty nodes.
-                }
+                me.loadJsonSgf(sgf.root, target);
 
                 if( completeFn ) { completeFn(); }
             } else if (data.charAt(0) === '{') {
@@ -819,12 +816,12 @@ Y.extend(NS.Player, Y.Base, {
         this.board.commit(); //Commit the changes to the board.
         if( this.doRender ) {
             this.board.render();
-            this.fire('execNode', {});
+            this.fire('execNode', {node: this.cursor.node});
         }
 
         // progressive loading?
         if (this.prefs.progressiveUrl) {
-            this.fetchProgressiveData();
+            this.fetchProgressiveData(null, this.cursor.node);
         }
 
         // play a reponse in problem-solving mode, unless we just navigated backwards
@@ -1473,8 +1470,8 @@ Y.extend(NS.Player, Y.Base, {
     /*****************
      * Progressive Loading Code
      ***************/
-    fetchProgressiveData: function(completeFn) {
-        var loadNode = this.cursor.node || null,
+    fetchProgressiveData: function(completeFn, target) {
+        var loadNode = target,
         loadId = (loadNode && loadNode._id) || 0;
 
         if (loadNode && loadNode._cached) { return; }

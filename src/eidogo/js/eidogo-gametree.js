@@ -32,6 +32,7 @@ NS.GameNode = function(parent, properties, id) {
     this._parent = parent || null;
     this._children = [];
     this._preferredChild = 0;
+    this._moveNum = 0;
 
     if (properties) {
         this.loadJson(properties);
@@ -204,7 +205,7 @@ NS.GameNode.prototype =  {
      * Applies a function to this node and all its children, recursively
      * (although we use a stack instead of actual recursion)
      **/
-    walk: function(fn, thisObj, depthFirst) {
+    walk: function(fn, thisObj, depthFirst ) {
         var collection = [this],
         node, i, len;
         while (collection.length) {
@@ -216,11 +217,7 @@ NS.GameNode.prototype =  {
 
             for (i = 0; i < len; i++)
             {
-                if( depthFirst) {
-                    collection.unshift(node._children[i]);
-                } else {
-                    collection.push(node._children[i]);
-                }
+                collection.push(node._children[i]);
             }
         }
     },
