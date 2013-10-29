@@ -15,7 +15,7 @@ NS.NavTree = function (cfg) {
     this.srcNode = Y.one(cfg.srcNode);
     this.srcNode.addClass('eidogo-navtree');
 
-    this.player.on('newNode', this.selectNode, this);
+    this.player.once('newNode', this.selectNode, this);
     this.player.on('loadComplete', //We don't want to know about executed nodes until our tree is built.
                    function() {
                        this.player.on('execNode', this.selectNode, this);
@@ -94,8 +94,8 @@ Y.extend(NS.NavTree, Y.Widget, {
 
     setNodeText: function(yuinode)
     {
-        var data = yuinode.sgfNode.getMoveColor()
-        data += yuinode.sgfNode._moveNum;;
+        var data = yuinode.sgfNode.getMoveColor();
+        data += yuinode.sgfNode._moveNum;
         data += ' - Nodes: ';
         data += yuinode.sgfNode.countChildren();
         yuinode.one('a').set('text', data);

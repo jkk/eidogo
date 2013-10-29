@@ -14,8 +14,6 @@ var NS = Y.namespace('Eidogo');
 
 NS.SgfParser = function(sgf, completeFn) {
     this.sgf = sgf[0] ===';' ? sgf.slice(1) : sgf; //Support SGF fragments
-    this.index = 0;
-    this.curChar = "";
     this.root = new NS.GameNode();
     this.parseTree(this.root);
     if( typeof completeFn === "function" ) { completeFn.call(this); }
@@ -25,39 +23,11 @@ NS.SgfParser.NAME = 'eidogo-sgfparser';
 
 NS.SgfParser.prototype =  {
     parseTree: function(startNode) {
-        var nodeStack = [], c;
+        var index = 0, nodeStack = [], c, lastKey, self=this, curNode;
 
-        curNode = startNode;
-        while (this.index < this.sgf.length) {
-            c = this.sgf.charAt(this.index++);
-
-            switch (c) {
-            case ';':
-                curNode = curNode.appendChild();
-                break;
-            case '(':
-                nodeStack.push(curNode);
-                break;
-            case ')':
-                curNode = nodeStack.pop();
-                break;
-            case '\r':
-            case '\n':
-            case ' ':
-            case '\t':
-                continue;
-            default:
-                this.index--;
-                this.parseProperties(curNode); //Doing this here, instead of after ';' allows us to parse root node properties.
-            }
-        }
-    },
-
-    parseProperties: function(node) {
-        var c = 0, lastKey = "", self = this;
         function nextChar()
         {
-            return self.sgf.charAt(self.index++);
+            return self.sgf.charAt(index++);
         }
 
         function readValue () {
@@ -73,6 +43,7 @@ NS.SgfParser.prototype =  {
 
             return valueChars;
         }
+
         function readKey(c) {
             var keyChars = "";
 
@@ -80,21 +51,26 @@ NS.SgfParser.prototype =  {
                 keyChars += c;
                 c = nextChar();
             }
-            self.index--;
+            index--;
             return keyChars;
         }
 
-        while (this.index < this.sgf.length) {
+        curNode = startNode;
+        while (index < this.sgf.length) {
             c = nextChar();
-            switch (c)
-            {
+
+            switch (c) {
             case ';':
+                curNode = curNode.appendChild();
+                break;
             case '(':
+                nodeStack.push(curNode);
+                break;
             case ')':
-                this.index--;
-                return;
+                curNode = nodeStack.pop();
+                break;
             case '[':
-                node.pushProperty(lastKey, readValue());
+                curNode.pushProperty(lastKey, readValue());
                 break;
             case '\r':
             case '\n':
@@ -105,6 +81,6 @@ NS.SgfParser.prototype =  {
                 lastKey = readKey(c);
             }
         }
-        return node;
+
     }
 };

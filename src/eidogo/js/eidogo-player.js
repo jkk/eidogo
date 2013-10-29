@@ -136,7 +136,7 @@ Y.extend(NS.Player, Y.Base, {
         this.sgfPath = cfg.sgfPath;
 
         this.renderer = cfg.renderer || Y.Eidogo.Renderers.CanvasRenderer;
-        this.doRender = false;
+        this.doRender = true;
 
         // unique id, so we can have more than one player on a page and for progressive loading
         this.uniq = (new Date()).getTime();
@@ -316,17 +316,17 @@ Y.extend(NS.Player, Y.Base, {
 
         if (!target._parent) {
             this.collectionRoot = target;
+            newGame = true;
             
             // Loading into tree root; use the first game by default or
             // other if specified
             gameIndex = this.loadPath.length ? parseInt(this.loadPath[0], 10) : 0;
             this.initGame(target._children[gameIndex || 0]);
-            this.goTo(gameIndex, newGame);
-            newGame = true;
+            //this.goTo([gameIndex], newGame); //If argument is an int, it assumes a move number, rather than a variation.  Pass an array.
         } else {
             this.refresh(); //Re-exec this node after it's loaded, incase something changed.
         }
-        
+
         // find out which color to play as for problem mode
         if (newGame && this.problemMode) {
             if (!this.problemColor) {

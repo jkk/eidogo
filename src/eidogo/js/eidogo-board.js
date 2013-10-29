@@ -144,7 +144,7 @@ Y.extend( NS.Board, Y.Base,  {
         //This needs to be here.  If it's in the init it
         //gets triggered on a board refresh and then things don't update properly.
         if(!this.lastRender) {
-            this.lastRender = { stones: this.stones.slice(), markers: this.markers.slice() };
+            this.lastRender = { stones: this.makeBoardArray(this.EMPTY), markers: this.makeBoardArray(this.EMPTY) };
         }
         
         colorLookup[this.WHITE] = "white";
