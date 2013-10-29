@@ -1,0 +1,71 @@
+{
+    "name": "eidogo",
+    "builds": {
+        "eidogo": {
+            "jsfiles": [ "js/eidogo.js"],
+            "config": {
+                "requires": [ "intl" ],
+                "uses": ["eidogo-lang","eidogo-gametree","eidogo-sgfparser","eidogo-board","eidogo-rules","eidogo-renderer-canvas","eidogo-toolbar","eidogo-navtree","eidogo-player" ]
+            }
+        },
+        "eidogo-lang": {     
+            "jsfiles": [ "js/eidogo-lang.js"],
+            "config": {
+                "requires": [ "intl" ]
+            }
+        },
+	"eidogo-player": {
+            "jsfiles": [ "js/eidogo-player.js"],
+            "config": {
+                "requires": [ "querystring-stringify-simple", "event", "node-base", "io", "eidogo", "eidogo-gametree", "eidogo-sgfparser", "eidogo-renderer-canvas", "eidogo-board", "eidogo-rules" ]
+            }
+        },
+	"eidogo-sgfparser": {
+            "jsfiles": [              
+	        "js/eidogo-sgfparser.js"],
+            "config": {
+                "requires": [ "eidogo-gametree"  ]
+            }
+        },
+	"eidogo-rules": {
+            "jsfiles": [            
+	        "js/eidogo-rules.js"],
+            "config": {
+                "requires": [  ]
+            }
+        },
+	"eidogo-board": {
+            "jsfiles": [ "js/eidogo-board.js"],
+            "config": {
+                "requires": [ ]
+            }
+        },
+	"eidogo-gametree": {
+            "jsfiles": [ 
+                "js/eidogo-gametree.js"],
+            "config": {
+                "requires": [  ]
+            }
+        },
+	"eidogo-renderer-canvas": {
+            "jsfiles": [              
+                "js/eidogo-renderer-canvas.js"],
+            "config": {
+                "requires": [ "node", "widget", "event"  ]
+            }
+        },
+	"eidogo-navtree": {
+            "jsfiles": [              
+                "js/eidogo-navtree.js"],
+            "config": {
+                "requires": [ "node-base", "widget", "event", "eidogo-gametree"  ]
+            }
+        },
+	"eidogo-toolbar": {
+            "jsfiles": [  "js/eidogo-toolbar.js"],
+            "config": {
+                "requires": [ "widget", "event", "node-base", "event", "button" ]
+            }
+        }
+    }
+}

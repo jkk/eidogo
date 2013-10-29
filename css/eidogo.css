@@ -1,0 +1,337 @@
+a.eidogo-variation
+{
+    border: 1px solid black;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    margin: 0.25em;
+}
+
+.eidogo-canvas 
+{
+    height: 100%;
+}
+
+.eidogo-sidebar
+{
+    height: 100%;
+}
+
+.yui3-eidogo-toolbar
+{    display: block;
+    border: 1px solid black;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.eidogo-comments
+{
+    display: block;
+    overflow: auto;
+    height: 30%;
+    border: 1px solid black;
+
+    
+}
+
+.eidogo-comments pre {
+    white-space: pre-wrap;       /* css-3 */
+    white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+    white-space: -pre-wrap;      /* Opera 4-6 */
+    white-space: -o-pre-wrap;    /* Opera 7 */
+    word-wrap: break-word;       /* Internet Explorer 5.5+ */
+}
+
+.eidogo-navtree
+{
+    display: block;
+    overflow: auto;
+    height: 55%;
+    border: 1px solid black;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.eidogo-navtree .eidogo-node
+{
+    text-decoration: none;
+    cursor: pointer;
+    margin: 0.25em;
+}
+
+.eidogo-navtree ol
+{
+    display: none;
+}
+
+.eidogo-navtree ol.eidogo-activeNode,
+.eidogo-navtree li.eidogo-activeNode > ol
+{
+    display: block;
+}
+
+.eidogo-navtree li.eidogo-activeNode 
+{
+    display: list-item;
+}
+
+.eidogo-navtree li.eidogo-activeNode > a
+{
+    display: block;
+    text-align:center;
+    width: 3em;
+    border-bottom: 1px solid black;
+    font-weight: bold;
+    background-color: grey;
+}
+
+
+/*csslint regex-selectors:false, known-properties:false, duplicate-properties:false*/
+.eidogo-g {
+    letter-spacing: -0.31em; /* Webkit: collapse white-space between units */
+    *letter-spacing: normal; /* reset IE < 8 */
+    *word-spacing: -0.43em; /* IE < 8: collapse white-space between units */
+    text-rendering: optimizespeed; /* Webkit: fixes text-rendering: optimizeLegibility */
+
+    /*
+    Sets the font stack to fonts known to work properly with the above letter
+    and word spacings. See: https://github.com/yui/eidogo/issues/41/
+
+    The following font stack makes Eidogo Grids work on all known environments.
+
+    * FreeSans: Ships with many Linux distros, including Ubuntu
+
+    * Arimo: Ships with Chrome OS. Arimo has to be defined before Helvetica and
+      Arial to get picked up by the browser, even though neither is available
+      in Chrome OS.
+
+    * Droid Sans: Ships with all versions of Android.
+
+    * Helvetica, Arial, sans-serif: Common font stack on OS X and Windows.
+    */
+    font-family: FreeSans, Arimo, "Droid Sans", Helvetica, Arial, sans-serif;
+
+    /*
+    Use flexbox when possible to avoid `letter-spacing` side-effects.
+
+    NOTE: Firefox (as of 25) does not currently support flex-wrap, so the
+    `-moz-` prefix version is omitted.
+    */
+
+    display: -webkit-flex;
+    -webkit-flex-flow: row wrap;
+
+    /* IE10 uses display: flexbox */
+    display: -ms-flexbox;
+    -ms-flex-flow: row wrap;
+}
+
+.opera-only :-o-prefocus,
+.eidogo-g {
+    word-spacing: -0.43em;
+}
+
+
+.eidogo-u {
+    display: inline-block;
+    *display: inline; /* IE < 8: fake inline-block */
+    zoom: 1;
+    letter-spacing: normal;
+    word-spacing: normal;
+    vertical-align: top;
+    text-rendering: auto;
+}
+
+
+.eidogo-u-1,.eidogo-u-1-2,.eidogo-u-1-3,.eidogo-u-2-3 {
+    display: inline-block;
+    *display: inline; /* IE < 8: fake inline-block */
+    zoom: 1;
+    letter-spacing: normal;
+    word-spacing: normal;
+    vertical-align: top;
+    text-rendering: auto;
+}
+
+
+
+.eidogo-u-1 {
+    display:block;
+}
+
+.eidogo-u-1-2 {
+    width: 50%;
+}
+
+.eidogo-offset-1-2 {
+    margin-left: 50%;
+}
+
+.eidogo-u-1-3 {
+    width: 33.33333%;
+}
+
+.eidogo-offset-1-3 {
+    margin-left: 33.33333%;
+}
+
+.eidogo-u-2-3 {
+    width: 66.66667%;
+}
+
+.eidogo-offset-2-3 {
+    margin-left: 66.66667%;
+}
+
+/*csslint regex-selectors:false, known-properties:false, duplicate-properties:false*/
+
+.eidogo-g-r {
+    letter-spacing: -0.31em;
+    *letter-spacing: normal;
+    *word-spacing: -0.43em;
+
+    /*
+    Sets the font stack to fonts known to work properly with the above letter
+    and word spacings. See: https://github.com/yui/eidogo/issues/41/
+
+    The following font stack makes Eidogo Grids work on all known environments.
+
+    * FreeSans: Ships with many Linux distros, including Ubuntu
+
+    * Arimo: Ships with Chrome OS. Arimo has to be defined before Helvetica and
+      Arial to get picked up by the browser, even though neither is available
+      in Chrome OS.
+
+    * Droid Sans: Ships with all versions of Android.
+
+    * Helvetica, Arial, sans-serif: Common font stack on OS X and Windows.
+    */
+    font-family: FreeSans, Arimo, "Droid Sans", Helvetica, Arial, sans-serif;
+
+    /*
+    Use flexbox when possible to avoid `letter-spacing` side-effects.
+
+    NOTE: Firefox (as of 25) does not currently support flex-wrap, so the
+    `-moz-` prefix version is omitted.
+    */
+
+    display: -webkit-flex;
+    -webkit-flex-flow: row wrap;
+
+    /* IE10 uses display: flexbox */
+    display: -ms-flexbox;
+    -ms-flex-flow: row wrap;
+}
+
+/* Opera as of 12 on Windows needs word-spacing.
+   The ".opera-only" selector is used to prevent actual prefocus styling
+   and is not required in markup.
+*/
+.opera-only :-o-prefocus,
+.eidogo-g-r {
+    word-spacing: -0.43em;
+}
+
+/*
+Resets the font family back to the OS/browser's default sans-serif font,
+this the same font stack that Normalize.css sets for the `body`.
+*/
+.eidogo-g-r [class *= "eidogo-u"] {
+    font-family: sans-serif;
+}
+
+.eidogo-g-r img {
+    max-width: 100%;
+    height: auto;
+}
+
+
+@media (min-width:980px) {
+    .eidogo-visible-phone {
+        display: none;
+    }
+    .eidogo-visible-tablet {
+        display: none;
+    }
+    .eidogo-hidden-desktop {
+        display: none;
+    }
+}
+
+
+
+
+@media (max-width:480px) {
+    .eidogo-g-r > .eidogo-u,
+    .eidogo-g-r > [class *= "eidogo-u-"] {
+        width: 100%;
+    }
+}
+
+
+
+@media (max-width:767px) {
+    .eidogo-g-r > .eidogo-u,
+    .eidogo-g-r > [class *= "eidogo-u-"] {
+        width: 100%;
+    }
+    .eidogo-hidden-phone {
+        display: none;
+    }
+    .eidogo-visible-desktop {
+        display: none;
+    }
+
+    .eidogo-canvas {
+        height: 50%;
+    }
+
+    .eidogo-sidebar {
+        height: 50%;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 979px) {
+    .eidogo-hidden-tablet {
+        display: none;
+    }
+    .eidogo-visible-desktop {
+        display: none;
+    }
+}
+
+@media only screen and (max-device-width: 480px) {
+    .eidogo-g-r > .eidogo-u,
+    .eidogo-g-r > [class *= "eidogo-u-"] {
+        width: 100%;
+    }
+
+
+    .eidogo-hidden-phone {
+        display: none;
+    }
+    .eidogo-visible-desktop {
+        display: none;
+    }
+
+    .eidogo-canvas {
+        height: 66%;
+    }
+
+    .eidogo-sidebar {
+        height: 33%;
+    }
+
+    .eidogo-navbar
+    {
+        display: none;
+    }
+}

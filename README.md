@@ -1,9 +1,8 @@
-EidoGo
+eidogo
 ======
 
-EidoGo is two things:
+Web-based Go app and embeddable SGF viewer. This repository ports it to be a YUI 
+module which substantially simplifies the code.   Additionaly, upgraded the renderer to be canvas.
+At some point in the future, re-adding an HTML renderer (for failback)  may be wise -- it should not be difficult.
 
-1. A site ([eidogo.com](http://eidogo.com/)) for refining your Go techniques, viewing games, and sharing games. The source for which is here, at the top level of this repo. It includes server-side PHP code and database data.
-
-2. An embeddable HTML/CSS/JS SGF viewer. The source for that is in the [player directory](https://github.com/jkk/eidogo/tree/master/player) of this repo. It does not depend on any server-side code or data.
-
+*** I do not commit my build files -- You will need to download shifter (a yui module packager) in order to build this into working YUI modules ***
