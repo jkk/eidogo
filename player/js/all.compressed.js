@@ -1277,6 +1277,7 @@ this.prefs={};
 this.prefs.markCurrent=typeof cfg.markCurrent!="undefined"?!!cfg.markCurrent:true;
 this.prefs.markNext=typeof cfg.markNext!="undefined"?cfg.markNext:false;
 this.prefs.markVariations=typeof cfg.markVariations!="undefined"?!!cfg.markVariations:true;
+this.prefs.restrictViewMoveSearch=typeof cfg.restrictViewMoveSearch!="undefined"?!!cfg.restrictViewMoveSearch:false;
 this.prefs.showGameInfo=!!cfg.showGameInfo;
 this.prefs.showPlayerInfo=!!cfg.showPlayerInfo;
 this.prefs.showTools=!!cfg.showTools;
@@ -1907,7 +1908,7 @@ return;
 }
 }
 }
-if(this.mode=="view"){
+if(this.mode=="view"&&!(this.problemMode||this.prefs.restrictViewMoveSearch)){
 var _a7=this.cursor.getGameRoot(),_a8=[0,_a7.getPosition()],mn=0,_aa=_a7._children[0];
 while(_aa){
 if(_aa.getMove()==_a4){
