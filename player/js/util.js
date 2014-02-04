@@ -6,10 +6,10 @@
  *
  * General-purpose utility functions.
  */
- 
+
 (function() {
 
-// browser detection    
+// browser detection
 var ua = navigator.userAgent.toLowerCase();
 var uav = (ua.match(/.+(?:rv|it|ra|ie)[\/: ]([\d.]+)/) || [])[1];
 eidogo.browser = {ua: ua, ver: uav, ie: /msie/.test(ua) && !/opera/.test(ua),
@@ -21,7 +21,15 @@ eidogo.util = {
     byId: function(id) {
         return document.getElementById(id);
     },
-    
+
+    downloadElement: function () {
+        return 'download' in document.createElement('a');
+    },
+
+    dataUri: function () {
+        return;
+    },
+
     makeQueryString: function(params) {
         var qs = "";
         if (params && typeof params == "object") {
@@ -41,7 +49,7 @@ eidogo.util = {
         }
         return qs;
     },
-    
+
     // Adapted from jQuery
     ajax: function(method, url, params, successFn, failureFn, scope, timeout) {
         method = method.toUpperCase();
@@ -85,7 +93,7 @@ eidogo.util = {
                 xhr = null;
             }
         }
-        var ival = setInterval(handleReadyState, 13); 
+        var ival = setInterval(handleReadyState, 13);
         if (timeout)
             setTimeout(function() {
                 if (xhr) {
@@ -97,7 +105,7 @@ eidogo.util = {
         xhr.send(qs);
         return xhr;
     },
-    
+
     // written by Dean Edwards, 2005
     // with input from Tino Zijdel, Matthias Miller, Diego Perini
     // http://dean.edwards.name/weblog/2005/10/add-event/
@@ -142,7 +150,7 @@ eidogo.util = {
         }
         return returnValue;
     },
-    
+
     addEvent: function(el, eventType, handler, arg, override) {
         if (!el) return;
         if (override) {
@@ -156,11 +164,11 @@ eidogo.util = {
         }
         eidogo.util.addEventHelper(el, eventType, handler);
     },
-    
+
     onClick: function(el, handler, scope) {
         eidogo.util.addEvent(el, "click", handler, scope, true);
     },
-    
+
     getElClickXY: function(e, el, noScroll) {
         var doc = el.ownerDocument;
         // for IE
@@ -173,7 +181,7 @@ eidogo.util = {
         var elXY = eidogo.util.getElXY(el, noScroll);
         return [e.pageX - elXY[0], e.pageY - elXY[1]];
     },
-    
+
     stopEvent: function(e) {
         if (!e) return;
         if (e.stopPropagation) {
@@ -187,13 +195,13 @@ eidogo.util = {
             e.returnValue = false;
         }
     },
-    
+
     getTarget: function(ev) {
         var t = ev.target || ev.srcElement;
         return (t && t.nodeName && t.nodeName.toUpperCase() == "#TEXT") ?
             t.parentNode : t;
     },
-    
+
     addClass: function(el, cls) {
         if (!cls) return;
         var ca = cls.split(/\s+/);
@@ -221,7 +229,7 @@ eidogo.util = {
         }
         return false;
     },
-    
+
     show: function(el, display) {
         display = display || "block";
         if (typeof el == "string") {
@@ -230,7 +238,7 @@ eidogo.util = {
         if (!el) return;
         el.style.display = display;
     },
-    
+
     hide: function(el) {
         if (typeof el == "string") {
             el = eidogo.util.byId(el);
@@ -238,7 +246,7 @@ eidogo.util = {
         if (!el) return;
         el.style.display = "none";
     },
-    
+
     getElXY: function(el, noScroll) {
         var node = el, elX = 0, elY = 0, parent = el.parentNode,
             sx = 0, sy = 0, doc = el.ownerDocument;
@@ -262,15 +270,15 @@ eidogo.util = {
         }
         return [elX, elY, sx, sy];
     },
-    
+
     getElX: function(el) {
         return this.getElXY(el)[0];
     },
-    
+
     getElY: function(el) {
         return this.getElXY(el)[1];
     },
-    
+
     addStyleSheet: function(href) {
         if (document.createStyleSheet) {
             document.createStyleSheet(href);
@@ -282,7 +290,7 @@ eidogo.util = {
             document.getElementsByTagName("head")[0].appendChild(link);
         }
     },
-    
+
     getPlayerPath: function() {
         var scripts = document.getElementsByTagName('script');
         var scriptPath;
@@ -294,13 +302,13 @@ eidogo.util = {
         }
         return scriptPath;
     },
-    
+
     numProperties: function(obj) {
         var count = 0;
         for (var i in obj) count++;
         return count;
     }
-    
+
 };
 
 })();
