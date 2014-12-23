@@ -74,7 +74,7 @@ eidogo.GameNode.prototype = {
             if (this[prop] instanceof Array) {
                 this[prop] = this[prop].filter(function(v) { return !test(v); });
                 if (!this[prop].length) delete this[prop];
-            } else if (test(this.prop)) {
+            } else if (test(this[prop])) {
                 delete this[prop];
             }
         }
