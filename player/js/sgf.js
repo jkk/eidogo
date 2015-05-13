@@ -74,7 +74,15 @@ eidogo.SgfParser.prototype = {
                                 this.index++;
                             }
                         }
-                        values[i] += this.curChar();
+                        if (this.curChar() === '<') {
+                            values[i] += '&lt';
+                        } else if (this.curChar() === '>') {
+                            values[i] += '&gt';
+                        } else if (this.curChar() === '&') {
+                            values[i] += '&amp';
+                        } else {
+                            values[i] += this.curChar();
+                        }
                         this.index++;
                     }
                     i++;

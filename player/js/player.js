@@ -506,11 +506,6 @@ eidogo.Player.prototype = {
                     me.load(this.root, target);
                     completeFn && completeFn();
                 });
-            } else if (data.charAt(0) == '{') {
-                // JSON
-                data = eval("(" + data + ")");
-                this.load(data, target);
-                completeFn && completeFn();
             } else {
                 this.croak(t['invalid data']);
             }
@@ -972,7 +967,7 @@ eidogo.Player.prototype = {
             contBranch.C = moveNum > 1 ? "<a id='cont-search' href='#'>" +
                 t['show games'] + "</a>" : "";
             var cont,
-                conts = eval('(' + req.responseText + ')');
+                conts = JSON.parse(req.responseText);
             if (conts.length) {
                 conts.sort(function(a, b) { return parseInt(b.count, 10) - parseInt(a.count, 10); });
                 var highCount = parseInt(conts[0].count, 10);
@@ -1474,7 +1469,7 @@ eidogo.Player.prototype = {
                 this.dom.searchCount.innerHTML = "No";
                 return;
             }
-            var ret = eval("(" + req.responseText + ")");
+            var ret = JSON.parse(req.responseText);
             var results = ret.results,
                 result,
                 html = "",
