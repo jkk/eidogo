@@ -473,9 +473,11 @@
 }
 .eidogo-player .board .point.stone.black {
 	background: url(../images/b.png);
+	background-size: contain;
 }
 .eidogo-player .board .point.stone.white {
 	background: url(../images/w.png);
+	background-size: contain;
 }
 .eidogo-player .board .point.marker {
 	z-index: 2;
