@@ -203,7 +203,11 @@ eidogo.Player.prototype = {
         
         // player-wide events
         if (cfg.enableShortcuts) {
-            addEvent(document, isMoz ? "keypress" : "keydown", this.handleKeypress, this, true);
+            var keyDownEvent =
+                isMoz && parseFloat(eidogo.browser.ver < 65) ?
+                    "keypress" :
+                    "keydown";
+            addEvent(document, keyDownEvent, this.handleKeypress, this, true);
         }
         addEvent(document, "mouseup", this.handleDocMouseUp, this, true);
         
